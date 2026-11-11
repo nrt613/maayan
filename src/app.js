@@ -107,7 +107,7 @@
   /* ---------- מסכים ---------- */
   function viewToday(st, r, ctx) {
     const date = ctx.date, loc = atLocation(st, date), times = sun(date, loc, Number(st.settings.nightfall));
-    const upcoming = r.plans.filter(p => !p.done && new Date(p.end || p.start) >= now()).slice(0, 5);
+    const upcoming = r.plans.filter(p => !p.done && new Date(p.end || p.start) >= now()).slice(0, 4);
     const phase = r.phase, cd = r.cleanDay;
     const C = {
       empty: ["הרישום הראשון", "כדי לחשב מועדים, רשמי את תחילת הווסת: תאריך, שעה ומקום.", "רישום תחילת וסת", "flow"],

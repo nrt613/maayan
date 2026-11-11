@@ -6,7 +6,7 @@ head='''<title>מעיין</title>
 <meta name="description" content="יומן טהרת המשפחה — חינמי, פרטי, פועל כולו בטלפון">
 <meta name="theme-color" content="#0f2a24">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Frank+Ruhl+Libre:wght@500;600&family=Rubik:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;600;700&display=swap">
 <style>'''+css+'''</style>'''
 body='''<div id="app" dir="rtl" lang="he"></div><div id="modal" dir="rtl" lang="he"></div><div id="toast" dir="rtl" lang="he"></div>
 <script>document.documentElement.lang="he";document.documentElement.dir="rtl";
