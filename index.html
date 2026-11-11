@@ -1,0 +1,1734 @@
+<!doctype html>
+<html lang="he" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2064%2064%22%3E%3Crect%20width%3D%2264%22%20height%3D%2264%22%20rx%3D%2216%22%20fill%3D%22%23c3f4d9%22/%3E%3Cpath%20d%3D%22M32%2054a17%2017%200%200%200%2017-17c0-5-2.4-9.4-7.2-13.2S33.2%2014%2032%208c-1.2%206-4.8%2011.8-9.6%2015.8S15%2032%2015%2037a17%2017%200%200%200%2017%2017z%22%20fill%3D%22none%22%20stroke%3D%22%23123a2f%22%20stroke-width%3D%224%22%20stroke-linejoin%3D%22round%22/%3E%3C/svg%3E"><link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2064%2064%22%3E%3Crect%20width%3D%2264%22%20height%3D%2264%22%20rx%3D%2216%22%20fill%3D%22%23c3f4d9%22/%3E%3Cpath%20d%3D%22M32%2054a17%2017%200%200%200%2017-17c0-5-2.4-9.4-7.2-13.2S33.2%2014%2032%208c-1.2%206-4.8%2011.8-9.6%2015.8S15%2032%2015%2037a17%2017%200%200%200%2017%2017z%22%20fill%3D%22none%22%20stroke%3D%22%23123a2f%22%20stroke-width%3D%224%22%20stroke-linejoin%3D%22round%22/%3E%3C/svg%3E"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes">
+<link rel="manifest" href="data:application/manifest+json,%7B%22name%22%3A%20%22%D7%9E%D7%A2%D7%99%D7%99%D7%9F%22%2C%20%22short_name%22%3A%20%22%D7%9E%D7%A2%D7%99%D7%99%D7%9F%22%2C%20%22lang%22%3A%20%22he%22%2C%20%22dir%22%3A%20%22rtl%22%2C%20%22display%22%3A%20%22standalone%22%2C%20%22start_url%22%3A%20%22.%22%2C%20%22background_color%22%3A%20%22%23f2f6f3%22%2C%20%22theme_color%22%3A%20%22%230f2a24%22%2C%20%22icons%22%3A%20%5B%7B%22src%22%3A%20%22data%3Aimage/svg%2Bxml%2C%253Csvg%2520xmlns%253D%2522http%253A//www.w3.org/2000/svg%2522%2520viewBox%253D%25220%25200%252064%252064%2522%253E%253Crect%2520width%253D%252264%2522%2520height%253D%252264%2522%2520rx%253D%252216%2522%2520fill%253D%2522%2523c3f4d9%2522/%253E%253Cpath%2520d%253D%2522M32%252054a17%252017%25200%25200%25200%252017-17c0-5-2.4-9.4-7.2-13.2S33.2%252014%252032%25208c-1.2%25206-4.8%252011.8-9.6%252015.8S15%252032%252015%252037a17%252017%25200%25200%25200%252017%252017z%2522%2520fill%253D%2522none%2522%2520stroke%253D%2522%2523123a2f%2522%2520stroke-width%253D%25224%2522%2520stroke-linejoin%253D%2522round%2522/%253E%253C/svg%253E%22%2C%20%22sizes%22%3A%20%22any%22%2C%20%22type%22%3A%20%22image/svg%2Bxml%22%7D%5D%7D">
+<title>מעיין</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="description" content="יומן טהרת המשפחה — חינמי, פרטי, פועל כולו בטלפון">
+<meta name="theme-color" content="#0f2a24">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Frank+Ruhl+Libre:wght@500;600&family=Rubik:wght@400;500;600;700&display=swap">
+<style>/* Layout: sidebar + work column on desktop; single column with bottom tab bar on phones. Identity carried over from the original Maayan design (deep green, mint). */
+:root {
+  --bg: #f2f6f3; --surface: #ffffff; --soft: #e9f3ec; --line: #d9e5dd;
+  --ink: #132a23; --muted: #546a61; --accent: #176448; --accent-ink: #ffffff; --mint: #c3f4d9;
+  --hero: #123a2f; --hero-ink: #eaf7f0; --hero-muted: #a9cbbb;
+  --side: #0f2a24; --side-ink: #cfe2d8;
+  --flow: #b4344a; --clean: #2f7ec2; --sep: #c27a12; --mikvah: #6b4fc1;
+  --warn-bg: #fff5e0; --warn-ink: #7a4a00; --danger: #a32d3b; --danger-soft: #fdecef; --good: #1f7a4d; --good-soft: #e3f5ea;
+  --shadow: 0 1px 2px #14302612, 0 8px 22px #14302610;
+  --r: 18px; --r-s: 12px;
+  --font: "Rubik", "Assistant", "Segoe UI", Arial, sans-serif;
+  --font-heb: "Frank Ruhl Libre", "David", "Times New Roman", serif;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #0c1714; --surface: #13211d; --soft: #1a2c27; --line: #263b34;
+  --ink: #e4efe9; --muted: #9db3aa; --accent: #5fc79a; --accent-ink: #062018; --mint: #2c5b49;
+  --hero: #17392f; --hero-ink: #eaf7f0; --hero-muted: #9dc2b1; --side: #0a1411; --side-ink: #b9d0c5;
+  --flow: #ef7b8e; --clean: #6fb2ea; --sep: #e8a64a; --mikvah: #a891f0;
+  --warn-bg: #33270f; --warn-ink: #f2cf8a; --danger: #f08592; --danger-soft: #3a1b20; --good: #6fd3a0; --good-soft: #163327;
+  --shadow: 0 1px 2px #0006; color-scheme: dark; } }
+:root[data-theme="dark"] {
+  --bg: #0c1714; --surface: #13211d; --soft: #1a2c27; --line: #263b34;
+  --ink: #e4efe9; --muted: #9db3aa; --accent: #5fc79a; --accent-ink: #062018; --mint: #2c5b49;
+  --hero: #17392f; --hero-ink: #eaf7f0; --hero-muted: #9dc2b1; --side: #0a1411; --side-ink: #b9d0c5;
+  --flow: #ef7b8e; --clean: #6fb2ea; --sep: #e8a64a; --mikvah: #a891f0;
+  --warn-bg: #33270f; --warn-ink: #f2cf8a; --danger: #f08592; --danger-soft: #3a1b20; --good: #6fd3a0; --good-soft: #163327;
+  --shadow: 0 1px 2px #0006; color-scheme: dark; }
+
+*, *::before, *::after { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--font); font-size: 15px; line-height: 1.55; }
+body.locked { overflow: hidden; }
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 30; background: var(--bg); }
+h1, h2, h3, h4, p, ul, ol, dl, dd { margin: 0; }
+h1, h2, h3, h4 { line-height: 1.2; font-weight: 600; text-wrap: balance; }
+h1 { font-size: 26px; } h2 { font-size: 21px; } h3 { font-size: 16.5px; } h4 { font-size: 14px; color: var(--muted); font-weight: 500; }
+button, input, select, textarea { font: inherit; color: inherit; }
+button { cursor: pointer; }
+button:disabled { opacity: .5; cursor: default; }
+a { color: var(--accent); }
+:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; border-radius: 6px; }
+.ic { flex-shrink: 0; }
+.hebdate { font-family: var(--font-heb); font-weight: 500; letter-spacing: .01em; }
+time, [dir="ltr"], dd, input[type="time"], input[type="date"] { font-variant-numeric: tabular-nums; }
+
+#app { display: grid; grid-template-columns: 236px minmax(0, 1fr); min-height: 100dvh; }
+.side { position: sticky; top: 0; height: 100dvh; display: flex; flex-direction: column; gap: 28px; padding: 24px 14px; background: var(--side); color: var(--side-ink); }
+.brand { display: flex; align-items: center; gap: 11px; font-size: 25px; font-weight: 600; line-height: 1.1; padding-inline: 8px; color: #fff; }
+.brand small { display: block; font-size: 12px; font-weight: 400; color: var(--side-ink); margin-top: 5px; }
+.mark { display: grid; place-items: center; width: 42px; height: 42px; border-radius: 14px; background: #c3f4d9; color: #123a2f; }
+.mark.big { width: 64px; height: 64px; border-radius: 20px; margin-inline: auto; }
+.side nav { display: grid; gap: 4px; }
+.nav { display: flex; align-items: center; gap: 12px; padding: 11px 12px; border: 0; border-radius: 12px; background: transparent; color: var(--side-ink); text-align: start; }
+.nav:hover { background: #ffffff10; }
+.nav.on { background: #c3f4d9; color: #102b24; font-weight: 600; }
+.badge { margin-inline-start: auto; min-width: 22px; padding: 0 6px; border-radius: 99px; background: #ffffff22; text-align: center; font-size: 12px; }
+.nav.on .badge { background: #123a2f22; }
+.side-note { margin-top: auto; display: flex; gap: 8px; align-items: center; font-size: 12.5px; opacity: .85; padding-inline: 8px; }
+
+.work { min-width: 0; position: relative; }
+.top { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 20; display: flex; align-items: center; gap: 12px; min-height: 62px;
+  padding-block: 8px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+  background: color-mix(in srgb, var(--bg) 88%, transparent); backdrop-filter: blur(10px); border-bottom: 1px solid var(--line); }
+.brand.m { display: none; color: var(--ink); font-size: 21px; padding: 0; }
+.brand.m .mark { width: 34px; height: 34px; border-radius: 11px; }
+.top-date { display: flex; flex-direction: column; line-height: 1.25; min-width: 0; }
+.top-date .hebdate { font-size: 18px; }
+.top-date small { color: var(--muted); font-size: 12.5px; }
+.top-act { margin-inline-start: auto; display: flex; gap: 8px; align-items: center; }
+.pill { display: inline-flex; gap: 6px; align-items: center; padding: 7px 12px; border-radius: 99px; border: 1px solid var(--line); background: var(--surface); font-size: 13.5px; }
+.icon-btn { display: inline-grid; place-items: center; width: 40px; height: 40px; border-radius: 12px; border: 1px solid var(--line); background: var(--surface); }
+.icon-btn.danger { color: var(--danger); }
+.push { margin-inline-start: auto; }
+
+.banner { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; padding-block: 10px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); background: var(--soft); color: var(--ink); font-size: 14px; border-bottom: 1px solid var(--line); }
+.banner span { flex: 1 1 200px; }
+.banner button { border: 1px solid var(--line); background: var(--surface); border-radius: 99px; padding: 5px 12px; font-size: 13px; }
+.banner.warn { background: var(--warn-bg); color: var(--warn-ink); }
+
+main { padding-block: 22px 120px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); max-width: 1180px; display: grid; gap: 16px; }
+.page-h { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 18px; display: grid; gap: 12px; align-content: start; min-width: 0; }
+.card-h { display: flex; align-items: center; gap: 11px; }
+.card-h > .ic { color: var(--accent); }
+.card-h > div { min-width: 0; flex: 1; }
+.card-h p { color: var(--muted); font-size: 13px; margin-top: 2px; }
+.card-h .link, .card-h .btn { margin-inline-start: auto; }
+.count { display: inline-block; min-width: 24px; padding: 1px 8px; border-radius: 99px; background: var(--soft); color: var(--muted); font-size: 12.5px; font-weight: 500; text-align: center; vertical-align: 2px; }
+.fine { color: var(--muted); font-size: 12.5px; }
+.empty { color: var(--muted); padding: 10px 0; }
+.two { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); gap: 16px; align-items: start; }
+.stack { display: grid; gap: 16px; min-width: 0; }
+.stack-s { display: grid; gap: 12px; }
+.row-btns { display: flex; flex-wrap: wrap; gap: 8px; }
+
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 44px; padding: 9px 18px; border-radius: 13px; border: 1px solid var(--accent); background: var(--accent); color: var(--accent-ink); font-weight: 500; }
+.btn.ghost { background: var(--surface); color: var(--ink); border-color: var(--line); }
+.btn.light { background: #c3f4d9; color: #102b24; border-color: transparent; }
+.btn.danger { background: var(--danger); border-color: var(--danger); color: #fff; }
+.btn.sm { min-height: 36px; padding: 6px 12px; font-size: 14px; }
+.btn.full { width: 100%; }
+.link { display: inline-flex; align-items: center; gap: 5px; border: 0; background: none; color: var(--accent); padding: 4px 2px; font-weight: 500; }
+.link.danger { color: var(--danger); justify-self: start; }
+
+/* היום */
+.grid-top { display: grid; grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr); gap: 16px; }
+.grid-bottom { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); gap: 16px; align-items: start; }
+.hero { border-radius: 24px; padding: 24px; background: radial-gradient(120% 140% at 0% 100%, #1f5a47 0%, transparent 60%), var(--hero); color: var(--hero-ink); display: grid; gap: 20px; }
+.hero-row { display: flex; gap: 18px; align-items: center; justify-content: space-between; }
+.hero-copy { display: grid; gap: 10px; justify-items: start; min-width: 0; }
+.hero h2 { font-size: 27px; }
+.hero p { color: var(--hero-muted); max-width: 46ch; }
+.chip-light { display: inline-flex; padding: 3px 10px; border-radius: 99px; background: #ffffff1a; color: var(--hero-ink); font-size: 12.5px; letter-spacing: .02em; }
+.ring { --p: 0; flex-shrink: 0; width: 118px; height: 118px; border-radius: 50%; display: grid; place-content: center; text-align: center;
+  background: radial-gradient(closest-side, var(--hero) 80%, transparent 81%), conic-gradient(#c3f4d9 calc(var(--p) * 100%), #ffffff22 0); }
+.ring strong { font-size: 40px; line-height: 1; } .ring small { color: var(--hero-muted); }
+.ring.idle { color: #c3f4d9; background: radial-gradient(closest-side, var(--hero) 80%, transparent 81%), conic-gradient(#ffffff22 100%, #ffffff22 0); }
+.seven { list-style: none; padding: 0; display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; }
+.seven li { display: grid; justify-items: center; gap: 4px; font-size: 11.5px; color: var(--hero-muted); }
+.seven span { display: grid; place-items: center; width: 34px; height: 34px; border-radius: 50%; border: 1px solid #ffffff33; color: var(--hero-ink); }
+.seven .past span { background: #ffffff1a; }
+.seven .now span { background: #c3f4d9; color: #102b24; border-color: transparent; font-weight: 600; }
+.times dl { display: grid; gap: 6px; }
+.times dl div { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 10px; padding: 9px 12px; border-radius: 12px; background: var(--soft); }
+.times dl .hl { outline: 1.5px solid var(--accent); outline-offset: -1.5px; }
+.times dd { font-weight: 600; font-size: 16px; }
+.notice { display: flex; align-items: center; gap: 12px; text-align: start; padding: 14px 16px; border-radius: var(--r); border: 1px solid color-mix(in srgb, var(--sep) 40%, var(--line)); background: var(--warn-bg); color: var(--warn-ink); }
+.notice span { flex: 1; display: grid; } .notice small { opacity: .85; }
+.checks { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; }
+.checks label { display: flex; gap: 9px; align-items: center; padding: 8px 10px; border-radius: 11px; background: var(--soft); font-size: 14px; cursor: pointer; }
+.checks label.on span { text-decoration: line-through; color: var(--muted); }
+.checks input { width: 18px; height: 18px; accent-color: var(--accent); flex-shrink: 0; }
+.welcome-inline p { color: var(--muted); }
+
+/* מועדים */
+.plans { display: grid; gap: 6px; }
+.plan { border-radius: 13px; background: var(--soft); border-inline-start: 4px solid var(--accent); }
+.plan.k-monthly, .plan.k-interval, .plan.k-average, .plan.k-or-zarua, .plan.k-manual { border-inline-start-color: var(--sep); }
+.plan.k-mikvah { border-inline-start-color: var(--mikvah); }
+.plan.k-bedikah, .plan.k-hefsek { border-inline-start-color: var(--clean); }
+.plan.done { opacity: .6; }
+.plan summary { display: flex; align-items: center; gap: 10px; padding: 10px 12px; cursor: pointer; list-style: none; }
+.plan summary::-webkit-details-marker, details summary::-webkit-details-marker { display: none; }
+.plan-ic { color: var(--muted); display: grid; }
+.plan-name { flex: 1; display: grid; min-width: 0; }
+.plan-name small { color: var(--muted); font-size: 12.5px; }
+.plan time { font-weight: 600; }
+details[open] > summary > .ic:last-child { transform: rotate(-90deg); }
+summary > .ic:last-child { transition: transform .15s; color: var(--muted); }
+.plan-more { display: grid; gap: 4px; padding: 0 14px 12px; font-size: 13.5px; }
+.plan-more small { color: var(--muted); }
+.plan-more a { display: inline-flex; align-items: center; gap: 4px; font-size: 13px; justify-self: start; }
+.ok-text { color: var(--good) !important; }
+details.past > summary, .tgroup > summary, .reviews details > summary, .rules details > summary, .adv > summary { display: flex; justify-content: space-between; align-items: center; gap: 10px; cursor: pointer; list-style: none; padding: 10px 2px; font-weight: 500; }
+details.past .plans { margin-top: 6px; }
+
+/* לוח */
+.cal-layout { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); gap: 16px; align-items: start; }
+.cal-h { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+.cal-h h3 { font-size: 19px; }
+.cal-nav { display: flex; gap: 6px; align-items: center; }
+.seg { display: inline-flex; padding: 3px; border-radius: 12px; background: var(--soft); justify-self: start; }
+.seg button { border: 0; background: transparent; padding: 6px 16px; border-radius: 9px; }
+.seg button[aria-pressed="true"] { background: var(--surface); box-shadow: var(--shadow); font-weight: 600; }
+.wk, .days { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 4px; }
+.wk span { text-align: center; color: var(--muted); font-size: 12.5px; }
+.day { position: relative; aspect-ratio: 1 / 1.05; max-width: 100%; border: 1px solid transparent; border-radius: 12px; background: var(--soft); display: grid; grid-template-rows: 1fr auto auto; justify-items: center; padding: 5px 2px 6px; min-width: 0; }
+.day b { font-size: 16px; font-weight: 500; align-self: center; }
+.day i { font-style: normal; font-size: 10.5px; color: var(--muted); font-family: var(--font-heb); }
+.day.out { opacity: .4; }
+.day.clean { background: color-mix(in srgb, var(--clean) 14%, var(--surface)); }
+.day.today { border-color: var(--accent); }
+.day.today b { color: var(--accent); font-weight: 700; }
+.day.sel { background: var(--accent); color: var(--accent-ink); }
+.day.sel i { color: inherit; opacity: .85; }
+.dots { display: flex; gap: 3px; height: 6px; }
+.dots em, .legend em { display: inline-block; width: 6px; height: 6px; border-radius: 50%; }
+.d-f { background: var(--flow); } .d-c { background: var(--clean); } .d-s { background: var(--sep); } .d-m { background: var(--mikvah); }
+.legend { display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: 12.5px; color: var(--muted); }
+.legend span { display: inline-flex; gap: 6px; align-items: center; }
+.legend em { width: 8px; height: 8px; }
+.dayp .card-h h3 { font-size: 16px; }
+
+/* יומן */
+.entries { display: grid; gap: 6px; }
+.entry { display: flex; align-items: center; gap: 12px; width: 100%; text-align: start; padding: 11px 12px; border-radius: 13px; border: 1px solid var(--line); background: var(--surface); }
+.entry:hover { background: var(--soft); }
+.entry-main { flex: 1; display: grid; min-width: 0; }
+.entry-main small { color: var(--muted); font-size: 12.5px; }
+.entry-main .note { color: var(--ink); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.entry-side { display: flex; align-items: center; gap: 8px; color: var(--muted); font-size: 12px; }
+.ev-ic { display: grid; place-items: center; width: 34px; height: 34px; border-radius: 11px; background: var(--soft); color: var(--accent); flex-shrink: 0; }
+.ev-ic.t-flow { color: var(--flow); background: color-mix(in srgb, var(--flow) 13%, var(--surface)); }
+.ev-ic.t-hefsek, .ev-ic.t-bedikah { color: var(--clean); background: color-mix(in srgb, var(--clean) 13%, var(--surface)); }
+.ev-ic.t-mikvah { color: var(--mikvah); background: color-mix(in srgb, var(--mikvah) 13%, var(--surface)); }
+.filters { display: flex; gap: 8px; flex-wrap: wrap; }
+.search { flex: 1 1 200px; display: flex; align-items: center; gap: 8px; padding: 0 12px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); color: var(--muted); }
+.search input { flex: 1; border: 0; background: transparent; padding: 10px 0; min-width: 0; color: var(--ink); outline: none; }
+.reviews details { border-top: 1px solid var(--line); }
+.reviews details p { color: var(--muted); font-size: 14px; padding-bottom: 6px; }
+.reviews details .link { font-size: 13px; margin-inline-end: 10px; }
+
+/* טפסים */
+.field { display: grid; gap: 6px; font-weight: 500; font-size: 14px; min-width: 0; }
+.field small { color: var(--muted); font-weight: 400; font-size: 12.5px; }
+.opt { color: var(--muted); font-weight: 400; font-size: 12.5px; }
+input:not([type="checkbox"]), select, textarea { width: 100%; min-width: 0; min-height: 44px; padding: 9px 12px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); font-weight: 400; }
+textarea { resize: vertical; }
+.mono { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 12px; direction: ltr; text-align: left; }
+.toggle { display: flex; align-items: center; justify-content: space-between; gap: 14px; padding: 6px 0; cursor: pointer; }
+.toggle span { display: grid; } .toggle small { color: var(--muted); font-size: 12.5px; }
+.toggle input { appearance: none; -webkit-appearance: none; flex-shrink: 0; width: 46px; height: 28px; border-radius: 99px; background: var(--line); position: relative; cursor: pointer; transition: background .15s; }
+.toggle input::after { content: ""; position: absolute; top: 3px; inset-inline-start: 3px; width: 22px; height: 22px; border-radius: 50%; background: #fff; box-shadow: 0 1px 3px #0003; transition: inset-inline-start .15s; }
+.toggle input:checked { background: var(--accent); }
+.toggle input:checked::after { inset-inline-start: 21px; }
+.pair { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.save-bar { position: sticky; bottom: calc(76px + env(safe-area-inset-bottom, 0px)); display: flex; align-items: center; gap: 12px; flex-wrap: wrap; padding: 12px; border-radius: var(--r); background: var(--surface); border: 1px solid var(--line); box-shadow: var(--shadow); }
+.save-bar small { color: var(--muted); }
+.trip { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 8px 12px; border-radius: 12px; background: var(--soft); }
+.trip span { display: grid; } .trip small { color: var(--muted); }
+.action { display: flex; align-items: center; gap: 12px; padding: 12px; border-radius: 13px; border: 1px solid var(--line); background: var(--surface); text-align: start; color: var(--ink); }
+.action .ic { color: var(--accent); }
+.action span { display: grid; } .action small { color: var(--muted); font-size: 12.5px; }
+.about p { color: var(--muted); font-size: 14px; }
+.hint { display: flex; gap: 8px; align-items: flex-start; padding: 10px 12px; border-radius: 12px; background: var(--soft); color: var(--muted); font-size: 13.5px; }
+.err { padding: 10px 12px; border-radius: 12px; background: var(--danger-soft); color: var(--danger); font-size: 14px; }
+.adv { border-top: 1px solid var(--line); }
+.adv[open] { padding-bottom: 4px; }
+.confirm { display: grid; gap: 10px; padding: 12px; border-radius: 12px; background: var(--danger-soft); }
+
+/* בודקים */
+.review-hero { border-radius: 24px; padding: 24px; background: var(--hero); color: var(--hero-ink); }
+.review-hero > div { display: grid; gap: 10px; justify-items: start; max-width: 70ch; }
+.review-hero p { color: var(--hero-muted); }
+.steps { padding-inline-start: 20px; display: grid; gap: 4px; color: var(--hero-ink); }
+.scen-list { display: grid; gap: 8px; }
+.scen { border: 1px solid var(--line); border-radius: 14px; overflow: hidden; }
+.scen.open { border-color: var(--accent); }
+.scen-h { display: flex; align-items: center; gap: 10px; width: 100%; padding: 12px 14px; border: 0; background: var(--surface); text-align: start; }
+.scen-h strong { flex: 1; font-weight: 500; }
+.scen.open .scen-h > .ic:last-child { transform: rotate(-90deg); }
+.tag { flex-shrink: 0; padding: 2px 9px; border-radius: 99px; background: var(--soft); color: var(--muted); font-size: 12px; }
+.scen-body { display: grid; gap: 10px; padding: 4px 14px 14px; }
+.expect { padding: 12px; border-radius: 12px; background: var(--good-soft); display: grid; gap: 4px; }
+.expect strong { color: var(--good); font-size: 13px; }
+.sim, .phase { font-size: 13.5px; }
+.inputs, .rv { padding-inline-start: 18px; display: grid; gap: 4px; font-size: 13.5px; }
+.rv { color: var(--muted); }
+.rv strong { color: var(--ink); font-weight: 500; }
+.test-sum { display: flex; gap: 8px; align-items: center; padding: 10px 12px; border-radius: 12px; font-weight: 500; }
+.test-sum.good { background: var(--good-soft); color: var(--good); }
+.test-sum.bad { background: var(--danger-soft); color: var(--danger); }
+.tgroup { border-top: 1px solid var(--line); }
+.tgroup ul { list-style: none; padding: 0 0 8px; display: grid; gap: 4px; font-size: 13.5px; }
+.tgroup li { display: flex; gap: 8px; align-items: flex-start; }
+.tgroup li span { display: grid; }
+.tgroup li.ok .ic { color: var(--good); } .tgroup li.no .ic { color: var(--danger); }
+.tgroup li small { color: var(--danger); }
+.rules details { border-top: 1px solid var(--line); }
+.rules details p { color: var(--muted); font-size: 14px; padding-bottom: 6px; max-width: 75ch; }
+.rules details a { display: inline-flex; align-items: center; gap: 4px; font-size: 13px; margin-bottom: 10px; }
+
+.foot { display: flex; flex-wrap: wrap; gap: 8px 14px; align-items: center; justify-content: space-between; color: var(--muted); font-size: 12.5px; padding-top: 10px; }
+.foot span { display: inline-flex; gap: 6px; align-items: center; }
+.veil { display: grid; place-items: center; gap: 12px; align-content: center; min-height: 60vh; color: var(--muted); }
+
+/* חלון */
+#modal { position: relative; z-index: 50; }
+.scrim { position: fixed; inset: 0; background: #0a1a1580; }
+.sheet { position: fixed; inset: auto 0 0 0; max-height: 92dvh; overflow: auto; background: var(--surface); border-radius: 22px 22px 0 0; display: grid; gap: 14px; align-content: start;
+  padding-top: 18px; padding-bottom: calc(18px + env(safe-area-inset-bottom, 0px)); padding-left: max(18px, env(safe-area-inset-left, 0px)); padding-right: max(18px, env(safe-area-inset-right, 0px)); box-shadow: 0 -10px 40px #0003; }
+@media (min-width: 720px) { .sheet { inset: 50% auto auto 50%; transform: translate(-50%, -50%); width: min(560px, calc(100vw - 32px)); border-radius: 22px; max-height: 88dvh; } }
+.m-h { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+.m-actions { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.welcome { display: grid; gap: 14px; text-align: center; }
+.welcome > p { color: var(--muted); }
+.promises { list-style: none; padding: 0; display: grid; gap: 10px; text-align: start; }
+.promises li { display: flex; gap: 10px; align-items: flex-start; padding: 10px 12px; border-radius: 12px; background: var(--soft); font-size: 14px; }
+.promises .ic { color: var(--accent); margin-top: 2px; }
+.toast { position: fixed; z-index: 60; inset-inline: 0; margin-inline: auto; bottom: calc(86px + env(safe-area-inset-bottom, 0px)); width: fit-content; max-width: calc(100vw - 32px); display: flex; align-items: center; gap: 10px; padding: 8px 8px 8px 8px; padding-inline-start: 16px; border-radius: 14px; background: var(--ink); color: var(--bg); box-shadow: var(--shadow); font-size: 14px; }
+.toast .icon-btn { width: 32px; height: 32px; background: transparent; border-color: transparent; color: inherit; }
+
+.tabs { display: none; }
+@media (max-width: 900px) {
+  #app { grid-template-columns: minmax(0, 1fr); }
+  .side { display: none; }
+  .brand.m { display: flex; }
+  .top-date { border-inline-start: 1px solid var(--line); padding-inline-start: 12px; }
+  .tabs { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); position: fixed; inset: auto 0 0 0; z-index: 40; background: var(--surface); border-top: 1px solid var(--line);
+    padding-bottom: env(safe-area-inset-bottom, 0px); padding-left: env(safe-area-inset-left, 0px); padding-right: env(safe-area-inset-right, 0px); }
+  .tabs button { display: grid; justify-items: center; gap: 2px; padding: 8px 0 7px; border: 0; background: transparent; color: var(--muted); font-size: 11px; min-width: 0; }
+  .tabs button.on { color: var(--accent); font-weight: 600; }
+  .grid-top, .grid-bottom, .two, .cal-layout { grid-template-columns: minmax(0, 1fr); }
+  .page-h .btn { display: none; }
+  h1 { font-size: 23px; }
+}
+@media (max-width: 560px) {
+  .pill { display: none; }
+  .hero { padding: 20px; } .hero h2 { font-size: 23px; }
+  .ring { width: 92px; height: 92px; } .ring strong { font-size: 32px; }
+  .checks { grid-template-columns: minmax(0, 1fr); }
+  .seven span { width: 30px; height: 30px; }
+  .card { padding: 15px; }
+  .entry-side small { display: none; }
+  .day b { font-size: 15px; }
+}
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+</head><body>
+<div id="app" dir="rtl" lang="he"></div><div id="modal" dir="rtl" lang="he"></div><div id="toast" dir="rtl" lang="he"></div>
+<script>document.documentElement.lang="he";document.documentElement.dir="rtl";
+/* מעיין — ליבת החישוב. ללא תלויות חיצוניות.
+ * לוח עברי (אלגוריתם הקביעות, כמו בספריית Hebcal) וזמני שמש (אלגוריתם NOAA, גובה פני הים).
+ * המנוע הוא העברה נאמנה של lib/engine.ts, lib/dates.ts ו-lib/model.ts מהגרסה הקודמת. */
+const Maayan = (() => {
+  "use strict";
+
+  /* ---------- לוח עברי ---------- */
+  const NISAN = 1, IYYAR = 2, SIVAN = 3, TAMUZ = 4, AV = 5, ELUL = 6, TISHREI = 7, CHESHVAN = 8, KISLEV = 9, TEVET = 10, SHVAT = 11, ADAR_I = 12, ADAR_II = 13;
+  const EPOCH = -1373428;
+  const isLeapYear = y => (1 + y * 7) % 19 < 7;
+  const monthsInYear = y => 12 + (isLeapYear(y) ? 1 : 0);
+  const edCache = new Map();
+  function elapsedDays(year) {
+    let v = edCache.get(year);
+    if (v !== undefined) return v;
+    const prev = year - 1;
+    const mElapsed = 235 * Math.floor(prev / 19) + 12 * (prev % 19) + Math.floor(((prev % 19) * 7 + 1) / 19);
+    const pElapsed = 204 + 793 * (mElapsed % 1080);
+    const hElapsed = 5 + 12 * mElapsed + 793 * Math.floor(mElapsed / 1080) + Math.floor(pElapsed / 1080);
+    const parts = (pElapsed % 1080) + 1080 * (hElapsed % 24);
+    const day = 1 + 29 * mElapsed + Math.floor(hElapsed / 24);
+    let alt = day;
+    if (parts >= 19440 || (day % 7 === 2 && parts >= 9924 && !isLeapYear(year)) || (day % 7 === 1 && parts >= 16789 && isLeapYear(prev))) alt++;
+    if (alt % 7 === 0 || alt % 7 === 3 || alt % 7 === 5) alt++;
+    edCache.set(year, alt);
+    return alt;
+  }
+  const daysInYear = y => elapsedDays(y + 1) - elapsedDays(y);
+  function daysInMonth(m, y) {
+    if (m === IYYAR || m === TAMUZ || m === ELUL || m === TEVET || m === ADAR_II) return 29;
+    if (m === ADAR_I) return isLeapYear(y) ? 30 : 29;
+    if (m === CHESHVAN) return daysInYear(y) % 10 === 5 ? 30 : 29;
+    if (m === KISLEV) return daysInYear(y) % 10 === 3 ? 29 : 30;
+    return 30;
+  }
+  function hebrew2abs(y, m, d) {
+    let t = d;
+    if (m < TISHREI) {
+      for (let i = TISHREI; i <= monthsInYear(y); i++) t += daysInMonth(i, y);
+      for (let i = NISAN; i < m; i++) t += daysInMonth(i, y);
+    } else for (let i = TISHREI; i < m; i++) t += daysInMonth(i, y);
+    return EPOCH + elapsedDays(y) + t - 1;
+  }
+  function abs2hebrew(abs) {
+    let y = Math.floor((abs - EPOCH) / 365.24682220597794);
+    while (EPOCH + elapsedDays(y) <= abs) y++;
+    y--;
+    let m = abs < hebrew2abs(y, NISAN, 1) ? TISHREI : NISAN;
+    while (abs > hebrew2abs(y, m, daysInMonth(m, y))) m++;
+    return { y, m, d: 1 + abs - hebrew2abs(y, m, 1) };
+  }
+  const RD_1970 = 719163;
+  const absFromYMD = (y, m, d) => Math.round(Date.UTC(y, m - 1, d) / 864e5) + RD_1970;
+  function ymdFromAbs(abs) { const t = new Date((abs - RD_1970) * 864e5); return [t.getUTCFullYear(), t.getUTCMonth() + 1, t.getUTCDate()]; }
+
+  const MONTH_NAMES = { 1: "ניסן", 2: "אייר", 3: "סיון", 4: "תמוז", 5: "אב", 6: "אלול", 7: "תשרי", 8: "חשון", 9: "כסלו", 10: "טבת", 11: "שבט", 12: "אדר", 13: "אדר ב׳" };
+  const monthName = (m, y) => m === ADAR_I && isLeapYear(y) ? "אדר א׳" : MONTH_NAMES[m];
+  function gematriya(n) {
+    const ones = ["", "א", "ב", "ג", "ד", "ה", "ו", "ז", "ח", "ט"], tens = ["", "י", "כ", "ל", "מ", "נ", "ס", "ע", "פ", "צ"], hundreds = ["", "ק", "ר", "ש", "ת"];
+    let s = "", h = Math.floor(n / 100) % 10, r = n % 100;
+    while (h > 4) { s += "ת"; h -= 4; }
+    s += hundreds[h];
+    if (r === 15) s += "טו"; else if (r === 16) s += "טז"; else s += tens[Math.floor(r / 10)] + ones[r % 10];
+    return s.length === 1 ? s + "׳" : s.slice(0, -1) + "״" + s.slice(-1);
+  }
+  function nextMonth(m, y, dir) {
+    if (dir > 0) {
+      if (m === ELUL) return [TISHREI, y + 1];
+      if (m === ADAR_I) return isLeapYear(y) ? [ADAR_II, y] : [NISAN, y];
+      if (m === ADAR_II) return [NISAN, y];
+      return [m + 1, y];
+    }
+    if (m === TISHREI) return [ELUL, y - 1];
+    if (m === NISAN) return [isLeapYear(y) ? ADAR_II : ADAR_I, y];
+    return [m - 1, y];
+  }
+  class HDate {
+    constructor(a, m, y) {
+      if (m === undefined) {
+        if (a instanceof Date) a = absFromYMD(a.getFullYear(), a.getMonth() + 1, a.getDate());
+        this._abs = a; const h = abs2hebrew(a); this.dd = h.d; this.mm = h.m; this.yy = h.y;
+      } else {
+        if (m === ADAR_II && !isLeapYear(y)) m = ADAR_I;
+        let d = a;
+        while (d > daysInMonth(m, y)) { d -= daysInMonth(m, y); [m, y] = nextMonth(m, y, 1); }
+        this.dd = d; this.mm = m; this.yy = y; this._abs = hebrew2abs(y, m, d);
+      }
+    }
+    abs() { return this._abs; }
+    getDate() { return this.dd; }
+    getMonth() { return this.mm; }
+    getFullYear() { return this.yy; }
+    greg() { const [y, m, d] = ymdFromAbs(this._abs); return new Date(y, m - 1, d, 12); }
+    add(n, unit) {
+      if (unit !== "M") return new HDate(this._abs + n);
+      let m = this.mm, y = this.yy;
+      for (let i = 0; i < Math.abs(n); i++) [m, y] = nextMonth(m, y, Math.sign(n));
+      return new HDate(this.dd, m, y);
+    }
+    monthName() { return monthName(this.mm, this.yy); }
+    renderGematriya() { return `${gematriya(this.dd)} ${monthName(this.mm, this.yy)} ${gematriya(this.yy % 1000)}`; }
+  }
+
+  /* ---------- זמני שמש (NOAA) ---------- */
+  const rad = x => x * Math.PI / 180, deg = x => x * 180 / Math.PI;
+  function solarParams(jc) {
+    const L0 = (280.46646 + jc * (36000.76983 + jc * 0.0003032)) % 360;
+    const M = 357.52911 + jc * (35999.05029 - 0.0001537 * jc);
+    const e = 0.016708634 - jc * (0.000042037 + 0.0000001267 * jc);
+    const C = Math.sin(rad(M)) * (1.914602 - jc * (0.004817 + 0.000014 * jc)) + Math.sin(rad(2 * M)) * (0.019993 - 0.000101 * jc) + Math.sin(rad(3 * M)) * 0.000289;
+    const trueLong = L0 + C;
+    const omega = 125.04 - 1934.136 * jc;
+    const lambda = trueLong - 0.00569 - 0.00478 * Math.sin(rad(omega));
+    const eps0 = 23 + (26 + (21.448 - jc * (46.815 + jc * (0.00059 - jc * 0.001813))) / 60) / 60;
+    const eps = eps0 + 0.00256 * Math.cos(rad(omega));
+    const dec = deg(Math.asin(Math.sin(rad(eps)) * Math.sin(rad(lambda))));
+    const yv = Math.tan(rad(eps / 2)) ** 2;
+    const eqTime = 4 * deg(yv * Math.sin(2 * rad(L0)) - 2 * e * Math.sin(rad(M)) + 4 * e * yv * Math.sin(rad(M)) * Math.cos(2 * rad(L0)) - 0.5 * yv * yv * Math.sin(4 * rad(L0)) - 1.25 * e * e * Math.sin(2 * rad(M)));
+    return { dec, eqTime };
+  }
+  /** דקות UTC מחצות של התאריך האזרחי; null כאשר השמש אינה מגיעה לזווית */
+  function sunEventUTC(y, m, d, lat, lon, zenith, rising) {
+    const jd0 = (Date.UTC(y, m - 1, d) / 864e5) + 2440587.5;
+    let t = 720 - 4 * lon;
+    for (let i = 0; i < 3; i++) {
+      const jc = (jd0 + t / 1440 - 2451545) / 36525;
+      const { dec, eqTime } = solarParams(jc);
+      const cosH = Math.cos(rad(zenith)) / (Math.cos(rad(lat)) * Math.cos(rad(dec))) - Math.tan(rad(lat)) * Math.tan(rad(dec));
+      if (cosH > 1 || cosH < -1) return null;
+      const H = deg(Math.acos(cosH));
+      t = 720 - 4 * (lon + (rising ? H : -H)) - eqTime;
+    }
+    return t;
+  }
+
+  /* ---------- מודל ---------- */
+  const CITIES = [
+    { id: "netanya", name: "נתניה", lat: 32.3215, lon: 34.8532, tz: "Asia/Jerusalem" },
+    { id: "jerusalem", name: "ירושלים", lat: 31.778, lon: 35.235, tz: "Asia/Jerusalem" },
+    { id: "tel-aviv", name: "תל אביב", lat: 32.0853, lon: 34.7818, tz: "Asia/Jerusalem" },
+    { id: "bnei-brak", name: "בני ברק", lat: 32.0849, lon: 34.8352, tz: "Asia/Jerusalem" },
+    { id: "haifa", name: "חיפה", lat: 32.794, lon: 34.9896, tz: "Asia/Jerusalem" },
+    { id: "beersheba", name: "באר שבע", lat: 31.2529, lon: 34.7915, tz: "Asia/Jerusalem" },
+    { id: "paris", name: "פריז", lat: 48.8566, lon: 2.3522, tz: "Europe/Paris" },
+    { id: "london", name: "לונדון", lat: 51.5074, lon: -0.1278, tz: "Europe/London" },
+    { id: "new-york", name: "ניו יורק", lat: 40.7128, lon: -74.006, tz: "America/New_York" },
+    { id: "los-angeles", name: "לוס אנג׳לס", lat: 34.0522, lon: -118.2437, tz: "America/Los_Angeles" },
+    { id: "sydney", name: "סידני", lat: -33.8688, lon: 151.2093, tz: "Australia/Sydney" },
+    { id: "tromso", name: "טרומסה", lat: 69.6492, lon: 18.9553, tz: "Europe/Oslo" },
+  ];
+  const city = id => CITIES.find(c => c.id === id) || CITIES[0];
+  const EVENT_TYPES = ["flow", "hefsek", "bedikah", "mikvah", "question", "restart", "note", "intimacy", "manual"];
+  const EVENT_NAMES = {
+    flow: "תחילת וסת", hefsek: "הפסק טהרה", bedikah: "בדיקה", mikvah: "טבילה", question: "שאלה לבירור",
+    restart: "חידוש ספירה לפי הוראה", note: "הערה אישית", intimacy: "בסיס להמתנת ארבעה ימים", manual: "עונת פרישה לפי הוראה",
+  };
+  const CHECKLIST = ["תיאום עם המקווה", "הסרת תכשיטים וחציצות", "טיפול בציפורניים", "רחצה וחפיפה", "סירוק השיער", "בדיקה שאין חציצות", "מגבת ובגדים נקיים", "פריטים אישיים לדרך"];
+  const SETTING_DEFAULTS = {
+    cityId: "netanya", wait: "five", haflagah: "days", beinonit: "same", day31: false, orZarua: false, carryMonthly: false,
+    carryLongIntervals: false, missingMonthly: "skip", bedikot: "twice", nightfall: "8.5", special: "regular", methodNote: "",
+    neutralReminders: true, reminderMinutes: 30, morningTime: "08:00", remindersEnabled: true, checklist: [],
+  };
+  const SETTING_ENUMS = {
+    wait: ["five", "four-from-relations"], haflagah: ["days", "chabad-onot"], beinonit: ["same", "both"], missingMonthly: ["skip", "first-next-month"],
+    bedikot: ["twice", "first-last"], nightfall: ["8.5", "7.083"], special: ["regular", "pregnancy", "postpartum", "nursing", "hormonal"],
+  };
+  const uuid = () => {
+    if (globalThis.crypto && crypto.randomUUID) try { return crypto.randomUUID(); } catch { /* fallback */ }
+    const b = new Uint8Array(16); (globalThis.crypto || { getRandomValues: a => a.map(() => Math.random() * 256 | 0) }).getRandomValues(b);
+    b[6] = (b[6] & 15) | 64; b[8] = (b[8] & 63) | 128;
+    const h = [...b].map(x => x.toString(16).padStart(2, "0")).join("");
+    return `${h.slice(0, 8)}-${h.slice(8, 12)}-${h.slice(12, 16)}-${h.slice(16, 20)}-${h.slice(20)}`;
+  };
+  const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+  const TIME_RE = /^(?:[01]\d|2[0-3]):[0-5]\d$/;
+  const validISO = s => {
+    if (typeof s !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(s)) return false;
+    const d = new Date(`${s}T12:00:00Z`);
+    return !Number.isNaN(d.valueOf()) && d.toISOString().slice(0, 10) === s && s >= "2000-01-01" && s <= "2100-12-31";
+  };
+  class ValidationError extends Error {}
+  const fail = msg => { throw new ValidationError(msg); };
+  /** מקבילה ל-stateSchema.parse: משלים ברירות מחדל וזורק שגיאה בעברית */
+  function parseState(input) {
+    if (!input || typeof input !== "object" || input.schemaVersion !== 1) fail("מבנה היומן אינו נתמך");
+    const s = { ...SETTING_DEFAULTS, ...(input.settings || {}) };
+    if (!CITIES.some(c => c.id === s.cityId)) fail("עיר לא מוכרת בהגדרות");
+    for (const [k, vals] of Object.entries(SETTING_ENUMS)) if (!vals.includes(s[k])) fail(`ערך לא תקין בהגדרה ${k}`);
+    for (const k of ["day31", "orZarua", "carryMonthly", "carryLongIntervals", "neutralReminders", "remindersEnabled"]) if (typeof s[k] !== "boolean") fail(`ערך לא תקין בהגדרה ${k}`);
+    if (typeof s.methodNote !== "string" || s.methodNote.length > 1000) fail("הערת השיטה ארוכה מדי");
+    if (!Number.isInteger(s.reminderMinutes) || s.reminderMinutes < 5 || s.reminderMinutes > 120) fail("דקות התזכורת צריכות להיות בין 5 ל-120");
+    if (!TIME_RE.test(s.morningTime)) fail("שעת הבוקר אינה תקינה");
+    if (!Array.isArray(s.checklist) || s.checklist.length > 40 || s.checklist.some(x => typeof x !== "string" || x.length > 80)) fail("רשימת ההכנה אינה תקינה");
+    const events = (input.events || []).map(e => {
+      const x = { result: "clear", note: "", authorityNote: "", ...e };
+      if (!UUID_RE.test(x.id)) fail("מזהה רישום לא תקין");
+      if (!EVENT_TYPES.includes(x.type)) fail("סוג רישום לא מוכר");
+      if (!validISO(x.date)) fail("תאריך לא תקין או מחוץ לטווח 2000–2100");
+      if (!TIME_RE.test(x.time)) fail("שעה לא תקינה");
+      if (!CITIES.some(c => c.id === x.cityId)) fail("מקום לא מוכר");
+      if (!["clear", "uncertain", "bleeding"].includes(x.result)) fail("תוצאה לא תקינה");
+      if (x.onah !== undefined && !["day", "night"].includes(x.onah)) fail("עונה לא תקינה");
+      if (typeof x.note !== "string" || x.note.length > 2000) fail("ההערה ארוכה מדי");
+      if (typeof x.authorityNote !== "string" || x.authorityNote.length > 1000) fail("תיעוד ההנחיה ארוך מדי");
+      if (typeof x.createdAt !== "string" || Number.isNaN(Date.parse(x.createdAt))) fail("זמן יצירה לא תקין");
+      if (x.type === "manual" && !x.onah) fail("יש לבחור עונה למועד ידני");
+      const out = { id: x.id, type: x.type, date: x.date, time: x.time, cityId: x.cityId, result: x.result, note: x.note, authorityNote: x.authorityNote, createdAt: x.createdAt };
+      if (x.onah) out.onah = x.onah;
+      return out;
+    });
+    if (events.length > 5000) fail("יותר מדי רישומים");
+    if (new Set(events.map(e => e.id)).size !== events.length) fail("אירועים כפולים");
+    const trips = (input.trips || []).map(t => {
+      if (!UUID_RE.test(t.id) || !validISO(t.from) || !validISO(t.to) || !CITIES.some(c => c.id === t.cityId)) fail("נסיעה לא תקינה");
+      if (t.to < t.from) fail("סיום הנסיעה חייב להיות אחרי תחילתה");
+      return { id: t.id, from: t.from, to: t.to, cityId: t.cityId };
+    });
+    if (trips.length > 100) fail("יותר מדי נסיעות");
+    for (let i = 0; i < trips.length; i++) for (let j = i + 1; j < trips.length; j++)
+      if (trips[i].from <= trips[j].to && trips[j].from <= trips[i].to) fail("טווחי נסיעות חופפים");
+    return { schemaVersion: 1, settings: s, events, trips };
+  }
+  const safeParse = input => { try { return { success: true, data: parseState(input) }; } catch (e) { return { success: false, error: e }; } };
+  const emptyState = () => ({ schemaVersion: 1, settings: { ...SETTING_DEFAULTS, checklist: [] }, events: [], trips: [] });
+
+  /* ---------- תאריכים ---------- */
+  const fromISO = d => { const [y, m, day] = d.split("-").map(Number); return new Date(y, m - 1, day, 12); };
+  const toISO = d => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+  const isoAbs = d => { const [y, m, day] = d.split("-").map(Number); return absFromYMD(y, m, day); };
+  const fromAbs = n => { const [y, m, d] = ymdFromAbs(n); return `${y}-${String(m).padStart(2, "0")}-${String(d).padStart(2, "0")}`; };
+  const addDays = (d, n) => fromAbs(isoAbs(d) + n);
+  const hd = d => new HDate(isoAbs(d));
+  const hebrew = d => hd(d).renderGematriya();
+  const dayNumber = d => isoAbs(d);
+  const civilFmt = new Map();
+  const civilLabel = (d, short = false) => {
+    const k = short ? "s" : "l";
+    if (!civilFmt.has(k)) civilFmt.set(k, new Intl.DateTimeFormat("he-IL", { day: "numeric", month: short ? "short" : "long", year: short ? undefined : "numeric", timeZone: "UTC" }));
+    const [y, m, day] = d.split("-").map(Number);
+    return civilFmt.get(k).format(new Date(Date.UTC(y, m - 1, day, 12)));
+  };
+  const dzFmt = new Map();
+  const dateInZone = (now, tz) => {
+    let f = dzFmt.get(tz);
+    if (!f) { f = new Intl.DateTimeFormat("en-CA", { timeZone: tz, year: "numeric", month: "2-digit", day: "2-digit" }); dzFmt.set(tz, f); }
+    const p = f.formatToParts(now), val = t => p.find(x => x.type === t).value;
+    return `${val("year")}-${val("month")}-${val("day")}`;
+  };
+  const tzFmt = new Map();
+  const timeInZone = (d, tz) => {
+    if (!d || !Number.isFinite(d.valueOf())) return "—";
+    let f = tzFmt.get(tz);
+    if (!f) { f = new Intl.DateTimeFormat("en-GB", { timeZone: tz, hour: "2-digit", minute: "2-digit", hourCycle: "h23" }); tzFmt.set(tz, f); }
+    return f.format(d);
+  };
+  const wallFmt = new Map();
+  function localParts(ms, tz) {
+    let f = wallFmt.get(tz);
+    if (!f) { f = new Intl.DateTimeFormat("en-CA", { timeZone: tz, year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit", hourCycle: "h23" }); wallFmt.set(tz, f); }
+    const parts = f.formatToParts(new Date(ms)), p = s => Number(parts.find(x => x.type === s)?.value);
+    return [p("year"), p("month"), p("day"), p("hour") % 24, p("minute")];
+  }
+  /** שעה מקומית לרגע מוחלט, בלי לבחור בשקט שעה כפולה במעבר שעון */
+  function localInstant(date, time, tz) {
+    const target = [...date.split("-").map(Number), ...time.split(":").map(Number)];
+    const naive = Date.UTC(target[0], target[1] - 1, target[2], target[3], target[4]);
+    const offsets = new Set();
+    for (const n of [-24, -12, 0, 12, 24]) {
+      const sample = naive + n * 3600000, p = localParts(sample, tz);
+      offsets.add(Date.UTC(p[0], p[1] - 1, p[2], p[3], p[4]) - sample);
+    }
+    const matches = [...offsets].map(o => naive - o).filter(ms => localParts(ms, tz).every((n, i) => n === target[i]));
+    if (matches.length !== 1) throw new Error(matches.length ? "השעה מופיעה פעמיים במעבר שעון; נדרש בירור" : "השעה אינה קיימת במעבר שעון");
+    return new Date(matches[0]);
+  }
+  const sunCache = new Map();
+  function calculateSun(date, c, degrees) {
+    const [y, m, d] = date.split("-").map(Number), base = Date.UTC(y, m - 1, d);
+    const at = (zenith, rising) => { const t = sunEventUTC(y, m, d, c.lat, c.lon, zenith, rising); return t === null ? null : new Date(base + Math.round(t * 60000)); };
+    return { sunrise: at(90.833, true), sunset: at(90.833, false), nightfall: at(90 + degrees, false), dawn: at(106.1, true) };
+  }
+  function sun(date, c, degrees = 8.5) {
+    const key = `${date}:${c.id}:${degrees}`;
+    let s = sunCache.get(key);
+    if (!s) { s = calculateSun(date, c, degrees); if (sunCache.size > 4000) sunCache.clear(); sunCache.set(key, s); }
+    return s;
+  }
+  function atLocation(state, date) {
+    const trip = state.trips.find(t => t.from <= date && t.to >= date);
+    return city(trip ? trip.cityId : state.settings.cityId);
+  }
+  function stamp(e) {
+    const c = city(e.cityId), instant = localInstant(e.date, e.time, c.tz), s = sun(e.date, c);
+    if (!s.sunrise || !s.sunset) throw new Error("אין זריחה או שקיעה בתאריך ובמיקום הזה; נדרשת הוראה אישית");
+    const after = instant >= s.sunset, night = after || instant < s.sunrise;
+    const abs = isoAbs(after ? addDays(e.date, 1) : e.date);
+    // מרווח של שלוש דקות הוא סימון לבירור, לא הגדרה של בין השמשות
+    const nearSunset = Math.abs(instant - s.sunset) <= 3 * 60000;
+    const twilight = instant >= s.sunset && (!s.nightfall || instant < s.nightfall);
+    const nearSunrise = Math.abs(instant - s.sunrise) <= 3 * 60000;
+    return { abs, onah: night ? "night" : "day", ordinal: 2 * abs + (night ? 0 : 1), instant, hebrewDate: new HDate(abs).renderGematriya(), uncertain: nearSunset || twilight || nearSunrise, sun: s };
+  }
+  function onahWindow(abs, onah, c, degrees = 8.5) {
+    const date = fromAbs(abs), s = sun(date, c, degrees), prior = sun(addDays(date, -1), c, degrees);
+    return { start: onah === "day" ? s.sunrise : prior.sunset, end: onah === "day" ? s.sunset : s.sunrise, date: onah === "day" ? date : addDays(date, -1) };
+  }
+  const today = (cityId = "netanya", now = new Date()) => dateInZone(now, city(cityId).tz);
+  function currentContext(state, now = new Date()) {
+    const trip = state.trips.find(t => { const d = dateInZone(now, city(t.cityId).tz); return t.from <= d && d <= t.to; });
+    const c = city(trip ? trip.cityId : state.settings.cityId), date = dateInZone(now, c.tz), s = sun(date, c, Number(state.settings.nightfall));
+    const abs = isoAbs(s.sunset && now >= s.sunset ? addDays(date, 1) : date);
+    return { city: c, date, abs, time: timeInZone(now, c.tz), hebrewDate: new HDate(abs).renderGematriya(), afterSunset: !!(s.sunset && now >= s.sunset) };
+  }
+
+  /* ---------- מנוע ---------- */
+  const ENGINE_VERSION = "0.2.0-review";
+  const SOURCES = {
+    calendar: "https://www.yoatzot.org/548/", wait: "https://www.yoatzot.org/526/", hefsek: "https://www.yoatzot.org/527/",
+    clean: "https://www.yoatzot.org/529/", monthly: "https://www.yoatzot.org/677/", interval: "https://www.yoatzot.org/670/",
+    average: "https://www.yoatzot.org/672/", fixed: "https://www.yoatzot.org/676/",
+    chabad: "https://learn.mikvah.org/halachos-of-taharas-hamishpacha-chabad/calendar",
+  };
+  const sorted = events => [...events].sort((a, b) => `${a.date}T${a.time}`.localeCompare(`${b.date}T${b.time}`) || a.createdAt.localeCompare(b.createdAt));
+
+  /** חישוב מחדש מלא מכל הרישומים. כל מועד מצטט את הרישומים ואת הכלל שעליהם הוא נשען. */
+  function calculate(state, now = new Date()) {
+    const plans = [], reviews = [], stamped = [], unresolvedStarts = [];
+    const context = currentContext(state, now), date = context.date, currentAbs = context.abs;
+    const nf = Number(state.settings.nightfall);
+    const review = (id, title, detail, eventIds = []) => { if (!reviews.some(r => r.id === id)) reviews.push({ id, title, detail, eventIds }); };
+    for (const e of sorted(state.events)) {
+      try {
+        const s = stamp(e);
+        if (s.instant > now && e.type !== "manual" && e.type !== "note") { review(`future-${e.id}`, "רישום עתידי", "אירוע שטרם התרחש אינו משמש כחישוב בפועל.", [e.id]); continue; }
+        stamped.push({ e, s });
+        if (s.uncertain && ["flow", "hefsek", "restart", "bedikah"].includes(e.type)) review(`boundary-${e.id}`, "רישום סמוך לגבול היום או העונה", "נשמרו השעה והמקום. שיוך האירוע דורש בירור, והוא לא משמש לבדו לחישוב ודאי.", [e.id]);
+        if (e.type === "question" || e.result === "uncertain") review(`question-${e.id}`, "רישום שממתין לבירור", e.note || "שאלה על דימום או מראה אינה הופכת אוטומטית לווסת או להפסק תקף.", [e.id]);
+      } catch (err) {
+        if (e.type === "flow" || e.type === "restart") {
+          const zone = city(e.cityId).tz, localDate = dateInZone(now, zone);
+          if (e.date < localDate || (e.date === localDate && e.time <= timeInZone(now, zone))) unresolvedStarts.push(e);
+        }
+        review(`time-${e.id}`, "נדרש בירור של הזמן והמיקום", err instanceof Error ? err.message : "לא ניתן לחשב זמן", [e.id]);
+      }
+    }
+    stamped.sort((a, b) => a.s.instant - b.s.instant);
+    const recordedFlows = stamped.filter(x => x.e.type === "flow");
+    const natural = recordedFlows.filter(x => x.e.result !== "uncertain");
+    const flows = natural.filter(x => !x.s.uncertain);
+    const latestFlow = natural.at(-1)?.e;
+    const latestNiddah = stamped.filter(x => ["flow", "restart"].includes(x.e.type)).at(-1);
+    const latestMikvah = stamped.filter(x => x.e.type === "mikvah").at(-1);
+    const couldFollow = (event, reference) => !reference || event.date >= dateInZone(reference.s.instant, city(event.cityId).tz);
+    const unresolvedActive = unresolvedStarts.some(event => couldFollow(event, latestNiddah) && couldFollow(event, latestMikvah));
+    const unresolvedFlows = unresolvedStarts.filter(event => event.type === "flow");
+    let dateline = false;
+    for (let i = 1; i < stamped.length; i++) {
+      if (Math.abs(city(stamped[i].e.cityId).lon - city(stamped[i - 1].e.cityId).lon) > 180) { dateline = true; review("dateline", "נסיעה אפשרית מעבר לקו התאריך", "החישובים האוטומטיים לעונות הושעו. יש לרשום את ההנחיות האישיות כאירועים ידניים.", [stamped[i - 1].e.id, stamped[i].e.id]); }
+    }
+    if (state.settings.special !== "regular") review("special", "נבחר מצב המחייב התאמה אישית", "היריון, אחרי לידה, הנקה וטיפול הורמונלי אינם מחושבים כאן אוטומטית לפי כללי מחזור רגיל. אפשר לרשום מועדים ידניים לפי הוראה.");
+    let earliestHefsek;
+    if (!unresolvedActive && latestNiddah && (!latestMikvah || latestMikvah.s.instant < latestNiddah.s.instant)) {
+      let baseAbs = latestNiddah.s.abs;
+      if (latestNiddah.e.type === "restart") {
+        const prior = stamped.filter(x => x.e.type === "flow" && x.s.instant < latestNiddah.s.instant && (!latestMikvah || x.s.instant > latestMikvah.s.instant)).at(-1);
+        if (prior) baseAbs = prior.s.abs; else review("restart-without-history", "חסר בסיס לחידוש הספירה", "נרשם חידוש ספירה ללא וסת קודמת מתועדת. יש לברר את מועד ההפסק האפשרי.", [latestNiddah.e.id]);
+      }
+      if (state.settings.wait === "five") earliestHefsek = fromAbs(Math.max(baseAbs + 4, latestNiddah.s.abs));
+      else {
+        const relations = stamped.filter(x => x.e.type === "intimacy" && x.s.instant <= latestNiddah.s.instant).at(-1);
+        if (relations && !relations.s.uncertain) earliestHefsek = fromAbs(Math.max(relations.s.abs + 3, latestNiddah.s.abs));
+        else review("wait-base", "חסר מועד בסיס להמתנה", "נבחר חישוב ארבעה ימים ממועד היחסים. צריך לרשום את מועד הבסיס או לצרף הוראה אישית להפסק; אין הנחה אוטומטית של ארבעה ימים מתחילת הווסת.");
+      }
+      if (latestNiddah.s.uncertain || latestNiddah.e.result === "uncertain") earliestHefsek = undefined;
+    }
+    const hefsekCandidates = unresolvedActive ? [] : stamped.filter(x => x.e.type === "hefsek" && x.e.result === "clear" && (!latestNiddah || x.s.instant > latestNiddah.s.instant) && (!latestMikvah || x.s.instant > latestMikvah.s.instant));
+    let validHefsek;
+    for (const h of hefsekCandidates) {
+      const beforeSunset = !!h.s.sun.sunset && h.s.instant < h.s.sun.sunset && !h.s.uncertain;
+      if (!beforeSunset) { review(`hefsek-late-${h.e.id}`, "זמן ההפסק דורש בירור", "אין להתחיל ספירה אוטומטית מהפסק שנרשם אחרי השקיעה או בזמן מסופק.", [h.e.id]); continue; }
+      if (!latestNiddah) { review(`hefsek-no-flow-${h.e.id}`, "חסר רישום תחילת התקופה", "נשמר ההפסק, אך חסרים נתוני הבסיס להמתנה. אפשר לתעד הוראה אישית.", [h.e.id]); if (!h.e.authorityNote) continue; }
+      if ((!earliestHefsek || h.e.date < earliestHefsek) && !h.e.authorityNote) { review(`hefsek-early-${h.e.id}`, "הפסק לפני מועד ההמתנה המחושב", "המערכת אינה משנה את ההמתנה ללא תיעוד הוראה אישית.", [h.e.id]); continue; }
+      validHefsek = h;
+    }
+    const checks = {};
+    let cleanDay = 0, immersionDate;
+    const addPlan = p => plans.push({ ...p, tentative: p.tentative ?? true });
+    if (validHefsek) {
+      const h = validHefsek;
+      immersionDate = fromAbs(h.s.abs + 7);
+      cleanDay = Math.max(0, Math.min(7, currentAbs - h.s.abs));
+      for (let n = 1; n <= 7; n++) {
+        const d = fromAbs(h.s.abs + n), c = atLocation(state, d), s = sun(d, c, nf);
+        checks[n] = stamped.filter(x => x.e.type === "bedikah" && x.e.result === "clear" && x.s.abs === h.s.abs + n && !!x.s.sun.dawn && !!x.s.sun.sunset && x.s.instant >= x.s.sun.dawn && x.s.instant < x.s.sun.sunset && !x.s.uncertain).map(x => x.e);
+        const morning = checks[n].some(e => e.time < "12:00"), afternoon = checks[n].some(e => e.time >= "12:00");
+        if ((n === 1 || n === 7) && d < date && !checks[n].length) review(`missing-day-${n}`, `לא נרשמה בדיקה ביום ${n === 1 ? "הראשון" : "השביעי"}`, "חוסר רישום אינו מוכיח שלא בוצעה בדיקה. יש להשלים רישום או לברר; המערכת אינה פוסלת או מאשרת את הספירה בעצמה.", [h.e.id]);
+        if (state.settings.bedikot === "first-last" && n !== 1 && n !== 7) continue;
+        if (s.sunrise && s.sunset) {
+          const base = { kind: "bedikah", date: d, onah: "day", source: SOURCES.clean, eventIds: [h.e.id], cityId: c.id, day: n };
+          let morningInstant = s.sunrise;
+          try { morningInstant = localInstant(d, state.settings.morningTime, c.tz); }
+          catch { review("morning-clock-" + d, "שעת התזכורת דורשת התאמה במעבר שעון", "תזכורת הבוקר הועברה לשעת הזריחה המקומית ביום הזה."); }
+          if (morningInstant < s.sunrise) morningInstant = s.sunrise;
+          if (morningInstant >= s.sunset) { morningInstant = s.sunrise; review("morning-outside-day", "שעת הבוקר שנבחרה מחוץ לעונת היום", "תזכורת הבוקר הוזזה לזריחה כדי להישאר בתוך יום הבדיקה."); }
+          addPlan({ ...base, id: `bedikah-${h.e.id}-${n}-am`, title: `בדיקת בוקר · יום ${n}`, start: morningInstant.toISOString(), end: s.sunset.toISOString(), reason: "תזכורת לרישום בדיקה; אינה קביעה שבדיקה בוצעה.", done: morning || (state.settings.bedikot === "first-last" && checks[n].length > 0) });
+          if (state.settings.bedikot === "twice") addPlan({ ...base, id: `bedikah-${h.e.id}-${n}-pm`, title: `בדיקת ערב · יום ${n}`, start: new Date(s.sunset.valueOf() - state.settings.reminderMinutes * 60000).toISOString(), end: s.sunset.toISOString(), reason: `${state.settings.reminderMinutes} דקות לפני השקיעה המקומית.`, done: afternoon });
+        } else review(`sun-${d}`, "חסרים זמני יום", "אין זמן שמש תקף למועד ולמיקום שנבחרו; נדרש בירור.");
+      }
+      const c = atLocation(state, immersionDate), s = sun(immersionDate, c, nf);
+      if (s.nightfall) addPlan({ id: `mikvah-${h.e.id}`, kind: "mikvah", title: "ליל טבילה מתוכנן", date: immersionDate, onah: "evening", start: s.nightfall.toISOString(), reason: "הערב שלאחר היום השביעי. מותנה בהשלמת הספירה, הבדיקות ובירור הספקות; אינו אישור טבילה.", source: SOURCES.clean, eventIds: [h.e.id], cityId: c.id });
+    } else if (earliestHefsek) {
+      const d = earliestHefsek < date ? date : earliestHefsek, c = atLocation(state, d), s = sun(d, c);
+      if (s.sunset) addPlan({ id: `hefsek-${latestNiddah?.e.id}`, kind: "hefsek", title: "תזכורת להפסק טהרה", date: d, onah: "day", start: new Date(s.sunset.valueOf() - state.settings.reminderMinutes * 60000).toISOString(), end: s.sunset.toISOString(), reason: "זהו המועד המוקדם לפי ההמתנה שנבחרה, ורק אם הדימום פסק והבדיקה תקפה. לא נרשם הפסק באופן אוטומטי.", source: SOURCES.wait, eventIds: latestNiddah ? [latestNiddah.e.id] : [], cityId: c.id });
+    }
+    const addOnah = (abs, onah, kind, title, reason, source, eventIds, id) => {
+      const civil = fromAbs(abs), location = atLocation(state, onah === "night" ? addDays(civil, -1) : civil);
+      const w = onahWindow(abs, onah, location, nf);
+      if (!w.start || !w.end) { review(`onah-sun-${id}`, "לא ניתן לחשב עונה במיקום הזה", "חסרים זמני זריחה או שקיעה תקפים.", eventIds); return; }
+      const p = { id, kind, title, date: w.date, onah, start: w.start.toISOString(), end: w.end.toISOString(), reason, source, eventIds, cityId: location.id, tentative: true };
+      addPlan(p);
+      if (state.settings.orZarua && ["monthly", "interval", "average"].includes(kind)) {
+        const prev = 2 * abs + (onah === "night" ? 0 : 1) - 1, pa = Math.floor(prev / 2), po = prev % 2 ? "day" : "night", pw = onahWindow(pa, po, location);
+        if (pw.start && pw.end) addPlan({ ...p, id: `oz-${id}`, kind: "or-zarua", title: `אור זרוע · ${title}`, date: pw.date, onah: po, start: pw.start.toISOString(), end: pw.end.toISOString(), reason: "העונה הקודמת לעונה הצפויה, לפי האפשרות שנבחרה בהגדרות." });
+      }
+    };
+    const last = flows.at(-1), lastRecorded = recordedFlows.at(-1);
+    const latestHasUncertainty = unresolvedFlows.some(event => couldFollow(event, lastRecorded)) || (!!lastRecorded && (lastRecorded.s.uncertain || lastRecorded.e.result === "uncertain"));
+    if (last && !latestHasUncertainty && state.settings.special === "regular" && !dateline) {
+      const onot = state.settings.beinonit === "both" ? ["night", "day"] : [last.s.onah];
+      for (const day of (state.settings.day31 ? [30, 31] : [30])) for (const onah of onot)
+        addOnah(last.s.abs + day - 1, onah, "average", `עונה בינונית · יום ${day}`, `ספירה כוללנית: יום הראייה הוא יום 1. יום ${day} הוא ${day - 1} ימים לאחר התאריך העברי שנרשם.`, SOURCES.average, [last.e.id], `average-${last.e.id}-${day}-${onah}`);
+      const monthly = f => {
+        const h = new HDate(f.s.abs), nextFirst = new HDate(1, h.getMonth(), h.getFullYear()).add(1, "M");
+        const monthLength = nextFirst.add(1, "M").abs() - nextFirst.abs();
+        if (h.getDate() <= monthLength) return nextFirst.abs() + h.getDate() - 1;
+        if (state.settings.missingMonthly === "first-next-month") return nextFirst.add(1, "M").abs();
+        return null;
+      };
+      const monthlyAbs = monthly(last);
+      if (monthlyAbs) addOnah(monthlyAbs, last.s.onah, "monthly", "עונת החודש", "אותו יום בחודש העברי הבא ובאותה עונה. כלל יום ל׳ בחודש חסר נקבע בנפרד בהגדרות.", SOURCES.monthly, [last.e.id], `monthly-${last.e.id}`);
+      else review("missing-month-day", "בחודש הבא אין יום מקביל", "נבחר לדלג על עונת החודש בחודש חסר. זו בחירת שיטה, ולא החלטה שמתאימה לכל מנהג.", [last.e.id]);
+      if (state.settings.carryMonthly && flows.length > 1) {
+        for (const f of flows.slice(0, -1)) {
+          let target = monthly(f), guard = 0;
+          while (target && target <= last.s.abs && guard++ < 18) {
+            const t = target;
+            const niddah = stamped.filter(x => ["flow", "restart"].includes(x.e.type) && x.s.abs <= t).at(-1);
+            const end = stamped.find(x => x.e.type === "hefsek" && x.e.result === "clear" && niddah && x.s.instant > niddah.s.instant);
+            if (!niddah || !end || end.s.abs < target) { target = null; break; }
+            const h = new HDate(target), next = h.add(1, "M");
+            target = next.getDate() === h.getDate() ? next.abs() : null;
+          }
+          if (target && target > last.s.abs && target !== monthlyAbs) addOnah(target, f.s.onah, "monthly", "עונת חודש שנשמרה", "עונת חודש קודמת שנפלה בתוך תקופת דימום מתועדת, לפי בחירת שימור. יש לאמת את נסיבות העקירה.", SOURCES.monthly, [f.e.id, last.e.id], `carry-monthly-${f.e.id}-${target}`);
+        }
+      }
+      const uncertainInterval = unresolvedFlows.some(event => couldFollow(event, recordedFlows.at(-2))) || recordedFlows.slice(-2).some(x => x.s.uncertain || x.e.result === "uncertain");
+      if (uncertainInterval && recordedFlows.length >= 2) review("uncertain-interval", "חסר בסיס ודאי להפלגה", "אחת משתי הראיות האחרונות מסופקת. אין לדלג עליה ולחשב מרווח מראייה מוקדמת יותר.");
+      if (flows.length >= 2 && !uncertainInterval) {
+        const intervals = [];
+        for (let i = 1; i < flows.length; i++) {
+          const a = flows[i - 1], b = flows[i];
+          let value;
+          if (state.settings.haflagah === "days") value = b.s.abs - a.s.abs + 1;
+          else {
+            const h = stamped.filter(x => x.e.type === "hefsek" && x.e.result === "clear" && !x.s.uncertain && !!x.s.sun.sunset && x.s.instant < x.s.sun.sunset && x.s.instant > a.s.instant && x.s.instant < b.s.instant && (x.s.abs >= a.s.abs + 4 || !!x.e.authorityNote)).at(-1);
+            if (h) value = b.s.ordinal - (2 * h.s.abs + 1);
+            else review(`chabad-hefsek-${b.e.id}`, "חסר הפסק לחישוב הפלגה בחב״ד", "חישוב זה דורש את ההפסק הקודם ולא רק שתי התחלות וסת.", [a.e.id, b.e.id]);
+          }
+          if (!value || value <= 0) continue;
+          if (state.settings.haflagah === "chabad-onot" || state.settings.carryLongIntervals) { for (let j = intervals.length - 1; j >= 0; j--) if (intervals[j].value <= value) intervals.splice(j, 1); }
+          else intervals.length = 0;
+          intervals.push({ value, ids: [a.e.id, b.e.id] });
+        }
+        for (const interval of intervals) {
+          if (state.settings.haflagah === "days") addOnah(last.s.abs + interval.value - 1, last.s.onah, "interval", `הפלגה · ${interval.value} ימים`, "הפרש התאריכים העבריים בתוספת 1, בספירה כוללנית. חוזרים על אותו מרווח מהווסת האחרונה ובאותה עונה.", SOURCES.interval, interval.ids, `interval-${interval.value}-${last.e.id}`);
+          else if (validHefsek) {
+            const ordinal = 2 * validHefsek.s.abs + 1 + interval.value;
+            addOnah(Math.floor(ordinal / 2), ordinal % 2 ? "day" : "night", "interval", `הפלגה · ${interval.value} עונות`, "מספר העונות מההפסק הקודם ועד הראייה הבאה, בספירה כוללנית; מועד חדש נספר מההפסק הנוכחי. מספרים גבוהים נשמרים כשמגיע מספר נמוך.", SOURCES.chabad, [...interval.ids, validHefsek.e.id], `chabad-${interval.value}-${last.e.id}`);
+          }
+        }
+      }
+    }
+    if (flows.length >= 3) {
+      const recent = flows.slice(-3), months = recent.map(x => new HDate(x.s.abs));
+      if (recent.every(x => x.s.onah === recent[0].s.onah) && months.every(h => h.getDate() === months[0].getDate()) && months[0].add(1, "M").abs() === months[1].abs() && months[1].add(1, "M").abs() === months[2].abs())
+        review("possible-fixed-month", "דפוס חודשי אפשרי שחוזר שלוש פעמים", "נדרש בירור של קביעות ועקירה. המערכת אינה מחליפה את מועדי החשש אוטומטית על בסיס זיהוי דפוס.", recent.map(x => x.e.id));
+    }
+    if (flows.length >= 4) {
+      const f = flows.slice(-4), g = [1, 2, 3].map(i => f[i].s.abs - f[i - 1].s.abs);
+      if (g.every(n => n === g[0]) && f.slice(1).every(x => x.s.onah === f[1].s.onah)) review("possible-fixed-interval", "שלוש הפלגות שוות בארבע ראיות", "זהו חשד לדפוס קבוע, ולא קביעה של וסת קבוע. יש לברר אילו חששות לשמור.", f.map(x => x.e.id));
+    }
+    for (const { e } of stamped) if (e.type === "manual" && e.onah) addOnah(isoAbs(e.date), e.onah, "manual", "עונת פרישה לפי הוראה", e.authorityNote || e.note || "מועד שנרשם ידנית; אינו נוצר מהחישוב האוטומטי.", "", [e.id], `manual-${e.id}`);
+    for (const x of stamped.filter(x => x.e.type === "bedikah" && x.e.result === "bleeding")) review(`bleeding-check-${x.e.id}`, "בדיקה שנרשמה כלא נקייה", "אין איפוס אוטומטי על סמך תיאור מראה. יש לברר ולתעד חידוש ספירה אם כך הונחית.", [x.e.id]);
+    const immersed = !unresolvedActive && latestMikvah && (!latestNiddah || latestMikvah.s.instant > latestNiddah.s.instant);
+    const phase = immersed ? "immersed" : validHefsek ? (currentAbs > validHefsek.s.abs + 7 ? "planned" : "clean") : latestNiddah || unresolvedActive ? "waiting" : "empty";
+    if (immersed && !stamped.some(x => x.e.type === "hefsek" && x.s.instant < latestMikvah.s.instant)) review("immersion-no-history", "טבילה ללא תיעוד ספירה קודם", "נשמר רישום הטבילה כפי שהוזן. אין להסיק ממנו אישור הלכתי או השלמת בדיקות.", [latestMikvah.e.id]);
+    const deduped = [...new Map(plans.map(p => [p.id, p])).values()].sort((a, b) => a.start.localeCompare(b.start));
+    return { plans: deduped, reviews, latestFlow, hefsek: validHefsek?.e, earliestHefsek, cleanDay, phase, immersionDate, checks, version: ENGINE_VERSION };
+  }
+
+  /* ---------- גיבוי מוצפן וייצוא ---------- */
+  const enc = new TextEncoder(), dec = new TextDecoder();
+  const b64 = bytes => { let s = ""; for (let i = 0; i < bytes.length; i++) s += String.fromCharCode(bytes[i]); return btoa(s); };
+  const unb64 = s => Uint8Array.from(atob(s), c => c.charCodeAt(0));
+  async function passwordKey(password, salt) {
+    const seed = await crypto.subtle.importKey("raw", enc.encode(password), "PBKDF2", false, ["deriveKey"]);
+    return crypto.subtle.deriveKey({ name: "PBKDF2", salt, iterations: 310000, hash: "SHA-256" }, seed, { name: "AES-GCM", length: 256 }, false, ["encrypt", "decrypt"]);
+  }
+  async function encryptBackup(value, password) {
+    if (!globalThis.crypto?.subtle) throw new Error("הדפדפן הזה אינו תומך בהצפנה. פתחי את היומן בכתובת מאובטחת (https).");
+    if (password.length < 10) throw new Error("סיסמת הגיבוי צריכה להכיל לפחות 10 תווים");
+    const salt = crypto.getRandomValues(new Uint8Array(16)), iv = crypto.getRandomValues(new Uint8Array(12)), key = await passwordKey(password, salt);
+    const encrypted = await crypto.subtle.encrypt({ name: "AES-GCM", iv }, key, enc.encode(JSON.stringify(value)));
+    return JSON.stringify({ format: "maayan-encrypted-v1", kdf: "PBKDF2-SHA256", iterations: 310000, salt: b64(salt), iv: b64(iv), ciphertext: b64(new Uint8Array(encrypted)) });
+  }
+  async function decryptBackup(data, password) {
+    if (!globalThis.crypto?.subtle) throw new Error("הדפדפן הזה אינו תומך בהצפנה.");
+    let x; try { x = JSON.parse(data); } catch { throw new Error("קובץ הגיבוי אינו בפורמט נתמך"); }
+    if (x.format !== "maayan-encrypted-v1" || x.iterations !== 310000 || typeof x.salt !== "string" || typeof x.iv !== "string" || typeof x.ciphertext !== "string") throw new Error("קובץ הגיבוי אינו בפורמט נתמך");
+    const salt = unb64(x.salt), iv = unb64(x.iv);
+    if (salt.length !== 16 || iv.length !== 12) throw new Error("קובץ גיבוי פגום");
+    const key = await passwordKey(password, salt);
+    try { return JSON.parse(dec.decode(await crypto.subtle.decrypt({ name: "AES-GCM", iv }, key, unb64(x.ciphertext)))); }
+    catch { throw new Error("סיסמה שגויה או קובץ גיבוי פגום"); }
+  }
+  const escapeICS = s => s.replace(/\\/g, "\\\\").replace(/\r\n|\r|\n/g, "\\n").replace(/;/g, "\\;").replace(/,/g, "\\,");
+  const utc = s => new Date(s).toISOString().replace(/[-:]/g, "").replace(/\.\d{3}/, "");
+  function foldICS(line) {
+    const out = []; let part = "", size = 0;
+    for (const ch of line) { const n = enc.encode(ch).length; if (size + n > 73) { out.push(part); part = " "; size = 1; } part += ch; size += n; }
+    out.push(part); return out.join("\r\n");
+  }
+  function calendarExport(plans, neutral = true, now = new Date()) {
+    const rows = ["BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//Maayan//Personal Calendar//HE", "CALSCALE:GREGORIAN", "METHOD:PUBLISH"];
+    for (const p of plans.filter(x => !x.done && new Date(x.start) >= now).slice(0, 250)) {
+      const summary = escapeICS(neutral ? "תזכורת אישית" : p.title);
+      rows.push("BEGIN:VEVENT", `UID:${p.id}@maayan.local`, `DTSTAMP:${utc(now.toISOString())}`, `DTSTART:${utc(p.start)}`,
+        `DTEND:${utc(p.end ?? new Date(new Date(p.start).valueOf() + 30 * 60000).toISOString())}`, `SUMMARY:${summary}`,
+        `DESCRIPTION:${escapeICS(neutral ? "פרטים ביומן האישי. מועד לתכנון בלבד." : `${p.reason}\n${p.source}`)}`,
+        "CLASS:PRIVATE", "TRANSP:TRANSPARENT", "BEGIN:VALARM", "TRIGGER:PT0M", "ACTION:DISPLAY", `DESCRIPTION:${summary}`, "END:VALARM", "END:VEVENT");
+    }
+    rows.push("END:VCALENDAR");
+    return rows.map(foldICS).join("\r\n") + "\r\n";
+  }
+  const SETTING_LABELS = {
+    wait: { five: "חמישה ימים מתחילת הנידה", "four-from-relations": "ארבעה ימים ממועד היחסים" },
+    haflagah: { days: "ימים בין תחילות הווסתות", "chabad-onot": "עונות מהפסק טהרה (חב״ד)" },
+    beinonit: { same: "אותה עונה", both: "שתי העונות" },
+    missingMonthly: { skip: "דילוג", "first-next-month": "א׳ בחודש שאחריו" },
+    bedikot: { twice: "בוקר וערב בכל יום", "first-last": "ראשון ושביעי" },
+    special: { regular: "מחזור רגיל", pregnancy: "היריון", postpartum: "אחרי לידה", nursing: "הנקה", hormonal: "טיפול הורמונלי" },
+  };
+  const yesNo = b => b ? "כן" : "לא";
+  function settingsSummary(s) {
+    return [
+      `מקום: ${city(s.cityId).name}`, `המתנה: ${SETTING_LABELS.wait[s.wait]}`, `הפלגה: ${SETTING_LABELS.haflagah[s.haflagah]}`,
+      `עונה בינונית: ${SETTING_LABELS.beinonit[s.beinonit]}`, `יום 31: ${yesNo(s.day31)}`, `אור זרוע: ${yesNo(s.orZarua)}`,
+      `שימור הפלגות ארוכות: ${yesNo(s.carryLongIntervals)}`, `שימור עונת חודש בזמן דימום: ${yesNo(s.carryMonthly)}`,
+      `יום ל׳ בחודש חסר: ${SETTING_LABELS.missingMonthly[s.missingMonthly]}`, `בדיקות: ${SETTING_LABELS.bedikot[s.bedikot]}`,
+      `צאת הכוכבים: ${s.nightfall}°`, `מצב: ${SETTING_LABELS.special[s.special]}`, `הערת שיטה: ${s.methodNote || "לא נרשמה"}`,
+    ];
+  }
+  const RESULT_NAMES = { clear: "נקייה", uncertain: "ממתינה לבירור", bleeding: "לא נקייה" };
+  function eventLine(e) {
+    let h = "זמן לבירור";
+    try { const s = stamp(e); h = `${s.hebrewDate} · ${s.onah === "day" ? "יום" : "לילה"}${s.uncertain ? " · סמוך לגבול עונה" : ""}`; } catch { /* נשאר לבירור */ }
+    const extra = ["hefsek", "bedikah", "question"].includes(e.type) ? ` | ${RESULT_NAMES[e.result]}` : "";
+    return `${e.date} ${e.time} | ${h} | ${city(e.cityId).name} | ${EVENT_NAMES[e.type]}${extra}${e.onah ? ` | עונת ${e.onah === "day" ? "יום" : "לילה"}` : ""}${e.note ? `\n   הערה: ${e.note}` : ""}${e.authorityNote ? `\n   הוראה שנרשמה: ${e.authorityNote}` : ""}`;
+  }
+  function planLine(p) {
+    const c = city(p.cityId), hdate = hebrew(p.onah === "day" ? p.date : addDays(p.date, 1));
+    const onah = p.onah === "day" ? "עונת יום" : p.onah === "night" ? "עונת לילה" : "ערב";
+    return `${hdate} (${p.date}) · ${onah} · ${p.title} · מ-${timeInZone(new Date(p.start), c.tz)}${p.end ? ` עד ${timeInZone(new Date(p.end), c.tz)}` : ""} · ${c.name}${p.done ? " · נרשם" : ""}`;
+  }
+  function reportExport(state, now = new Date(), result = calculate(state, now)) {
+    return ["מעיין — סיכום אישי לבירור", `נוצר: ${now.toISOString()} · גרסת מנוע ${ENGINE_VERSION}`, "מנוע החישובים טרם קיבל אישור הלכתי. רישומים אינם אישור שהספירה או הטבילה תקפות.", "",
+      "הגדרות:", ...settingsSummary(state.settings).map(x => "  " + x), "",
+      `רישומים (${state.events.length}):`, ...sorted(state.events).map(e => "• " + eventLine(e)), "",
+      `מועדים מחושבים (${result.plans.length}):`, ...result.plans.map(p => "• " + planLine(p)), "",
+      `נקודות לבירור (${result.reviews.length}):`, ...result.reviews.map(r => `• ${r.title} — ${r.detail}`),
+    ].join("\n");
+  }
+
+  /* ---------- נתוני דוגמה ---------- */
+  function demoState(now = new Date()) {
+    const s = emptyState(), d = today("netanya", now);
+    const ev = (type, offset, time, note = "") => ({ id: uuid(), type, date: addDays(d, offset), time, cityId: "netanya", result: "clear", note, authorityNote: "", createdAt: now.toISOString() });
+    s.events = [ev("flow", -39, "11:20"), ev("hefsek", -35, "15:50"), ev("bedikah", -34, "09:00"), ev("bedikah", -28, "09:00"), ev("mikvah", -28, "21:00"), ev("flow", -10, "11:20"), ev("hefsek", -5, "15:50"), ...[-4, -3, -2, -1].map(n => ev("bedikah", n, "09:00"))];
+    return s;
+  }
+
+  return {
+    HDate, isLeapYear, daysInMonth, monthsInYear, gematriya, hebrew2abs, abs2hebrew,
+    CITIES, city, EVENT_TYPES, EVENT_NAMES, CHECKLIST, SETTING_DEFAULTS, SETTING_LABELS, RESULT_NAMES, uuid, validISO, parseState, safeParse, emptyState, ValidationError,
+    fromISO, toISO, addDays, hd, fromAbs, hebrew, dayNumber, isoAbs, civilLabel, dateInZone, timeInZone, localInstant, sun, atLocation, stamp, onahWindow, today, currentContext,
+    ENGINE_VERSION, SOURCES, calculate, sorted,
+    encryptBackup, decryptBackup, calendarExport, reportExport, settingsSummary, eventLine, planLine, demoState,
+  };
+})();
+if (typeof module !== "undefined") module.exports = Maayan;
+
+/* בדיקות המנוע — העברה של tests/engine.test.ts. רצות גם ב-Node וגם בתוך האפליקציה. */
+const MaayanTests = (M) => {
+  const fail = m => { throw new Error(m); };
+  const a = {
+    equal: (x, y, m) => { if (x !== y) fail(m || `ציפינו ל-${JSON.stringify(y)} וקיבלנו ${JSON.stringify(x)}`); },
+    notEqual: (x, y, m) => { if (x === y) fail(m || `לא ציפינו ל-${JSON.stringify(y)}`); },
+    ok: (x, m) => { if (!x) fail(m || "התנאי לא התקיים"); },
+    deepEqual: (x, y, m) => { if (JSON.stringify(x) !== JSON.stringify(y)) fail(m || `ציפינו ל-${JSON.stringify(y)} וקיבלנו ${JSON.stringify(x)}`); },
+    match: (x, re, m) => { if (!re.test(x)) fail(m || `"${x}" אינו תואם ל-${re}`); },
+    throws: (f, re) => { try { f(); } catch (e) { if (re && !re.test(e.message)) fail(`נזרקה שגיאה אחרת: ${e.message}`); return; } fail("ציפינו לשגיאה"); },
+  };
+  const { HDate, calculate, city, emptyState, safeParse, addDays, currentContext, fromAbs, hd, localInstant, onahWindow, stamp, sun, timeInZone, toISO, uuid } = M;
+  const NOW = new Date("2026-11-20T12:00:00Z");
+  const N = (day, month = 1, year = 5785) => toISO(new HDate(day, month, year).greg());
+  const event = (type, date, time = "10:00", extra = {}) => ({ id: uuid(), type, date, time, cityId: "netanya", result: "clear", note: "", authorityNote: "", createdAt: "2026-11-01T10:00:00Z", ...extra });
+  const run = (events, settings = {}, now = NOW) => { const s = emptyState(); s.events = events; s.settings = { ...s.settings, ...settings }; return calculate(s, now); };
+  const T = [];
+  const test = (group, name, fn) => T.push({ group, name, fn });
+
+  test("לוח עברי", "ראש השנה תשפ״ז חל ב-12 בספטמבר 2026", () => a.equal(N(1, 7, 5787), "2026-09-12"));
+  test("לוח עברי", "ט״ו בניסן תשפ״ו חל ב-2 באפריל 2026", () => a.equal(N(15, 1, 5786), "2026-04-02"));
+  test("לוח עברי", "התאמה ללוח העברי של הדפדפן ב-3,000 ימים", () => {
+    let f; try { f = new Intl.DateTimeFormat("en-u-ca-hebrew", { day: "numeric", year: "numeric", timeZone: "UTC" }); } catch { return; }
+    for (let i = 0; i < 3000; i++) {
+      const d = addDays("2022-01-01", i * 3), [y, m, day] = d.split("-").map(Number);
+      const parts = f.formatToParts(new Date(Date.UTC(y, m - 1, day, 12)));
+      const h = hd(d);
+      a.equal(h.getDate(), Number(parts.find(p => p.type === "day").value), `יום שגוי ב-${d}`);
+      const yr = parts.find(p => p.type === "year" || p.type === "relatedYear");
+      if (yr && /^\d+$/.test(yr.value)) a.equal(h.getFullYear(), Number(yr.value), `שנה שגויה ב-${d}`);
+    }
+  });
+  test("לוח עברי", "חודשים מתחלפים נכון באדר א׳, אדר ב׳ ואלול", () => {
+    a.equal(new HDate(12, 12, 5784).add(1, "M").getMonth(), 13);
+    a.equal(new HDate(12, 12, 5785).add(1, "M").getMonth(), 1);
+    const t = new HDate(3, 6, 5785).add(1, "M"); a.equal(t.getMonth(), 7); a.equal(t.getFullYear(), 5786);
+  });
+
+  test("בסיס", "יומן ריק אינו ממציא מועדים", () => { const r = run([]); a.equal(r.phase, "empty"); a.equal(r.plans.length, 0); a.equal(r.hefsek, undefined); });
+  test("הפלגה", "וקטור נשמת: ב׳ ניסן ← ל׳ ניסן מחשב כ״ח אייר", () => {
+    const x = event("flow", N(2)), y = event("flow", N(30)); const p = run([x, y]).plans.find(p => p.kind === "interval");
+    a.equal(p.date, N(28, 2)); a.equal(p.onah, "day"); a.match(p.title, /29/); a.deepEqual(p.eventIds, [x.id, y.id]);
+  });
+  test("הפלגה", "עונת ההפלגה נקבעת לפי הווסת האחרונה", () => { const p = run([event("flow", N(2)), event("flow", N(30), "01:00")]).plans.find(p => p.kind === "interval"); a.equal(p.onah, "night"); a.equal(p.date, addDays(N(28, 2), -1)); });
+  test("עונה בינונית", "יום 30 הוא יום הראייה ועוד 29 (ספירה כוללנית)", () => { const p = run([event("flow", N(2))]).plans.find(p => p.kind === "average"); a.equal(p.date, N(1, 2)); });
+  test("עונה בינונית", "שתי העונות ויום 31 הן אפשרויות נפרדות", () => { const pp = run([event("flow", N(2))], { beinonit: "both", day31: true }).plans.filter(p => p.kind === "average"); a.equal(pp.length, 4); a.deepEqual([...new Set(pp.map(p => p.onah))].sort(), ["day", "night"]); });
+  test("עונת החודש", "שומרת על התאריך העברי גם כשאורך החודש הלועזי משתנה", () => { const p = run([event("flow", N(15))]).plans.find(p => p.kind === "monthly"); a.equal(p.date, N(15, 2)); });
+  test("עונת החודש", "ל׳ בחודש שאחריו אין ל׳ — מדיניות דילוג, בלי גלישה שקטה", () => { const r = run([event("flow", N(30))]); a.equal(r.plans.filter(p => p.kind === "monthly").length, 0); a.ok(r.reviews.some(r => r.id === "missing-month-day")); });
+  test("עונת החודש", "ל׳ ניסן במדיניות ״א׳ בחודש שאחריו״ מגיע לא׳ סיון ולא לתמוז", () => { const p = run([event("flow", N(30))], { missingMonthly: "first-next-month" }).plans.find(p => p.kind === "monthly"); a.equal(p.date, N(1, 3)); });
+  test("עונת החודש", "חוצה את ראש השנה (אלול ← תשרי)", () => { const p = run([event("flow", N(12, 6, 5785))]).plans.find(p => p.kind === "monthly"); a.equal(p.date, N(12, 7, 5786)); });
+  test("עונת החודש", "בשנה מעוברת עוברת מאדר א׳ לאדר ב׳", () => { const p = run([event("flow", N(12, 12, 5784))]).plans.find(p => p.kind === "monthly"); a.equal(p.date, N(12, 13, 5784)); });
+  test("המתנה", "חמישה ימים כוללים את יום תחילת הווסת", () => a.equal(run([event("flow", N(2), "16:00")]).earliestHefsek, N(6)));
+  test("המתנה", "ראייה אחרי השקיעה נספרת ליום העברי הבא", () => a.equal(run([event("flow", N(2), "22:00")]).earliestHefsek, N(7)));
+  test("המתנה", "שיטת ארבעה ימים נספרת ממועד היחסים ולא מהראייה", () => a.equal(run([event("intimacy", N(1), "10:00"), event("flow", N(3), "10:00")], { wait: "four-from-relations" }).earliestHefsek, N(4)));
+  test("המתנה", "שיטת ארבעה ימים בלי מועד בסיס מסומנת לבירור ולא מנוחשת", () => { const r = run([event("flow", N(2))], { wait: "four-from-relations" }); a.equal(r.earliestHefsek, undefined); a.ok(r.reviews.some(r => r.id === "wait-base")); });
+  test("שבעה נקיים", "הפסק תקף פותח שבעה ימים ומתכנן טבילה בערב השביעי", () => { const r = run([event("flow", N(2)), event("hefsek", N(6), "16:00")]); a.equal(r.immersionDate, N(13)); a.equal(r.plans.filter(p => p.kind === "bedikah").length, 14); a.ok(r.plans.find(p => p.kind === "mikvah").tentative); });
+  test("שבעה נקיים", "הפסק מוקדם אינו פותח ספירה בלי הוראה מתועדת", () => { const r = run([event("flow", N(2)), event("hefsek", N(4), "16:00")]); a.equal(r.hefsek, undefined); a.ok(r.reviews.some(r => r.id.startsWith("hefsek-early"))); });
+  test("שבעה נקיים", "הוראה אישית מתועדת מאפשרת הפסק מוקדם", () => { const h = event("hefsek", N(4), "16:00", { authorityNote: "הוראה אישית שנרשמה לצורך הבדיקה" }); a.equal(run([event("flow", N(2)), h]).hefsek?.id, h.id); });
+  test("שבעה נקיים", "הפסק אחרי השקיעה אינו מתקבל אוטומטית", () => { const r = run([event("flow", N(2)), event("hefsek", N(6), "22:00")]); a.equal(r.hefsek, undefined); a.ok(r.reviews.some(r => r.id.startsWith("hefsek-late"))); });
+  test("שבעה נקיים", "הפסק מסופק אינו פותח ספירה", () => a.equal(run([event("flow", N(2)), event("hefsek", N(6), "16:00", { result: "uncertain" })]).hefsek, undefined));
+  test("שבעה נקיים", "חוסר בדיקה ביום הראשון או השביעי מסומן לבירור, לא מאושר", () => { const r = run([event("flow", N(2)), event("hefsek", N(6), "16:00")]); a.ok(r.reviews.some(r => r.id === "missing-day-1")); a.ok(r.reviews.some(r => r.id === "missing-day-7")); });
+  test("שבעה נקיים", "בדיקות מתועדות ביום הראשון והשביעי מסירות את הסימון", () => { const r = run([event("flow", N(2)), event("hefsek", N(6), "16:00"), event("bedikah", N(7)), event("bedikah", N(13))]); a.ok(!r.reviews.some(r => r.id.startsWith("missing-day"))); a.equal(r.checks[1].length, 1); });
+  test("שבעה נקיים", "חידוש ספירה בתוך תקופת נידה אינו מחייב חמישה ימים חדשים", () => { const r = run([event("flow", N(2)), event("hefsek", N(6), "16:00"), event("restart", N(9))]); a.equal(r.earliestHefsek, N(9)); a.equal(r.hefsek, undefined); });
+  test("ספקות", "כתם מסופק אינו יוצר הפלגה חדשה", () => { const r = run([event("flow", N(2)), event("question", N(20), "10:00", { result: "uncertain" })]); a.equal(r.plans.filter(p => p.kind === "interval").length, 0); a.ok(r.reviews.some(r => r.id.startsWith("question"))); });
+  test("שבעה נקיים", "טבילה אינה נרשמת רק משום שהמועד עבר", () => { const r = run([event("flow", N(2)), event("hefsek", N(6), "16:00")]); a.equal(r.phase, "planned"); });
+  test("חב״ד", "52 עונות מההפסק עד ראייה ביום", () => { const h = event("hefsek", N(5, 2), "16:00"); const p = run([event("flow", N(1)), event("hefsek", N(5), "16:00"), event("flow", N(1, 2)), h], { haflagah: "chabad-onot" }).plans.find(p => p.kind === "interval"); a.match(p.title, /52/); a.equal(p.date, fromAbs(hd(h.date).abs() + 26)); a.equal(p.onah, "day"); });
+  test("חב״ד", "מספר עונות אי-זוגי מחושב לעונת לילה בערב הקודם", () => { const h = event("hefsek", N(5, 2), "16:00"); const p = run([event("flow", N(1)), event("hefsek", N(5), "16:00"), event("flow", N(1, 2), "01:00"), h], { haflagah: "chabad-onot" }).plans.find(p => p.kind === "interval"); a.match(p.title, /51/); a.equal(p.onah, "night"); a.equal(p.date, fromAbs(hd(h.date).abs() + 25)); });
+  test("חב״ד", "בלי הפסק קודם — מסומן כחסר נתון", () => { const r = run([event("flow", N(1)), event("flow", N(1, 2))], { haflagah: "chabad-onot" }); a.equal(r.plans.filter(p => p.kind === "interval").length, 0); a.ok(r.reviews.some(r => r.id.startsWith("chabad-hefsek"))); });
+  test("חב״ד", "הפסק קודם אחרי השקיעה אינו משמש בסיס להפלגה", () => { const r = run([event("flow", N(1)), event("hefsek", N(5), "22:00"), event("flow", N(1, 2)), event("hefsek", N(5, 2), "16:00")], { haflagah: "chabad-onot" }); a.equal(r.plans.filter(p => p.kind === "interval").length, 0); });
+  test("ספקות", "ראייה מסופקת באמצע אינה נמחקת כדי לייצר הפלגה ארוכה", () => { const r = run([event("flow", N(2)), event("flow", N(15), "10:00", { result: "uncertain" }), event("flow", N(30))]); a.equal(r.plans.filter(p => p.kind === "interval").length, 0); a.ok(r.reviews.some(r => r.id === "uncertain-interval")); });
+  test("וסת קבוע", "שלוש הפלגות שוות דורשות ארבע ראיות", () => { const s = N(1), f = [0, 28, 56, 84].map(n => event("flow", addDays(s, n))); a.ok(!run(f.slice(0, 3)).reviews.some(r => r.id === "possible-fixed-interval")); a.ok(run(f).reviews.some(r => r.id === "possible-fixed-interval")); });
+  test("וסת קבוע", "אותו תאריך בשנים שונות אינו דפוס חודשי", () => { const r = run([event("flow", N(10, 1, 5783)), event("flow", N(10, 2, 5784)), event("flow", N(10, 3, 5785))]); a.ok(!r.reviews.some(r => r.id === "possible-fixed-month")); });
+  test("וסת קבוע", "שלוש ראיות רצופות באותו יום ועונה מסומנות לבירור", () => a.ok(run([event("flow", N(10)), event("flow", N(10, 2)), event("flow", N(10, 3))]).reviews.some(r => r.id === "possible-fixed-month")));
+  test("מצבים מיוחדים", "היריון, לידה, הנקה וטיפול הורמונלי משעים חישוב רגיל", () => { for (const special of ["pregnancy", "postpartum", "nursing", "hormonal"]) { const r = run([event("flow", N(2))], { special }); a.equal(r.plans.filter(p => ["monthly", "average", "interval"].includes(p.kind)).length, 0); a.ok(r.reviews.some(r => r.id === "special")); } });
+  test("רישום ידני", "עונה עתידית לפי הוראה נשמרת כמועד", () => { const r = run([event("manual", "2026-12-01", "12:00", { onah: "night", authorityNote: "הוראה אישית" })]); a.equal(r.plans[0].kind, "manual"); a.equal(r.plans[0].date, "2026-11-30"); });
+  test("בסיס", "ראייה עתידית אינה משנה את החישוב הנוכחי", () => { const r = run([event("flow", "2026-12-01")]); a.equal(r.latestFlow, undefined); a.ok(r.reviews.some(r => r.id.startsWith("future"))); });
+  test("בסיס", "עריכת תאריך מחשבת מחדש את כל המועדים", () => { const e = event("flow", N(2)), x = run([e]), y = run([{ ...e, date: N(3) }]); a.notEqual(x.plans.find(p => p.kind === "average").date, y.plans.find(p => p.kind === "average").date); });
+  test("בסיס", "סדר ההזנה אינו משפיע על החישוב", () => { const x = event("flow", N(2)), y = event("flow", N(30)); a.deepEqual(run([x, y]).plans, run([y, x]).plans); });
+  test("אור זרוע", "העונה שלפני העונה המחושבת", () => { const pp = run([event("flow", N(2))], { orZarua: true }).plans; const x = pp.find(p => p.kind === "average"), o = pp.find(p => p.id === `oz-${x.id}`); a.equal(o.onah, "night"); a.equal(new Date(o.end).valueOf(), new Date(x.start).valueOf()); });
+  test("מקום וזמן", "נסיעה משנה את אזור הזמן של מועד עתידי בלי לשנות רישום קודם", () => { const s = emptyState(); s.events = [event("flow", N(2))]; const t = N(1, 2); s.trips = [{ id: uuid(), from: t, to: t, cityId: "paris" }]; const p = calculate(s, NOW).plans.find(p => p.kind === "average"); a.equal(p.cityId, "paris"); a.equal(s.events[0].cityId, "netanya"); });
+  test("מקום וזמן", "מעבר קו התאריך מסומן ולא מנוחש", () => { const r = run([event("flow", N(2), "10:00", { cityId: "los-angeles" }), event("note", N(4), "10:00", { cityId: "sydney" })]); a.ok(r.reviews.some(r => r.id === "dateline")); a.equal(r.plans.filter(p => p.kind === "average").length, 0); });
+  test("מקום וזמן", "עונת לילה ועונת יום נפגשות בדיוק בזריחה", () => { const x = hd(N(10)).abs(), n = onahWindow(x, "night", city("netanya")), d = onahWindow(x, "day", city("netanya")); a.equal(n.end.toISOString(), d.start.toISOString()); });
+  test("מקום וזמן", "רישום בשעת השקיעה מסומן כמסופק ואינו יוצר מועד ודאי", () => { const d = N(10), s = sun(d, city("netanya")), time = timeInZone(s.sunset, "Asia/Jerusalem"), e = event("flow", d, time); a.ok(stamp(e).uncertain); a.equal(run([e]).plans.filter(p => p.kind === "average").length, 0); });
+  test("מקום וזמן", "שעה כפולה או חסרה במעבר שעון לא נבחרת בשקט", () => { a.throws(() => localInstant("2026-11-01", "01:30", "America/New_York"), /פעמיים/); a.throws(() => localInstant("2026-03-08", "02:30", "America/New_York"), /אינה קיימת/); });
+  test("מקום וזמן", "שעה מקומית רגילה מחושבת נכון בלי תלות באזור הזמן של המכשיר", () => a.equal(localInstant("2026-11-10", "12:00", "America/New_York").toISOString(), "2026-11-10T17:00:00.000Z"));
+  test("מקום וזמן", "ביום קוטבי לא ממציאים שקיעה או עונה", () => a.throws(() => stamp({ date: "2026-06-21", time: "12:00", cityId: "tromso" }), /אין זריחה/));
+  test("מקום וזמן", "היום העברי מתחלף בשקיעה ולא בחצות", () => { const s = emptyState(), ss = sun("2026-11-10", city("netanya")).sunset; const b = currentContext(s, new Date(ss - 60000)), f = currentContext(s, new Date(ss.valueOf() + 60000)); a.equal(f.abs, b.abs + 1); a.equal(b.date, f.date); });
+  test("מקום וזמן", "זמני שמש בירושלים בתקופת תמוז סבירים (±3 דק׳)", () => {
+    const s = sun("2026-06-21", city("jerusalem"));
+    const mins = d => { const [h, m] = timeInZone(d, "Asia/Jerusalem").split(":").map(Number); return h * 60 + m; };
+    a.ok(Math.abs(mins(s.sunrise) - (5 * 60 + 33)) <= 3, "זריחה " + timeInZone(s.sunrise, "Asia/Jerusalem"));
+    a.ok(Math.abs(mins(s.sunset) - (19 * 60 + 47)) <= 3, "שקיעה " + timeInZone(s.sunset, "Asia/Jerusalem"));
+  });
+  test("נתונים", "דחיית תאריך לא קיים, כפילות, נסיעות חופפות ועונה ידנית חסרה", () => {
+    const s = emptyState(); a.ok(!safeParse({ ...s, events: [event("flow", "2026-02-30")] }).success);
+    const v = event("flow", N(2)); a.ok(!safeParse({ ...s, events: [v, v] }).success);
+    a.ok(!safeParse({ ...s, events: [event("manual", N(2))] }).success);
+    a.ok(!safeParse({ ...s, trips: [{ id: uuid(), from: "2026-11-01", to: "2026-11-05", cityId: "paris" }, { id: uuid(), from: "2026-11-05", to: "2026-11-08", cityId: "london" }] }).success);
+  });
+  test("מקום וזמן", "תזכורת בוקר שנופלת בשעה שאינה קיימת עוברת לזריחה ומסומנת", () => {
+    const ny = { cityId: "new-york" };
+    const r = run([event("flow", "2026-03-01", "10:00", ny), event("hefsek", "2026-03-05", "15:00", ny)], { ...ny, morningTime: "02:30" }, new Date("2026-03-07T16:00:00Z"));
+    const m = r.plans.find(p => p.kind === "bedikah" && p.date === "2026-03-08" && p.id.endsWith("-am"));
+    a.equal(m?.start, sun("2026-03-08", city("new-york")).sunrise.toISOString()); a.ok(r.reviews.some(x => x.id === "morning-clock-2026-03-08"));
+  });
+  test("ספקות", "ראייה אחרונה בזמן לא ברור מבטלת מועדים של מחזור קודם", () => {
+    const ny = { cityId: "new-york" }, amb = event("flow", "2026-11-01", "01:30", ny);
+    const r = run([event("flow", "2026-10-08", "10:00", ny), event("hefsek", "2026-10-12", "15:00", ny), amb], ny, new Date("2026-11-02T16:00:00Z"));
+    a.equal(r.phase, "waiting"); a.equal(r.earliestHefsek, undefined); a.equal(r.plans.length, 0); a.ok(r.reviews.some(x => x.eventIds.includes(amb.id)));
+  });
+  test("ספקות", "ראייה בזמן לא ברור בין שתי ראיות חוסמת הפלגה", () => {
+    const ny = { cityId: "new-york" };
+    const r = run([event("flow", "2026-10-08", "10:00", ny), event("flow", "2026-11-01", "01:30", ny), event("flow", "2026-11-09", "10:00", ny)], ny);
+    a.ok(r.plans.some(p => p.kind === "average")); a.ok(!r.plans.some(p => p.kind === "interval"));
+  });
+
+  return {
+    tests: T,
+    run() {
+      return T.map(t => { const started = Date.now(); try { t.fn(); return { ...t, ok: true, ms: Date.now() - started }; } catch (e) { return { ...t, ok: false, error: e.message, ms: Date.now() - started }; } });
+    },
+  };
+};
+if (typeof module !== "undefined") module.exports = MaayanTests;
+
+/* תרחישים מוכנים לבודקים ההלכתיים. כל תרחיש: קלט, זמן מדומה ומה צריך לבדוק. */
+const MaayanScenarios = (M) => {
+  const { HDate, toISO, emptyState, uuid, localInstant, city } = M;
+  const N = (day, month, year) => toISO(new HDate(day, month, year).greg());
+  const ev = (type, date, time = "10:00", extra = {}) => ({ id: uuid(), type, date, time, cityId: "netanya", result: "clear", note: "", authorityNote: "", createdAt: "2026-01-01T10:00:00Z", ...extra });
+  const at = (date, time = "12:00", cityId = "netanya") => localInstant(date, time, city(cityId).tz);
+  const Y = 5786, NIS = 1, IYR = 2, SIV = 3;
+  const list = [
+    {
+      id: "interval-days", tag: "הפלגה", title: "הפלגה בימים: ב׳ ניסן ← ל׳ ניסן",
+      check: "הפלגה של 29 ימים צריכה ליפול בכ״ח אייר בעונת היום. עונה בינונית (יום 30) בכ״ט אייר. בחודש אייר אין ל׳, ולכן לפי ברירת המחדל אין עונת חודש ומופיעה נקודה לבירור.",
+      settings: {}, events: () => [ev("flow", N(2, NIS, Y)), ev("flow", N(30, NIS, Y))], now: () => at(N(1, IYR, Y)),
+    },
+    {
+      id: "five-days", tag: "המתנה", title: "חמישה ימים מתחילת הנידה",
+      check: "ראייה בב׳ ניסן בשעה 16:00 (לפני השקיעה). יום הראייה נספר כיום הראשון, ולכן ההפסק המוקדם הוא ביום ו׳ ניסן.",
+      settings: {}, events: () => [ev("flow", N(2, NIS, Y), "16:00")], now: () => at(N(4, NIS, Y)),
+    },
+    {
+      id: "after-sunset", tag: "המתנה", title: "ראייה אחרי השקיעה",
+      check: "ראייה בתאריך האזרחי של ב׳ ניסן בשעה 22:00 שייכת ללילה של ג׳ ניסן. ההפסק המוקדם הוא ז׳ ניסן. העונה הבינונית ועונת החודש בעונת לילה.",
+      settings: {}, events: () => [ev("flow", N(2, NIS, Y), "22:00")], now: () => at(N(4, NIS, Y)),
+    },
+    {
+      id: "four-days", tag: "המתנה", title: "ארבעה ימים ממועד היחסים",
+      check: "בסיס ההמתנה נרשם בא׳ ניסן והראייה בג׳ ניסן. לפי שיטת ארבעה ימים ממועד היחסים ההפסק המוקדם הוא ד׳ ניסן.",
+      settings: { wait: "four-from-relations" }, events: () => [ev("intimacy", N(1, NIS, Y)), ev("flow", N(3, NIS, Y))], now: () => at(N(3, NIS, Y), "14:00"),
+    },
+    {
+      id: "clean-days", tag: "שבעה נקיים", title: "ספירה באמצע שבעה נקיים",
+      check: "הפסק בו׳ ניסן לפני השקיעה. יום א׳ של הספירה הוא ז׳ ניסן, וההדמיה נמצאת ביום ד׳. ליל הטבילה המתוכנן הוא ליל י״ד ניסן, במוצאי יום ז׳ (י״ג ניסן). בדיקות נרשמו בימים א׳–ג׳.",
+      settings: {}, events: () => [ev("flow", N(2, NIS, Y)), ev("hefsek", N(6, NIS, Y), "16:00"), ...[7, 8, 9].flatMap(d => [ev("bedikah", N(d, NIS, Y), "08:30"), ev("bedikah", N(d, NIS, Y), "16:00")])], now: () => at(N(10, NIS, Y), "11:00"),
+    },
+    {
+      id: "late-hefsek", tag: "שבעה נקיים", title: "הפסק שנרשם אחרי השקיעה",
+      check: "הפסק בשעה 22:00 אינו פותח ספירה אוטומטית ומופיע בנקודות לבירור. המערכת נשארת במצב המתנה.",
+      settings: {}, events: () => [ev("flow", N(2, NIS, Y)), ev("hefsek", N(6, NIS, Y), "22:00")], now: () => at(N(7, NIS, Y)),
+    },
+    {
+      id: "early-hefsek", tag: "שבעה נקיים", title: "הפסק מוקדם עם הוראה מתועדת",
+      check: "הפסק בד׳ ניסן, לפני תום חמשת הימים. נרשמה הוראה אישית, ולכן הספירה מתחילה ממנו. בלי ההוראה הייתה מופיעה נקודה לבירור. אפשר למחוק את ההוראה ברישום ולראות את ההבדל.",
+      settings: {}, events: () => [ev("flow", N(2, NIS, Y)), ev("hefsek", N(4, NIS, Y), "16:00", { authorityNote: "הוראת מורה הוראה לצורך הדגמה" }), ev("bedikah", N(5, NIS, Y), "08:30")], now: () => at(N(6, NIS, Y)),
+    },
+    {
+      id: "chabad", tag: "הפלגה", title: "שיטת חב״ד: 52 עונות",
+      check: "מההפסק בה׳ ניסן עד הראייה בא׳ אייר (ביום) עברו 52 עונות. החשש החדש נספר מההפסק הנוכחי (ה׳ אייר): 52 עונות אחריו, כלומר ב׳ סיון בעונת היום.",
+      settings: { haflagah: "chabad-onot" }, events: () => [ev("flow", N(1, NIS, Y)), ev("hefsek", N(5, NIS, Y), "16:00"), ev("flow", N(1, IYR, Y)), ev("hefsek", N(5, IYR, Y), "16:00")], now: () => at(N(6, IYR, Y)),
+    },
+    {
+      id: "missing-30", tag: "עונת החודש", title: "ל׳ ניסן, וחודש אייר חסר",
+      check: "בהגדרה ״א׳ בחודש שלאחר החודש החסר״ עונת החודש היא א׳ סיון, ולא תמוז. אפשר לשנות בהגדרות ל״דילוג״ ולראות שהמועד נעלם ונוספת נקודה לבירור.",
+      settings: { missingMonthly: "first-next-month" }, events: () => [ev("flow", N(30, NIS, Y))], now: () => at(N(2, IYR, Y)),
+    },
+    {
+      id: "adar", tag: "עונת החודש", title: "שנה מעוברת: אדר א׳ ← אדר ב׳",
+      check: "ראייה בי״ב אדר א׳ תשפ״ד. עונת החודש בי״ב אדר ב׳ ולא בי״ב ניסן.",
+      settings: {}, events: () => [ev("flow", N(12, 12, 5784))], now: () => at(N(14, 12, 5784)),
+    },
+    {
+      id: "stringencies", tag: "עונה בינונית", title: "יום 31, שתי עונות ואור זרוע",
+      check: "בהפעלת שלוש האפשרויות: עונה בינונית ביום 30 וביום 31, בשתי העונות, ולכל חשש גם עונת אור זרוע שלפניו. כל אפשרות נשלטת בנפרד בהגדרות.",
+      settings: { beinonit: "both", day31: true, orZarua: true }, events: () => [ev("flow", N(2, NIS, Y))], now: () => at(N(10, NIS, Y)),
+    },
+    {
+      id: "uncertain", tag: "ספקות", title: "כתם מסופק באמצע",
+      check: "ראייה מסופקת בט״ו ניסן אינה נמחקת כדי לייצר הפלגה ארוכה. לא מחושבת הפלגה, ומופיעה נקודה לבירור.",
+      settings: {}, events: () => [ev("flow", N(2, NIS, Y)), ev("flow", N(15, NIS, Y), "10:00", { result: "uncertain", note: "מראה לא ברור — נשאל" }), ev("flow", N(30, NIS, Y))], now: () => at(N(1, IYR, Y)),
+    },
+    {
+      id: "fixed", tag: "וסת קבוע", title: "שלוש ראיות בי׳ לחודש",
+      check: "שלוש ראיות רצופות בי׳ ניסן, אייר וסיון באותה עונה. המערכת מסמנת ״דפוס חודשי אפשרי״ לבירור ואינה קובעת וסת קבוע בעצמה.",
+      settings: {}, events: () => [ev("flow", N(10, NIS, Y)), ev("flow", N(10, IYR, Y)), ev("flow", N(10, SIV, Y))], now: () => at(N(12, SIV, Y)),
+    },
+    {
+      id: "travel", tag: "מקום וזמן", title: "נסיעה לפריז בזמן עונה",
+      check: "הראייה נרשמה בנתניה. בזמן העונה הבינונית יש נסיעה לפריז, ולכן העונה מחושבת לפי השקיעה והזריחה בפריז, בלי לשנות את מקום הרישום המקורי.",
+      settings: {}, events: () => [ev("flow", N(2, NIS, Y))], trips: () => [{ id: uuid(), from: N(28, NIS, Y), to: N(4, IYR, Y), cityId: "paris" }], now: () => at(N(10, NIS, Y)),
+    },
+  ];
+  return list.map(s => ({
+    ...s,
+    build() {
+      const st = emptyState();
+      st.settings = { ...st.settings, ...s.settings };
+      st.events = s.events();
+      st.trips = s.trips ? s.trips() : [];
+      return { state: st, now: s.now() };
+    },
+  }));
+};
+if (typeof module !== "undefined") module.exports = MaayanScenarios;
+
+/* מעיין — ממשק. קוד צד-לקוח בלבד; שום מידע לא יוצא מהמכשיר. */
+(() => {
+  "use strict";
+  const M = Maayan, SCENARIOS = MaayanScenarios(M);
+  const { EVENT_NAMES, CITIES, city, addDays, hebrew, civilLabel, timeInZone, sun, atLocation, currentContext, calculate, hd, fromAbs, fromISO, toISO, HDate } = M;
+  const APP_VERSION = "1.0.0-review";
+  const STORE_KEY = "maayan.v1.diary", SEEN_KEY = "maayan.v1.seen";
+  const $ = sel => document.querySelector(sel);
+  const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+
+  /* ---------- אייקונים ---------- */
+  const P = {
+    droplet: '<path d="M12 22a7 7 0 0 0 7-7c0-2-1-3.9-3-5.5s-3.5-4-4-6.5c-.5 2.5-2 4.9-4 6.5C6 11.1 5 13 5 15a7 7 0 0 0 7 7z"/>',
+    home: '<path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/>',
+    calendar: '<rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/>',
+    book: '<path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20V2H6.5A2.5 2.5 0 0 0 4 4.5z"/><path d="M6.5 17A2.5 2.5 0 0 0 4 19.5 2.5 2.5 0 0 0 6.5 22H20v-5"/>',
+    bell: '<path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/>',
+    sliders: '<path d="M4 21v-7M4 10V3M12 21v-9M12 8V3M20 21v-5M20 12V3M1 14h6M9 8h6M17 16h6"/>',
+    plus: '<path d="M12 5v14M5 12h14"/>',
+    eye: '<path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/>',
+    eyeoff: '<path d="M9.9 4.2A10 10 0 0 1 12 4c7 0 10 8 10 8a17 17 0 0 1-2.2 3.2M6.6 6.6C3.6 8.6 2 12 2 12s3 8 10 8a9.7 9.7 0 0 0 5.4-1.6M2 2l20 20M9.9 9.9a3 3 0 0 0 4.2 4.2"/>',
+    pin: '<path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0z"/><circle cx="12" cy="10" r="3"/>',
+    sun: '<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M6.3 17.7l-1.4 1.4M19.1 4.9l-1.4 1.4"/>',
+    moon: '<path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9z"/>',
+    sunrise: '<path d="M12 2v8M4.9 10.9l1.4 1.4M2 18h2M20 18h2M19.1 10.9l-1.4 1.4M22 22H2M8 6l4-4 4 4M16 18a4 4 0 0 0-8 0"/>',
+    sunset: '<path d="M12 10V2M4.9 10.9l1.4 1.4M2 18h2M20 18h2M19.1 10.9l-1.4 1.4M22 22H2M16 6l-4 4-4-4M16 18a4 4 0 0 0-8 0"/>',
+    check: '<path d="M20 6 9 17l-5-5"/>', x: '<path d="M18 6 6 18M6 6l12 12"/>',
+    left: '<path d="m15 18-6-6 6-6"/>', right: '<path d="m9 18 6-6-6-6"/>', out: '<path d="M17 17 7 7M7 17V7h10"/>',
+    pencil: '<path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/>',
+    trash: '<path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>',
+    download: '<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/>',
+    upload: '<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/>',
+    lock: '<rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>',
+    help: '<circle cx="12" cy="12" r="10"/><path d="M9.1 9a3 3 0 0 1 5.8 1c0 2-3 3-3 3M12 17h.01"/>',
+    list: '<path d="M10 6h11M10 12h11M10 18h11M3 6l1 1 2-2M3 12l1 1 2-2M3 18l1 1 2-2"/>',
+    flask: '<path d="M10 2v7.3L4.3 19a2 2 0 0 0 1.7 3h12a2 2 0 0 0 1.7-3L14 9.3V2M8.5 2h7M7 16h10"/>',
+    copy: '<rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>',
+    search: '<circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/>',
+    info: '<circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/>',
+    shield: '<path d="M20 13c0 5-3.5 7.5-7.7 9a1 1 0 0 1-.7 0C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.2-2.7a1.2 1.2 0 0 1 1.5 0C14.5 3.8 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/>',
+    play: '<path d="m7 4 12 8-12 8z"/>',
+    file: '<path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7z"/><path d="M14 2v4a2 2 0 0 0 2 2h4M16 13H8M16 17H8"/>',
+    refresh: '<path d="M3 12a9 9 0 0 1 15-6.7L21 8M21 3v5h-5M21 12a9 9 0 0 1-15 6.7L3 16M8 16H3v5"/>',
+    scale: '<path d="M12 3v18M5 21h14M3 7h18M6 7l-3 7a3 3 0 0 0 6 0zM18 7l-3 7a3 3 0 0 0 6 0z"/>',
+  };
+  const I = (n, s = 20) => `<svg class="ic" width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${P[n]}</svg>`;
+
+  /* ---------- מצב ---------- */
+  const storage = {
+    ok: true,
+    get(k) { try { return localStorage.getItem(k); } catch { this.ok = false; return null; } },
+    set(k, v) { try { localStorage.setItem(k, v); return true; } catch { this.ok = false; return false; } },
+  };
+  function loadPersonal() {
+    const raw = storage.get(STORE_KEY);
+    if (!raw) return M.emptyState();
+    try { return M.parseState(JSON.parse(raw)); } catch { app.loadWarning = "היומן השמור במכשיר פגום ולא נטען. הנתונים לא נמחקו."; app.blockSave = true; return M.emptyState(); }
+  }
+  const NAV = [
+    ["today", "היום", "home"], ["calendar", "לוח השנה", "calendar"], ["journal", "היומן שלי", "book"],
+    ["dates", "מועדים", "bell"], ["review", "לבודקים", "scale"], ["prefs", "הגדרות", "sliders"],
+  ];
+  const app = {
+    mode: "personal", personal: null, sandbox: null, scenario: null, simNow: null,
+    tab: "today", hidden: false, modal: null, toast: "", toastTimer: 0,
+    cal: { cursor: null, mode: "civil", selected: null }, filter: "all", query: "",
+    testResults: null, openScenario: null, permission: "default", notified: new Set(), loadWarning: "", blockSave: false, lastDayKey: "",
+  };
+  const realNow = () => new Date();
+  const now = () => app.mode === "scenario" ? app.simNow : realNow();
+  const state = () => app.mode === "personal" ? app.personal : app.sandbox;
+
+  function commit(next) {
+    const parsed = M.parseState(next);
+    if (app.mode === "personal") {
+      if (app.blockSave) throw new Error("היומן השמור פגום. שחזרי מגיבוי או מחקי אותו בהגדרות לפני שמירה.");
+      app.personal = parsed;
+      if (!storage.set(STORE_KEY, JSON.stringify(parsed))) toast("השינוי נשמר רק עד סגירת הדף: הדפדפן חוסם שמירה במכשיר. מומלץ לגבות.");
+      else toast("נשמר במכשיר");
+    } else { app.sandbox = parsed; toast(app.mode === "scenario" ? "נשמר בתרחיש (לא ביומן האישי)" : "נשמר ביומן לדוגמה"); }
+    render();
+  }
+  function toast(msg) { app.toast = msg; clearTimeout(app.toastTimer); app.toastTimer = setTimeout(() => { app.toast = ""; renderToast(); }, 4200); renderToast(); }
+
+  /* ---------- עזרים לתצוגה ---------- */
+  const hebDay = d => hebrew(d).split(" ")[0];
+  const hebMonthTitle = d => { const h = hd(d); return `${h.monthName()} ${M.gematriya(h.getFullYear() % 1000)}`; };
+  const civilMonthTitle = d => new Intl.DateTimeFormat("he-IL", { month: "long", year: "numeric", timeZone: "UTC" }).format(new Date(`${d.slice(0, 7)}-15T12:00:00Z`));
+  const weekdayName = d => new Intl.DateTimeFormat("he-IL", { weekday: "long", timeZone: "UTC" }).format(new Date(`${d}T12:00:00Z`));
+  const planHebrew = p => p.onah === "day" ? hebrew(p.date) : hebrew(addDays(p.date, 1));
+  const onahLabel = o => o === "day" ? "עונת יום" : o === "night" ? "עונת לילה" : "ערב";
+  const SEP_KINDS = ["monthly", "interval", "average", "or-zarua", "manual"];
+
+  function planLine(p, { compact = false, open = false } = {}) {
+    const c = city(p.cityId), start = timeInZone(new Date(p.start), c.tz);
+    const prefix = p.onah === "day" ? "" : "ליל ";
+    return `<details class="plan k-${p.kind}${p.done ? " done" : ""}"${open ? " open" : ""}>
+      <summary><span class="plan-ic">${I(p.onah === "day" ? "sun" : "moon", 17)}</span>
+        <span class="plan-name"><strong>${esc(p.title)}</strong><small><span class="hebdate">${prefix}${esc(planHebrew(p))}</span>${compact ? "" : ` · ${esc(civilLabel(p.date, true))} · ${esc(c.name)}`}</small></span>
+        <time dir="ltr">${start}</time>${I("left", 15)}</summary>
+      <div class="plan-more"><p>${esc(p.reason)}</p>
+        <small>${onahLabel(p.onah)} · ${p.end ? `מ-${start} עד ${timeInZone(new Date(p.end), c.tz)}` : `מ-${start}`} · ${esc(c.name)}</small>
+        ${p.done ? '<small class="ok-text">בדיקה נרשמה</small>' : ""}
+        ${p.source ? `<a href="${esc(p.source)}" target="_blank" rel="noopener">מקור הכלל ${I("out", 13)}</a>` : ""}</div></details>`;
+  }
+
+  /* ---------- מסכים ---------- */
+  function viewToday(st, r, ctx) {
+    const date = ctx.date, loc = atLocation(st, date), times = sun(date, loc, Number(st.settings.nightfall));
+    const upcoming = r.plans.filter(p => !p.done && new Date(p.end || p.start) >= now()).slice(0, 5);
+    const phase = r.phase, cd = r.cleanDay;
+    const C = {
+      empty: ["הרישום הראשון", "כדי לחשב מועדים, רשמי את תחילת הווסת: תאריך, שעה ומקום.", "רישום תחילת וסת", "flow"],
+      waiting: ["ממתינה להפסק טהרה", r.earliestHefsek ? `המועד המוקדם לפי ההגדרות: ${hebrew(r.earliestHefsek)}, ${civilLabel(r.earliestHefsek, true)}, לפני השקיעה.` : "חסר מידע כדי לחשב את מועד ההפסק. פרטים בנקודות לבירור.", "רישום הפסק טהרה", "hefsek"],
+      clean: [cd ? `יום ${cd} מתוך 7` : "הפסק טהרה נרשם", cd ? "שבעה נקיים לפי ההפסק שנרשם." : "יום הספירה הראשון מתחיל בתאריך העברי הבא.", "רישום בדיקה", "bedikah"],
+      planned: ["מועד הטבילה המתוכנן עבר", "אפשר לרשום את הטבילה ולעיין בנקודות לבירור.", "רישום טבילה", "mikvah"],
+      immersed: ["טבילה נרשמה", "המועדים הקרובים מופיעים למטה ובלוח השנה.", "רישום חדש", "note"],
+    }[phase];
+    const days = phase === "clean" ? `<ol class="seven" aria-label="שבעת הימים">${[1, 2, 3, 4, 5, 6, 7].map(d =>
+      `<li class="${d < cd ? "past" : ""}${d === cd ? " now" : ""}"><span>${r.checks[d]?.length ? I("check", 16) : d}</span><small>${d === cd ? "היום" : "יום " + d}</small></li>`).join("")}</ol>` : "";
+    const ring = phase === "clean" && cd ? `<div class="ring" style="--p:${cd / 7}"><strong>${cd}</strong><small>מתוך 7</small></div>`
+      : `<div class="ring idle">${I(phase === "waiting" ? "moon" : "droplet", 44)}</div>`;
+    return `
+    ${app.mode === "personal" && !st.events.length ? onboardingCard() : ""}
+    <div class="grid-top">
+      <section class="hero" data-phase="${phase}">
+        <div class="hero-row"><div class="hero-copy">
+          <span class="chip-light">${phase === "clean" ? "שבעה נקיים" : "המצב לפי היומן"}</span>
+          <h2>${esc(C[0])}</h2><p>${esc(C[1])}</p>
+          <button class="btn light" data-act="add" data-type="${C[3]}">${I("plus", 18)}${esc(C[2])}</button>
+        </div>${ring}</div>${days}
+      </section>
+      <section class="card times">
+        <div class="card-h">${I("sunset")}<div><h3>זמני היום</h3><p>${esc(loc.name)} · ${esc(civilLabel(date, true))}</p></div></div>
+        <dl>${[["זריחה", "sunrise", times.sunrise], ["שקיעה", "sunset", times.sunset], ["צאת הכוכבים", "moon", times.nightfall]].map(([n, ic, v]) =>
+          `<div${ic === "sunset" ? ' class="hl"' : ""}>${I(ic, 18)}<dt>${n}</dt><dd dir="ltr">${timeInZone(v, loc.tz)}</dd></div>`).join("")}</dl>
+        <p class="fine">בגובה פני הים · צאת הכוכבים ${esc(st.settings.nightfall)}° מתחת לאופק</p>
+      </section>
+    </div>
+    ${r.reviews.length ? `<button class="notice" data-go="journal">${I("help", 22)}<span><strong>${r.reviews.length} ${r.reviews.length === 1 ? "נקודה לבירור" : "נקודות לבירור"}</strong><small>${esc(r.reviews[0].title)}</small></span>${I("left", 16)}</button>` : ""}
+    <div class="grid-bottom">
+      <section class="card"><div class="card-h">${I("bell")}<h3>מועדים קרובים</h3><button class="link" data-go="dates">הכול ${I("left", 14)}</button></div>
+        ${upcoming.length ? `<div class="plans">${upcoming.map(p => planLine(p)).join("")}</div>` : `<p class="empty">אין מועדים קרובים.</p>`}
+      </section>
+      <section class="card"><div class="card-h">${I("list")}<h3>רשימת הכנה למקווה</h3></div>
+        <div class="checks">${M.CHECKLIST.map((item, i) => `<label class="${st.settings.checklist.includes(item) ? "on" : ""}"><input type="checkbox" id="chk-${i}" data-check="${esc(item)}" ${st.settings.checklist.includes(item) ? "checked" : ""}><span>${esc(item)}</span></label>`).join("")}</div>
+      </section>
+    </div>`;
+  }
+  function onboardingCard() {
+    return `<section class="card welcome-inline"><div class="card-h">${I("shield")}<h3>היומן שלך ריק</h3></div>
+      <p>אפשר להתחיל לרשום, להתאים קודם את שיטת החישוב, או לראות איך זה נראה עם נתוני דוגמה.</p>
+      <div class="row-btns"><button class="btn" data-act="add" data-type="flow">${I("plus", 17)}רישום ראשון</button>
+      <button class="btn ghost" data-go="prefs">${I("sliders", 17)}שיטת החישוב</button>
+      <button class="btn ghost" data-act="demo">${I("flask", 17)}יומן לדוגמה</button></div></section>`;
+  }
+
+  function viewCalendar(st, r, ctx) {
+    const c = app.cal; c.cursor ||= ctx.date; c.selected ||= ctx.date;
+    let first, next;
+    if (c.mode === "hebrew") { const h = hd(c.cursor); const f = new HDate(1, h.getMonth(), h.getFullYear()); first = fromAbs(f.abs()); next = fromAbs(f.add(1, "M").abs()); }
+    else { const d = fromISO(c.cursor); first = toISO(new Date(d.getFullYear(), d.getMonth(), 1, 12)); next = toISO(new Date(d.getFullYear(), d.getMonth() + 1, 1, 12)); }
+    const offset = fromISO(first).getDay(), len = M.isoAbs(next) - M.isoAbs(first);
+    const start = addDays(first, -offset), cells = Math.ceil((offset + len) / 7) * 7;
+    const hef = r.hefsek ? M.isoAbs(r.hefsek.date) : null;
+    const title = c.mode === "hebrew" ? hebMonthTitle(first) : civilMonthTitle(first);
+    const dayCells = Array.from({ length: cells }, (_, i) => {
+      const d = addDays(start, i), ents = st.events.filter(e => e.date === d), pl = r.plans.filter(p => p.date === d);
+      const out = d < first || d >= next, abs = M.isoAbs(d), clean = hef !== null && abs > hef && abs <= hef + 7;
+      const flags = [ents.some(e => e.type === "flow") && "f", ents.some(e => e.type === "hefsek" || e.type === "bedikah") && "c", pl.some(p => SEP_KINDS.includes(p.kind)) && "s", pl.some(p => p.kind === "mikvah") && "m"].filter(Boolean);
+      const main = c.mode === "civil" ? fromISO(d).getDate() : hebDay(d), sub = c.mode === "civil" ? hebDay(d) : fromISO(d).getDate();
+      return `<button class="day${out ? " out" : ""}${d === ctx.date ? " today" : ""}${d === c.selected ? " sel" : ""}${clean ? " clean" : ""}" data-day="${d}" aria-label="${esc(civilLabel(d))}, ${esc(hebrew(d))}${ents.length ? `, ${ents.length} רישומים` : ""}${pl.length ? `, ${pl.length} מועדים` : ""}" aria-pressed="${d === c.selected}">
+        <b>${main}</b><i>${sub}</i><span class="dots">${flags.map(f => `<em class="d-${f}"></em>`).join("")}</span></button>`;
+    }).join("");
+    const sel = c.selected, ents = M.sorted(st.events.filter(e => e.date === sel)), pl = r.plans.filter(p => p.date === sel);
+    return `<div class="cal-layout"><section class="card cal">
+      <div class="cal-h"><h3>${esc(title)}</h3><div class="cal-nav">
+        <button class="icon-btn" data-cal="-1" aria-label="החודש הקודם">${I("right")}</button>
+        <button class="link" data-cal="today">היום</button>
+        <button class="icon-btn" data-cal="1" aria-label="החודש הבא">${I("left")}</button></div></div>
+      <div class="seg" role="group" aria-label="סוג לוח"><button data-calmode="civil" aria-pressed="${c.mode === "civil"}">לועזי</button><button data-calmode="hebrew" aria-pressed="${c.mode === "hebrew"}">עברי</button></div>
+      <div class="wk" aria-hidden="true">${["א׳", "ב׳", "ג׳", "ד׳", "ה׳", "ו׳", "ש׳"].map(w => `<span>${w}</span>`).join("")}</div>
+      <div class="days">${dayCells}</div>
+      <div class="legend"><span><em class="d-f"></em>וסת</span><span><em class="d-c"></em>הפסק ובדיקות</span><span><em class="d-s"></em>עונת פרישה</span><span><em class="d-m"></em>טבילה מתוכננת</span></div>
+      <p class="fine">התאריך העברי במשבצת שייך לשעות היום. בשקיעה מתחיל התאריך העברי הבא.</p>
+    </section>
+    <section class="card dayp"><div class="card-h">${I("calendar")}<div><h3>${esc(weekdayName(sel))}, ${esc(civilLabel(sel))}</h3><p class="hebdate">${esc(hebrew(sel))} · שעות היום</p></div></div>
+      ${ents.map(entryRow).join("")}${pl.length ? `<div class="plans">${pl.map(p => planLine(p, { compact: true })).join("")}</div>` : ""}
+      ${!ents.length && !pl.length ? `<p class="empty">אין רישומים או מועדים ביום הזה.</p>` : ""}
+      <button class="btn ghost full" data-act="add" data-date="${sel}">${I("plus", 17)}רישום ליום הזה</button></section></div>`;
+  }
+  function entryRow(e) {
+    let h = "זמן לבירור", onah = "";
+    try { const s = M.stamp(e); h = s.hebrewDate; onah = s.onah === "day" ? "יום" : "לילה"; } catch { /* מסומן לבירור */ }
+    const status = e.result === "uncertain" ? "ממתין לבירור" : e.result === "bleeding" ? "נרשמה כלא נקייה" : city(e.cityId).name;
+    return `<button class="entry" data-edit="${e.id}"><span class="ev-ic t-${e.type}">${I(e.type === "flow" ? "droplet" : e.type === "mikvah" ? "moon" : ["bedikah", "hefsek"].includes(e.type) ? "check" : "book", 17)}</span>
+      <span class="entry-main"><strong>${esc(EVENT_NAMES[e.type])}</strong><small>${esc(civilLabel(e.date, true))} · <span dir="ltr">${e.time}</span> · <span class="hebdate">${esc(h)}</span>${onah ? ` · ${onah}` : ""}</small>${e.note ? `<small class="note">${esc(e.note)}</small>` : ""}</span>
+      <span class="entry-side"><small>${esc(status)}</small>${I("pencil", 15)}</span></button>`;
+  }
+
+  function viewJournal(st, r) {
+    const q = app.query.trim().toLowerCase();
+    const evs = [...st.events].sort((a, b) => b.date.localeCompare(a.date) || b.time.localeCompare(a.time))
+      .filter(e => (app.filter === "all" || e.type === app.filter) && (!q || `${EVENT_NAMES[e.type]} ${e.date} ${e.note} ${hebrew(e.date)}`.toLowerCase().includes(q)));
+    return `${r.reviews.length ? `<section class="card reviews"><div class="card-h">${I("help")}<h3>נקודות לבירור <span class="count">${r.reviews.length}</span></h3></div>
+      <p class="fine">המערכת אינה מכריעה בנקודות אלה. כל נקודה מפנה לרישומים הנוגעים בה.</p>
+      ${r.reviews.map(v => `<details><summary>${esc(v.title)}${I("left", 15)}</summary><p>${esc(v.detail)}</p>${v.eventIds.map(id => { const e = st.events.find(x => x.id === id); return e ? `<button class="link" data-edit="${id}">${esc(EVENT_NAMES[e.type])} · ${esc(civilLabel(e.date, true))} ${I("pencil", 13)}</button>` : ""; }).join("")}</details>`).join("")}</section>` : ""}
+    <section class="card"><div class="card-h">${I("book")}<h3>רישומים <span class="count">${st.events.length}</span></h3><button class="link" data-act="report">${I("file", 15)}דוח לבירור</button></div>
+      <div class="filters"><label class="search">${I("search", 17)}<input id="q" type="search" placeholder="חיפוש לפי תאריך או הערה" value="${esc(app.query)}" aria-label="חיפוש"></label>
+      <select id="filter" aria-label="סינון לפי סוג"><option value="all">כל הסוגים</option>${Object.entries(EVENT_NAMES).map(([v, n]) => `<option value="${v}"${app.filter === v ? " selected" : ""}>${n}</option>`).join("")}</select></div>
+      <div class="entries">${evs.map(entryRow).join("") || `<p class="empty">${st.events.length ? "לא נמצאו רישומים מתאימים." : "אין עדיין רישומים."}</p>`}</div>
+      <button class="btn full" data-act="add">${I("plus", 17)}רישום חדש</button></section>`;
+  }
+
+  function viewDates(st, r) {
+    const n = now(), up = r.plans.filter(p => !p.done && new Date(p.end || p.start) >= n), past = r.plans.filter(p => !up.includes(p));
+    return `<div class="two"><section class="card"><div class="card-h">${I("bell")}<h3>מועדים עתידיים <span class="count">${up.length}</span></h3></div>
+      ${up.length ? `<div class="plans">${up.map(p => planLine(p)).join("")}</div>` : `<p class="empty">אין מועדים עתידיים כרגע.</p>`}
+      ${past.length ? `<details class="past"><summary>מועדים שעברו או שהושלמו (${past.length})${I("left", 15)}</summary><div class="plans">${past.map(p => planLine(p)).join("")}</div></details>` : ""}
+      <p class="fine">כל מועד הוא תכנון לפי השיטה שנבחרה בהגדרות. לחיצה על מועד מציגה את הכלל ואת המקור.</p></section>
+    <aside class="stack"><section class="card"><div class="card-h">${I("calendar")}<h3>ייצוא ליומן הטלפון</h3></div>
+      <p>קובץ מועדים עם התראות, לייבוא ליומן Google או לכל יומן אחר. ${st.settings.neutralReminders ? "הנוסח דיסקרטי: ״תזכורת אישית״ בלבד." : "הנוסח המלא מופיע בקובץ."}</p>
+      <button class="btn full" data-act="ics" ${up.length ? "" : "disabled"}>${I("download", 17)}קובץ מועדים</button>
+      <p class="fine">אחרי שינוי ברישומים צריך לייצא שוב.</p></section>
+      <section class="card"><div class="card-h">${I("bell")}<h3>התראות במכשיר</h3></div>
+      <p>התראה מוצגת כשהיומן פתוח, בכפוף להרשאת הדפדפן.</p>
+      <button class="btn ghost full" data-act="notify" ${app.permission === "granted" || app.permission === "unsupported" ? "disabled" : ""}>${app.permission === "granted" ? I("check", 17) + "ההרשאה פעילה" : app.permission === "unsupported" ? "הדפדפן אינו תומך" : "הפעלת התראות"}</button></section></aside></div>`;
+  }
+
+  const SETTINGS_FIELDS = s => `
+    <section class="card"><div class="card-h">${I("pin")}<div><h3>מקום</h3><p>עיר ברירת המחדל לזמני היום</p></div></div>
+      <label class="field" for="s-city">עיר מגורים<select id="s-city" name="cityId">${CITIES.map(c => `<option value="${c.id}"${s.cityId === c.id ? " selected" : ""}>${c.name}</option>`).join("")}</select></label>
+      <p class="fine">לכל רישום נשמר המקום שלו. שינוי העיר אינו משנה רישומים קודמים.</p></section>
+    <section class="card"><div class="card-h">${I("scale")}<div><h3>שיטת החישוב</h3><p>לבחור לפי ההנחיה שקיבלת</p></div></div>
+      ${sel("wait", "המתנה לפני שבעה נקיים", s, [["five", "חמישה ימים מתחילת הנידה"], ["four-from-relations", "ארבעה ימים ממועד היחסים — לפי הוראה"]])}
+      ${sel("haflagah", "שיטת חישוב ההפלגה", s, [["days", "ימים בין תחילות הווסתות"], ["chabad-onot", "עונות מהפסק טהרה — חב״ד"]])}
+      ${sel("beinonit", "עונה בינונית ביום 30", s, [["same", "אותה עונה שבה התחילה הווסת"], ["both", "שתי העונות — לילה ויום"]])}
+      ${tog("day31", "הוספת יום 31", "לפי המנהג או ההנחיה", s)}${tog("orZarua", "עונת אור זרוע", "העונה שלפני כל חשש מחושב", s)}
+      ${tog("carryLongIntervals", "שימור הפלגות ארוכות", "בחישוב ימים, כשווסת חדשה מקדימה את החשש הקודם", s)}
+      ${tog("carryMonthly", "שימור עונת חודש בזמן דימום", "דורש תיעוד מלא של הווסת וההפסק", s)}
+      ${sel("missingMonthly", "יום ל׳, כשבחודש הבא אין ל׳", s, [["skip", "בלי עונת חודש באותו חודש"], ["first-next-month", "א׳ בחודש שאחרי החודש החסר"]])}
+      ${sel("bedikot", "תזכורות לבדיקות", s, [["twice", "בוקר וערב בכל אחד משבעת הימים"], ["first-last", "ראשון ושביעי בלבד — לפי הוראה"]])}
+      ${sel("nightfall", "צאת הכוכבים", s, [["8.5", "8.5° מתחת לאופק"], ["7.083", "7.083° מתחת לאופק"]])}
+      ${sel("special", "מצב מיוחד", s, [["regular", "מחזור רגיל"], ["pregnancy", "היריון"], ["postpartum", "אחרי לידה"], ["nursing", "הנקה"], ["hormonal", "טיפול הורמונלי / אמצעי מניעה"]])}
+      <p class="fine">במצב מיוחד החישובים הרגילים מושעים, ואפשר לרשום עונות לפי הוראה.</p>
+      <label class="field" for="s-methodNote">ממי ההנחיות<textarea id="s-methodNote" name="methodNote" rows="2" maxlength="1000" placeholder="שם מורה ההוראה או המנהג">${esc(s.methodNote)}</textarea></label></section>
+    <section class="card"><div class="card-h">${I("bell")}<div><h3>תזכורות</h3></div></div>
+      ${tog("remindersEnabled", "התראות כשהיומן פתוח", "דורש הרשאה מהדפדפן", s)}${tog("neutralReminders", "נוסח דיסקרטי", "״תזכורת אישית״ בלי פירוט", s)}
+      <div class="pair"><label class="field" for="s-reminderMinutes">דקות לפני השקיעה<input id="s-reminderMinutes" name="reminderMinutes" type="number" min="5" max="120" value="${s.reminderMinutes}" inputmode="numeric"></label>
+      <label class="field" for="s-morningTime">שעת בדיקת בוקר<input id="s-morningTime" name="morningTime" type="time" value="${s.morningTime}"></label></div></section>`;
+  const sel = (name, label, s, opts) => `<label class="field" for="s-${name}">${label}<select id="s-${name}" name="${name}">${opts.map(([v, t]) => `<option value="${v}"${s[name] === v ? " selected" : ""}>${t}</option>`).join("")}</select></label>`;
+  const tog = (name, label, detail, s) => `<label class="toggle" for="s-${name}"><span><strong>${label}</strong><small>${detail}</small></span><input id="s-${name}" name="${name}" type="checkbox" role="switch"${s[name] ? " checked" : ""}></label>`;
+
+  function viewPrefs(st) {
+    const where = app.mode === "personal" ? "היומן האישי" : app.mode === "scenario" ? "התרחיש הפתוח בלבד" : "היומן לדוגמה בלבד";
+    return `<div class="two"><form id="settings-form" class="stack">${SETTINGS_FIELDS(st.settings)}
+      <div class="save-bar"><button class="btn" type="submit">${I("check", 17)}שמירת ההגדרות</button><small>יחול על ${where}</small></div></form>
+    <aside class="stack">
+      <section class="card"><div class="card-h">${I("pin")}<div><h3>נסיעות</h3><p>זמני המועדים לפי היעד</p></div></div>
+        ${st.trips.map(t => `<div class="trip"><span><strong>${esc(city(t.cityId).name)}</strong><small dir="ltr">${t.from} — ${t.to}</small></span><button class="icon-btn" data-deltrip="${t.id}" aria-label="מחיקת נסיעה">${I("trash", 17)}</button></div>`).join("")}
+        <form id="trip-form" class="stack-s"><label class="field" for="t-city">יעד<select id="t-city" name="cityId">${CITIES.map(c => `<option value="${c.id}">${c.name}</option>`).join("")}</select></label>
+        <div class="pair"><label class="field" for="t-from">מתאריך<input id="t-from" name="from" type="date" required min="2000-01-01" max="2100-12-31"></label><label class="field" for="t-to">עד תאריך<input id="t-to" name="to" type="date" required min="2000-01-01" max="2100-12-31"></label></div>
+        <button class="btn ghost full" type="submit">${I("plus", 17)}הוספת נסיעה</button></form>
+        <p class="fine">נסיעה מעבר לקו התאריך מחייבת בירור אישי.</p></section>
+      <section class="card"><div class="card-h">${I("lock")}<div><h3>גיבוי והעברה למכשיר אחר</h3><p>היומן שמור רק בטלפון הזה</p></div></div>
+        <button class="action" data-act="backup">${I("download", 19)}<span><strong>גיבוי מוצפן</strong><small>בסיסמה שתבחרי</small></span></button>
+        <button class="action" data-act="restore">${I("upload", 19)}<span><strong>שחזור מגיבוי</strong><small>מחליף את היומן לאחר אישור</small></span></button>
+        <button class="action" data-act="report">${I("file", 19)}<span><strong>דוח לבירור</strong><small>טקסט גלוי לשליחה למורה הוראה</small></span></button>
+        <button class="link danger" data-act="clear">מחיקת כל הרישומים</button></section>
+      <section class="card about"><div class="card-h">${I("droplet")}<div><h3>על מעיין</h3><p>גרסה ${APP_VERSION} · מנוע ${M.ENGINE_VERSION}</p></div></div>
+        <p>האפליקציה חינמית ופועלת כולה בטלפון, בלי חשבון ובלי שרת. שום מידע לא נשלח לאף אחד.</p>
+        <p>להתקנה: בתפריט הדפדפן (⋮) בוחרים ״הוספה למסך הבית״.</p></section>
+    </aside></div>`;
+  }
+
+  /* ---------- מסך הבודקים ---------- */
+  function viewReview(st) {
+    const res = app.testResults, passed = res && res.filter(t => t.ok).length;
+    const groups = res ? [...new Set(res.map(t => t.group))] : [];
+    return `<section class="review-hero"><div>
+        <span class="chip-light">גרסת בדיקה ${APP_VERSION}</span><h2>הנחיות לבודקים</h2>
+        <p>תודה על הבדיקה. המטרה היא לוודא שכל כלל מחושב כמו שצריך לפי השיטה שנבחרה, ושהמערכת לא מכריעה במקום שבו צריך לשאול.</p>
+        <ol class="steps"><li>פותחים תרחיש מוכן, רואים מה הוזן ומה חושב, ומשווים להלכה.</li><li>אפשר לפתוח תרחיש ביומן המלא, לשנות רישומים והגדרות ולראות את החישוב משתנה.</li><li>מעתיקים דוח ושולחים למפתח עם ההערות.</li></ol>
+      </div></section>
+      <section class="card"><div class="card-h">${I("flask")}<div><h3>תרחישים מוכנים <span class="count">${SCENARIOS.length}</span></h3><p>כל תרחיש רץ בזמן מדומה ואינו נוגע ביומן האישי</p></div></div>
+        <div class="scen-list">${SCENARIOS.map(scenarioCard).join("")}</div></section>
+      <div class="two">
+      <section class="card"><div class="card-h">${I("shield")}<div><h3>בדיקות אוטומטיות</h3><p>${res ? `${passed} מתוך ${res.length} עברו` : `${MaayanTests(M).tests.length} בדיקות של מנוע החישוב`}</p></div>
+        <button class="btn ghost sm" data-act="tests">${I(res ? "refresh" : "play", 16)}${res ? "הרצה חוזרת" : "הרצה"}</button></div>
+        ${res ? `<div class="test-sum ${passed === res.length ? "good" : "bad"}">${passed === res.length ? I("check", 18) + "כל הבדיקות עברו במכשיר הזה" : I("x", 18) + `${res.length - passed} בדיקות נכשלו`}</div>
+          ${groups.map(g => `<details class="tgroup"><summary>${esc(g)} <span class="count">${res.filter(t => t.group === g && t.ok).length}/${res.filter(t => t.group === g).length}</span>${I("left", 15)}</summary><ul>${res.filter(t => t.group === g).map(t => `<li class="${t.ok ? "ok" : "no"}">${I(t.ok ? "check" : "x", 15)}<span>${esc(t.name)}${t.ok ? "" : `<small>${esc(t.error)}</small>`}</span></li>`).join("")}</ul></details>`).join("")}`
+          : `<p>הבדיקות מוודאות את הלוח העברי, זמני השמש ואת כל כללי החישוב מול דוגמאות קבועות, כולל הדוגמה של מכון נשמת (ב׳ ניסן ← ל׳ ניסן ← כ״ח אייר).</p>`}
+      </section>
+      <section class="card"><div class="card-h">${I("copy")}<div><h3>שליחת הערות</h3><p>דוח עם ההגדרות, הרישומים והתוצאות</p></div></div>
+        <label class="field" for="rv-note">ההערות שלך<textarea id="rv-note" rows="4" placeholder="למשל: בתרחיש ״ראייה אחרי השקיעה״ העונה הבינונית צריכה להיות…"></textarea></label>
+        <button class="btn full" data-act="review-report">${I("copy", 17)}העתקת הדוח</button>
+        <p class="fine">הדוח כולל את היומן שפתוח עכשיו (${app.mode === "personal" ? "היומן האישי" : app.mode === "scenario" ? "התרחיש" : "יומן הדוגמה"}). אחרי ההעתקה מדביקים בוואטסאפ או במייל.</p></section>
+      </div>
+      <section class="card"><div class="card-h">${I("book")}<div><h3>כללי החישוב ומקורותיהם</h3><p>מה המערכת עושה, ובמה היא לא מכריעה</p></div></div><div class="rules">${RULES.map(rl => `<details><summary>${esc(rl.t)}${I("left", 15)}</summary>${rl.p.map(x => `<p>${esc(x)}</p>`).join("")}${rl.src ? `<a href="${rl.src}" target="_blank" rel="noopener">מקור ${I("out", 13)}</a>` : ""}</details>`).join("")}</div></section>`;
+  }
+  function scenarioCard(sc) {
+    const open = app.openScenario === sc.id;
+    let body = "";
+    if (open) {
+      const { state: s, now: n } = sc.build(), r = calculate(s, n), ctx = currentContext(s, n);
+      const plans = r.plans.filter(p => p.kind !== "bedikah"), bed = r.plans.filter(p => p.kind === "bedikah");
+      body = `<div class="scen-body">
+        <div class="expect"><strong>מה לבדוק</strong><p>${esc(sc.check)}</p></div>
+        <p class="sim">זמן ההדמיה: <span class="hebdate">${esc(ctx.hebrewDate)}</span> · ${esc(civilLabel(ctx.date))} · ${esc(ctx.time)} · ${esc(ctx.city.name)}</p>
+        ${diffSettings(s.settings)}
+        <h4>מה הוזן</h4><ul class="inputs">${M.sorted(s.events).map(e => `<li>${esc(M.eventLine(e).split("\n")[0].split(" | ").slice(1).join(" · "))}</li>`).join("")}${s.trips.map(t => `<li>נסיעה ל${esc(city(t.cityId).name)}: ${esc(hebrew(t.from))} עד ${esc(hebrew(t.to))}</li>`).join("")}</ul>
+        <h4>מה חושב</h4><p class="phase">מצב: <strong>${esc(PHASE_NAMES[r.phase])}</strong>${r.earliestHefsek && r.phase === "waiting" ? ` · הפסק מוקדם: <span class="hebdate">${esc(hebrew(r.earliestHefsek))}</span>` : ""}${r.phase === "clean" ? ` · יום ${r.cleanDay} מתוך 7` : ""}</p>
+        <div class="plans">${plans.map(p => planLine(p)).join("") || '<p class="empty">אין מועדים מחושבים.</p>'}</div>
+        ${bed.length ? `<p class="fine">ועוד ${bed.length} תזכורות לבדיקות בשבעה נקיים (מופיעות ביומן המלא).</p>` : ""}
+        ${r.reviews.length ? `<h4>נקודות לבירור</h4><ul class="rv">${r.reviews.map(v => `<li><strong>${esc(v.title)}</strong> — ${esc(v.detail)}</li>`).join("")}</ul>` : ""}
+        <button class="btn full" data-scenario-load="${sc.id}">${I("play", 16)}פתיחה ביומן המלא</button></div>`;
+    }
+    return `<article class="scen${open ? " open" : ""}"><button class="scen-h" data-scenario="${sc.id}" aria-expanded="${open}"><span class="tag">${esc(sc.tag)}</span><strong>${esc(sc.title)}</strong>${I("left", 16)}</button>${body}</article>`;
+  }
+  const PHASE_NAMES = { empty: "אין רישומים", waiting: "ממתינה להפסק", clean: "שבעה נקיים", planned: "מועד הטבילה עבר", immersed: "אחרי טבילה" };
+  function diffSettings(s) {
+    const d = M.SETTING_DEFAULTS, keys = ["wait", "haflagah", "beinonit", "day31", "orZarua", "carryMonthly", "carryLongIntervals", "missingMonthly"];
+    const changed = keys.filter(k => s[k] !== d[k]);
+    if (!changed.length) return `<p class="fine">הגדרות ברירת המחדל: חמישה ימים, הפלגה בימים, עונה בינונית באותה עונה.</p>`;
+    return `<p class="fine">הגדרות התרחיש: ${changed.map(k => esc(M.settingsSummary(s).find(x => x.startsWith({ wait: "המתנה", haflagah: "הפלגה", beinonit: "עונה בינונית", day31: "יום 31", orZarua: "אור זרוע", carryMonthly: "שימור עונת", carryLongIntervals: "שימור הפלגות", missingMonthly: "יום ל׳" }[k])))).join(" · ")}</p>`;
+  }
+  const S = M.SOURCES;
+  const RULES = [
+    { t: "היום העברי והעונה", p: ["כל רישום נשמר עם התאריך האזרחי, השעה המקומית והעיר. היום העברי מתחיל בשקיעה, ועונת היום נמשכת מהזריחה עד השקיעה.", "זמני השמש מחושבים בגובה פני הים. צאת הכוכבים לפי הזווית שנבחרה (8.5° או 7.083°).", "רישום בטווח שלוש דקות מהזריחה או מהשקיעה, או בין השקיעה לצאת הכוכבים, מסומן לבירור ואינו משמש לחישוב ודאי. שלוש הדקות הן סף לסימון ולא הגדרה של בין השמשות.", "שעה כפולה או חסרה במעבר שעון, ומקום בלי זריחה או שקיעה (קוטב), אינם מסווגים אוטומטית."], src: S.calendar },
+    { t: "המתנה לפני ההפסק", p: ["חמישה ימים: יום הראייה נספר כיום הראשון, וההפסק המוקדם ביום החמישי.", "ארבעה ימים: נספרים ממועד היחסים שנרשם כבסיס, ולא מהראייה. בלי בסיס רשום אין חישוב, ומופיעה נקודה לבירור.", "חידוש ספירה בתוך תקופת הנידה נשען על תחילת הנידה הקודמת ולא מוסיף חמישה ימים חדשים."], src: S.wait },
+    { t: "הפסק טהרה ושבעה נקיים", p: ["הספירה מתחילה רק מהפסק שנרשם כנקי, לפני השקיעה ולא בזמן מסופק, ולא לפני סוף ההמתנה. הפסק מוקדם מתקבל רק עם הוראה אישית מתועדת.", "יום א׳ הוא היום העברי שאחרי ההפסק. ליל הטבילה המתוכנן הוא במוצאי היום השביעי, וזה נשאר תכנון בלבד.", "חוסר רישום בדיקה ביום הראשון או השביעי מסומן לבירור, ואינו פוסל או מאשר. בדיקה שנרשמה כלא נקייה אינה מאפסת אוטומטית."], src: S.clean },
+    { t: "עונת החודש", p: ["אותו יום בחודש העברי הבא, באותה עונה.", "ראייה בל׳ כשבחודש הבא אין ל׳: לפי ההגדרה, בלי עונת חודש או א׳ בחודש שאחריו.", "בשנה מעוברת אדר א׳ עובר לאדר ב׳.", "שימור עונת חודש שחלה בזמן דימום הוא אפשרות נפרדת שדורשת תיעוד מלא."], src: S.monthly },
+    { t: "עונה בינונית", p: ["יום 30 בספירה כוללנית: יום הראייה הוא יום 1, כלומר 29 ימים אחריו, באותה עונה.", "שתי העונות, יום 31 ואור זרוע הם שלוש הגדרות נפרדות, ואף אחת מהן אינה נבחרת לפי עדה."], src: S.average },
+    { t: "הפלגה", p: ["בשיטת הימים: ההפרש בין התאריכים העבריים של שתי הראיות ועוד 1. אותו מרווח נספר מהראייה האחרונה, באותה עונה.", "בשיטת חב״ד: מספר העונות מההפסק הקודם ועד הראייה הבאה. המועד החדש נספר מההפסק הנוכחי. מספר זוגי נופל ביום ואי-זוגי בלילה. הפלגה ארוכה נשמרת כשמגיעה קצרה ממנה.", "ראייה מסופקת באמצע אינה נמחקת כדי לייצר מרווח ארוך."], src: S.interval },
+    { t: "וסת קבוע", p: ["שלוש ראיות רצופות באותו יום בחודש ובאותה עונה, או שלוש הפלגות שוות בארבע ראיות, מסומנות כדפוס אפשרי.", "המערכת אינה קובעת, עוקרת או משעה וסת קבוע בעצמה."], src: S.fixed },
+    { t: "במה המערכת לא מכריעה", p: ["היריון, אחרי לידה, הנקה, טיפול הורמונלי, וסתות לא רגילים (דילוג, סירוג), מראות וכתמים, בדיקות שהוחסרו ומעבר קו התאריך.", "במצבים האלה החישוב הרגיל מושעה ואפשר לרשום עונות ידניות לפי הוראה. אין במערכת זיהוי מראות ואין ״שאלת רב״ אוטומטית."], src: "" },
+  ];
+
+  /* ---------- מסגרת ---------- */
+  function shell() {
+    const st = state(), ctx = currentContext(st, now()), r = calculate(st, now());
+    app.lastDayKey = `${ctx.abs}|${r.phase}|${app.mode}`;
+    const title = NAV.find(n => n[0] === app.tab)[1];
+    const upcoming = r.plans.filter(p => !p.done && new Date(p.start) >= now()).length;
+    const banner = app.mode === "demo" ? `<div class="banner">${I("flask", 17)}<span>יומן לדוגמה. השינויים לא נשמרים.</span><button data-act="personal">ליומן שלי</button></div>`
+      : app.mode === "scenario" ? `<div class="banner">${I("flask", 17)}<span>תרחיש: ${esc(app.scenario.title)} · זמן מדומה: <span class="hebdate">${esc(ctx.hebrewDate)}</span></span><button data-go="review">לתרחישים</button><button data-act="personal">ליומן שלי</button></div>`
+      : !storage.ok ? `<div class="banner warn">${I("info", 17)}<span>הדפדפן הזה חוסם שמירה במכשיר. הרישומים יימחקו בסגירת הדף, אלא אם תגבי אותם.</span></div>`
+      : app.loadWarning ? `<div class="banner warn">${I("info", 17)}<span>${esc(app.loadWarning)}</span></div>` : "";
+    const views = { today: viewToday, calendar: viewCalendar, journal: viewJournal, dates: viewDates, review: viewReview, prefs: viewPrefs };
+    return `<aside class="side"><div class="brand">${mark()}<span>מעיין<small>יומן טהרת המשפחה</small></span></div>
+        <nav aria-label="ניווט">${NAV.map(([id, t, ic]) => `<button class="nav${app.tab === id ? " on" : ""}" data-go="${id}"${app.tab === id ? ' aria-current="page"' : ""}>${I(ic, 19)}<span>${t}</span>${id === "dates" && upcoming && !app.hidden ? `<small class="badge">${upcoming}</small>` : ""}</button>`).join("")}</nav>
+        <p class="side-note">${I("lock", 15)}נשמר רק במכשיר הזה</p></aside>
+      <div class="work">
+        <header class="top"><div class="brand m">${mark()}<strong>מעיין</strong></div>
+          <div class="top-date"><span class="hebdate">${esc(ctx.hebrewDate)}</span><small>${esc(civilLabel(ctx.date, true))}${ctx.afterSunset ? " · אחרי השקיעה" : ""}</small></div>
+          <div class="top-act">${app.hidden ? "" : `<button class="pill" data-go="prefs" aria-label="עיר: ${esc(ctx.city.name)}">${I("pin", 15)}${esc(ctx.city.name)}</button>`}
+            <button class="icon-btn" data-act="hide" aria-pressed="${app.hidden}" aria-label="${app.hidden ? "הצגת היומן" : "הסתרת היומן"}">${I(app.hidden ? "eye" : "eyeoff")}</button></div></header>
+        ${banner}
+        <main ${app.hidden ? "hidden" : ""}>
+          <div class="page-h"><h1>${title}</h1>${["today", "calendar", "journal"].includes(app.tab) ? `<button class="btn" data-act="add">${I("plus", 18)}רישום חדש</button>` : ""}</div>
+          ${views[app.tab](st, r, ctx)}
+          <footer class="foot"><span>${I("info", 15)}החישובים טרם קיבלו אישור הלכתי. אין לראות בהם פסק.</span><button class="link" data-go="review">כללים ומקורות</button></footer>
+        </main>
+        ${app.hidden ? `<div class="veil">${I("lock", 30)}<h2>היומן מוסתר</h2><button class="btn" data-act="hide">${I("eye", 18)}הצגת היומן</button></div>` : ""}
+      </div>
+      <nav class="tabs" aria-label="ניווט">${NAV.map(([id, t, ic]) => `<button class="${app.tab === id ? "on" : ""}" data-go="${id}"${app.tab === id ? ' aria-current="page"' : ""}>${I(ic, 21)}<span>${t.replace("לוח השנה", "לוח").replace("היומן שלי", "יומן")}</span></button>`).join("")}</nav>`;
+  }
+  const mark = () => `<span class="mark">${I("droplet", 22)}</span>`;
+
+  function render() {
+    const root = $("#app"), scroll = window.scrollY, focusId = document.activeElement?.id, selStart = document.activeElement?.selectionStart;
+    root.innerHTML = shell();
+    if (focusId) { const el = document.getElementById(focusId); if (el) { el.focus(); try { if (selStart != null) el.setSelectionRange(selStart, selStart); } catch { /* */ } } }
+    window.scrollTo(0, scroll);
+    renderModal(); renderToast();
+  }
+  function renderToast() { $("#toast").innerHTML = app.toast ? `<div class="toast" role="status">${esc(app.toast)}<button class="icon-btn" data-act="toast-x" aria-label="סגירה">${I("x", 16)}</button></div>` : ""; }
+  function go(tab, top = true) {
+    app.tab = tab;
+    try { history.replaceState(null, "", "#" + tab); } catch { /* */ }
+    render(); if (top) window.scrollTo(0, 0);
+  }
+
+  /* ---------- חלונות ---------- */
+  function renderModal() {
+    const host = $("#modal"), m = app.modal;
+    if (!m) { host.innerHTML = ""; document.body.classList.remove("locked"); return; }
+    document.body.classList.add("locked");
+    host.innerHTML = `<div class="scrim" data-act="close-modal"></div><div class="sheet" role="dialog" aria-modal="true" aria-labelledby="m-title">${modalBody(m)}</div>`;
+    const first = host.querySelector("[autofocus]") || host.querySelector("input,select,textarea,button");
+    first?.focus({ preventScroll: true });
+  }
+  function modalBody(m) {
+    const close = `<button class="icon-btn" data-act="close-modal" aria-label="סגירה">${I("x")}</button>`;
+    if (m.kind === "event") {
+      const f = m.form, needsResult = ["hefsek", "bedikah", "question"].includes(f.type);
+      const HELP = { question: "שאלה לבירור נשמרת ומופיעה בנקודות לבירור. היא אינה הופכת לווסת.", restart: "רישום הוראה להתחיל ספירה חדשה בתוך תקופת הנידה.", intimacy: "משמש בסיס לחישוב כשנבחרה שיטת ארבעה ימים ממועד היחסים.", hefsek: "הפסק סמוך לשקיעה או לפני סוף ההמתנה יסומן לבירור.", manual: "עונה שנקבעה לפי הוראה אישית. אינה נוצרת מהחישוב.", flow: "השעה חשובה: אחרי השקיעה זה כבר היום העברי הבא." };
+      let hebHint = ""; if (M.validISO(f.date)) hebHint = `${hebrew(f.date)} · עד השקיעה`;
+      return `<div class="m-h"><h2 id="m-title">${m.editing ? "עריכת רישום" : "רישום חדש"}</h2>${close}</div>
+      <form id="event-form" class="stack-s">
+        <label class="field" for="e-type">סוג<select id="e-type" name="type">${Object.entries(EVENT_NAMES).map(([v, n]) => `<option value="${v}"${f.type === v ? " selected" : ""}>${n}</option>`).join("")}</select></label>
+        <div class="pair"><label class="field" for="e-date">${f.type === "manual" ? "התאריך של יום העונה" : "תאריך"}<input id="e-date" name="date" type="date" required min="2000-01-01" max="2100-12-31" value="${f.date}"><small class="hebdate" id="e-heb">${esc(hebHint)}</small></label>
+        <label class="field" for="e-time">שעה<input id="e-time" name="time" type="time" required value="${f.time}"><small>לפי השעון במקום</small></label></div>
+        <label class="field" for="e-city">מקום<select id="e-city" name="cityId">${CITIES.map(c => `<option value="${c.id}"${f.cityId === c.id ? " selected" : ""}>${c.name}</option>`).join("")}</select></label>
+        ${f.type === "manual" ? `<label class="field" for="e-onah">עונה<select id="e-onah" name="onah" required><option value="" ${f.onah ? "" : "selected"} disabled>בחירה</option><option value="day"${f.onah === "day" ? " selected" : ""}>יום · מהזריחה עד השקיעה</option><option value="night"${f.onah === "night" ? " selected" : ""}>לילה · מהשקיעה הקודמת עד הזריחה</option></select></label>` : ""}
+        ${needsResult ? `<label class="field" for="e-result">תוצאה<select id="e-result" name="result"><option value="clear"${f.result === "clear" ? " selected" : ""}>נקייה</option><option value="uncertain"${f.result === "uncertain" ? " selected" : ""}>ממתינה לבירור</option><option value="bleeding"${f.result === "bleeding" ? " selected" : ""}>לא נקייה</option></select></label>` : ""}
+        <label class="field" for="e-note">הערה <span class="opt">לא חובה</span><textarea id="e-note" name="note" rows="2" maxlength="2000">${esc(f.note)}</textarea></label>
+        <details class="adv"${f.authorityNote ? " open" : ""}><summary>הוראה אישית שקיבלת${I("left", 14)}</summary><label class="field" for="e-auth">תיעוד ההוראה<textarea id="e-auth" name="authorityNote" rows="2" maxlength="1000" placeholder="מי הורה, מתי ומה נאמר">${esc(f.authorityNote)}</textarea></label></details>
+        ${HELP[f.type] ? `<p class="hint">${I("info", 16)}${HELP[f.type]}</p>` : ""}
+        ${m.error ? `<p class="err" role="alert">${esc(m.error)}</p>` : ""}
+        ${m.confirmDelete ? `<div class="confirm"><p>למחוק את הרישום? כל המועדים יחושבו מחדש.</p><div class="row-btns"><button type="button" class="btn danger" data-act="delete-yes">מחיקה</button><button type="button" class="btn ghost" data-act="delete-no">ביטול</button></div></div>`
+          : `<div class="m-actions"><button class="btn" type="submit">${I("check", 17)}שמירה</button><button type="button" class="btn ghost" data-act="close-modal">ביטול</button>${m.editing ? `<button type="button" class="icon-btn danger push" data-act="delete" aria-label="מחיקת רישום">${I("trash", 19)}</button>` : ""}</div>`}
+      </form>`;
+    }
+    if (m.kind === "text") return `<div class="m-h"><h2 id="m-title">${esc(m.title)}</h2>${close}</div><p>${esc(m.intro)}</p>
+      <textarea id="m-text" class="mono" rows="9" readonly>${esc(m.text)}</textarea>
+      <div class="m-actions"><button class="btn" data-act="copy-text">${I("copy", 17)}העתקה</button>${m.file ? `<button class="btn ghost" data-act="dl-text">${I("download", 17)}שמירה כקובץ</button>` : ""}</div>
+      ${m.file ? `<p class="fine">אם השמירה כקובץ לא עובדת בדפדפן הזה, מעתיקים ושומרים בפתקים או שולחים לעצמך.</p>` : ""}`;
+    if (m.kind === "backup") return `<div class="m-h"><h2 id="m-title">גיבוי מוצפן</h2>${close}</div>
+      <form id="backup-form" class="stack-s"><p>הגיבוי מוצפן בסיסמה שאת בוחרת. בלי הסיסמה אי אפשר לשחזר אותו, גם לא אנחנו.</p>
+      <label class="field" for="b-pass">סיסמת גיבוי<input id="b-pass" type="password" minlength="10" required autocomplete="new-password"><small>לפחות 10 תווים. לשמור אותה בנפרד.</small></label>
+      ${m.error ? `<p class="err" role="alert">${esc(m.error)}</p>` : ""}<div class="m-actions"><button class="btn" type="submit">${I("lock", 17)}יצירת גיבוי</button></div></form>`;
+    if (m.kind === "restore") return `<div class="m-h"><h2 id="m-title">שחזור מגיבוי</h2>${close}</div>
+      <form id="restore-form" class="stack-s"><label class="field" for="r-file">קובץ גיבוי<input id="r-file" type="file" accept=".may,.json,.txt,application/json,text/plain"></label>
+      <label class="field" for="r-text">או הדבקת טקסט הגיבוי<textarea id="r-text" class="mono" rows="3" placeholder='{"format":"maayan-encrypted-v1",…}'></textarea></label>
+      <label class="field" for="r-pass">סיסמת הגיבוי<input id="r-pass" type="password" required autocomplete="off"></label>
+      ${m.error ? `<p class="err" role="alert">${esc(m.error)}</p>` : ""}<div class="m-actions"><button class="btn" type="submit">${I("upload", 17)}פתיחת הגיבוי</button></div></form>`;
+    if (m.kind === "confirm") return `<div class="m-h"><h2 id="m-title">${esc(m.title)}</h2>${close}</div><p>${esc(m.text)}</p>
+      <div class="m-actions"><button class="btn ${m.danger ? "danger" : ""}" data-act="confirm-yes">${esc(m.yes)}</button><button class="btn ghost" data-act="close-modal">ביטול</button></div>`;
+    if (m.kind === "welcome") return `<div class="welcome"><div class="mark big">${I("droplet", 34)}</div><h2 id="m-title">ברוכה הבאה למעיין</h2>
+      <p>יומן אישי לטהרת המשפחה: רישום, חישוב עונות הפרישה, שבעה נקיים ותזכורות.</p>
+      <ul class="promises"><li>${I("lock", 18)}<span><strong>פרטי לגמרי.</strong> הכול נשמר רק בטלפון הזה, בלי חשבון ובלי שרת.</span></li>
+      <li>${I("scale", 18)}<span><strong>שקוף.</strong> לכל מועד מוצגים הכלל והמקור, ואת שיטת החישוב בוחרים לפי ההנחיה שקיבלת.</span></li>
+      <li>${I("help", 18)}<span><strong>לא פוסק.</strong> זו גרסת בדיקה שטרם קיבלה אישור הלכתי. במקום של ספק המערכת מסמנת לבירור.</span></li></ul>
+      <div class="stack-s"><button class="btn full" data-act="start-personal">${I("plus", 18)}התחלת יומן אישי</button>
+      <button class="btn ghost full" data-act="start-demo">${I("flask", 18)}צפייה ביומן לדוגמה</button>
+      <button class="btn ghost full" data-act="start-review">${I("scale", 18)}אני בודק/ת הלכתי/ת</button></div></div>`;
+    return "";
+  }
+  function openEvent(opts = {}) {
+    const st = state(), ctx = currentContext(st, now());
+    const date = opts.date || ctx.date, c = opts.date ? atLocation(st, date) : ctx.city;
+    const form = opts.event ? { ...opts.event } : { id: M.uuid(), type: opts.type || (opts.date && opts.date > ctx.date ? "manual" : "flow"), date, time: timeInZone(now(), c.tz), cityId: c.id, result: "clear", note: "", authorityNote: "", createdAt: new Date().toISOString() };
+    app.modal = { kind: "event", form, editing: !!opts.event, error: "", confirmDelete: false };
+    renderModal();
+  }
+  function readEventForm() {
+    const fd = new FormData($("#event-form")), f = { ...app.modal.form };
+    for (const k of ["type", "date", "time", "cityId", "note", "authorityNote"]) if (fd.has(k)) f[k] = String(fd.get(k));
+    f.result = fd.has("result") ? String(fd.get("result")) : f.result;
+    f.onah = fd.has("onah") ? String(fd.get("onah")) || undefined : f.onah;
+    return f;
+  }
+  function textModal(title, intro, text, file) { app.modal = { kind: "text", title, intro, text, file }; renderModal(); }
+  function download(text, name, type) {
+    const a = document.createElement("a"), url = URL.createObjectURL(new Blob([text], { type }));
+    a.href = url; a.download = name; document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(url), 2000);
+  }
+  async function copy(text) {
+    try { await navigator.clipboard.writeText(text); toast("הועתק"); return true; }
+    catch { const t = $("#m-text"); if (t) { t.focus(); t.select(); } toast("ההעתקה האוטומטית נחסמה. הטקסט מסומן — אפשר להעתיק ידנית."); return false; }
+  }
+  function reviewReport() {
+    const st = state(), n = now(), note = ($("#rv-note")?.value || "").trim();
+    const where = app.mode === "scenario" ? `תרחיש: ${app.scenario.title} (זמן מדומה)` : app.mode === "demo" ? "יומן לדוגמה" : "יומן אישי";
+    const tests = app.testResults ? `בדיקות אוטומטיות: ${app.testResults.filter(t => t.ok).length}/${app.testResults.length} עברו` : "בדיקות אוטומטיות: לא הורצו";
+    return [`הערות בודק — מעיין ${APP_VERSION}`, note ? `\nהערות:\n${note}\n` : "", `מקור הנתונים: ${where}`, tests, `מכשיר: ${navigator.userAgent}`, "", M.reportExport(st, n)].join("\n");
+  }
+
+  /* ---------- אירועים ---------- */
+  document.addEventListener("click", async e => {
+    const t = e.target.closest("[data-go],[data-act],[data-edit],[data-day],[data-cal],[data-calmode],[data-scenario],[data-scenario-load],[data-deltrip]");
+    if (!t) return;
+    const d = t.dataset;
+    if (d.go) { app.modal = null; return go(d.go); }
+    if (d.edit) { const ev = state().events.find(x => x.id === d.edit); if (ev) openEvent({ event: ev }); return; }
+    if (d.day) { app.cal.selected = d.day; if (d.day < app.cal.cursor.slice(0, 8) + "01" || t.classList.contains("out")) app.cal.cursor = d.day; return render(); }
+    if (d.calmode) { app.cal.mode = d.calmode; app.cal.cursor = app.cal.selected; return render(); }
+    if (d.cal) {
+      const c = app.cal;
+      if (d.cal === "today") { c.cursor = c.selected = currentContext(state(), now()).date; }
+      else if (c.mode === "hebrew") { const h = hd(c.cursor); c.cursor = fromAbs(new HDate(1, h.getMonth(), h.getFullYear()).add(Number(d.cal), "M").abs()); c.selected = c.cursor; }
+      else { const x = fromISO(c.cursor); c.cursor = c.selected = toISO(new Date(x.getFullYear(), x.getMonth() + Number(d.cal), 1, 12)); }
+      return render();
+    }
+    if (d.scenario) { app.openScenario = app.openScenario === d.scenario ? null : d.scenario; return render(); }
+    if (d.scenarioLoad) {
+      const sc = SCENARIOS.find(s => s.id === d.scenarioLoad), b = sc.build();
+      Object.assign(app, { mode: "scenario", scenario: sc, sandbox: M.parseState(b.state), simNow: b.now, cal: { cursor: null, mode: "civil", selected: null } });
+      toast("נפתח תרחיש בזמן מדומה. היומן האישי לא השתנה."); return go("today");
+    }
+    if (d.deltrip) { const st = state(); try { commit({ ...st, trips: st.trips.filter(x => x.id !== d.deltrip) }); } catch (err) { toast(err.message); } return; }
+    const st = state();
+    switch (d.act) {
+      case "add": return openEvent({ type: d.type, date: d.date });
+      case "hide": app.hidden = !app.hidden; return render();
+      case "close-modal": if (app.modal?.kind === "welcome") markSeen(); app.modal = null; return renderModal();
+      case "toast-x": app.toast = ""; return renderToast();
+      case "demo": Object.assign(app, { mode: "demo", sandbox: M.demoState(realNow()), cal: { cursor: null, mode: "civil", selected: null } }); return go("today");
+      case "personal": Object.assign(app, { mode: "personal", sandbox: null, scenario: null, cal: { cursor: null, mode: "civil", selected: null } }); return go("today");
+      case "start-personal": markSeen(); app.modal = null; return go("today");
+      case "start-demo": markSeen(); app.modal = null; Object.assign(app, { mode: "demo", sandbox: M.demoState(realNow()) }); return go("today");
+      case "start-review": markSeen(); app.modal = null; return go("review");
+      case "delete": app.modal.form = readEventForm(); app.modal.confirmDelete = true; return renderModal();
+      case "delete-no": app.modal.confirmDelete = false; return renderModal();
+      case "delete-yes": try { const id = app.modal.form.id; app.modal = null; commit({ ...st, events: st.events.filter(x => x.id !== id) }); } catch (err) { toast(err.message); } return;
+      case "report": return textModal("דוח לבירור", "טקסט גלוי עם ההגדרות, הרישומים, המועדים והנקודות לבירור. לא נשלח לאף אחד — את מחליטה למי להעביר.", M.reportExport(st, now()), { name: `maayan-report-${currentContext(st, now()).date}.txt`, type: "text/plain;charset=utf-8" });
+      case "review-report": { const text = reviewReport(); if (await copy(text)) return; return textModal("דוח לבודק", "סמנו את הטקסט והעתיקו.", text); }
+      case "ics": { const r = calculate(st, now()); return textModal("קובץ מועדים ליומן", "שומרים כקובץ ופותחים אותו ביומן הטלפון. אם השמירה לא עובדת כאן, פתחו את מעיין ישירות בדפדפן.", M.calendarExport(r.plans, st.settings.neutralReminders, now()), { name: "maayan-dates.ics", type: "text/calendar;charset=utf-8" }); }
+      case "copy-text": return copy(app.modal.text);
+      case "dl-text": try { download(app.modal.text, app.modal.file.name, app.modal.file.type); toast("הקובץ נשמר בהורדות"); } catch { toast("השמירה כקובץ נחסמה. אפשר להעתיק."); } return;
+      case "backup": app.modal = { kind: "backup", error: "" }; return renderModal();
+      case "restore": app.modal = { kind: "restore", error: "" }; return renderModal();
+      case "clear": app.modal = { kind: "confirm", title: "למחוק את כל הרישומים?", text: "כל הרישומים והנסיעות יימחקו מהמכשיר. ההגדרות יישארו. אי אפשר לבטל.", yes: "מחיקה", danger: true, run: () => { app.blockSave = false; app.loadWarning = ""; commit({ ...st, events: [], trips: [] }); } }; return renderModal();
+      case "confirm-yes": { const run = app.modal.run; app.modal = null; try { run(); } catch (err) { toast(err.message); } return renderModal(); }
+      case "tests": { t.disabled = true; setTimeout(() => { app.testResults = MaayanTests(M).run(); render(); }, 30); return; }
+      case "notify":
+        if (!("Notification" in window)) { app.permission = "unsupported"; toast("הדפדפן אינו תומך בהתראות"); return render(); }
+        try { app.permission = await Notification.requestPermission(); toast(app.permission === "granted" ? "התראות הופעלו" : "ההרשאה לא ניתנה. אפשר לשנות בהגדרות הדפדפן."); } catch { app.permission = "unsupported"; toast("הדפדפן לא מאפשר לבקש הרשאה כאן"); }
+        return render();
+    }
+  });
+  document.addEventListener("change", e => {
+    const t = e.target;
+    if (t.dataset.check !== undefined && t.dataset.check) {
+      const st = state(), list = st.settings.checklist, item = t.dataset.check;
+      try { commit({ ...st, settings: { ...st.settings, checklist: t.checked ? [...list, item] : list.filter(x => x !== item) } }); } catch (err) { toast(err.message); }
+    } else if (t.id === "filter") { app.filter = t.value; render(); }
+    else if (t.id === "e-type") { app.modal.form = readEventForm(); renderModal(); $("#e-type")?.focus(); }
+    else if (t.id === "e-date") { const h = $("#e-heb"); if (h) h.textContent = M.validISO(t.value) ? `${hebrew(t.value)} · עד השקיעה` : ""; }
+    else if (t.id === "r-file") { const f = t.files?.[0]; if (f && f.size < 4e6) f.text().then(x => { $("#r-text").value = x; }); }
+  });
+  document.addEventListener("input", e => { if (e.target.id === "q") { app.query = e.target.value; render(); } });
+  document.addEventListener("submit", async e => {
+    e.preventDefault();
+    const f = e.target, st = state();
+    if (f.id === "event-form") {
+      const ev = readEventForm();
+      if (ev.type !== "manual") delete ev.onah;
+      if (!["hefsek", "bedikah", "question"].includes(ev.type)) ev.result = "clear";
+      try { commit({ ...st, events: [...st.events.filter(x => x.id !== ev.id), ev] }); app.modal = null; renderModal(); }
+      catch (err) { app.modal.form = ev; app.modal.error = err.message; renderModal(); }
+    } else if (f.id === "settings-form") {
+      const fd = new FormData(f), s = { ...st.settings };
+      for (const k of ["cityId", "wait", "haflagah", "beinonit", "missingMonthly", "bedikot", "nightfall", "special", "methodNote", "morningTime"]) s[k] = String(fd.get(k));
+      s.reminderMinutes = Number(fd.get("reminderMinutes"));
+      for (const k of ["day31", "orZarua", "carryMonthly", "carryLongIntervals", "remindersEnabled", "neutralReminders"]) s[k] = fd.has(k);
+      try { commit({ ...st, settings: s }); } catch (err) { toast(err.message); }
+    } else if (f.id === "trip-form") {
+      const fd = new FormData(f);
+      try { commit({ ...st, trips: [...st.trips, { id: M.uuid(), cityId: String(fd.get("cityId")), from: String(fd.get("from")), to: String(fd.get("to")) }] }); } catch (err) { toast(err.message); }
+    } else if (f.id === "backup-form") {
+      try { const text = await M.encryptBackup(st, $("#b-pass").value); textModal("הגיבוי מוכן", "שמרי את הקובץ או העתיקי את הטקסט למקום בטוח (למשל מייל לעצמך). לשחזור צריך גם את הסיסמה.", text, { name: `maayan-backup-${currentContext(st, now()).date}.may`, type: "application/json" }); }
+      catch (err) { app.modal.error = err.message; renderModal(); }
+    } else if (f.id === "restore-form") {
+      try {
+        const text = $("#r-text").value.trim(); if (!text) throw new Error("יש לבחור קובץ או להדביק את טקסט הגיבוי");
+        const restored = M.parseState(await M.decryptBackup(text, $("#r-pass").value));
+        app.modal = { kind: "confirm", title: "להחליף את היומן?", text: `היומן הנוכחי יוחלף בגרסה מהגיבוי (${restored.events.length} רישומים).`, yes: "שחזור", run: () => { app.blockSave = false; app.loadWarning = ""; commit(restored); } };
+        renderModal();
+      } catch (err) { app.modal.error = err.message; renderModal(); }
+    }
+  });
+  document.addEventListener("keydown", e => { if (e.key === "Escape" && app.modal) { if (app.modal.kind === "welcome") markSeen(); app.modal = null; renderModal(); } });
+  function markSeen() { storage.set(SEEN_KEY, "1"); }
+
+  /* ---------- שעון והתראות ---------- */
+  function tick() {
+    if (app.mode === "scenario") return;
+    const st = state(), n = now(), r = calculate(st, n), ctx = currentContext(st, n);
+    if (app.permission === "granted" && st.settings.remindersEnabled && app.mode === "personal") {
+      for (const p of r.plans) {
+        const delta = n - new Date(p.start);
+        if (p.done || delta < 0 || delta > 90000 || app.notified.has(p.id)) continue;
+        app.notified.add(p.id);
+        try { new Notification(st.settings.neutralReminders ? "תזכורת אישית" : p.title, { body: "פרטים ביומן האישי", tag: p.id }); } catch { /* */ }
+      }
+    }
+    if (`${ctx.abs}|${r.phase}|${app.mode}` !== app.lastDayKey && !app.modal) render();
+  }
+
+  /* ---------- הפעלה ---------- */
+  app.personal = loadPersonal();
+  if ("Notification" in window) app.permission = Notification.permission; else app.permission = "unsupported";
+  const hash = location.hash.slice(1);
+  if (NAV.some(n => n[0] === hash)) app.tab = hash;
+  window.addEventListener("hashchange", () => { const h = location.hash.slice(1); if (NAV.some(n => n[0] === h) && h !== app.tab) go(h); });
+  render();
+  if (!storage.get(SEEN_KEY) && !app.personal.events.length) { app.modal = { kind: "welcome" }; renderModal(); }
+  setInterval(tick, 30000);
+  document.addEventListener("visibilitychange", () => { if (!document.hidden) tick(); });
+})();
+</script>
+</body></html>
