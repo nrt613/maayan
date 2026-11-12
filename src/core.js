@@ -158,7 +158,7 @@ const Maayan = (() => {
   const SETTING_DEFAULTS = {
     cityId: "netanya", wait: "five", haflagah: "days", beinonit: "same", day31: false, orZarua: false, carryMonthly: false,
     carryLongIntervals: false, missingMonthly: "first-next-month", bedikot: "twice", nightfall: "8.5", special: "regular", methodNote: "",
-    neutralReminders: true, reminderMinutes: 30, safetyMinutes: 5, morningTime: "08:00", remindersEnabled: true, checklist: [],
+    neutralReminders: true, reminderMinutes: 30, morningTime: "08:00", remindersEnabled: true, checklist: [],
   };
   const SETTING_ENUMS = {
     wait: ["five", "four-from-relations"], haflagah: ["days", "chabad-onot"], beinonit: ["same", "both"], missingMonthly: ["skip", "first-next-month"],
@@ -188,7 +188,6 @@ const Maayan = (() => {
     for (const [k, vals] of Object.entries(SETTING_ENUMS)) if (!vals.includes(s[k])) fail(`ערך לא תקין בהגדרה ${k}`);
     for (const k of ["day31", "orZarua", "carryMonthly", "carryLongIntervals", "neutralReminders", "remindersEnabled"]) if (typeof s[k] !== "boolean") fail(`ערך לא תקין בהגדרה ${k}`);
     if (typeof s.methodNote !== "string" || s.methodNote.length > 1000) fail("הערת השיטה ארוכה מדי");
-    if (![0, 3, 5, 10].includes(s.safetyMinutes)) fail("מרווח הביטחון אינו תקין");
     if (!Number.isInteger(s.reminderMinutes) || s.reminderMinutes < 5 || s.reminderMinutes > 120) fail("דקות התזכורת צריכות להיות בין 5 ל-120");
     if (!TIME_RE.test(s.morningTime)) fail("שעת הבוקר אינה תקינה");
     if (!Array.isArray(s.checklist) || s.checklist.length > 40 || s.checklist.some(x => typeof x !== "string" || x.length > 80)) fail("רשימת ההכנה אינה תקינה");
@@ -290,17 +289,15 @@ const Maayan = (() => {
     const trip = state.trips.find(t => t.from <= date && t.to >= date);
     return city(trip ? trip.cityId : state.settings.cityId);
   }
-  /** margin: דקות סביב זריחה ושקיעה שבהן רישום מסומן לבירור (לפחות 3) */
-  function stamp(e, margin = 3) {
+  function stamp(e) {
     const c = city(e.cityId), instant = localInstant(e.date, e.time, c.tz), s = sun(e.date, c);
     if (!s.sunrise || !s.sunset) throw new Error("אין זריחה או שקיעה בתאריך ובמיקום הזה; נדרשת הוראה אישית");
     const after = instant >= s.sunset, night = after || instant < s.sunrise;
     const abs = isoAbs(after ? addDays(e.date, 1) : e.date);
     // מרווח של שלוש דקות הוא סימון לבירור, לא הגדרה של בין השמשות
-    const edge = Math.max(3, margin) * 60000;
-    const nearSunset = Math.abs(instant - s.sunset) <= edge;
+    const nearSunset = Math.abs(instant - s.sunset) <= 3 * 60000;
     const twilight = instant >= s.sunset && (!s.nightfall || instant < s.nightfall);
-    const nearSunrise = Math.abs(instant - s.sunrise) <= edge;
+    const nearSunrise = Math.abs(instant - s.sunrise) <= 3 * 60000;
     return { abs, onah: night ? "night" : "day", ordinal: 2 * abs + (night ? 0 : 1), instant, hebrewDate: new HDate(abs).renderGematriya(), uncertain: nearSunset || twilight || nearSunrise, sun: s };
   }
   function onahWindow(abs, onah, c, degrees = 8.5) {
@@ -330,13 +327,10 @@ const Maayan = (() => {
     const plans = [], reviews = [], stamped = [], unresolvedStarts = [];
     const context = currentContext(state, now), date = context.date, currentAbs = context.abs;
     const nf = Number(state.settings.nightfall);
-    // מרווח ביטחון: עונות פרישה מתחילות מוקדם ונגמרות מאוחר, ומועדי ״עד השקיעה״ מוקדמים
-    const safety = state.settings.safetyMinutes ?? 0, SM = safety * 60000;
-    const early = d => new Date(d.valueOf() - SM), late = d => new Date(d.valueOf() + SM);
     const review = (id, title, detail, eventIds = []) => { if (!reviews.some(r => r.id === id)) reviews.push({ id, title, detail, eventIds }); };
     for (const e of sorted(state.events)) {
       try {
-        const s = stamp(e, safety);
+        const s = stamp(e);
         if (s.instant > now && e.type !== "manual" && e.type !== "note") { review(`future-${e.id}`, "רישום עתידי", "אירוע שטרם התרחש אינו משמש כחישוב בפועל.", [e.id]); continue; }
         stamped.push({ e, s });
         if (s.uncertain && ["flow", "hefsek", "restart", "bedikah"].includes(e.type)) review(`boundary-${e.id}`, "רישום סמוך לגבול היום או העונה", "נשמרו השעה והמקום. שיוך האירוע דורש בירור, והוא לא משמש לבדו לחישוב ודאי.", [e.id]);
@@ -404,31 +398,30 @@ const Maayan = (() => {
         if (state.settings.bedikot === "first-last" && n !== 1 && n !== 7) continue;
         if (s.sunrise && s.sunset) {
           const base = { kind: "bedikah", date: d, onah: "day", source: SOURCES.clean, eventIds: [h.e.id], cityId: c.id, day: n };
-          const dayStart = late(s.sunrise), dayEnd = early(s.sunset);
-          let morningInstant = dayStart;
+          let morningInstant = s.sunrise;
           try { morningInstant = localInstant(d, state.settings.morningTime, c.tz); }
           catch { review("morning-clock-" + d, "שעת התזכורת דורשת התאמה במעבר שעון", "תזכורת הבוקר הועברה לשעת הזריחה המקומית ביום הזה."); }
-          if (morningInstant < dayStart) morningInstant = dayStart;
-          if (morningInstant >= dayEnd) { morningInstant = dayStart; review("morning-outside-day", "שעת הבוקר שנבחרה מחוץ לעונת היום", "תזכורת הבוקר הוזזה לזריחה כדי להישאר בתוך יום הבדיקה."); }
-          addPlan({ ...base, id: `bedikah-${h.e.id}-${n}-am`, title: `בדיקת בוקר · יום ${n}`, start: morningInstant.toISOString(), end: dayEnd.toISOString(), reason: "תזכורת לרישום בדיקה; אינה קביעה שבדיקה בוצעה.", done: morning || (state.settings.bedikot === "first-last" && checks[n].length > 0) });
-          if (state.settings.bedikot === "twice") addPlan({ ...base, id: `bedikah-${h.e.id}-${n}-pm`, title: `בדיקת ערב · יום ${n}`, start: new Date(dayEnd.valueOf() - state.settings.reminderMinutes * 60000).toISOString(), end: dayEnd.toISOString(), reason: `${state.settings.reminderMinutes} דקות לפני השקיעה המקומית${safety ? `, עם מרווח ביטחון של ${safety} דקות` : ""}.`, done: afternoon });
+          if (morningInstant < s.sunrise) morningInstant = s.sunrise;
+          if (morningInstant >= s.sunset) { morningInstant = s.sunrise; review("morning-outside-day", "שעת הבוקר שנבחרה מחוץ לעונת היום", "תזכורת הבוקר הוזזה לזריחה כדי להישאר בתוך יום הבדיקה."); }
+          addPlan({ ...base, id: `bedikah-${h.e.id}-${n}-am`, title: `בדיקת בוקר · יום ${n}`, start: morningInstant.toISOString(), end: s.sunset.toISOString(), reason: "תזכורת לרישום בדיקה; אינה קביעה שבדיקה בוצעה.", done: morning || (state.settings.bedikot === "first-last" && checks[n].length > 0) });
+          if (state.settings.bedikot === "twice") addPlan({ ...base, id: `bedikah-${h.e.id}-${n}-pm`, title: `בדיקת ערב · יום ${n}`, start: new Date(s.sunset.valueOf() - state.settings.reminderMinutes * 60000).toISOString(), end: s.sunset.toISOString(), reason: `${state.settings.reminderMinutes} דקות לפני השקיעה המקומית.`, done: afternoon });
         } else review(`sun-${d}`, "חסרים זמני יום", "אין זמן שמש תקף למועד ולמיקום שנבחרו; נדרש בירור.");
       }
       const c = atLocation(state, immersionDate), s = sun(immersionDate, c, nf);
-      if (s.nightfall) addPlan({ id: `mikvah-${h.e.id}`, kind: "mikvah", title: "ליל טבילה מתוכנן", date: immersionDate, onah: "evening", start: late(s.nightfall).toISOString(), reason: "הערב שלאחר היום השביעי. מותנה בהשלמת הספירה, הבדיקות ובירור הספקות; אינו אישור טבילה.", source: SOURCES.clean, eventIds: [h.e.id], cityId: c.id });
+      if (s.nightfall) addPlan({ id: `mikvah-${h.e.id}`, kind: "mikvah", title: "ליל טבילה מתוכנן", date: immersionDate, onah: "evening", start: s.nightfall.toISOString(), reason: "הערב שלאחר היום השביעי. מותנה בהשלמת הספירה, הבדיקות ובירור הספקות; אינו אישור טבילה.", source: SOURCES.clean, eventIds: [h.e.id], cityId: c.id });
     } else if (earliestHefsek) {
       const d = earliestHefsek < date ? date : earliestHefsek, c = atLocation(state, d), s = sun(d, c);
-      if (s.sunset) addPlan({ id: `hefsek-${latestNiddah?.e.id}`, kind: "hefsek", title: "תזכורת להפסק טהרה", date: d, onah: "day", start: new Date(early(s.sunset).valueOf() - state.settings.reminderMinutes * 60000).toISOString(), end: early(s.sunset).toISOString(), reason: "זהו המועד המוקדם לפי ההמתנה שנבחרה, ורק אם הדימום פסק והבדיקה תקפה. לא נרשם הפסק באופן אוטומטי.", source: SOURCES.wait, eventIds: latestNiddah ? [latestNiddah.e.id] : [], cityId: c.id });
+      if (s.sunset) addPlan({ id: `hefsek-${latestNiddah?.e.id}`, kind: "hefsek", title: "תזכורת להפסק טהרה", date: d, onah: "day", start: new Date(s.sunset.valueOf() - state.settings.reminderMinutes * 60000).toISOString(), end: s.sunset.toISOString(), reason: "זהו המועד המוקדם לפי ההמתנה שנבחרה, ורק אם הדימום פסק והבדיקה תקפה. לא נרשם הפסק באופן אוטומטי.", source: SOURCES.wait, eventIds: latestNiddah ? [latestNiddah.e.id] : [], cityId: c.id });
     }
     const addOnah = (abs, onah, kind, title, reason, source, eventIds, id) => {
       const civil = fromAbs(abs), location = atLocation(state, onah === "night" ? addDays(civil, -1) : civil);
       const w = onahWindow(abs, onah, location, nf);
       if (!w.start || !w.end) { review(`onah-sun-${id}`, "לא ניתן לחשב עונה במיקום הזה", "חסרים זמני זריחה או שקיעה תקפים.", eventIds); return; }
-      const p = { id, kind, title, date: w.date, onah, start: early(w.start).toISOString(), end: late(w.end).toISOString(), reason: safety ? `${reason} כולל מרווח ביטחון של ${safety} דקות בכל צד.` : reason, source, eventIds, cityId: location.id, tentative: true };
+      const p = { id, kind, title, date: w.date, onah, start: w.start.toISOString(), end: w.end.toISOString(), reason, source, eventIds, cityId: location.id, tentative: true };
       addPlan(p);
       if (state.settings.orZarua && ["monthly", "interval", "average"].includes(kind)) {
         const prev = 2 * abs + (onah === "night" ? 0 : 1) - 1, pa = Math.floor(prev / 2), po = prev % 2 ? "day" : "night", pw = onahWindow(pa, po, location);
-        if (pw.start && pw.end) addPlan({ ...p, id: `oz-${id}`, kind: "or-zarua", title: `אור זרוע · ${title}`, date: pw.date, onah: po, start: early(pw.start).toISOString(), end: late(pw.end).toISOString(), reason: "העונה הקודמת לעונה הצפויה, לפי האפשרות שנבחרה בהגדרות." });
+        if (pw.start && pw.end) addPlan({ ...p, id: `oz-${id}`, kind: "or-zarua", title: `אור זרוע · ${title}`, date: pw.date, onah: po, start: pw.start.toISOString(), end: pw.end.toISOString(), reason: "העונה הקודמת לעונה הצפויה, לפי האפשרות שנבחרה בהגדרות." });
       }
     };
     const last = flows.at(-1), lastRecorded = recordedFlows.at(-1);
@@ -577,7 +570,7 @@ const Maayan = (() => {
       `מקום: ${city(s.cityId).name}`, `המתנה: ${SETTING_LABELS.wait[s.wait]}`, `הפלגה: ${SETTING_LABELS.haflagah[s.haflagah]}`,
       `עונה בינונית: ${SETTING_LABELS.beinonit[s.beinonit]}`, `יום 31: ${yesNo(s.day31)}`, `אור זרוע: ${yesNo(s.orZarua)}`,
       `שימור הפלגות ארוכות: ${yesNo(s.carryLongIntervals)}`, `שימור עונת חודש בזמן דימום: ${yesNo(s.carryMonthly)}`,
-      `יום ל׳ בחודש חסר: ${SETTING_LABELS.missingMonthly[s.missingMonthly]}`, `בדיקות: ${SETTING_LABELS.bedikot[s.bedikot]}`, `מרווח ביטחון: ${s.safetyMinutes} דקות`,
+      `יום ל׳ בחודש חסר: ${SETTING_LABELS.missingMonthly[s.missingMonthly]}`, `בדיקות: ${SETTING_LABELS.bedikot[s.bedikot]}`,
       `צאת הכוכבים: ${s.nightfall}°`, `מצב: ${SETTING_LABELS.special[s.special]}`, `הערת שיטה: ${s.methodNote || "לא נרשמה"}`,
     ];
   }
