@@ -22,7 +22,7 @@ jobs:
           "--- install log ---"; Get-Content -LiteralPath "$dir\install.log" -Encoding utf8 -ErrorAction SilentlyContinue
           $sh = New-Object -ComObject Shell.Application
           foreach ($d in @($desk, $prog)) {
-            $lnk = Get-ChildItem -LiteralPath $d -Filter "*.lnk" | Where-Object { $_.Name -ne "Microsoft Edge.lnk" } | Select-Object -First 1
+            $lnk = Get-ChildItem -LiteralPath $d -Filter "*.lnk" | Where-Object { $_.Name -eq "מעיין.lnk" } | Select-Object -First 1
             if (-not $lnk) { throw "no shortcut in $d" }
             $link = $sh.Namespace($d).ParseName($lnk.Name).GetLink
             "shortcut: $($lnk.Name) -> $($link.Path)"
