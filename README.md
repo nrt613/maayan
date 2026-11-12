@@ -9,3 +9,6 @@
 - `src/tests.js` — בדיקות המנוע. הרצה: `node -e 'const M=require("./src/core.js");console.log(require("./src/tests.js")(M).run().filter(t=>!t.ok))'`
 - `src/scenarios.js` — תרחישים לבודקים.
 - `verify.js` — בדיקה עצמאית רחבה: כ-65,000 השוואות מול לוח עברי חיצוני (ICU) ומול אלגוריתם שמש שני. הרצה: `node verify.js`
+
+## התקנה במחשב Windows בלי אינטרנט
+`download/Maayan-Setup.exe` — לחיצה כפולה מתקינה את מעיין עם אייקון בשולחן העבודה ובתפריט התחל. קוד המקור ב-`windows/` (נבנה ב-Go: `llvm-windres` למשאבים ואז `GOOS=windows go build -ldflags "-H windowsgui"`).
