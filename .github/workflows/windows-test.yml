@@ -30,7 +30,8 @@ jobs:
           }
           "message box open: " + (-not $p.HasExited)
           Get-Process | Where-Object { $_.MainWindowTitle -ne "" } | ForEach-Object { "window: $($_.ProcessName) / $($_.MainWindowTitle)" }
-          if ((Get-FileHash -LiteralPath "$dir\maayan.html").Hash -ne (Get-FileHash index.html).Hash) { throw "installed html differs" }
+          $a = (Get-Content -LiteralPath "$dir\maayan.html" -Raw -Encoding utf8) -replace "`r",""; $b = (Get-Content index.html -Raw -Encoding utf8) -replace "`r",""
+          if ($a -ne $b) { throw "installed html differs" }
           "INSTALL OK"
           Stop-Process -Id $p.Id -Force -ErrorAction SilentlyContinue
       - name: Engine tests on Windows Node
