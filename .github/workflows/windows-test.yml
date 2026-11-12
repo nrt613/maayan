@@ -17,8 +17,9 @@ jobs:
           $desk = [Environment]::GetFolderPath('Desktop')
           $prog = [Environment]::GetFolderPath('Programs')
           "--- installed files ---"; Get-ChildItem $dir | Format-Table Name, Length
-          "--- desktop ---"; Get-ChildItem $desk -Filter "*.lnk" | Select-Object Name
-          "--- start menu ---"; Get-ChildItem $prog -Filter "*.lnk" | Select-Object Name
+          "--- install log ---"; Get-Content "$dir\install.log" -ErrorAction SilentlyContinue
+          "--- desktop ---"; Get-ChildItem $desk | Select-Object Name
+          "--- start menu ---"; Get-ChildItem $prog | Select-Object Name
           $w = New-Object -ComObject WScript.Shell
           $s = $w.CreateShortcut((Get-ChildItem $desk -Filter "*.lnk" | Select-Object -First 1).FullName)
           "shortcut target: " + $s.TargetPath; "shortcut icon: " + $s.IconLocation

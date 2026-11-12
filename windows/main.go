@@ -4,6 +4,7 @@ package main
 
 import (
 	_ "embed"
+	"fmt"
 	"encoding/base64"
 	"os"
 	"os/exec"
@@ -68,13 +69,30 @@ func shortcut(dir, target, icon string) {
 	}
 	cmd := exec.Command("powershell.exe", "-NoProfile", "-NonInteractive", "-ExecutionPolicy", "Bypass", "-EncodedCommand", base64.StdEncoding.EncodeToString(raw))
 	cmd.SysProcAttr = &syscall.SysProcAttr{HideWindow: true}
-	if cmd.Run() == nil {
-		if _, err := os.Stat(link); err == nil {
+	out, err := cmd.CombinedOutput()
+	logf("powershell %s: err=%v out=%s", link, err, strings.TrimSpace(string(out)))
+	if err == nil {
+		if _, e := os.Stat(link); e == nil {
 			return
 		}
 	}
 	url := "[InternetShortcut]\r\nURL=file:///" + filepath.ToSlash(target) + "\r\nIconFile=" + icon + "\r\nIconIndex=0\r\n"
-	os.WriteFile(filepath.Join(dir, "מעיין.url"), []byte(url), 0o644)
+	werr := os.WriteFile(filepath.Join(dir, "מעיין.url"), []byte(url), 0o644)
+	logf("url fallback %s: %v", dir, werr)
+}
+
+var logPath string
+
+func logf(format string, a ...any) {
+	if logPath == "" {
+		return
+	}
+	f, err := os.OpenFile(logPath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0o644)
+	if err != nil {
+		return
+	}
+	defer f.Close()
+	fmt.Fprintf(f, format+"\r\n", a...)
 }
 
 func main() {
@@ -97,6 +115,9 @@ func main() {
 		return
 	}
 	os.WriteFile(icon, appIcon, 0o644)
+	logPath = filepath.Join(dir, "install.log")
+	os.Remove(logPath)
+	logf("desktop=%q programs=%q", folder(csidlDesktop), folder(csidlPrograms))
 	shortcut(folder(csidlDesktop), page, icon)
 	shortcut(folder(csidlPrograms), page, icon)
 
