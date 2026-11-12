@@ -5,13 +5,10 @@ package main
 import (
 	_ "embed"
 	"fmt"
-	"encoding/base64"
 	"os"
-	"os/exec"
 	"path/filepath"
-	"strings"
+	"runtime"
 	"syscall"
-	"unicode/utf16"
 	"unsafe"
 )
 
@@ -53,24 +50,61 @@ func folder(csidl uintptr) string {
 	return syscall.UTF16ToString(buf)
 }
 
-// קיצור דרך אמיתי (lnk) דרך PowerShell, שמטפל בשמות משתמש בעברית; אם נכשל — קובץ url
+type guid struct {
+	d1     uint32
+	d2, d3 uint16
+	d4     [8]byte
+}
+
+var (
+	ole32          = syscall.NewLazyDLL("ole32.dll")
+	coInit         = ole32.NewProc("CoInitializeEx")
+	coCreate       = ole32.NewProc("CoCreateInstance")
+	clsidShellLink = guid{0x00021401, 0, 0, [8]byte{0xC0, 0, 0, 0, 0, 0, 0, 0x46}}
+	iidShellLinkW  = guid{0x000214F9, 0, 0, [8]byte{0xC0, 0, 0, 0, 0, 0, 0, 0x46}}
+	iidPersistFile = guid{0x0000010B, 0, 0, [8]byte{0xC0, 0, 0, 0, 0, 0, 0, 0x46}}
+)
+
+// קריאה לפונקציה בטבלת ה-COM של אובייקט
+func vcall(obj uintptr, idx int, args ...uintptr) uintptr {
+	vtbl := *(*uintptr)(unsafe.Pointer(obj))
+	fn := *(*uintptr)(unsafe.Pointer(vtbl + uintptr(idx)*unsafe.Sizeof(uintptr(0))))
+	r, _, _ := syscall.SyscallN(fn, append([]uintptr{obj}, args...)...)
+	return r
+}
+
+// קיצור דרך lnk דרך IShellLinkW — עובד עם נתיבים ושמות בעברית בכל שפת Windows
+func createLink(link, target, icon, desc string) error {
+	var sl uintptr
+	if hr, _, _ := coCreate.Call(uintptr(unsafe.Pointer(&clsidShellLink)), 0, 1, uintptr(unsafe.Pointer(&iidShellLinkW)), uintptr(unsafe.Pointer(&sl))); hr != 0 || sl == 0 {
+		return fmt.Errorf("CoCreateInstance 0x%x", hr)
+	}
+	defer vcall(sl, 2)
+	if hr := vcall(sl, 20, uintptr(unsafe.Pointer(u16(target)))); hr != 0 {
+		return fmt.Errorf("SetPath 0x%x", hr)
+	}
+	vcall(sl, 9, uintptr(unsafe.Pointer(u16(filepath.Dir(target)))))
+	vcall(sl, 7, uintptr(unsafe.Pointer(u16(desc))))
+	vcall(sl, 17, uintptr(unsafe.Pointer(u16(icon))), 0)
+	var pf uintptr
+	if hr := vcall(sl, 0, uintptr(unsafe.Pointer(&iidPersistFile)), uintptr(unsafe.Pointer(&pf))); hr != 0 || pf == 0 {
+		return fmt.Errorf("QueryInterface 0x%x", hr)
+	}
+	defer vcall(pf, 2)
+	if hr := vcall(pf, 6, uintptr(unsafe.Pointer(u16(link))), 1); hr != 0 {
+		return fmt.Errorf("Save 0x%x", hr)
+	}
+	return nil
+}
+
+// קיצור דרך עם אייקון; אם נכשל — קובץ url
 func shortcut(dir, target, icon string) {
 	if dir == "" {
 		return
 	}
 	link := filepath.Join(dir, "מעיין.lnk")
-	q := func(s string) string { return "'" + strings.ReplaceAll(s, "'", "''") + "'" }
-	script := "$w=New-Object -ComObject WScript.Shell;$s=$w.CreateShortcut(" + q(link) + ");$s.TargetPath=" + q(target) +
-		";$s.IconLocation=" + q(icon+",0") + ";$s.Description='מעיין — יומן טהרת המשפחה';$s.Save()"
-	enc := utf16.Encode([]rune(script))
-	raw := make([]byte, len(enc)*2)
-	for i, c := range enc {
-		raw[2*i], raw[2*i+1] = byte(c), byte(c>>8)
-	}
-	cmd := exec.Command("powershell.exe", "-NoProfile", "-NonInteractive", "-ExecutionPolicy", "Bypass", "-EncodedCommand", base64.StdEncoding.EncodeToString(raw))
-	cmd.SysProcAttr = &syscall.SysProcAttr{HideWindow: true}
-	out, err := cmd.CombinedOutput()
-	logf("powershell %s: err=%v out=%s", link, err, strings.TrimSpace(string(out)))
+	err := createLink(link, target, icon, "מעיין — יומן טהרת המשפחה")
+	logf("lnk %s: %v", link, err)
 	if err == nil {
 		if _, e := os.Stat(link); e == nil {
 			return
@@ -96,6 +130,8 @@ func logf(format string, a ...any) {
 }
 
 func main() {
+	runtime.LockOSThread()
+	coInit.Call(0, 2)
 	base := os.Getenv("LOCALAPPDATA")
 	if base == "" {
 		base = filepath.Join(os.Getenv("USERPROFILE"), "AppData", "Local")

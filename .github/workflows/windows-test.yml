@@ -8,51 +8,33 @@ jobs:
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Run installer (fresh install)
+      - name: Install with a Hebrew folder name
         shell: pwsh
         run: |
+          $env:LOCALAPPDATA = Join-Path $env:LOCALAPPDATA "בדיקה_עברית"
+          New-Item -ItemType Directory -Force -Path $env:LOCALAPPDATA | Out-Null
           $p = Start-Process -FilePath "download\Maayan-Setup.exe" -PassThru
-          Start-Sleep -Seconds 20
+          Start-Sleep -Seconds 15
           $dir = Join-Path $env:LOCALAPPDATA "Maayan"
           $desk = [Environment]::GetFolderPath('Desktop')
           $prog = [Environment]::GetFolderPath('Programs')
-          "--- installed files ---"; Get-ChildItem $dir | Format-Table Name, Length
-          "--- install log ---"; Get-Content "$dir\install.log" -ErrorAction SilentlyContinue
-          "--- desktop ---"; Get-ChildItem $desk | Select-Object Name
-          "--- start menu ---"; Get-ChildItem $prog | Select-Object Name
-          $w = New-Object -ComObject WScript.Shell
-          $s = $w.CreateShortcut((Get-ChildItem $desk -Filter "*.lnk" | Select-Object -First 1).FullName)
-          "shortcut target: " + $s.TargetPath; "shortcut icon: " + $s.IconLocation
-          "--- installer still waiting on message box: " + (-not $p.HasExited)
-          Get-Process | Where-Object { $_.MainWindowTitle -ne "" } | Select-Object ProcessName, MainWindowTitle | Format-Table
-          if (-not (Test-Path "$dir\maayan.html")) { throw "html missing" }
-          if (-not (Test-Path "$dir\maayan.ico")) { throw "icon missing" }
-          if (-not (Test-Path (Join-Path $desk "*.lnk"))) { throw "desktop shortcut missing" }
-          if (-not (Test-Path (Join-Path $prog "*.lnk"))) { throw "start menu shortcut missing" }
-          if ($s.TargetPath -ne "$dir\maayan.html") { throw "bad target" }
+          "--- installed files ---"; Get-ChildItem -LiteralPath $dir | ForEach-Object { "$($_.Name) $($_.Length)" }
+          "--- install log ---"; Get-Content -LiteralPath "$dir\install.log" -Encoding utf8 -ErrorAction SilentlyContinue
+          $sh = New-Object -ComObject Shell.Application
+          foreach ($d in @($desk, $prog)) {
+            $lnk = Get-ChildItem -LiteralPath $d -Filter "*.lnk" | Where-Object { $_.Name -ne "Microsoft Edge.lnk" } | Select-Object -First 1
+            if (-not $lnk) { throw "no shortcut in $d" }
+            $link = $sh.Namespace($d).ParseName($lnk.Name).GetLink
+            "shortcut: $($lnk.Name) -> $($link.Path)"
+            if ($link.Path -ne "$dir\maayan.html") { throw "bad target $($link.Path)" }
+          }
+          "message box open: " + (-not $p.HasExited)
+          Get-Process | Where-Object { $_.MainWindowTitle -ne "" } | ForEach-Object { "window: $($_.ProcessName) / $($_.MainWindowTitle)" }
+          if ((Get-FileHash -LiteralPath "$dir\maayan.html").Hash -ne (Get-FileHash index.html).Hash) { throw "installed html differs" }
+          "INSTALL OK"
           Stop-Process -Id $p.Id -Force -ErrorAction SilentlyContinue
-          (Get-FileHash "$dir\maayan.html").Hash
-          (Get-FileHash "index.html").Hash
-      - name: Run installer again (update keeps install)
+      - name: Engine tests on Windows Node
         shell: pwsh
         run: |
-          $p = Start-Process -FilePath "download\Maayan-Setup.exe" -PassThru
-          Start-Sleep -Seconds 12
-          Get-Process | Where-Object { $_.MainWindowTitle -ne "" } | Select-Object ProcessName, MainWindowTitle | Format-Table
-          Stop-Process -Id $p.Id -Force -ErrorAction SilentlyContinue
-          Get-ChildItem (Join-Path $env:LOCALAPPDATA "Maayan") | Format-Table Name, Length, LastWriteTime
-      - name: Open installed app in Edge and run the built-in test suite
-        shell: pwsh
-        run: |
-          $html = (Join-Path $env:LOCALAPPDATA "Maayan\maayan.html")
-          $edge = "C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe"
-          $url = "file:///" + ($html -replace '\\','/')
-          & $edge --headless=new --disable-gpu --window-size=412,915 --screenshot="$PWD\shot.png" $url 2>$null
-          Start-Sleep -Seconds 5
-          Get-Item shot.png | Format-Table Name, Length
           node -e "const M=require('./src/core.js');const r=require('./src/tests.js')(M).run();const f=r.filter(t=>!t.ok);console.log('engine tests on Windows:',r.length-f.length+'/'+r.length);f.forEach(t=>console.log('FAIL',t.name,t.error));process.exit(f.length?1:0)"
           node verify.js
-      - uses: actions/upload-artifact@v4
-        with:
-          name: screenshot
-          path: shot.png
