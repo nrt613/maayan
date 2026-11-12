@@ -68,6 +68,18 @@ const MaayanTests = (M) => {
   test("המתנה", "ראייה אחרי השקיעה נספרת ליום העברי הבא", () => a.equal(run([event("flow", N(2), "22:00")]).earliestHefsek, N(7)));
   test("המתנה", "שיטת ארבעה ימים נספרת ממועד היחסים ולא מהראייה", () => a.equal(run([event("intimacy", N(1), "10:00"), event("flow", N(3), "10:00")], { wait: "four-from-relations" }).earliestHefsek, N(4)));
   test("המתנה", "שיטת ארבעה ימים בלי מועד בסיס מסומנת לבירור ולא מנוחשת", () => { const r = run([event("flow", N(2))], { wait: "four-from-relations" }); a.equal(r.earliestHefsek, undefined); a.ok(r.reviews.some(r => r.id === "wait-base")); });
+  test("מרווח ביטחון", "עונת פרישה מתחילה 5 דקות לפני השקיעה ונגמרת 5 דקות אחרי הזריחה", () => {
+    const x = run([event("flow", N(2), "22:00")]).plans.find(p => p.kind === "average"), y = run([event("flow", N(2), "22:00")], { safetyMinutes: 0 }).plans.find(p => p.kind === "average");
+    a.equal(new Date(y.start) - new Date(x.start), 5 * 60000); a.equal(new Date(x.end) - new Date(y.end), 5 * 60000);
+  });
+  test("מרווח ביטחון", "הפסק 4 דקות לפני השקיעה מסומן לבירור ואינו פותח ספירה", () => {
+    const d = N(6), ss = sun(d, city("netanya")).sunset, t = timeInZone(new Date(ss - 4 * 60000), "Asia/Jerusalem");
+    const r = run([event("flow", N(2)), event("hefsek", d, t)]); a.equal(r.hefsek, undefined);
+  });
+  test("מרווח ביטחון", "תזכורת להפסק ובדיקת ערב מסתיימות לפני השקיעה בפער המרווח", () => {
+    const r = run([event("flow", N(2)), event("hefsek", N(6), "16:00")]), b = r.plans.find(p => p.id.endsWith("-1-pm"));
+    a.equal(sun(b.date, city("netanya")).sunset - new Date(b.end), 5 * 60000);
+  });
   test("שבעה נקיים", "הפסק תקף פותח שבעה ימים ומתכנן טבילה בערב השביעי", () => { const r = run([event("flow", N(2)), event("hefsek", N(6), "16:00")]); a.equal(r.immersionDate, N(13)); a.equal(r.plans.filter(p => p.kind === "bedikah").length, 14); a.ok(r.plans.find(p => p.kind === "mikvah").tentative); });
   test("שבעה נקיים", "הפסק מוקדם אינו פותח ספירה בלי הוראה מתועדת", () => { const r = run([event("flow", N(2)), event("hefsek", N(4), "16:00")]); a.equal(r.hefsek, undefined); a.ok(r.reviews.some(r => r.id.startsWith("hefsek-early"))); });
   test("שבעה נקיים", "הוראה אישית מתועדת מאפשרת הפסק מוקדם", () => { const h = event("hefsek", N(4), "16:00", { authorityNote: "הוראה אישית שנרשמה לצורך הבדיקה" }); a.equal(run([event("flow", N(2)), h]).hefsek?.id, h.id); });
@@ -91,7 +103,7 @@ const MaayanTests = (M) => {
   test("בסיס", "ראייה עתידית אינה משנה את החישוב הנוכחי", () => { const r = run([event("flow", "2026-12-01")]); a.equal(r.latestFlow, undefined); a.ok(r.reviews.some(r => r.id.startsWith("future"))); });
   test("בסיס", "עריכת תאריך מחשבת מחדש את כל המועדים", () => { const e = event("flow", N(2)), x = run([e]), y = run([{ ...e, date: N(3) }]); a.notEqual(x.plans.find(p => p.kind === "average").date, y.plans.find(p => p.kind === "average").date); });
   test("בסיס", "סדר ההזנה אינו משפיע על החישוב", () => { const x = event("flow", N(2)), y = event("flow", N(30)); a.deepEqual(run([x, y]).plans, run([y, x]).plans); });
-  test("אור זרוע", "העונה שלפני העונה המחושבת", () => { const pp = run([event("flow", N(2))], { orZarua: true }).plans; const x = pp.find(p => p.kind === "average"), o = pp.find(p => p.id === `oz-${x.id}`); a.equal(o.onah, "night"); a.equal(new Date(o.end).valueOf(), new Date(x.start).valueOf()); });
+  test("אור זרוע", "העונה שלפני העונה המחושבת", () => { const pp = run([event("flow", N(2))], { orZarua: true, safetyMinutes: 0 }).plans; const x = pp.find(p => p.kind === "average"), o = pp.find(p => p.id === `oz-${x.id}`); a.equal(o.onah, "night"); a.equal(new Date(o.end).valueOf(), new Date(x.start).valueOf()); });
   test("מקום וזמן", "נסיעה משנה את אזור הזמן של מועד עתידי בלי לשנות רישום קודם", () => { const s = emptyState(); s.events = [event("flow", N(2))]; const t = N(1, 2); s.trips = [{ id: uuid(), from: t, to: t, cityId: "paris" }]; const p = calculate(s, NOW).plans.find(p => p.kind === "average"); a.equal(p.cityId, "paris"); a.equal(s.events[0].cityId, "netanya"); });
   test("מקום וזמן", "מעבר קו התאריך מסומן ולא מנוחש", () => { const r = run([event("flow", N(2), "10:00", { cityId: "los-angeles" }), event("note", N(4), "10:00", { cityId: "sydney" })]); a.ok(r.reviews.some(r => r.id === "dateline")); a.equal(r.plans.filter(p => p.kind === "average").length, 0); });
   test("מקום וזמן", "עונת לילה ועונת יום נפגשות בדיוק בזריחה", () => { const x = hd(N(10)).abs(), n = onahWindow(x, "night", city("netanya")), d = onahWindow(x, "day", city("netanya")); a.equal(n.end.toISOString(), d.start.toISOString()); });
@@ -114,7 +126,7 @@ const MaayanTests = (M) => {
   });
   test("מקום וזמן", "תזכורת בוקר שנופלת בשעה שאינה קיימת עוברת לזריחה ומסומנת", () => {
     const ny = { cityId: "new-york" };
-    const r = run([event("flow", "2026-03-01", "10:00", ny), event("hefsek", "2026-03-05", "15:00", ny)], { ...ny, morningTime: "02:30" }, new Date("2026-03-07T16:00:00Z"));
+    const r = run([event("flow", "2026-03-01", "10:00", ny), event("hefsek", "2026-03-05", "15:00", ny)], { ...ny, morningTime: "02:30", safetyMinutes: 0 }, new Date("2026-03-07T16:00:00Z"));
     const m = r.plans.find(p => p.kind === "bedikah" && p.date === "2026-03-08" && p.id.endsWith("-am"));
     a.equal(m?.start, sun("2026-03-08", city("new-york")).sunrise.toISOString()); a.ok(r.reviews.some(x => x.id === "morning-clock-2026-03-08"));
   });

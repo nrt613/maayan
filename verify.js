@@ -56,7 +56,7 @@ for (let i = 0; i < 4000; i++) {
   ok(ip && planHebDay(ip) === addD(b.hd, gapH) && ip.onah === b.onah && ip.title.includes(String(gapH + 1)), `interval ${a.hd}->${b.hd}`);
   ok(r.earliestHefsek === addD(b.hd, 4), `hefsek ${b.hd} ${r.earliestHefsek}`);
   if (settings.orZarua) for (const p of r.plans.filter(p => p.kind === "or-zarua")) {
-    const src = r.plans.find(q => p.id === "oz-" + q.id); ok(src && p.end === src.start, "or zarua adjacency");
+    const src = r.plans.find(q => p.id === "oz-" + q.id); ok(src && new Date(p.end) - new Date(src.start) === 10 * 60000, "or zarua adjacency");
   }
   // אין מועד שמתחיל אחרי שהסתיים, וחלונות העונות תואמים זריחה/שקיעה
   for (const p of r.plans) if (p.end) ok(new Date(p.start) < new Date(p.end), "window order " + p.id);
