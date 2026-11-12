@@ -333,3 +333,9 @@ textarea { resize: vertical; }
   .times dd { font-size: 16px; }
 }
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+/* שפות משמאל לימין: חצים מתהפכים */
+[dir="ltr"] .ic.dirflip { transform: scaleX(-1); }
+[dir="ltr"] details[open] > summary > .ic.dirflip:last-child, [dir="ltr"] .scen.open .scen-h > .ic.dirflip:last-child { transform: scaleX(-1) rotate(-90deg); }
+.langs { justify-self: center; flex-wrap: wrap; }
+.welcome .langs { margin-inline: auto; }
+.langs button { padding: 6px 12px; }

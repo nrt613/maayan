@@ -53,6 +53,14 @@ const Maayan = (() => {
   const absFromYMD = (y, m, d) => Math.round(Date.UTC(y, m - 1, d) / 864e5) + RD_1970;
   function ymdFromAbs(abs) { const t = new Date((abs - RD_1970) * 864e5); return [t.getUTCFullYear(), t.getUTCMonth() + 1, t.getUTCDate()]; }
 
+  /* שפת התצוגה של תאריכים עבריים ולועזיים. 0 = אדר א׳ בשנה מעוברת */
+  let LANG = "he";
+  const LOCALES = { he: "he-IL", en: "en-GB", fr: "fr-FR", es: "es-ES" };
+  const MONTH_TR = {
+    en: { 0: "Adar I", 1: "Nisan", 2: "Iyar", 3: "Sivan", 4: "Tammuz", 5: "Av", 6: "Elul", 7: "Tishrei", 8: "Cheshvan", 9: "Kislev", 10: "Tevet", 11: "Shevat", 12: "Adar", 13: "Adar II" },
+    fr: { 0: "Adar I", 1: "Nissan", 2: "Iyar", 3: "Sivan", 4: "Tamouz", 5: "Av", 6: "Eloul", 7: "Tichri", 8: "'Hechvan", 9: "Kislev", 10: "Tévet", 11: "Chevat", 12: "Adar", 13: "Adar II" },
+    es: { 0: "Adar I", 1: "Nisán", 2: "Iyar", 3: "Siván", 4: "Tamuz", 5: "Av", 6: "Elul", 7: "Tishrei", 8: "Jeshván", 9: "Kislev", 10: "Tevet", 11: "Shevat", 12: "Adar", 13: "Adar II" },
+  };
   const MONTH_NAMES = { 1: "ניסן", 2: "אייר", 3: "סיון", 4: "תמוז", 5: "אב", 6: "אלול", 7: "תשרי", 8: "חשון", 9: "כסלו", 10: "טבת", 11: "שבט", 12: "אדר", 13: "אדר ב׳" };
   const monthName = (m, y) => m === ADAR_I && isLeapYear(y) ? "אדר א׳" : MONTH_NAMES[m];
   function gematriya(n) {
@@ -97,8 +105,9 @@ const Maayan = (() => {
       for (let i = 0; i < Math.abs(n); i++) [m, y] = nextMonth(m, y, Math.sign(n));
       return new HDate(this.dd, m, y);
     }
-    monthName() { return monthName(this.mm, this.yy); }
-    renderGematriya() { return `${gematriya(this.dd)} ${monthName(this.mm, this.yy)} ${gematriya(this.yy % 1000)}`; }
+    monthName() { return LANG === "he" ? monthName(this.mm, this.yy) : MONTH_TR[LANG][this.mm === ADAR_I && isLeapYear(this.yy) ? 0 : this.mm]; }
+    monthTitle() { return LANG === "he" ? `${monthName(this.mm, this.yy)} ${gematriya(this.yy % 1000)}` : `${this.monthName()} ${this.yy}`; }
+    renderGematriya() { return LANG === "he" ? `${gematriya(this.dd)} ${monthName(this.mm, this.yy)} ${gematriya(this.yy % 1000)}` : `${this.dd} ${this.monthName()} ${this.yy}`; }
   }
 
   /* ---------- זמני שמש (NOAA) ---------- */
@@ -234,8 +243,8 @@ const Maayan = (() => {
   const dayNumber = d => isoAbs(d);
   const civilFmt = new Map();
   const civilLabel = (d, short = false) => {
-    const k = short ? "s" : "l";
-    if (!civilFmt.has(k)) civilFmt.set(k, new Intl.DateTimeFormat("he-IL", { day: "numeric", month: short ? "short" : "long", year: short ? undefined : "numeric", timeZone: "UTC" }));
+    const k = LANG + (short ? "s" : "l");
+    if (!civilFmt.has(k)) civilFmt.set(k, new Intl.DateTimeFormat(LOCALES[LANG], { day: "numeric", month: short ? "short" : "long", year: short ? undefined : "numeric", timeZone: "UTC" }));
     const [y, m, day] = d.split("-").map(Number);
     return civilFmt.get(k).format(new Date(Date.UTC(y, m - 1, day, 12)));
   };
@@ -544,13 +553,14 @@ const Maayan = (() => {
     for (const ch of line) { const n = enc.encode(ch).length; if (size + n > 73) { out.push(part); part = " "; size = 1; } part += ch; size += n; }
     out.push(part); return out.join("\r\n");
   }
-  function calendarExport(plans, neutral = true, now = new Date()) {
+  function calendarExport(plans, neutral = true, now = new Date(), labels = {}) {
+    const personal = labels.personal || "תזכורת אישית", details = labels.details || "פרטים ביומן האישי. מועד לתכנון בלבד.";
     const rows = ["BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//Maayan//Personal Calendar//HE", "CALSCALE:GREGORIAN", "METHOD:PUBLISH"];
     for (const p of plans.filter(x => !x.done && new Date(x.start) >= now).slice(0, 250)) {
-      const summary = escapeICS(neutral ? "תזכורת אישית" : p.title);
+      const summary = escapeICS(neutral ? personal : p.title);
       rows.push("BEGIN:VEVENT", `UID:${p.id}@maayan.local`, `DTSTAMP:${utc(now.toISOString())}`, `DTSTART:${utc(p.start)}`,
         `DTEND:${utc(p.end ?? new Date(new Date(p.start).valueOf() + 30 * 60000).toISOString())}`, `SUMMARY:${summary}`,
-        `DESCRIPTION:${escapeICS(neutral ? "פרטים ביומן האישי. מועד לתכנון בלבד." : `${p.reason}\n${p.source}`)}`,
+        `DESCRIPTION:${escapeICS(neutral ? details : `${p.reason}\n${p.source}`)}`,
         "CLASS:PRIVATE", "TRANSP:TRANSPARENT", "BEGIN:VALARM", "TRIGGER:PT0M", "ACTION:DISPLAY", `DESCRIPTION:${summary}`, "END:VALARM", "END:VEVENT");
     }
     rows.push("END:VCALENDAR");
@@ -603,8 +613,10 @@ const Maayan = (() => {
     return s;
   }
 
+  const setLang = l => { if (LOCALES[l]) LANG = l; };
+  const getLang = () => LANG;
   return {
-    HDate, isLeapYear, daysInMonth, monthsInYear, gematriya, hebrew2abs, abs2hebrew,
+    setLang, getLang, LOCALES, HDate, isLeapYear, daysInMonth, monthsInYear, gematriya, hebrew2abs, abs2hebrew,
     CITIES, city, EVENT_TYPES, EVENT_NAMES, CHECKLIST, SETTING_DEFAULTS, SETTING_LABELS, RESULT_NAMES, uuid, validISO, parseState, safeParse, emptyState, ValidationError,
     fromISO, toISO, addDays, hd, fromAbs, hebrew, dayNumber, isoAbs, civilLabel, dateInZone, timeInZone, localInstant, sun, atLocation, stamp, onahWindow, today, currentContext,
     ENGINE_VERSION, SOURCES, calculate, sorted,

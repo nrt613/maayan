@@ -1,6 +1,6 @@
 import pathlib
 s=pathlib.Path("src")
-css=(s/"styles.css").read_text(); js="\n".join((s/f).read_text() for f in ["core.js","tests.js","scenarios.js","app.js"])
+css=(s/"styles.css").read_text(); js="\n".join((s/f).read_text() for f in ["core.js","i18n.js","i18n-dict.js","tests.js","scenarios.js","app.js"])
 head='''<title>מעיין</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <meta name="description" content="יומן טהרת המשפחה — חינמי, פרטי, פועל כולו בטלפון">

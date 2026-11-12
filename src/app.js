@@ -1,10 +1,11 @@
 /* מעיין — ממשק. קוד צד-לקוח בלבד; שום מידע לא יוצא מהמכשיר. */
 (() => {
   "use strict";
-  const M = Maayan, SCENARIOS = MaayanScenarios(M);
+  const M = Maayan, SCENARIOS = MaayanScenarios(M), L = MaayanI18n;
+  if (typeof MaayanDict !== "undefined") L.load(MaayanDict);
   const { EVENT_NAMES, CITIES, city, addDays, hebrew, civilLabel, timeInZone, sun, atLocation, currentContext, calculate, hd, fromAbs, fromISO, toISO, HDate } = M;
   const APP_VERSION = "1.0.0-review";
-  const STORE_KEY = "maayan.v1.diary", SEEN_KEY = "maayan.v1.seen";
+  const STORE_KEY = "maayan.v1.diary", SEEN_KEY = "maayan.v1.seen", LANG_KEY = "maayan.v1.lang";
   const $ = sel => document.querySelector(sel);
   const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 
@@ -43,7 +44,7 @@
     refresh: '<path d="M3 12a9 9 0 0 1 15-6.7L21 8M21 3v5h-5M21 12a9 9 0 0 1-15 6.7L3 16M8 16H3v5"/>',
     scale: '<path d="M12 3v18M5 21h14M3 7h18M6 7l-3 7a3 3 0 0 0 6 0zM18 7l-3 7a3 3 0 0 0 6 0z"/>',
   };
-  const I = (n, s = 20) => `<svg class="ic" width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${P[n]}</svg>`;
+  const I = (n, s = 20) => `<svg class="ic${n === "left" || n === "right" || n === "out" ? " dirflip" : ""}" width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${P[n]}</svg>`;
 
   /* ---------- מצב ---------- */
   const storage = {
@@ -84,9 +85,11 @@
 
   /* ---------- עזרים לתצוגה ---------- */
   const hebDay = d => hebrew(d).split(" ")[0];
-  const hebMonthTitle = d => { const h = hd(d); return `${h.monthName()} ${M.gematriya(h.getFullYear() % 1000)}`; };
-  const civilMonthTitle = d => new Intl.DateTimeFormat("he-IL", { month: "long", year: "numeric", timeZone: "UTC" }).format(new Date(`${d.slice(0, 7)}-15T12:00:00Z`));
-  const weekdayName = d => new Intl.DateTimeFormat("he-IL", { weekday: "long", timeZone: "UTC" }).format(new Date(`${d}T12:00:00Z`));
+  const loc = () => M.LOCALES[L.lang];
+  const hebMonthTitle = d => hd(d).monthTitle();
+  const civilMonthTitle = d => new Intl.DateTimeFormat(loc(), { month: "long", year: "numeric", timeZone: "UTC" }).format(new Date(`${d.slice(0, 7)}-15T12:00:00Z`));
+  const weekdayName = d => new Intl.DateTimeFormat(loc(), { weekday: "long", timeZone: "UTC" }).format(new Date(`${d}T12:00:00Z`));
+  const weekHeads = () => L.lang === "he" ? ["א׳", "ב׳", "ג׳", "ד׳", "ה׳", "ו׳", "ש׳"] : [0, 1, 2, 3, 4, 5, 6].map(i => new Intl.DateTimeFormat(loc(), { weekday: "short", timeZone: "UTC" }).format(new Date(Date.UTC(2024, 0, 7 + i, 12))));
   const planHebrew = p => p.onah === "day" ? hebrew(p.date) : hebrew(addDays(p.date, 1));
   const onahLabel = o => o === "day" ? "עונת יום" : o === "night" ? "עונת לילה" : "ערב";
   const SEP_KINDS = ["monthly", "interval", "average", "or-zarua", "manual"];
@@ -180,7 +183,7 @@
         <button class="link" data-cal="today">היום</button>
         <button class="icon-btn" data-cal="1" aria-label="החודש הבא">${I("left")}</button></div></div>
       <div class="seg" role="group" aria-label="סוג לוח"><button data-calmode="civil" aria-pressed="${c.mode === "civil"}">לועזי</button><button data-calmode="hebrew" aria-pressed="${c.mode === "hebrew"}">עברי</button></div>
-      <div class="wk" aria-hidden="true">${["א׳", "ב׳", "ג׳", "ד׳", "ה׳", "ו׳", "ש׳"].map(w => `<span>${w}</span>`).join("")}</div>
+      <div class="wk" aria-hidden="true">${weekHeads().map(w => `<span>${w}</span>`).join("")}</div>
       <div class="days">${dayCells}</div>
       <div class="legend"><span><em class="d-f"></em>וסת</span><span><em class="d-c"></em>הפסק ובדיקות</span><span><em class="d-s"></em>עונת פרישה</span><span><em class="d-m"></em>טבילה מתוכננת</span></div>
       <p class="fine">התאריך העברי במשבצת שייך לשעות היום. בשקיעה מתחיל התאריך העברי הבא.</p>
@@ -195,7 +198,7 @@
     try { const s = M.stamp(e); h = s.hebrewDate; onah = s.onah === "day" ? "יום" : "לילה"; } catch { /* מסומן לבירור */ }
     const status = e.result === "uncertain" ? "ממתין לבירור" : e.result === "bleeding" ? "נרשמה כלא נקייה" : city(e.cityId).name;
     return `<button class="entry" data-edit="${e.id}"><span class="ev-ic t-${e.type}">${I(e.type === "flow" ? "droplet" : e.type === "mikvah" ? "moon" : ["bedikah", "hefsek"].includes(e.type) ? "check" : "book", 17)}</span>
-      <span class="entry-main"><strong>${esc(EVENT_NAMES[e.type])}</strong><small>${esc(civilLabel(e.date, true))} · <span dir="ltr">${e.time}</span> · <span class="hebdate">${esc(h)}</span>${onah ? ` · ${onah}` : ""}</small>${e.note ? `<small class="note">${esc(e.note)}</small>` : ""}</span>
+      <span class="entry-main"><strong>${esc(EVENT_NAMES[e.type])}</strong><small>${esc(civilLabel(e.date, true))} · <span dir="ltr">${e.time}</span> · <span class="hebdate">${esc(h)}</span>${onah ? ` · ${onah}` : ""}</small>${e.note ? `<small class="note" data-nt>${esc(e.note)}</small>` : ""}</span>
       <span class="entry-side"><small>${esc(status)}</small>${I("pencil", 15)}</span></button>`;
   }
 
@@ -268,6 +271,7 @@
         <button class="action" data-act="restore">${I("upload", 19)}<span><strong>שחזור מגיבוי</strong><small>מחליף את היומן לאחר אישור</small></span></button>
         <button class="action" data-act="report">${I("file", 19)}<span><strong>דוח לבירור</strong><small>טקסט גלוי לשליחה למורה הוראה</small></span></button>
         <button class="link danger" data-act="clear">מחיקת כל הרישומים</button></section>
+      <section class="card"><div class="card-h">${I("info")}<div><h3>שפה</h3></div></div>${langSwitch()}</section>
       <section class="card about"><div class="card-h">${I("droplet")}<div><h3>על מעיין</h3><p>גרסה ${APP_VERSION} · מנוע ${M.ENGINE_VERSION}</p></div></div>
         <p>האפליקציה חינמית ופועלת כולה בטלפון, בלי חשבון ובלי שרת. שום מידע לא נשלח לאף אחד.</p>
         <p>להתקנה: בתפריט הדפדפן (⋮) בוחרים ״הוספה למסך הבית״.</p></section>
@@ -367,15 +371,24 @@
       <nav class="tabs" aria-label="ניווט">${NAV.map(([id, t, ic]) => `<button class="${app.tab === id ? "on" : ""}" data-go="${id}"${app.tab === id ? ' aria-current="page"' : ""}>${I(ic, 21)}<span>${t.replace("לוח השנה", "לוח").replace("היומן שלי", "יומן")}</span></button>`).join("")}</nav>`;
   }
   const mark = () => `<span class="mark">${I("droplet", 22)}</span>`;
+  const langSwitch = () => `<div class="seg langs" role="group" aria-label="שפה" data-nt>${Object.entries(L.LANGS).map(([k, n]) => `<button type="button" data-lang="${k}" aria-pressed="${L.lang === k}" lang="${k}">${n}</button>`).join("")}</div>`;
+  function applyLang(l, save) {
+    L.set(l); M.setLang(L.lang);
+    const d = L.dir();
+    document.documentElement.lang = L.lang; document.documentElement.dir = d;
+    for (const id of ["app", "modal", "toast"]) { const el = document.getElementById(id); el.dir = d; el.lang = L.lang; }
+    document.title = L.lang === "he" ? "מעיין" : "Maayan";
+    if (save) storage.set(LANG_KEY, L.lang);
+  }
 
   function render() {
     const root = $("#app"), scroll = window.scrollY, focusId = document.activeElement?.id, selStart = document.activeElement?.selectionStart;
-    root.innerHTML = shell();
+    root.innerHTML = shell(); L.dom(root);
     if (focusId) { const el = document.getElementById(focusId); if (el) { el.focus(); try { if (selStart != null) el.setSelectionRange(selStart, selStart); } catch { /* */ } } }
     window.scrollTo(0, scroll);
     renderModal(); renderToast();
   }
-  function renderToast() { $("#toast").innerHTML = app.toast ? `<div class="toast" role="status">${esc(app.toast)}<button class="icon-btn" data-act="toast-x" aria-label="סגירה">${I("x", 16)}</button></div>` : ""; }
+  function renderToast() { const el = $("#toast"); el.innerHTML = app.toast ? `<div class="toast" role="status">${esc(app.toast)}<button class="icon-btn" data-act="toast-x" aria-label="סגירה">${I("x", 16)}</button></div>` : ""; L.dom(el); }
   function go(tab, top = true) {
     app.tab = tab;
     try { history.replaceState(null, "", "#" + tab); } catch { /* */ }
@@ -388,6 +401,7 @@
     if (!m) { host.innerHTML = ""; document.body.classList.remove("locked"); return; }
     document.body.classList.add("locked");
     host.innerHTML = `<div class="scrim" data-act="close-modal"></div><div class="sheet" role="dialog" aria-modal="true" aria-labelledby="m-title">${modalBody(m)}</div>`;
+    L.dom(host);
     const first = host.querySelector("[autofocus]") || host.querySelector("input,select,textarea,button");
     first?.focus({ preventScroll: true });
   }
@@ -438,7 +452,7 @@
       ${m.error ? `<p class="err" role="alert">${esc(m.error)}</p>` : ""}<div class="m-actions"><button class="btn" type="submit">${I("upload", 17)}פתיחת הגיבוי</button></div></form>`;
     if (m.kind === "confirm") return `<div class="m-h"><h2 id="m-title">${esc(m.title)}</h2>${close}</div><p>${esc(m.text)}</p>
       <div class="m-actions"><button class="btn ${m.danger ? "danger" : ""}" data-act="confirm-yes">${esc(m.yes)}</button><button class="btn ghost" data-act="close-modal">ביטול</button></div>`;
-    if (m.kind === "welcome") return `<div class="welcome"><div class="mark big">${I("droplet", 34)}</div><h2 id="m-title">ברוכה הבאה למעיין</h2>
+    if (m.kind === "welcome") return `<div class="welcome">${langSwitch()}<div class="mark big">${I("droplet", 34)}</div><h2 id="m-title">ברוכה הבאה למעיין</h2>
       <p>יומן אישי לטהרת המשפחה: רישום, חישוב עונות הפרישה, שבעה נקיים ותזכורות.</p>
       <ul class="promises"><li>${I("lock", 18)}<span><strong>פרטי לגמרי.</strong> הכול נשמר רק בטלפון הזה, בלי חשבון ובלי שרת.</span></li>
       <li>${I("scale", 18)}<span><strong>שקוף.</strong> לכל מועד מוצגים הכלל והמקור, ואת שיטת החישוב בוחרים לפי ההנחיה שקיבלת.</span></li>
@@ -475,11 +489,13 @@
     const st = state(), n = now(), note = ($("#rv-note")?.value || "").trim();
     const where = app.mode === "scenario" ? `תרחיש: ${app.scenario.title} (זמן מדומה)` : app.mode === "demo" ? "יומן לדוגמה" : "יומן אישי";
     const tests = app.testResults ? `בדיקות אוטומטיות: ${app.testResults.filter(t => t.ok).length}/${app.testResults.length} עברו` : "בדיקות אוטומטיות: לא הורצו";
-    return [`הערות בודק — מעיין ${APP_VERSION}`, note ? `\nהערות:\n${note}\n` : "", `מקור הנתונים: ${where}`, tests, `מכשיר: ${navigator.userAgent}`, "", M.reportExport(st, n)].join("\n");
+    return [`הערות בודק — מעיין ${APP_VERSION}`, note ? `\nהערות:\n${note}\n` : "", `מקור הנתונים: ${where}`, tests, `מכשיר: ${navigator.userAgent}`, "", M.reportExport(st, n)].map(x => L.tx(x)).join("\n");
   }
 
   /* ---------- אירועים ---------- */
   document.addEventListener("click", async e => {
+    const lb = e.target.closest("[data-lang]");
+    if (lb) { applyLang(lb.dataset.lang, true); render(); return; }
     const t = e.target.closest("[data-go],[data-act],[data-edit],[data-day],[data-cal],[data-calmode],[data-scenario],[data-scenario-load],[data-deltrip]");
     if (!t) return;
     const d = t.dataset;
@@ -516,9 +532,9 @@
       case "delete": app.modal.form = readEventForm(); app.modal.confirmDelete = true; return renderModal();
       case "delete-no": app.modal.confirmDelete = false; return renderModal();
       case "delete-yes": try { const id = app.modal.form.id; app.modal = null; commit({ ...st, events: st.events.filter(x => x.id !== id) }); } catch (err) { toast(err.message); } return;
-      case "report": return textModal("דוח לבירור", "טקסט גלוי עם ההגדרות, הרישומים, המועדים והנקודות לבירור. לא נשלח לאף אחד — את מחליטה למי להעביר.", M.reportExport(st, now()), { name: `maayan-report-${currentContext(st, now()).date}.txt`, type: "text/plain;charset=utf-8" });
+      case "report": return textModal("דוח לבירור", "טקסט גלוי עם ההגדרות, הרישומים, המועדים והנקודות לבירור. לא נשלח לאף אחד — את מחליטה למי להעביר.", L.tx(M.reportExport(st, now())), { name: `maayan-report-${currentContext(st, now()).date}.txt`, type: "text/plain;charset=utf-8" });
       case "review-report": { const text = reviewReport(); if (await copy(text)) return; return textModal("דוח לבודק", "סמנו את הטקסט והעתיקו.", text); }
-      case "ics": { const r = calculate(st, now()); return textModal("קובץ מועדים ליומן", "שומרים כקובץ ופותחים אותו ביומן הטלפון. אם השמירה לא עובדת כאן, פתחו את מעיין ישירות בדפדפן.", M.calendarExport(r.plans, st.settings.neutralReminders, now()), { name: "maayan-dates.ics", type: "text/calendar;charset=utf-8" }); }
+      case "ics": { const r = calculate(st, now()); return textModal("קובץ מועדים ליומן", "שומרים כקובץ ופותחים אותו ביומן הטלפון. אם השמירה לא עובדת כאן, פתחו את מעיין ישירות בדפדפן.", M.calendarExport(r.plans.map(p => ({ ...p, title: L.t(p.title), reason: L.t(p.reason) })), st.settings.neutralReminders, now(), { personal: L.t("תזכורת אישית"), details: L.t("פרטים ביומן האישי. מועד לתכנון בלבד.") }), { name: "maayan-dates.ics", type: "text/calendar;charset=utf-8" }); }
       case "copy-text": return copy(app.modal.text);
       case "dl-text": try { download(app.modal.text, app.modal.file.name, app.modal.file.type); toast("הקובץ נשמר בהורדות"); } catch { toast("השמירה כקובץ נחסמה. אפשר להעתיק."); } return;
       case "backup": app.modal = { kind: "backup", error: "" }; return renderModal();
@@ -539,7 +555,7 @@
       try { commit({ ...st, settings: { ...st.settings, checklist: t.checked ? [...list, item] : list.filter(x => x !== item) } }); } catch (err) { toast(err.message); }
     } else if (t.id === "filter") { app.filter = t.value; render(); }
     else if (t.id === "e-type") { app.modal.form = readEventForm(); renderModal(); $("#e-type")?.focus(); }
-    else if (t.id === "e-date") { const h = $("#e-heb"); if (h) h.textContent = M.validISO(t.value) ? `${hebrew(t.value)} · עד השקיעה` : ""; }
+    else if (t.id === "e-date") { const h = $("#e-heb"); if (h) h.textContent = M.validISO(t.value) ? L.t(`${hebrew(t.value)} · עד השקיעה`) : ""; }
     else if (t.id === "r-file") { const f = t.files?.[0]; if (f && f.size < 4e6) f.text().then(x => { $("#r-text").value = x; }); }
   });
   document.addEventListener("input", e => { if (e.target.id === "q") { app.query = e.target.value; render(); } });
@@ -597,13 +613,17 @@
         const delta = n - new Date(p.start);
         if (p.done || delta < 0 || delta > 90000 || app.notified.has(p.id)) continue;
         app.notified.add(p.id);
-        try { new Notification(st.settings.neutralReminders ? "תזכורת אישית" : p.title, { body: "פרטים ביומן האישי", tag: p.id }); } catch { /* */ }
+        try { new Notification(L.t(st.settings.neutralReminders ? "תזכורת אישית" : p.title), { body: L.t("פרטים ביומן האישי"), tag: p.id }); } catch { /* */ }
       }
     }
     if (`${ctx.abs}|${r.phase}|${app.mode}` !== app.lastDayKey && !app.modal) render();
   }
 
   /* ---------- הפעלה ---------- */
+  {
+    const saved = storage.get(LANG_KEY), nav = (navigator.language || "he").slice(0, 2).toLowerCase();
+    applyLang(saved || (L.LANGS[nav] ? nav : (nav === "iw" ? "he" : "en")), false);
+  }
   app.personal = loadPersonal();
   if ("Notification" in window) app.permission = Notification.permission; else app.permission = "unsupported";
   const hash = location.hash.slice(1);
