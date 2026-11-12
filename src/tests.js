@@ -45,8 +45,23 @@ const MaayanTests = (M) => {
   test("עונה בינונית", "יום 30 הוא יום הראייה ועוד 29 (ספירה כוללנית)", () => { const p = run([event("flow", N(2))]).plans.find(p => p.kind === "average"); a.equal(p.date, N(1, 2)); });
   test("עונה בינונית", "שתי העונות ויום 31 הן אפשרויות נפרדות", () => { const pp = run([event("flow", N(2))], { beinonit: "both", day31: true }).plans.filter(p => p.kind === "average"); a.equal(pp.length, 4); a.deepEqual([...new Set(pp.map(p => p.onah))].sort(), ["day", "night"]); });
   test("עונת החודש", "שומרת על התאריך העברי גם כשאורך החודש הלועזי משתנה", () => { const p = run([event("flow", N(15))]).plans.find(p => p.kind === "monthly"); a.equal(p.date, N(15, 2)); });
-  test("עונת החודש", "ל׳ בחודש שאחריו אין ל׳ — מדיניות דילוג, בלי גלישה שקטה", () => { const r = run([event("flow", N(30))]); a.equal(r.plans.filter(p => p.kind === "monthly").length, 0); a.ok(r.reviews.some(r => r.id === "missing-month-day")); });
+  test("עונת החודש", "ל׳ בחודש שאחריו אין ל׳ — במדיניות דילוג אין גלישה שקטה", () => { const r = run([event("flow", N(30))], { missingMonthly: "skip" }); a.equal(r.plans.filter(p => p.kind === "monthly").length, 0); a.ok(r.reviews.some(r => r.id === "missing-month-day")); });
   test("עונת החודש", "ל׳ ניסן במדיניות ״א׳ בחודש שאחריו״ מגיע לא׳ סיון ולא לתמוז", () => { const p = run([event("flow", N(30))], { missingMonthly: "first-next-month" }).plans.find(p => p.kind === "monthly"); a.equal(p.date, N(1, 3)); });
+  test("עונת החודש", "ברירת המחדל לל׳ בחודש חסר היא א׳ בחודש שאחריו (כפסיקת נשמת)", () => { const p = run([event("flow", N(30))]).plans.find(p => p.kind === "monthly"); a.equal(p.date, N(1, 3)); });
+  test("עונת החודש", "ראתה פעמיים בחודש: עונת החודש של הראייה הראשונה נשמרת", () => {
+    const pp = run([event("flow", N(5)), event("hefsek", N(9), "16:00"), event("flow", N(25))]).plans.filter(p => p.kind === "monthly");
+    a.deepEqual(pp.map(p => p.date).sort(), [N(5, 2), N(25, 2)].sort());
+  });
+  test("עונת החודש", "ראייה קודמת שעונת החודש שלה כבר עברה אינה מוסיפה עונה", () => a.equal(run([event("flow", N(2)), event("flow", N(4, 2))]).plans.filter(p => p.kind === "monthly").length, 1));
+  test("חב״ד", "בחירת חב״ד עם עונה בינונית חלקית מסומנת לבירור", () => a.ok(run([event("flow", N(2))], { haflagah: "chabad-onot" }).reviews.some(r => r.id === "chabad-beinonit")));
+  test("אור זרוע", "בעונה בינונית של יממה אין כפילות של אור זרוע", () => { const pp = run([event("flow", N(2))], { orZarua: true, beinonit: "both" }).plans; const w = pp.map(p => p.start + p.end); a.equal(new Set(w).size, w.length); });
+  test("רטרואקטיבי", "שנה של מחזורים קודמים בסדר הזנה הפוך נותנת תוצאה זהה", () => {
+    const evs = []; let d = N(1, 7, 5785);
+    for (let c = 0; c < 12; c++) { evs.push(event("flow", d), event("hefsek", addDays(d, 5), "16:00"), event("mikvah", addDays(d, 12), "20:30")); d = addDays(d, 29 + (c % 3)); }
+    const x = run(evs), y = run([...evs].reverse());
+    a.deepEqual(x.plans, y.plans); a.equal(x.phase, "immersed"); a.ok(x.plans.some(p => p.kind === "interval"));
+  });
+  test("רטרואקטיבי", "ראיות ישנות בלי טבילה מסומנות לבירור ולא מציגות מצב שגוי בשקט", () => a.ok(run([event("flow", N(2)), event("flow", N(1, 2))]).reviews.some(r => r.id === "no-mikvah-after-flow")));
   test("עונת החודש", "חוצה את ראש השנה (אלול ← תשרי)", () => { const p = run([event("flow", N(12, 6, 5785))]).plans.find(p => p.kind === "monthly"); a.equal(p.date, N(12, 7, 5786)); });
   test("עונת החודש", "בשנה מעוברת עוברת מאדר א׳ לאדר ב׳", () => { const p = run([event("flow", N(12, 12, 5784))]).plans.find(p => p.kind === "monthly"); a.equal(p.date, N(12, 13, 5784)); });
   test("המתנה", "חמישה ימים כוללים את יום תחילת הווסת", () => a.equal(run([event("flow", N(2), "16:00")]).earliestHefsek, N(6)));

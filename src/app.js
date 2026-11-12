@@ -149,8 +149,9 @@
   }
   function onboardingCard() {
     return `<section class="card welcome-inline"><div class="card-h">${I("shield")}<h3>היומן שלך ריק</h3></div>
-      <p>אפשר להתחיל לרשום, להתאים קודם את שיטת החישוב, או לראות איך זה נראה עם נתוני דוגמה.</p>
+      <p>כדאי להתחיל מהזנת המחזורים האחרונים (לפחות שניים), כדי שההפלגה ועונת החודש יחושבו נכון. אפשר גם להתאים קודם את שיטת החישוב.</p>
       <div class="row-btns"><button class="btn" data-act="add" data-type="flow">${I("plus", 17)}רישום ראשון</button>
+      <button class="btn ghost" data-act="cycle">${I("calendar", 17)}הזנת מחזורים קודמים</button>
       <button class="btn ghost" data-go="prefs">${I("sliders", 17)}שיטת החישוב</button>
       <button class="btn ghost" data-act="demo">${I("flask", 17)}יומן לדוגמה</button></div></section>`;
   }
@@ -209,7 +210,7 @@
       <div class="filters"><label class="search">${I("search", 17)}<input id="q" type="search" placeholder="חיפוש לפי תאריך או הערה" value="${esc(app.query)}" aria-label="חיפוש"></label>
       <select id="filter" aria-label="סינון לפי סוג"><option value="all">כל הסוגים</option>${Object.entries(EVENT_NAMES).map(([v, n]) => `<option value="${v}"${app.filter === v ? " selected" : ""}>${n}</option>`).join("")}</select></div>
       <div class="entries">${evs.map(entryRow).join("") || `<p class="empty">${st.events.length ? "לא נמצאו רישומים מתאימים." : "אין עדיין רישומים."}</p>`}</div>
-      <button class="btn full" data-act="add">${I("plus", 17)}רישום חדש</button></section>`;
+      <div class="row-btns"><button class="btn" data-act="add">${I("plus", 17)}רישום חדש</button><button class="btn ghost" data-act="cycle">${I("calendar", 17)}הזנת מחזור קודם</button></div></section>`;
   }
 
   function viewDates(st, r) {
@@ -238,7 +239,7 @@
       ${tog("day31", "הוספת יום 31", "לפי המנהג או ההנחיה", s)}${tog("orZarua", "עונת אור זרוע", "העונה שלפני כל חשש מחושב", s)}
       ${tog("carryLongIntervals", "שימור הפלגות ארוכות", "בחישוב ימים, כשווסת חדשה מקדימה את החשש הקודם", s)}
       ${tog("carryMonthly", "שימור עונת חודש בזמן דימום", "דורש תיעוד מלא של הווסת וההפסק", s)}
-      ${sel("missingMonthly", "יום ל׳, כשבחודש הבא אין ל׳", s, [["skip", "בלי עונת חודש באותו חודש"], ["first-next-month", "א׳ בחודש שאחרי החודש החסר"]])}
+      ${sel("missingMonthly", "יום ל׳, כשבחודש הבא אין ל׳", s, [["first-next-month", "א׳ בחודש שאחרי החודש החסר (מומלץ)"], ["skip", "בלי עונת חודש באותו חודש"]])}
       ${sel("bedikot", "תזכורות לבדיקות", s, [["twice", "בוקר וערב בכל אחד משבעת הימים"], ["first-last", "ראשון ושביעי בלבד — לפי הוראה"]])}
       ${sel("nightfall", "צאת הכוכבים", s, [["8.5", "8.5° מתחת לאופק"], ["7.083", "7.083° מתחת לאופק"]])}
       ${sel("special", "מצב מיוחד", s, [["regular", "מחזור רגיל"], ["pregnancy", "היריון"], ["postpartum", "אחרי לידה"], ["nursing", "הנקה"], ["hormonal", "טיפול הורמונלי / אמצעי מניעה"]])}
@@ -329,7 +330,7 @@
     { t: "היום העברי והעונה", p: ["כל רישום נשמר עם התאריך האזרחי, השעה המקומית והעיר. היום העברי מתחיל בשקיעה, ועונת היום נמשכת מהזריחה עד השקיעה.", "זמני השמש מחושבים בגובה פני הים. צאת הכוכבים לפי הזווית שנבחרה (8.5° או 7.083°).", "רישום בטווח שלוש דקות מהזריחה או מהשקיעה, או בין השקיעה לצאת הכוכבים, מסומן לבירור ואינו משמש לחישוב ודאי. שלוש הדקות הן סף לסימון ולא הגדרה של בין השמשות.", "שעה כפולה או חסרה במעבר שעון, ומקום בלי זריחה או שקיעה (קוטב), אינם מסווגים אוטומטית."], src: S.calendar },
     { t: "המתנה לפני ההפסק", p: ["חמישה ימים: יום הראייה נספר כיום הראשון, וההפסק המוקדם ביום החמישי.", "ארבעה ימים: נספרים ממועד היחסים שנרשם כבסיס, ולא מהראייה. בלי בסיס רשום אין חישוב, ומופיעה נקודה לבירור.", "חידוש ספירה בתוך תקופת הנידה נשען על תחילת הנידה הקודמת ולא מוסיף חמישה ימים חדשים."], src: S.wait },
     { t: "הפסק טהרה ושבעה נקיים", p: ["הספירה מתחילה רק מהפסק שנרשם כנקי, לפני השקיעה ולא בזמן מסופק, ולא לפני סוף ההמתנה. הפסק מוקדם מתקבל רק עם הוראה אישית מתועדת.", "יום א׳ הוא היום העברי שאחרי ההפסק. ליל הטבילה המתוכנן הוא במוצאי היום השביעי, וזה נשאר תכנון בלבד.", "חוסר רישום בדיקה ביום הראשון או השביעי מסומן לבירור, ואינו פוסל או מאשר. בדיקה שנרשמה כלא נקייה אינה מאפסת אוטומטית."], src: S.clean },
-    { t: "עונת החודש", p: ["אותו יום בחודש העברי הבא, באותה עונה.", "ראייה בל׳ כשבחודש הבא אין ל׳: לפי ההגדרה, בלי עונת חודש או א׳ בחודש שאחריו.", "בשנה מעוברת אדר א׳ עובר לאדר ב׳.", "שימור עונת חודש שחלה בזמן דימום הוא אפשרות נפרדת שדורשת תיעוד מלא."], src: S.monthly },
+    { t: "עונת החודש", p: ["אותו יום בחודש העברי הבא, באותה עונה.", "ראייה בל׳ כשבחודש הבא אין ל׳: ברירת המחדל היא א׳ בחודש שאחרי החודש החסר, כפסיקת מכון נשמת. אפשר לבחור דילוג.", "ראתה פעמיים באותו חודש: כל החישובים נעשים מהראייה האחרונה, ובנוסף נשמרת עונת החודש של הראייה הקודמת אם עוד לא הגיעה (נשמת; לוח חב״ד).", "בשנה מעוברת אדר א׳ עובר לאדר ב׳.", "שימור עונת חודש שחלה בזמן דימום הוא אפשרות נפרדת שדורשת תיעוד מלא."], src: S.monthly },
     { t: "עונה בינונית", p: ["יום 30 בספירה כוללנית: יום הראייה הוא יום 1, כלומר 29 ימים אחריו, באותה עונה.", "שתי העונות, יום 31 ואור זרוע הם שלוש הגדרות נפרדות, ואף אחת מהן אינה נבחרת לפי עדה."], src: S.average },
     { t: "הפלגה", p: ["בשיטת הימים: ההפרש בין התאריכים העבריים של שתי הראיות ועוד 1. אותו מרווח נספר מהראייה האחרונה, באותה עונה.", "בשיטת חב״ד: מספר העונות מההפסק הקודם ועד הראייה הבאה. המועד החדש נספר מההפסק הנוכחי. מספר זוגי נופל ביום ואי-זוגי בלילה. הפלגה ארוכה נשמרת כשמגיעה קצרה ממנה.", "ראייה מסופקת באמצע אינה נמחקת כדי לייצר מרווח ארוך."], src: S.interval },
     { t: "וסת קבוע", p: ["שלוש ראיות רצופות באותו יום בחודש ובאותה עונה, או שלוש הפלגות שוות בארבע ראיות, מסומנות כדפוס אפשרי.", "המערכת אינה קובעת, עוקרת או משעה וסת קבוע בעצמה."], src: S.fixed },
@@ -416,6 +417,16 @@
       <textarea id="m-text" class="mono" rows="9" readonly>${esc(m.text)}</textarea>
       <div class="m-actions"><button class="btn" data-act="copy-text">${I("copy", 17)}העתקה</button>${m.file ? `<button class="btn ghost" data-act="dl-text">${I("download", 17)}שמירה כקובץ</button>` : ""}</div>
       ${m.file ? `<p class="fine">אם השמירה כקובץ לא עובדת בדפדפן הזה, מעתיקים ושומרים בפתקים או שולחים לעצמך.</p>` : ""}`;
+    if (m.kind === "cycle") return `<div class="m-h"><h2 id="m-title">הזנת מחזור קודם</h2>${close}</div>
+      <form id="cycle-form" class="stack-s"><p class="fine">מזינים כל מחזור בנפרד, בכל סדר. החישוב מסדר הכול לפי התאריכים.${m.saved ? ` נשמרו ${m.saved} מחזורים.` : ""}</p>
+        <div class="pair"><label class="field" for="c-flow">תחילת הווסת<input id="c-flow" type="date" required min="2000-01-01" max="2100-12-31"></label>
+        <label class="field" for="c-flow-t">שעה<input id="c-flow-t" type="time" required value="10:00"><small>אחרי השקיעה = היום העברי הבא</small></label></div>
+        <div class="pair"><label class="field" for="c-hef">הפסק טהרה <span class="opt">אם ידוע</span><input id="c-hef" type="date" min="2000-01-01" max="2100-12-31"></label>
+        <label class="field" for="c-hef-t">שעה<input id="c-hef-t" type="time" value="16:00"></label></div>
+        <label class="field" for="c-mik">טבילה <span class="opt">תאריך הערב, אם ידוע</span><input id="c-mik" type="date" min="2000-01-01" max="2100-12-31"></label>
+        <label class="field" for="c-city">מקום<select id="c-city">${CITIES.map(c => `<option value="${c.id}"${state().settings.cityId === c.id ? " selected" : ""}>${c.name}</option>`).join("")}</select></label>
+        ${m.error ? `<p class="err" role="alert">${esc(m.error)}</p>` : ""}
+        <div class="m-actions"><button class="btn" type="submit">${I("check", 17)}שמירת המחזור</button><button type="button" class="btn ghost" data-act="close-modal">${m.saved ? "סיום" : "ביטול"}</button></div></form>`;
     if (m.kind === "backup") return `<div class="m-h"><h2 id="m-title">גיבוי מוצפן</h2>${close}</div>
       <form id="backup-form" class="stack-s"><p>הגיבוי מוצפן בסיסמה שאת בוחרת. בלי הסיסמה אי אפשר לשחזר אותו, גם לא אנחנו.</p>
       <label class="field" for="b-pass">סיסמת גיבוי<input id="b-pass" type="password" minlength="10" required autocomplete="new-password"><small>לפחות 10 תווים. לשמור אותה בנפרד.</small></label>
@@ -493,6 +504,7 @@
     const st = state();
     switch (d.act) {
       case "add": return openEvent({ type: d.type, date: d.date });
+      case "cycle": app.modal = { kind: "cycle", error: "", saved: 0 }; return renderModal();
       case "hide": app.hidden = !app.hidden; return render();
       case "close-modal": if (app.modal?.kind === "welcome") markSeen(); app.modal = null; return renderModal();
       case "toast-x": app.toast = ""; return renderToast();
@@ -549,6 +561,18 @@
     } else if (f.id === "trip-form") {
       const fd = new FormData(f);
       try { commit({ ...st, trips: [...st.trips, { id: M.uuid(), cityId: String(fd.get("cityId")), from: String(fd.get("from")), to: String(fd.get("to")) }] }); } catch (err) { toast(err.message); }
+    } else if (f.id === "cycle-form") {
+      const v = id => $(id).value, c = v("#c-city"), stamp = new Date().toISOString();
+      const mk = (type, date, time) => ({ id: M.uuid(), type, date, time, cityId: c, result: "clear", note: "", authorityNote: "", createdAt: stamp });
+      try {
+        const list = [mk("flow", v("#c-flow"), v("#c-flow-t"))];
+        if (v("#c-hef")) { if (v("#c-hef") < v("#c-flow")) throw new Error("ההפסק צריך להיות אחרי תחילת הווסת"); list.push(mk("hefsek", v("#c-hef"), v("#c-hef-t") || "16:00")); }
+        if (v("#c-mik")) { if (v("#c-mik") <= (v("#c-hef") || v("#c-flow"))) throw new Error("הטבילה צריכה להיות אחרי ההפסק"); if (!v("#c-hef")) throw new Error("כדי לרשום טבילה צריך לרשום גם את ההפסק"); list.push(mk("mikvah", v("#c-mik"), "20:30")); }
+        if (st.events.some(e => e.type === "flow" && e.date === list[0].date)) throw new Error("כבר רשומה תחילת וסת בתאריך הזה");
+        const saved = app.modal.saved + 1;
+        commit({ ...st, events: [...st.events, ...list] });
+        app.modal = { kind: "cycle", error: "", saved }; renderModal();
+      } catch (err) { app.modal.error = err.message; renderModal(); }
     } else if (f.id === "backup-form") {
       try { const text = await M.encryptBackup(st, $("#b-pass").value); textModal("הגיבוי מוכן", "שמרי את הקובץ או העתיקי את הטקסט למקום בטוח (למשל מייל לעצמך). לשחזור צריך גם את הסיסמה.", text, { name: `maayan-backup-${currentContext(st, now()).date}.may`, type: "application/json" }); }
       catch (err) { app.modal.error = err.message; renderModal(); }

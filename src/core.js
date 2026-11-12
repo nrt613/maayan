@@ -157,7 +157,7 @@ const Maayan = (() => {
   const CHECKLIST = ["תיאום עם המקווה", "הסרת תכשיטים וחציצות", "טיפול בציפורניים", "רחצה וחפיפה", "סירוק השיער", "בדיקה שאין חציצות", "מגבת ובגדים נקיים", "פריטים אישיים לדרך"];
   const SETTING_DEFAULTS = {
     cityId: "netanya", wait: "five", haflagah: "days", beinonit: "same", day31: false, orZarua: false, carryMonthly: false,
-    carryLongIntervals: false, missingMonthly: "skip", bedikot: "twice", nightfall: "8.5", special: "regular", methodNote: "",
+    carryLongIntervals: false, missingMonthly: "first-next-month", bedikot: "twice", nightfall: "8.5", special: "regular", methodNote: "",
     neutralReminders: true, reminderMinutes: 30, morningTime: "08:00", remindersEnabled: true, checklist: [],
   };
   const SETTING_ENUMS = {
@@ -357,6 +357,7 @@ const Maayan = (() => {
     for (let i = 1; i < stamped.length; i++) {
       if (Math.abs(city(stamped[i].e.cityId).lon - city(stamped[i - 1].e.cityId).lon) > 180) { dateline = true; review("dateline", "נסיעה אפשרית מעבר לקו התאריך", "החישובים האוטומטיים לעונות הושעו. יש לרשום את ההנחיות האישיות כאירועים ידניים.", [stamped[i - 1].e.id, stamped[i].e.id]); }
     }
+    if (state.settings.haflagah === "chabad-onot" && state.settings.beinonit === "same") review("chabad-beinonit", "בשיטת חב״ד העונה הבינונית היא יממה שלמה", "לפי לוח חב״ד פורשים ביום 30 מהשקיעה ועד השקיעה. בהגדרות נבחרה עונה אחת בלבד; כדי ליישר עם השיטה יש לבחור ״שתי העונות״.");
     if (state.settings.special !== "regular") review("special", "נבחר מצב המחייב התאמה אישית", "היריון, אחרי לידה, הנקה וטיפול הורמונלי אינם מחושבים כאן אוטומטית לפי כללי מחזור רגיל. אפשר לרשום מועדים ידניים לפי הוראה.");
     let earliestHefsek;
     if (!unresolvedActive && latestNiddah && (!latestMikvah || latestMikvah.s.instant < latestNiddah.s.instant)) {
@@ -439,6 +440,15 @@ const Maayan = (() => {
       const monthlyAbs = monthly(last);
       if (monthlyAbs) addOnah(monthlyAbs, last.s.onah, "monthly", "עונת החודש", "אותו יום בחודש העברי הבא ובאותה עונה. כלל יום ל׳ בחודש חסר נקבע בנפרד בהגדרות.", SOURCES.monthly, [last.e.id], `monthly-${last.e.id}`);
       else review("missing-month-day", "בחודש הבא אין יום מקביל", "נבחר לדלג על עונת החודש בחודש חסר. זו בחירת שיטה, ולא החלטה שמתאימה לכל מנהג.", [last.e.id]);
+      const monthlyTargets = new Set([monthlyAbs]);
+      // ראייה קודמת שעונת החודש שלה עוד לא הגיעה כשבאה הראייה האחרונה — עונת החודש שלה נשארת (ראתה פעמיים בחודש)
+      for (const f of flows.slice(0, -1)) {
+        const t = monthly(f);
+        if (t && t > last.s.abs && !monthlyTargets.has(t)) {
+          monthlyTargets.add(t);
+          addOnah(t, f.s.onah, "monthly", "עונת חודש נוספת", "ראייה קודמת שעונת החודש שלה עוד לא הגיעה. הראייה האחרונה אינה עוקרת אותה, ולכן שומרים גם אותה.", SOURCES.monthly, [f.e.id], `monthly-extra-${f.e.id}`);
+        }
+      }
       if (state.settings.carryMonthly && flows.length > 1) {
         for (const f of flows.slice(0, -1)) {
           let target = monthly(f), guard = 0;
@@ -450,7 +460,7 @@ const Maayan = (() => {
             const h = new HDate(target), next = h.add(1, "M");
             target = next.getDate() === h.getDate() ? next.abs() : null;
           }
-          if (target && target > last.s.abs && target !== monthlyAbs) addOnah(target, f.s.onah, "monthly", "עונת חודש שנשמרה", "עונת חודש קודמת שנפלה בתוך תקופת דימום מתועדת, לפי בחירת שימור. יש לאמת את נסיבות העקירה.", SOURCES.monthly, [f.e.id, last.e.id], `carry-monthly-${f.e.id}-${target}`);
+          if (target && target > last.s.abs && !monthlyTargets.has(target) && guard > 0) addOnah(target, f.s.onah, "monthly", "עונת חודש שנשמרה", "עונת חודש קודמת שנפלה בתוך תקופת דימום מתועדת, לפי בחירת שימור. יש לאמת את נסיבות העקירה.", SOURCES.monthly, [f.e.id, last.e.id], `carry-monthly-${f.e.id}-${target}`);
         }
       }
       const uncertainInterval = unresolvedFlows.some(event => couldFollow(event, recordedFlows.at(-2))) || recordedFlows.slice(-2).some(x => x.s.uncertain || x.e.result === "uncertain");
@@ -491,10 +501,14 @@ const Maayan = (() => {
     }
     for (const { e } of stamped) if (e.type === "manual" && e.onah) addOnah(isoAbs(e.date), e.onah, "manual", "עונת פרישה לפי הוראה", e.authorityNote || e.note || "מועד שנרשם ידנית; אינו נוצר מהחישוב האוטומטי.", "", [e.id], `manual-${e.id}`);
     for (const x of stamped.filter(x => x.e.type === "bedikah" && x.e.result === "bleeding")) review(`bleeding-check-${x.e.id}`, "בדיקה שנרשמה כלא נקייה", "אין איפוס אוטומטי על סמך תיאור מראה. יש לברר ולתעד חידוש ספירה אם כך הונחית.", [x.e.id]);
+    if (latestNiddah && !validHefsek && (!latestMikvah || latestMikvah.s.instant < latestNiddah.s.instant) && currentAbs - latestNiddah.s.abs > 14)
+      review("no-mikvah-after-flow", "לא נרשמו הפסק וטבילה אחרי הראייה האחרונה", "אם הוזנו מחזורים קודמים ללא הפסק וטבילה, המערכת מניחה שעדיין לא נעשו. כדי שהמצב יוצג נכון יש לרשום אותם.", [latestNiddah.e.id]);
     const immersed = !unresolvedActive && latestMikvah && (!latestNiddah || latestMikvah.s.instant > latestNiddah.s.instant);
     const phase = immersed ? "immersed" : validHefsek ? (currentAbs > validHefsek.s.abs + 7 ? "planned" : "clean") : latestNiddah || unresolvedActive ? "waiting" : "empty";
     if (immersed && !stamped.some(x => x.e.type === "hefsek" && x.s.instant < latestMikvah.s.instant)) review("immersion-no-history", "טבילה ללא תיעוד ספירה קודם", "נשמר רישום הטבילה כפי שהוזן. אין להסיק ממנו אישור הלכתי או השלמת בדיקות.", [latestMikvah.e.id]);
-    const deduped = [...new Map(plans.map(p => [p.id, p])).values()].sort((a, b) => a.start.localeCompare(b.start));
+    // אור זרוע שחופף בדיוק לעונה שכבר נשמרת (למשל בעונה בינונית של יממה שלמה) אינו מוצג פעמיים
+    const windows = new Set(plans.filter(p => p.kind !== "or-zarua").map(p => `${p.start}|${p.end}`));
+    const deduped = [...new Map(plans.filter(p => p.kind !== "or-zarua" || !windows.has(`${p.start}|${p.end}`)).map(p => [p.id, p])).values()].sort((a, b) => a.start.localeCompare(b.start));
     return { plans: deduped, reviews, latestFlow, hefsek: validHefsek?.e, earliestHefsek, cleanDay, phase, immersionDate, checks, version: ENGINE_VERSION };
   }
 

@@ -8,3 +8,4 @@
 - `src/core.js` — לוח עברי, זמני שמש (NOAA) ומנוע החישוב.
 - `src/tests.js` — בדיקות המנוע. הרצה: `node -e 'const M=require("./src/core.js");console.log(require("./src/tests.js")(M).run().filter(t=>!t.ok))'`
 - `src/scenarios.js` — תרחישים לבודקים.
+- `verify.js` — בדיקה עצמאית רחבה: כ-65,000 השוואות מול לוח עברי חיצוני (ICU) ומול אלגוריתם שמש שני. הרצה: `node verify.js`
