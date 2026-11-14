@@ -6,6 +6,9 @@ const results = [];
 const log = (...a) => { const line = a.join(" "); console.log(line); fs.appendFileSync("shots/log.txt", line + "\n"); };
 const check = (name, ok, detail = "") => { results.push({ name, ok }); log(`E2E ${ok ? "OK  " : "FAIL"} ${name} ${detail}`); };
 const sleep = ms => new Promise(r => setTimeout(r, ms));
+const { execSync } = require("child_process");
+// שולח מיקום לאמולטור (נתניה); לא נתקע אם הקונסולה לא עונה
+const geoFix = () => { try { execSync("adb emu geo fix 34.8532 32.3215", { timeout: 8000, stdio: "ignore" }); } catch { /* */ } };
 
 (async () => {
   fs.mkdirSync("shots", { recursive: true });
@@ -72,14 +75,18 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
 
   // זיהוי מיקום (האמולטור מוגדר לנתניה)
   await page.click('.tabs [data-go="prefs"]');
+  geoFix();
   await page.click('[data-act="locate"]');
   let place = null;
+  const feeder = setInterval(geoFix, 4000);
   try {
-    await page.waitForSelector("#place-form", { timeout: 70000 });
+    await page.waitForSelector("#place-form", { timeout: 60000 });
+    clearInterval(feeder);
     await sleep(300); await shot("5-location");
     place = await page.evaluate(() => document.querySelector('#place-form [dir="ltr"]').textContent);
     await page.click('#place-form button[type=submit]'); await sleep(800);
   } catch (e) { log("location failed:", e.message.split("\n")[0], "| toast:", await page.evaluate(() => document.querySelector(".toast")?.textContent || "")); await shot("5-location-failed"); }
+  clearInterval(feeder);
   const st = await page.evaluate(() => JSON.parse(localStorage.getItem("maayan.v1.diary")));
   const pl = (st.places || [])[0];
   check("location detected", !!pl && Math.abs(pl.lat - 32.3215) < 0.05 && Math.abs(pl.lon - 34.8532) < 0.05, place || "");

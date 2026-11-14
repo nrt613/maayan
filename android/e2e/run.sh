@@ -12,10 +12,9 @@ adb shell pm grant $PKG android.permission.POST_NOTIFICATIONS
 adb shell pm grant $PKG android.permission.ACCESS_FINE_LOCATION
 adb shell pm grant $PKG android.permission.ACCESS_COARSE_LOCATION
 adb shell appops set $PKG SCHEDULE_EXACT_ALARM allow || true
-adb emu geo fix 34.8532 32.3215 || true
-( for i in $(seq 1 40); do adb emu geo fix 34.8532 32.3215 >/dev/null 2>&1; sleep 5; done ) &
+timeout 20 adb emu geo fix 34.8532 32.3215 || true
 cd android/e2e && npm install --no-audit --no-fund playwright-core@1.48.2 >/dev/null 2>&1
-node test.js; code=$?
+timeout 480 node test.js; code=$?
 cd "$ROOT"
 adb logcat -d -t 400 | grep -iE "capacitor|maayan|chromium" | tail -80 >> android/e2e/shots/log.txt || true
 # בדיקת עשן לגרסה החתומה: מתקינה, נפתחת ונשארת פתוחה
