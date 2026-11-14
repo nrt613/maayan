@@ -75,7 +75,7 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
   await page.click('[data-act="locate"]');
   let place = null;
   try {
-    await page.waitForSelector("#place-form", { timeout: 45000 });
+    await page.waitForSelector("#place-form", { timeout: 70000 });
     await sleep(300); await shot("5-location");
     place = await page.evaluate(() => document.querySelector('#place-form [dir="ltr"]').textContent);
     await page.click('#place-form button[type=submit]'); await sleep(800);

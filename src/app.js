@@ -657,6 +657,10 @@
   function markSeen() { storage.set(SEEN_KEY, "1"); }
 
   /* ---------- זיהוי מיקום ---------- */
+  function webLocation(gps) {
+    if (!navigator.geolocation) return Promise.reject(new Error("הדפדפן הזה אינו תומך בזיהוי מיקום. אפשר לבחור עיר מהרשימה."));
+    return new Promise((res, rej) => navigator.geolocation.getCurrentPosition(res, () => rej(new Error(gps ? "לא ניתן לזהות מיקום כרגע. אפשר לנסות שוב במקום פתוח, או לבחור עיר מהרשימה." : "לא ניתן לזהות מיקום כאן. יש לאשר הרשאת מיקום בדפדפן, או לבחור עיר מהרשימה.")), { enableHighAccuracy: gps, timeout: 30000, maximumAge: 600000 }));
+  }
   async function detectLocation(btn) {
     if (btn) btn.disabled = true;
     toast("מזהה מיקום…");
@@ -665,11 +669,10 @@
       if (NATIVE && PL.Geolocation) {
         const perm = await PL.Geolocation.requestPermissions();
         if (perm.location !== "granted" && perm.coarseLocation !== "granted") throw new Error("לא ניתנה הרשאת מיקום. אפשר לאשר בהגדרות המכשיר, או לבחור עיר מהרשימה.");
-        pos = await PL.Geolocation.getCurrentPosition({ enableHighAccuracy: false, timeout: 25000, maximumAge: 600000 });
-      } else {
-        if (!navigator.geolocation) throw new Error("הדפדפן הזה אינו תומך בזיהוי מיקום. אפשר לבחור עיר מהרשימה.");
-        pos = await new Promise((res, rej) => navigator.geolocation.getCurrentPosition(res, () => rej(new Error("לא ניתן לזהות מיקום כאן. יש לאשר הרשאת מיקום בדפדפן, או לבחור עיר מהרשימה.")), { timeout: 25000, maximumAge: 600000 }));
-      }
+        // קודם שירות המיקום של Google; אם אינו זמין (למשל במכשיר בלי שירותי Google) — ה-GPS של המכשיר
+        try { pos = await Promise.race([PL.Geolocation.getCurrentPosition({ enableHighAccuracy: false, timeout: 10000, maximumAge: 600000 }), new Promise((_, rej) => setTimeout(() => rej(new Error("timeout")), 12000))]); }
+        catch { pos = await webLocation(true); }
+      } else pos = await webLocation(false);
       const lat = Math.round(pos.coords.latitude * 1e4) / 1e4, lon = Math.round(pos.coords.longitude * 1e4) / 1e4;
       const tz = Intl.DateTimeFormat().resolvedOptions().timeZone || "Asia/Jerusalem";
       const dist = c => { const R = Math.PI / 180, x = (c.lon - lon) * R * Math.cos((c.lat + lat) / 2 * R), y = (c.lat - lat) * R; return Math.sqrt(x * x + y * y) * 6371; };
