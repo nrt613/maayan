@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 # רץ בתוך האמולטור: מתקין את גרסת הבדיקה, נותן הרשאות, מגדיר מיקום ומריץ את הבדיקות
 set -u
+# כל פקודת adb מוגבלת בזמן, כדי שאמולטור שנתקע לא יתקע את כל הריצה
+adb() { timeout 120 "$(command -v adb)" "$@"; }
 PKG=io.github.nrt613.maayan
 ROOT=$(pwd)
 mkdir -p android/e2e/shots; : > android/e2e/shots/log.txt
