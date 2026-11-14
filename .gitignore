@@ -1,0 +1,5 @@
+node_modules/
+android/android/
+android/www/
+android/e2e/shots/
+out/

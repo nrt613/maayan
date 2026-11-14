@@ -157,7 +157,11 @@ const Maayan = (() => {
     { id: "sydney", name: "סידני", lat: -33.8688, lon: 151.2093, tz: "Australia/Sydney" },
     { id: "tromso", name: "טרומסה", lat: 69.6492, lon: 18.9553, tz: "Europe/Oslo" },
   ];
-  const city = id => CITIES.find(c => c.id === id) || CITIES[0];
+  /* מקומות שהמשתמשת הוסיפה (זיהוי מיקום). נטענים מהיומן לפני כל חישוב. */
+  let customPlaces = [];
+  const setPlaces = list => { customPlaces = Array.isArray(list) ? list : []; };
+  const city = id => CITIES.find(c => c.id === id) || customPlaces.find(c => c.id === id) || CITIES[0];
+  const validTZ = tz => { try { new Intl.DateTimeFormat("en", { timeZone: tz }); return typeof tz === "string" && tz.length < 60; } catch { return false; } };
   const EVENT_TYPES = ["flow", "hefsek", "bedikah", "mikvah", "question", "restart", "note", "intimacy", "manual"];
   const EVENT_NAMES = {
     flow: "תחילת וסת", hefsek: "הפסק טהרה", bedikah: "בדיקה", mikvah: "טבילה", question: "שאלה לבירור",
@@ -193,7 +197,14 @@ const Maayan = (() => {
   function parseState(input) {
     if (!input || typeof input !== "object" || input.schemaVersion !== 1) fail("מבנה היומן אינו נתמך");
     const s = { ...SETTING_DEFAULTS, ...(input.settings || {}) };
-    if (!CITIES.some(c => c.id === s.cityId)) fail("עיר לא מוכרת בהגדרות");
+    const places = (input.places || []).map(p => {
+      if (!p || !/^gps-[0-9a-f]{8}$/.test(p.id) || typeof p.name !== "string" || !p.name.trim() || p.name.length > 60) fail("מקום שמור לא תקין");
+      if (typeof p.lat !== "number" || typeof p.lon !== "number" || !(Math.abs(p.lat) <= 90) || !(Math.abs(p.lon) <= 180) || !validTZ(p.tz)) fail("מקום שמור לא תקין");
+      return { id: p.id, name: p.name.trim(), lat: p.lat, lon: p.lon, tz: p.tz };
+    });
+    if (places.length > 30 || new Set(places.map(p => p.id)).size !== places.length) fail("יותר מדי מקומות שמורים");
+    const known = id => CITIES.some(c => c.id === id) || places.some(c => c.id === id);
+    if (!known(s.cityId)) fail("עיר לא מוכרת בהגדרות");
     for (const [k, vals] of Object.entries(SETTING_ENUMS)) if (!vals.includes(s[k])) fail(`ערך לא תקין בהגדרה ${k}`);
     for (const k of ["day31", "orZarua", "carryMonthly", "carryLongIntervals", "neutralReminders", "remindersEnabled"]) if (typeof s[k] !== "boolean") fail(`ערך לא תקין בהגדרה ${k}`);
     if (typeof s.methodNote !== "string" || s.methodNote.length > 1000) fail("הערת השיטה ארוכה מדי");
@@ -206,7 +217,7 @@ const Maayan = (() => {
       if (!EVENT_TYPES.includes(x.type)) fail("סוג רישום לא מוכר");
       if (!validISO(x.date)) fail("תאריך לא תקין או מחוץ לטווח 2000–2100");
       if (!TIME_RE.test(x.time)) fail("שעה לא תקינה");
-      if (!CITIES.some(c => c.id === x.cityId)) fail("מקום לא מוכר");
+      if (!known(x.cityId)) fail("מקום לא מוכר");
       if (!["clear", "uncertain", "bleeding"].includes(x.result)) fail("תוצאה לא תקינה");
       if (x.onah !== undefined && !["day", "night"].includes(x.onah)) fail("עונה לא תקינה");
       if (typeof x.note !== "string" || x.note.length > 2000) fail("ההערה ארוכה מדי");
@@ -220,17 +231,18 @@ const Maayan = (() => {
     if (events.length > 5000) fail("יותר מדי רישומים");
     if (new Set(events.map(e => e.id)).size !== events.length) fail("אירועים כפולים");
     const trips = (input.trips || []).map(t => {
-      if (!UUID_RE.test(t.id) || !validISO(t.from) || !validISO(t.to) || !CITIES.some(c => c.id === t.cityId)) fail("נסיעה לא תקינה");
+      if (!UUID_RE.test(t.id) || !validISO(t.from) || !validISO(t.to) || !known(t.cityId)) fail("נסיעה לא תקינה");
       if (t.to < t.from) fail("סיום הנסיעה חייב להיות אחרי תחילתה");
       return { id: t.id, from: t.from, to: t.to, cityId: t.cityId };
     });
     if (trips.length > 100) fail("יותר מדי נסיעות");
     for (let i = 0; i < trips.length; i++) for (let j = i + 1; j < trips.length; j++)
       if (trips[i].from <= trips[j].to && trips[j].from <= trips[i].to) fail("טווחי נסיעות חופפים");
-    return { schemaVersion: 1, settings: s, events, trips };
+    setPlaces(places);
+    return { schemaVersion: 1, settings: s, events, trips, places };
   }
   const safeParse = input => { try { return { success: true, data: parseState(input) }; } catch (e) { return { success: false, error: e }; } };
-  const emptyState = () => ({ schemaVersion: 1, settings: { ...SETTING_DEFAULTS, checklist: [] }, events: [], trips: [] });
+  const emptyState = () => ({ schemaVersion: 1, settings: { ...SETTING_DEFAULTS, checklist: [] }, events: [], trips: [], places: [] });
 
   /* ---------- תאריכים ---------- */
   const fromISO = d => { const [y, m, day] = d.split("-").map(Number); return new Date(y, m - 1, day, 12); };
@@ -333,6 +345,7 @@ const Maayan = (() => {
 
   /** חישוב מחדש מלא מכל הרישומים. כל מועד מצטט את הרישומים ואת הכלל שעליהם הוא נשען. */
   function calculate(state, now = new Date()) {
+    setPlaces(state.places);
     const plans = [], reviews = [], stamped = [], unresolvedStarts = [];
     const context = currentContext(state, now), date = context.date, currentAbs = context.abs;
     const nf = Number(state.settings.nightfall);
@@ -617,7 +630,7 @@ const Maayan = (() => {
   const getLang = () => LANG;
   return {
     setLang, getLang, LOCALES, HDate, isLeapYear, daysInMonth, monthsInYear, gematriya, hebrew2abs, abs2hebrew,
-    CITIES, city, EVENT_TYPES, EVENT_NAMES, CHECKLIST, SETTING_DEFAULTS, SETTING_LABELS, RESULT_NAMES, uuid, validISO, parseState, safeParse, emptyState, ValidationError,
+    CITIES, city, setPlaces, EVENT_TYPES, EVENT_NAMES, CHECKLIST, SETTING_DEFAULTS, SETTING_LABELS, RESULT_NAMES, uuid, validISO, parseState, safeParse, emptyState, ValidationError,
     fromISO, toISO, addDays, hd, fromAbs, hebrew, dayNumber, isoAbs, civilLabel, dateInZone, timeInZone, localInstant, sun, atLocation, stamp, onahWindow, today, currentContext,
     ENGINE_VERSION, SOURCES, calculate, sorted,
     encryptBackup, decryptBackup, calendarExport, reportExport, settingsSummary, eventLine, planLine, demoState,

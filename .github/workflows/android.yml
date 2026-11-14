@@ -1,0 +1,81 @@
+name: android-app
+on:
+  push:
+    paths: ["android/**", "index.html", ".github/workflows/android.yml"]
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: android-app
+  cancel-in-progress: true
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 20 }
+      - uses: actions/setup-java@v4
+        with: { distribution: temurin, java-version: 17 }
+      - name: Build the Android project
+        working-directory: android
+        run: |
+          pip install --quiet pillow
+          mkdir -p www
+          curl -fsSL -o www/heebo.ttf "https://github.com/google/fonts/raw/main/ofl/heebo/Heebo%5Bwght%5D.ttf" || { rm -f www/heebo.ttf; echo "::warning::font download failed, using the system font"; }
+          python3 prepare.py www
+          npm install --no-audit --no-fund
+          npx cap add android
+          python3 prepare.py native
+          npx cap sync android
+          cd android && chmod +x gradlew && ./gradlew --no-daemon -q assembleDebug assembleRelease
+      - name: Sign the release
+        env:
+          SIGNING_PASSWORD: ${{ secrets.SIGNING_PASSWORD }}
+        run: |
+          BT=$(ls -d $ANDROID_HOME/build-tools/* | sort -V | tail -1)
+          mkdir -p out
+          cp android/android/app/build/outputs/apk/debug/app-debug.apk out/maayan-debug.apk
+          ls -la android/android/app/build/outputs/apk/release/
+          if [ -z "$SIGNING_PASSWORD" ]; then
+            echo "::warning::The SIGNING_PASSWORD secret is missing, so the release APK was not signed or published."
+            exit 0
+          fi
+          $BT/zipalign -f -p 4 android/android/app/build/outputs/apk/release/app-release-unsigned.apk out/aligned.apk
+          $BT/apksigner sign --ks android/signing/maayan.p12 --ks-type PKCS12 --ks-key-alias maayan --ks-pass env:SIGNING_PASSWORD --key-pass env:SIGNING_PASSWORD --out out/maayan.apk out/aligned.apk
+          $BT/apksigner verify --print-certs out/maayan.apk | head -4
+          rm -f out/aligned.apk
+          ls -la out
+      - name: Enable KVM
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+      - name: Test on an Android emulator
+        id: e2e
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 34
+          arch: x86_64
+          target: google_apis
+          profile: pixel_6
+          disable-animations: true
+          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -no-snapshot
+          script: bash android/e2e/run.sh
+      - name: Publish test screenshots
+        if: always()
+        run: |
+          cd android/e2e/shots 2>/dev/null || exit 0
+          git init -q -b ci-shots
+          git add .
+          git -c user.name="ci" -c user.email="ci@users.noreply.github.com" commit -qm "screenshots from run ${GITHUB_RUN_NUMBER}"
+          git push -q -f "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}" ci-shots
+      - name: Publish the app
+        if: success()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          [ -f out/maayan.apk ] || { echo "not signed, nothing to publish"; exit 0; }
+          V="1.1.${GITHUB_RUN_NUMBER}"
+          gh release create "v$V" out/maayan.apk --title "מעיין $V" --latest --notes "אפליקציית אנדרואיד. הורדה: maayan.apk. הגרסה נבדקה אוטומטית על אמולטור (התראות, זיהוי מיקום, שמירה)."

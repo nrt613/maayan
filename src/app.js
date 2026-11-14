@@ -4,9 +4,12 @@
   const M = Maayan, SCENARIOS = MaayanScenarios(M), L = MaayanI18n;
   if (typeof MaayanDict !== "undefined") L.load(MaayanDict);
   const { EVENT_NAMES, CITIES, city, addDays, hebrew, civilLabel, timeInZone, sun, atLocation, currentContext, calculate, hd, fromAbs, fromISO, toISO, HDate } = M;
-  const APP_VERSION = "1.0.0-review";
+  const APP_VERSION = "1.1.0-review";
   const STORE_KEY = "maayan.v1.diary", SEEN_KEY = "maayan.v1.seen", LANG_KEY = "maayan.v1.lang";
+  const CAP = window.Capacitor, NATIVE = !!(CAP && typeof CAP.isNativePlatform === "function" && CAP.isNativePlatform()), PL = NATIVE ? CAP.Plugins : {};
+  const TERMS_VERSION = "2026-11";
   const $ = sel => document.querySelector(sel);
+  const placeOptions = (st, selected) => [...CITIES, ...(st.places || [])].map(c => `<option value="${c.id}"${selected === c.id ? " selected" : ""}>${esc(c.name)}</option>`).join("");
   const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 
   /* ---------- אייקונים ---------- */
@@ -65,7 +68,7 @@
     mode: "personal", personal: null, sandbox: null, scenario: null, simNow: null,
     tab: "today", hidden: false, modal: null, toast: "", toastTimer: 0,
     cal: { cursor: null, mode: "civil", selected: null }, filter: "all", query: "",
-    testResults: null, openScenario: null, permission: "default", notified: new Set(), loadWarning: "", blockSave: false, lastDayKey: "",
+    testResults: null, openScenario: null, permission: "default", scheduled: 0, exact: null, notified: new Set(), loadWarning: "", blockSave: false, lastDayKey: "",
   };
   const realNow = () => new Date();
   const now = () => app.mode === "scenario" ? app.simNow : realNow();
@@ -78,6 +81,7 @@
       app.personal = parsed;
       if (!storage.set(STORE_KEY, JSON.stringify(parsed))) toast("השינוי נשמר רק עד סגירת הדף: הדפדפן חוסם שמירה במכשיר. מומלץ לגבות.");
       else toast("נשמר במכשיר");
+      syncNotifications();
     } else { app.sandbox = parsed; toast(app.mode === "scenario" ? "נשמר בתרחיש (לא ביומן האישי)" : "נשמר ביומן לדוגמה"); }
     render();
   }
@@ -227,14 +231,17 @@
       <button class="btn full" data-act="ics" ${up.length ? "" : "disabled"}>${I("download", 17)}קובץ מועדים</button>
       <p class="fine">אחרי שינוי ברישומים צריך לייצא שוב.</p></section>
       <section class="card"><div class="card-h">${I("bell")}<h3>התראות במכשיר</h3></div>
-      <p>התראה מוצגת כשהיומן פתוח, בכפוף להרשאת הדפדפן.</p>
+      ${NATIVE ? `<p>ההתראות מגיעות גם כשהאפליקציה סגורה. הן מתעדכנות בכל שינוי ביומן.</p>${app.permission === "granted" ? `<p class="fine">מתוזמנות כרגע: ${app.scheduled} התראות${st.settings.remindersEnabled ? "" : " (התזכורות כבויות בהגדרות)"}</p>` : ""}${app.permission === "granted" && app.exact === false ? `<button class="link" data-act="exact">${I("bell", 15)}אישור התראות בזמן מדויק</button>` : ""}`
+        : `<p>התראה מוצגת כשהיומן פתוח, בכפוף להרשאת הדפדפן. באפליקציית האנדרואיד ההתראות מגיעות גם כשהיא סגורה.</p>`}
       <button class="btn ghost full" data-act="notify" ${app.permission === "granted" || app.permission === "unsupported" ? "disabled" : ""}>${app.permission === "granted" ? I("check", 17) + "ההרשאה פעילה" : app.permission === "unsupported" ? "הדפדפן אינו תומך" : "הפעלת התראות"}</button></section></aside></div>`;
   }
 
   const SETTINGS_FIELDS = s => `
     <section class="card"><div class="card-h">${I("pin")}<div><h3>מקום</h3><p>עיר ברירת המחדל לזמני היום</p></div></div>
-      <label class="field" for="s-city">עיר מגורים<select id="s-city" name="cityId">${CITIES.map(c => `<option value="${c.id}"${s.cityId === c.id ? " selected" : ""}>${c.name}</option>`).join("")}</select></label>
-      <p class="fine">לכל רישום נשמר המקום שלו. שינוי העיר אינו משנה רישומים קודמים.</p></section>
+      <label class="field" for="s-city">עיר מגורים<select id="s-city" name="cityId">${placeOptions(state(), s.cityId)}</select></label>
+      <button class="btn ghost full" type="button" data-act="locate">${I("pin", 17)}זיהוי המיקום שלי</button>
+      ${(state().places || []).map(pl => `<div class="trip"><span><strong>${esc(pl.name)}</strong><small dir="ltr">${pl.lat.toFixed(3)}, ${pl.lon.toFixed(3)} · ${esc(pl.tz)}</small></span><button class="icon-btn" type="button" data-delplace="${pl.id}" aria-label="מחיקת מקום">${I("trash", 17)}</button></div>`).join("")}
+      <p class="fine">זיהוי המיקום נעשה רק בלחיצה, והמיקום נשמר במכשיר בלבד. לכל רישום נשמר המקום שלו, ושינוי העיר אינו משנה רישומים קודמים.</p></section>
     <section class="card"><div class="card-h">${I("scale")}<div><h3>שיטת החישוב</h3><p>לבחור לפי ההנחיה שקיבלת</p></div></div>
       ${sel("wait", "המתנה לפני שבעה נקיים", s, [["five", "חמישה ימים מתחילת הנידה"], ["four-from-relations", "ארבעה ימים ממועד היחסים — לפי הוראה"]])}
       ${sel("haflagah", "שיטת חישוב ההפלגה", s, [["days", "ימים בין תחילות הווסתות"], ["chabad-onot", "עונות מהפסק טהרה — חב״ד"]])}
@@ -262,7 +269,7 @@
     <aside class="stack">
       <section class="card"><div class="card-h">${I("pin")}<div><h3>נסיעות</h3><p>זמני המועדים לפי היעד</p></div></div>
         ${st.trips.map(t => `<div class="trip"><span><strong>${esc(city(t.cityId).name)}</strong><small dir="ltr">${t.from} — ${t.to}</small></span><button class="icon-btn" data-deltrip="${t.id}" aria-label="מחיקת נסיעה">${I("trash", 17)}</button></div>`).join("")}
-        <form id="trip-form" class="stack-s"><label class="field" for="t-city">יעד<select id="t-city" name="cityId">${CITIES.map(c => `<option value="${c.id}">${c.name}</option>`).join("")}</select></label>
+        <form id="trip-form" class="stack-s"><label class="field" for="t-city">יעד<select id="t-city" name="cityId">${placeOptions(st)}</select></label>
         <div class="pair"><label class="field" for="t-from">מתאריך<input id="t-from" name="from" type="date" required min="2000-01-01" max="2100-12-31"></label><label class="field" for="t-to">עד תאריך<input id="t-to" name="to" type="date" required min="2000-01-01" max="2100-12-31"></label></div>
         <button class="btn ghost full" type="submit">${I("plus", 17)}הוספת נסיעה</button></form>
         <p class="fine">נסיעה מעבר לקו התאריך מחייבת בירור אישי.</p></section>
@@ -274,7 +281,8 @@
       <section class="card"><div class="card-h">${I("info")}<div><h3>שפה</h3></div></div>${langSwitch()}</section>
       <section class="card about"><div class="card-h">${I("droplet")}<div><h3>על מעיין</h3><p>גרסה ${APP_VERSION} · מנוע ${M.ENGINE_VERSION}</p></div></div>
         <p>האפליקציה חינמית ופועלת כולה בטלפון, בלי חשבון ובלי שרת. שום מידע לא נשלח לאף אחד.</p>
-        <p>להתקנה: בתפריט הדפדפן (⋮) בוחרים ״הוספה למסך הבית״.</p></section>
+        ${NATIVE ? "" : `<p>להתקנה: בתפריט הדפדפן (⋮) בוחרים ״הוספה למסך הבית״.</p><a class="link" href="https://github.com/nrt613/maayan/releases/latest/download/maayan.apk" target="_blank" rel="noopener">${I("download", 15)}אפליקציית אנדרואיד עם התראות</a>`}
+        <button class="link" data-act="terms">${I("file", 15)}תנאי שימוש ופרטיות</button></section>
     </aside></div>`;
   }
 
@@ -329,6 +337,15 @@
     if (!changed.length) return `<p class="fine">הגדרות ברירת המחדל: חמישה ימים, הפלגה בימים, עונה בינונית באותה עונה.</p>`;
     return `<p class="fine">הגדרות התרחיש: ${changed.map(k => esc(M.settingsSummary(s).find(x => x.startsWith({ wait: "המתנה", haflagah: "הפלגה", beinonit: "עונה בינונית", day31: "יום 31", orZarua: "אור זרוע", carryMonthly: "שימור עונת", carryLongIntervals: "שימור הפלגות", missingMonthly: "יום ל׳" }[k])))).join(" · ")}</p>`;
   }
+  const TERMS = [
+    { t: "מה זה מעיין", p: ["מעיין היא כלי עזר אישי לרישום ולתכנון בענייני טהרת המשפחה. היא אינה פוסקת הלכה, אינה מורה הוראה ואינה ייעוץ רפואי.", "האפליקציה ניתנת בחינם, לשימוש אישי."] },
+    { t: "גרסת בדיקה", p: ["זו גרסת בדיקה. החישובים טרם קיבלו אישור הלכתי מגורם מוסמך."] },
+    { t: "אחריות", p: ["החישובים והתזכורות ניתנים כמות שהם, וייתכנו בהם טעויות או אי-דיוקים, לרבות בזמני הזריחה והשקיעה.", "אין להסתמך על האפליקציה לבדה. בכל שאלה או ספק יש לפנות למורה הוראה.", "השימוש באפליקציה הוא באחריות המשתמשת בלבד. המפתח אינו אחראי לכל תוצאה או נזק שנובעים מהשימוש בה או מהסתמכות עליה."] },
+    { t: "פרטיות", p: ["כל הרישומים וההגדרות נשמרים במכשיר שלך בלבד. אין חשבון, אין שרת, אין מעקב, אין פרסומות ואין איסוף נתונים. למפתח אין גישה ליומן שלך.", "מחיקת האפליקציה או נתוני הדפדפן מוחקת את היומן. הגיבוי הוא באחריותך, ובלי סיסמת הגיבוי אי אפשר לשחזר אותו.", "בגרסת האתר נטען גופן משרתי Google. באפליקציית האנדרואיד אין שום פנייה לרשת."] },
+    { t: "מיקום", p: ["זיהוי המיקום נעשה רק בלחיצה שלך. הקואורדינטות נשמרות במכשיר בלבד, משמשות לחישוב זמני היום, ואינן נשלחות לאף אחד."] },
+    { t: "התראות", p: ["ההתראות תלויות במכשיר ובהגדרותיו, ועלולות להתעכב או לא להגיע, למשל במצב חיסכון בסוללה. אין להסתמך עליהן לבדן."] },
+    { t: "שינויים", p: ["התנאים עשויים להתעדכן בגרסאות הבאות. המשך השימוש מהווה הסכמה לתנאים המעודכנים."] },
+  ];
   const S = M.SOURCES;
   const RULES = [
     { t: "היום העברי והעונה", p: ["כל רישום נשמר עם התאריך האזרחי, השעה המקומית והעיר. היום העברי מתחיל בשקיעה, ועונת היום נמשכת מהזריחה עד השקיעה.", "זמני השמש מחושבים בגובה פני הים. צאת הכוכבים לפי הזווית שנבחרה (8.5° או 7.083°).", "רישום בטווח שלוש דקות מהזריחה או מהשקיעה, או בין השקיעה לצאת הכוכבים, מסומן לבירור ואינו משמש לחישוב ודאי. שלוש הדקות הן סף לסימון ולא הגדרה של בין השמשות.", "שעה כפולה או חסרה במעבר שעון, ומקום בלי זריחה או שקיעה (קוטב), אינם מסווגים אוטומטית."], src: S.calendar },
@@ -364,7 +381,7 @@
         <main ${app.hidden ? "hidden" : ""}>
           <div class="page-h"><h1>${title}</h1>${["today", "calendar", "journal"].includes(app.tab) ? `<button class="btn" data-act="add">${I("plus", 18)}רישום חדש</button>` : ""}</div>
           ${views[app.tab](st, r, ctx)}
-          <footer class="foot"><span>${I("info", 15)}החישובים טרם קיבלו אישור הלכתי. אין לראות בהם פסק.</span><button class="link" data-go="review">כללים ומקורות</button></footer>
+          <footer class="foot"><span>${I("info", 15)}החישובים טרם קיבלו אישור הלכתי. אין לראות בהם פסק.</span><span><button class="link" data-act="terms">תנאי שימוש</button> <button class="link" data-go="review">כללים ומקורות</button></span></footer>
         </main>
         ${app.hidden ? `<div class="veil">${I("lock", 30)}<h2>היומן מוסתר</h2><button class="btn" data-act="hide">${I("eye", 18)}הצגת היומן</button></div>` : ""}
       </div>
@@ -416,7 +433,7 @@
         <label class="field" for="e-type">סוג<select id="e-type" name="type">${Object.entries(EVENT_NAMES).map(([v, n]) => `<option value="${v}"${f.type === v ? " selected" : ""}>${n}</option>`).join("")}</select></label>
         <div class="pair"><label class="field" for="e-date">${f.type === "manual" ? "התאריך של יום העונה" : "תאריך"}<input id="e-date" name="date" type="date" required min="2000-01-01" max="2100-12-31" value="${f.date}"><small class="hebdate" id="e-heb">${esc(hebHint)}</small></label>
         <label class="field" for="e-time">שעה<input id="e-time" name="time" type="time" required value="${f.time}"><small>לפי השעון במקום</small></label></div>
-        <label class="field" for="e-city">מקום<select id="e-city" name="cityId">${CITIES.map(c => `<option value="${c.id}"${f.cityId === c.id ? " selected" : ""}>${c.name}</option>`).join("")}</select></label>
+        <label class="field" for="e-city">מקום<select id="e-city" name="cityId">${placeOptions(state(), f.cityId)}</select></label>
         ${f.type === "manual" ? `<label class="field" for="e-onah">עונה<select id="e-onah" name="onah" required><option value="" ${f.onah ? "" : "selected"} disabled>בחירה</option><option value="day"${f.onah === "day" ? " selected" : ""}>יום · מהזריחה עד השקיעה</option><option value="night"${f.onah === "night" ? " selected" : ""}>לילה · מהשקיעה הקודמת עד הזריחה</option></select></label>` : ""}
         ${needsResult ? `<label class="field" for="e-result">תוצאה<select id="e-result" name="result"><option value="clear"${f.result === "clear" ? " selected" : ""}>נקייה</option><option value="uncertain"${f.result === "uncertain" ? " selected" : ""}>ממתינה לבירור</option><option value="bleeding"${f.result === "bleeding" ? " selected" : ""}>לא נקייה</option></select></label>` : ""}
         <label class="field" for="e-note">הערה <span class="opt">לא חובה</span><textarea id="e-note" name="note" rows="2" maxlength="2000">${esc(f.note)}</textarea></label>
@@ -438,7 +455,7 @@
         <div class="pair"><label class="field" for="c-hef">הפסק טהרה <span class="opt">אם ידוע</span><input id="c-hef" type="date" min="2000-01-01" max="2100-12-31"></label>
         <label class="field" for="c-hef-t">שעה<input id="c-hef-t" type="time" value="16:00"></label></div>
         <label class="field" for="c-mik">טבילה <span class="opt">תאריך הערב, אם ידוע</span><input id="c-mik" type="date" min="2000-01-01" max="2100-12-31"></label>
-        <label class="field" for="c-city">מקום<select id="c-city">${CITIES.map(c => `<option value="${c.id}"${state().settings.cityId === c.id ? " selected" : ""}>${c.name}</option>`).join("")}</select></label>
+        <label class="field" for="c-city">מקום<select id="c-city">${placeOptions(state(), state().settings.cityId)}</select></label>
         ${m.error ? `<p class="err" role="alert">${esc(m.error)}</p>` : ""}
         <div class="m-actions"><button class="btn" type="submit">${I("check", 17)}שמירת המחזור</button><button type="button" class="btn ghost" data-act="close-modal">${m.saved ? "סיום" : "ביטול"}</button></div></form>`;
     if (m.kind === "backup") return `<div class="m-h"><h2 id="m-title">גיבוי מוצפן</h2>${close}</div>
@@ -452,6 +469,16 @@
       ${m.error ? `<p class="err" role="alert">${esc(m.error)}</p>` : ""}<div class="m-actions"><button class="btn" type="submit">${I("upload", 17)}פתיחת הגיבוי</button></div></form>`;
     if (m.kind === "confirm") return `<div class="m-h"><h2 id="m-title">${esc(m.title)}</h2>${close}</div><p>${esc(m.text)}</p>
       <div class="m-actions"><button class="btn ${m.danger ? "danger" : ""}" data-act="confirm-yes">${esc(m.yes)}</button><button class="btn ghost" data-act="close-modal">ביטול</button></div>`;
+    if (m.kind === "terms") return `<div class="m-h"><h2 id="m-title">תנאי שימוש ופרטיות</h2>${close}</div>
+      <div class="terms">${TERMS.map(sec => `<h4>${esc(sec.t)}</h4>${sec.p.map(x => `<p>${esc(x)}</p>`).join("")}`).join("")}<p class="fine">עדכון אחרון: ${TERMS_VERSION}</p></div>
+      <div class="m-actions"><button class="btn" data-act="${m.back ? "terms-back" : "close-modal"}">הבנתי</button></div>`;
+    if (m.kind === "place") return `<div class="m-h"><h2 id="m-title">המיקום שזוהה</h2>${close}</div>
+      <form id="place-form" class="stack-s"><p>${m.near ? `המיקום נמצא ליד ${esc(m.near)}.` : "המיקום אינו קרוב לאחת הערים ברשימה."} זמני הזריחה והשקיעה יחושבו לפי הנקודה המדויקת.</p>
+        <p class="fine" dir="ltr">${m.lat.toFixed(4)}, ${m.lon.toFixed(4)} · ${esc(m.tz)}</p>
+        <label class="field" for="p-name">שם המקום<input id="p-name" maxlength="60" required value="${esc(m.name)}" data-nt></label>
+        <p class="fine">המקום יישמר במכשיר וייקבע כמקום ברירת המחדל. רישומים קודמים לא משתנים.</p>
+        ${m.error ? `<p class="err" role="alert">${esc(m.error)}</p>` : ""}
+        <div class="m-actions"><button class="btn" type="submit">${I("check", 17)}שמירה כמקום שלי</button><button type="button" class="btn ghost" data-act="close-modal">ביטול</button></div></form>`;
     if (m.kind === "welcome") return `<div class="welcome">${langSwitch()}<div class="mark big">${I("droplet", 34)}</div><h2 id="m-title">ברוכה הבאה למעיין</h2>
       <p>יומן אישי לטהרת המשפחה: רישום, חישוב עונות הפרישה, שבעה נקיים ותזכורות.</p>
       <ul class="promises"><li>${I("lock", 18)}<span><strong>פרטי לגמרי.</strong> הכול נשמר רק בטלפון הזה, בלי חשבון ובלי שרת.</span></li>
@@ -459,7 +486,8 @@
       <li>${I("help", 18)}<span><strong>לא פוסק.</strong> זו גרסת בדיקה שטרם קיבלה אישור הלכתי. במקום של ספק המערכת מסמנת לבירור.</span></li></ul>
       <div class="stack-s"><button class="btn full" data-act="start-personal">${I("plus", 18)}התחלת יומן אישי</button>
       <button class="btn ghost full" data-act="start-demo">${I("flask", 18)}צפייה ביומן לדוגמה</button>
-      <button class="btn ghost full" data-act="start-review">${I("scale", 18)}אני בודק/ת הלכתי/ת</button></div></div>`;
+      <button class="btn ghost full" data-act="start-review">${I("scale", 18)}אני בודק/ת הלכתי/ת</button></div>
+      <p class="fine">המשך השימוש מהווה הסכמה ל<button class="link inline" data-act="terms">תנאי השימוש והפרטיות</button></p></div>`;
     return "";
   }
   function openEvent(opts = {}) {
@@ -477,7 +505,12 @@
     return f;
   }
   function textModal(title, intro, text, file) { app.modal = { kind: "text", title, intro, text, file }; renderModal(); }
-  function download(text, name, type) {
+  async function download(text, name, type) {
+    if (NATIVE && PL.Filesystem && PL.Share) {
+      const f = await PL.Filesystem.writeFile({ path: name, data: text, directory: "CACHE", encoding: "utf8" });
+      await PL.Share.share({ title: name, url: f.uri, dialogTitle: L.t("שמירה או שליחה של הקובץ") });
+      return "shared";
+    }
     const a = document.createElement("a"), url = URL.createObjectURL(new Blob([text], { type }));
     a.href = url; a.download = name; document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(url), 2000);
   }
@@ -495,8 +528,8 @@
   /* ---------- אירועים ---------- */
   document.addEventListener("click", async e => {
     const lb = e.target.closest("[data-lang]");
-    if (lb) { applyLang(lb.dataset.lang, true); render(); return; }
-    const t = e.target.closest("[data-go],[data-act],[data-edit],[data-day],[data-cal],[data-calmode],[data-scenario],[data-scenario-load],[data-deltrip]");
+    if (lb) { applyLang(lb.dataset.lang, true); render(); syncNotifications(); return; }
+    const t = e.target.closest("[data-go],[data-act],[data-edit],[data-day],[data-cal],[data-calmode],[data-scenario],[data-scenario-load],[data-deltrip],[data-delplace]");
     if (!t) return;
     const d = t.dataset;
     if (d.go) { app.modal = null; return go(d.go); }
@@ -516,13 +549,18 @@
       Object.assign(app, { mode: "scenario", scenario: sc, sandbox: M.parseState(b.state), simNow: b.now, cal: { cursor: null, mode: "civil", selected: null } });
       toast("נפתח תרחיש בזמן מדומה. היומן האישי לא השתנה."); return go("today");
     }
+    if (d.delplace) {
+      const st = state(), id = d.delplace;
+      if (st.settings.cityId === id || st.events.some(x => x.cityId === id) || st.trips.some(x => x.cityId === id)) return toast("המקום בשימוש בהגדרות, ברישומים או בנסיעות, ולכן אי אפשר למחוק אותו.");
+      try { commit({ ...st, places: st.places.filter(x => x.id !== id) }); } catch (err) { toast(err.message); } return;
+    }
     if (d.deltrip) { const st = state(); try { commit({ ...st, trips: st.trips.filter(x => x.id !== d.deltrip) }); } catch (err) { toast(err.message); } return; }
     const st = state();
     switch (d.act) {
       case "add": return openEvent({ type: d.type, date: d.date });
       case "cycle": app.modal = { kind: "cycle", error: "", saved: 0 }; return renderModal();
       case "hide": app.hidden = !app.hidden; return render();
-      case "close-modal": if (app.modal?.kind === "welcome") markSeen(); app.modal = null; return renderModal();
+      case "close-modal": if (app.modal?.kind === "terms" && app.modal.back) { app.modal = { kind: "welcome" }; return renderModal(); } if (app.modal?.kind === "welcome") markSeen(); app.modal = null; return renderModal();
       case "toast-x": app.toast = ""; return renderToast();
       case "demo": Object.assign(app, { mode: "demo", sandbox: M.demoState(realNow()), cal: { cursor: null, mode: "civil", selected: null } }); return go("today");
       case "personal": Object.assign(app, { mode: "personal", sandbox: null, scenario: null, cal: { cursor: null, mode: "civil", selected: null } }); return go("today");
@@ -536,13 +574,21 @@
       case "review-report": { const text = reviewReport(); if (await copy(text)) return; return textModal("דוח לבודק", "סמנו את הטקסט והעתיקו.", text); }
       case "ics": { const r = calculate(st, now()); return textModal("קובץ מועדים ליומן", "שומרים כקובץ ופותחים אותו ביומן הטלפון. אם השמירה לא עובדת כאן, פתחו את מעיין ישירות בדפדפן.", M.calendarExport(r.plans.map(p => ({ ...p, title: L.t(p.title), reason: L.t(p.reason) })), st.settings.neutralReminders, now(), { personal: L.t("תזכורת אישית"), details: L.t("פרטים ביומן האישי. מועד לתכנון בלבד.") }), { name: "maayan-dates.ics", type: "text/calendar;charset=utf-8" }); }
       case "copy-text": return copy(app.modal.text);
-      case "dl-text": try { download(app.modal.text, app.modal.file.name, app.modal.file.type); toast("הקובץ נשמר בהורדות"); } catch { toast("השמירה כקובץ נחסמה. אפשר להעתיק."); } return;
+      case "dl-text": try { const how = await download(app.modal.text, app.modal.file.name, app.modal.file.type); if (how !== "shared") toast("הקובץ נשמר בהורדות"); } catch { toast("השמירה כקובץ נחסמה. אפשר להעתיק."); } return;
       case "backup": app.modal = { kind: "backup", error: "" }; return renderModal();
       case "restore": app.modal = { kind: "restore", error: "" }; return renderModal();
       case "clear": app.modal = { kind: "confirm", title: "למחוק את כל הרישומים?", text: "כל הרישומים והנסיעות יימחקו מהמכשיר. ההגדרות יישארו. אי אפשר לבטל.", yes: "מחיקה", danger: true, run: () => { app.blockSave = false; app.loadWarning = ""; commit({ ...st, events: [], trips: [] }); } }; return renderModal();
       case "confirm-yes": { const run = app.modal.run; app.modal = null; try { run(); } catch (err) { toast(err.message); } return renderModal(); }
       case "tests": { t.disabled = true; setTimeout(() => { app.testResults = MaayanTests(M).run(); render(); }, 30); return; }
+      case "terms": app.modal = { kind: "terms", back: app.modal?.kind === "welcome" }; return renderModal();
+      case "terms-back": app.modal = { kind: "welcome" }; return renderModal();
+      case "locate": return detectLocation(t);
+      case "exact": try { await PL.LocalNotifications.changeExactNotificationSetting(); } catch { /* */ } return;
       case "notify":
+        if (NATIVE && PL.LocalNotifications) {
+          try { const res = await PL.LocalNotifications.requestPermissions(); app.permission = res.display === "granted" ? "granted" : "denied"; toast(app.permission === "granted" ? "התראות הופעלו" : "ההרשאה לא ניתנה. אפשר לשנות בהגדרות המכשיר."); await syncNotifications(); } catch { toast("לא ניתן לבקש הרשאה להתראות"); }
+          return render();
+        }
         if (!("Notification" in window)) { app.permission = "unsupported"; toast("הדפדפן אינו תומך בהתראות"); return render(); }
         try { app.permission = await Notification.requestPermission(); toast(app.permission === "granted" ? "התראות הופעלו" : "ההרשאה לא ניתנה. אפשר לשנות בהגדרות הדפדפן."); } catch { app.permission = "unsupported"; toast("הדפדפן לא מאפשר לבקש הרשאה כאן"); }
         return render();
@@ -577,6 +623,12 @@
     } else if (f.id === "trip-form") {
       const fd = new FormData(f);
       try { commit({ ...st, trips: [...st.trips, { id: M.uuid(), cityId: String(fd.get("cityId")), from: String(fd.get("from")), to: String(fd.get("to")) }] }); } catch (err) { toast(err.message); }
+    } else if (f.id === "place-form") {
+      const m = app.modal, name = $("#p-name").value.trim();
+      const bytes = new Uint8Array(4); crypto.getRandomValues(bytes);
+      const pl = { id: "gps-" + [...bytes].map(x => x.toString(16).padStart(2, "0")).join(""), name, lat: m.lat, lon: m.lon, tz: m.tz };
+      try { app.modal = null; commit({ ...st, places: [...(st.places || []), pl], settings: { ...st.settings, cityId: pl.id } }); renderModal(); }
+      catch (err) { app.modal = { ...m, name, error: err.message }; renderModal(); }
     } else if (f.id === "cycle-form") {
       const v = id => $(id).value, c = v("#c-city"), stamp = new Date().toISOString();
       const mk = (type, date, time) => ({ id: M.uuid(), type, date, time, cityId: c, result: "clear", note: "", authorityNote: "", createdAt: stamp });
@@ -604,11 +656,65 @@
   document.addEventListener("keydown", e => { if (e.key === "Escape" && app.modal) { if (app.modal.kind === "welcome") markSeen(); app.modal = null; renderModal(); } });
   function markSeen() { storage.set(SEEN_KEY, "1"); }
 
+  /* ---------- זיהוי מיקום ---------- */
+  async function detectLocation(btn) {
+    if (btn) btn.disabled = true;
+    toast("מזהה מיקום…");
+    try {
+      let pos;
+      if (NATIVE && PL.Geolocation) {
+        const perm = await PL.Geolocation.requestPermissions();
+        if (perm.location !== "granted" && perm.coarseLocation !== "granted") throw new Error("לא ניתנה הרשאת מיקום. אפשר לאשר בהגדרות המכשיר, או לבחור עיר מהרשימה.");
+        pos = await PL.Geolocation.getCurrentPosition({ enableHighAccuracy: false, timeout: 25000, maximumAge: 600000 });
+      } else {
+        if (!navigator.geolocation) throw new Error("הדפדפן הזה אינו תומך בזיהוי מיקום. אפשר לבחור עיר מהרשימה.");
+        pos = await new Promise((res, rej) => navigator.geolocation.getCurrentPosition(res, () => rej(new Error("לא ניתן לזהות מיקום כאן. יש לאשר הרשאת מיקום בדפדפן, או לבחור עיר מהרשימה.")), { timeout: 25000, maximumAge: 600000 }));
+      }
+      const lat = Math.round(pos.coords.latitude * 1e4) / 1e4, lon = Math.round(pos.coords.longitude * 1e4) / 1e4;
+      const tz = Intl.DateTimeFormat().resolvedOptions().timeZone || "Asia/Jerusalem";
+      const dist = c => { const R = Math.PI / 180, x = (c.lon - lon) * R * Math.cos((c.lat + lat) / 2 * R), y = (c.lat - lat) * R; return Math.sqrt(x * x + y * y) * 6371; };
+      const near = [...CITIES].sort((a, b) => dist(a) - dist(b))[0], close = dist(near) <= 25;
+      app.toast = "";
+      app.modal = { kind: "place", lat, lon, tz, near: close ? near.name : "", name: L.t(close ? `ליד ${near.name}` : "המיקום שלי"), error: "" };
+      renderModal(); renderToast();
+    } catch (err) { toast(err && err.message && /[\u0590-\u05FF]/.test(err.message) ? err.message : "לא ניתן לזהות מיקום כרגע. אפשר לנסות שוב במקום פתוח, או לבחור עיר מהרשימה."); }
+    finally { if (btn && btn.isConnected) btn.disabled = false; }
+  }
+
+  /* ---------- התראות מתוזמנות (אפליקציית אנדרואיד) ---------- */
+  const hashId = str => { let h = 7; for (let i = 0; i < str.length; i++) h = (h * 31 + str.charCodeAt(i)) | 0; return Math.abs(h) % 2000000000 + 1; };
+  let syncing = Promise.resolve();
+  function syncNotifications() { syncing = syncing.then(doSync, doSync); return syncing; }
+  async function doSync() {
+    if (!NATIVE || !PL.LocalNotifications) return;
+    const LN = PL.LocalNotifications;
+    try {
+      const perm = await LN.checkPermissions();
+      app.permission = perm.display === "granted" ? "granted" : perm.display === "denied" ? "denied" : "default";
+      try { const ex = await LN.checkExactNotificationSetting(); app.exact = ex.exact_alarm === "granted"; } catch { app.exact = null; }
+      const pending = await LN.getPending();
+      if (pending.notifications.length) await LN.cancel({ notifications: pending.notifications.map(x => ({ id: x.id })) });
+      app.scheduled = 0;
+      const st = app.personal;
+      if (app.permission !== "granted" || !st.settings.remindersEnabled) return;
+      await LN.createChannel({ id: "maayan", name: L.t("תזכורות"), description: L.t("תזכורות אישיות מהיומן"), importance: 4, visibility: 0 });
+      const n = new Date(), r = calculate(st, n), neutral = st.settings.neutralReminders;
+      const list = r.plans.filter(p => !p.done && new Date(p.start) > n).slice(0, 60).map(p => ({
+        id: hashId(p.id), channelId: "maayan",
+        title: L.t(neutral ? "תזכורת אישית" : p.title),
+        body: neutral ? L.t("פרטים ביומן האישי") : `${p.onah === "day" ? planHebrew(p) : L.t(`ליל ${planHebrew(p)}`)} · ${L.t(onahLabel(p.onah))}`,
+        schedule: { at: new Date(p.start), allowWhileIdle: true },
+      }));
+      if (list.length) await LN.schedule({ notifications: list });
+      app.scheduled = list.length;
+    } catch (err) { console.warn("notifications", err); }
+  }
+
   /* ---------- שעון והתראות ---------- */
   function tick() {
     if (app.mode === "scenario") return;
     const st = state(), n = now(), r = calculate(st, n), ctx = currentContext(st, n);
-    if (app.permission === "granted" && st.settings.remindersEnabled && app.mode === "personal") {
+    if (!NATIVE && app.permission === "granted" && st.settings.remindersEnabled && app.mode === "personal") {
       for (const p of r.plans) {
         const delta = n - new Date(p.start);
         if (p.done || delta < 0 || delta > 90000 || app.notified.has(p.id)) continue;
@@ -625,12 +731,20 @@
     applyLang(saved || (L.LANGS[nav] ? nav : (nav === "iw" ? "he" : "en")), false);
   }
   app.personal = loadPersonal();
-  if ("Notification" in window) app.permission = Notification.permission; else app.permission = "unsupported";
+  if (NATIVE) app.permission = "default"; else if ("Notification" in window) app.permission = Notification.permission; else app.permission = "unsupported";
   const hash = location.hash.slice(1);
   if (NAV.some(n => n[0] === hash)) app.tab = hash;
   window.addEventListener("hashchange", () => { const h = location.hash.slice(1); if (NAV.some(n => n[0] === h) && h !== app.tab) go(h); });
   render();
   if (!storage.get(SEEN_KEY) && !app.personal.events.length) { app.modal = { kind: "welcome" }; renderModal(); }
   setInterval(tick, 30000);
-  document.addEventListener("visibilitychange", () => { if (!document.hidden) tick(); });
+  document.addEventListener("visibilitychange", () => { if (!document.hidden) { tick(); if (NATIVE) syncNotifications().then(() => { if (app.tab === "dates" && !app.modal) render(); }); } });
+  if (NATIVE && PL.App) PL.App.addListener("backButton", () => {
+    if (app.modal) { if (app.modal.kind === "welcome") markSeen(); app.modal = null; renderModal(); }
+    else if (app.tab !== "today") go("today");
+    else PL.App.minimizeApp();
+  });
+  if (NATIVE) syncNotifications().then(() => { if (app.tab === "dates" && !app.modal) render(); });
+  // אתר: התקנה למסך הבית ועבודה בלי רשת
+  if (!NATIVE && "serviceWorker" in navigator && location.protocol === "https:" && /github\.io$/.test(location.hostname)) navigator.serviceWorker.register("sw.js").catch(() => {});
 })();
