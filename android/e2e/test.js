@@ -18,7 +18,7 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
   const page = await webview.page();
   page.on("pageerror", e => log("PAGE ERROR", e.message));
   page.on("console", m => { if (m.type() === "error" || m.type() === "warning") log("console", m.type(), m.text().slice(0, 300)); });
-  await page.waitForSelector("#app .tabs, #app .side", { timeout: 60000 });
+  await page.waitForSelector("#app .tabs", { state: "attached", timeout: 60000 });
   await sleep(1500);
 
   const info = await page.evaluate(() => ({ native: !!(window.Capacitor && Capacitor.isNativePlatform()), platform: window.Capacitor && Capacitor.getPlatform(), plugins: ["LocalNotifications", "Geolocation", "Filesystem", "Share", "App"].filter(p => Capacitor.isPluginAvailable(p)), url: location.href, lang: navigator.language, tz: Intl.DateTimeFormat().resolvedOptions().timeZone, fonts: [...document.fonts].map(f => f.family + ":" + f.status).join(",") }));
@@ -91,7 +91,7 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
   await device.shell(`am force-stop ${PKG}`); await sleep(1000);
   await device.shell(`am start -n ${PKG}/.MainActivity`);
   const page2 = await (await device.webView({ pkg: PKG }, { timeout: 60000 })).page();
-  await page2.waitForSelector("#app .tabs", { timeout: 60000 }); await sleep(1500);
+  await page2.waitForSelector("#app .tabs", { state: "attached", timeout: 60000 }); await sleep(1500);
   const again = await page2.evaluate(async () => ({ events: JSON.parse(localStorage.getItem("maayan.v1.diary")).events.length, welcome: !!document.querySelector(".welcome"), pending: (await Capacitor.Plugins.LocalNotifications.getPending()).notifications.length, lang: document.documentElement.lang }));
   check("diary survives app restart", again.events === 1 && !again.welcome && again.lang === "he", JSON.stringify(again));
   check("notifications still scheduled after restart", again.pending >= 3, `count=${again.pending}`);
