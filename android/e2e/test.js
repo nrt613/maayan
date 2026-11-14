@@ -6,9 +6,9 @@ const results = [];
 const log = (...a) => { const line = a.join(" "); console.log(line); fs.appendFileSync("shots/log.txt", line + "\n"); };
 const check = (name, ok, detail = "") => { results.push({ name, ok }); log(`E2E ${ok ? "OK  " : "FAIL"} ${name} ${detail}`); };
 const sleep = ms => new Promise(r => setTimeout(r, ms));
-const { execSync } = require("child_process");
+const { exec } = require("child_process");
 // שולח מיקום לאמולטור (נתניה); לא נתקע אם הקונסולה לא עונה
-const geoFix = () => { try { execSync("adb emu geo fix 34.8532 32.3215", { timeout: 8000, stdio: "ignore" }); } catch { /* */ } };
+const geoFix = () => { exec("adb emu geo fix 34.8532 32.3215", { timeout: 8000 }, () => {}); };
 
 (async () => {
   fs.mkdirSync("shots", { recursive: true });
