@@ -61,8 +61,10 @@ jobs:
           arch: x86_64
           target: google_apis
           profile: pixel_6
+          ram-size: 4096M
+          heap-size: 512M
           disable-animations: true
-          emulator-options: -no-window -gpu guest -noaudio -no-boot-anim -no-snapshot
+          emulator-options: -no-window -gpu swiftshader_indirect -memory 4096 -cores 4 -noaudio -no-boot-anim -no-snapshot
           script: bash android/e2e/run.sh
       - name: Publish test screenshots
         if: always() && github.ref == 'refs/heads/main'
