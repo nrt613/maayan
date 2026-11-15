@@ -6,7 +6,7 @@ on:
 permissions:
   contents: write
 concurrency:
-  group: android-app
+  group: android-app-${{ github.ref }}
   cancel-in-progress: true
 jobs:
   build:
@@ -65,7 +65,7 @@ jobs:
           emulator-options: -no-window -gpu guest -noaudio -no-boot-anim -no-snapshot
           script: bash android/e2e/run.sh
       - name: Publish test screenshots
-        if: always()
+        if: always() && github.ref == 'refs/heads/main'
         run: |
           cd android/e2e/shots 2>/dev/null || exit 0
           git init -q -b ci-shots
@@ -73,7 +73,7 @@ jobs:
           git -c user.name="ci" -c user.email="ci@users.noreply.github.com" commit -qm "screenshots from run ${GITHUB_RUN_NUMBER}"
           git push -q -f "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}" ci-shots
       - name: Publish the app
-        if: success()
+        if: success() && github.ref == 'refs/heads/main'
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
