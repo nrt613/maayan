@@ -64,6 +64,12 @@ jobs:
           disable-animations: true
           emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -no-snapshot
           script: bash android/e2e/run.sh
+      - name: Diagnostics after an emulator failure
+        if: failure()
+        run: |
+          free -m; nproc
+          sudo dmesg -T | grep -iE "kill|oom|kvm|segfault|qemu|emulator" | tail -40 || true
+          ls -la /tmp/android-runner/ 2>/dev/null || true
       - name: Publish test screenshots
         if: always() && github.ref == 'refs/heads/main'
         run: |
