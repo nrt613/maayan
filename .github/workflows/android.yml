@@ -23,7 +23,7 @@ jobs:
         run: |
           pip install --quiet pillow
           mkdir -p www
-          cp ../fonts/assistant.ttf ../fonts/frank.ttf www/
+          true
           python3 prepare.py www
           npm install --no-audit --no-fund
           npx cap add android
@@ -62,7 +62,7 @@ jobs:
           target: google_apis
           profile: pixel_6
           disable-animations: true
-          emulator-options: -no-window -gpu guest -noaudio -no-boot-anim -no-snapshot
+          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -no-snapshot
           script: bash android/e2e/run.sh
       - name: Publish test screenshots
         if: always() && github.ref == 'refs/heads/main'
