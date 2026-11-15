@@ -433,7 +433,7 @@ const Maayan = (() => {
       if (s.nightfall) addPlan({ id: `mikvah-${h.e.id}`, kind: "mikvah", title: "ליל טבילה מתוכנן", date: immersionDate, onah: "evening", start: s.nightfall.toISOString(), reason: "הערב שלאחר היום השביעי. מותנה בהשלמת הספירה, הבדיקות ובירור הספקות; אינו אישור טבילה.", source: SOURCES.clean, eventIds: [h.e.id], cityId: c.id });
     } else if (earliestHefsek) {
       const d = earliestHefsek < date ? date : earliestHefsek, c = atLocation(state, d), s = sun(d, c);
-      if (s.sunset) addPlan({ id: `hefsek-${latestNiddah?.e.id}`, kind: "hefsek", title: "תזכורת להפסק טהרה", date: d, onah: "day", start: new Date(s.sunset.valueOf() - state.settings.reminderMinutes * 60000).toISOString(), end: s.sunset.toISOString(), reason: "זהו המועד המוקדם לפי ההמתנה שנבחרה, ורק אם הדימום פסק והבדיקה תקפה. לא נרשם הפסק באופן אוטומטי.", source: SOURCES.wait, eventIds: latestNiddah ? [latestNiddah.e.id] : [], cityId: c.id });
+      if (s.sunset) addPlan({ id: `hefsek-${latestNiddah?.e.id}`, kind: "hefsek", title: "הפסק טהרה, רק אם הדימום פסק", date: d, onah: "day", start: new Date(s.sunset.valueOf() - state.settings.reminderMinutes * 60000).toISOString(), end: s.sunset.toISOString(), reason: "זהו המועד המוקדם ביותר לפי ההמתנה שנבחרה, לא מועד קבוע. עושים הפסק רק אם הדימום פסק בפועל; אם לא, ממתינים והתזכורת עוברת ליום הבא. שבעה נקיים נספרים רק מהפסק שנרשם כנקי, והמערכת לעולם לא רושמת הפסק בעצמה.", source: SOURCES.wait, eventIds: latestNiddah ? [latestNiddah.e.id] : [], cityId: c.id });
     }
     const addOnah = (abs, onah, kind, title, reason, source, eventIds, id) => {
       const civil = fromAbs(abs), location = atLocation(state, onah === "night" ? addDays(civil, -1) : civil);

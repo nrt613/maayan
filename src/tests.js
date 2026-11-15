@@ -17,6 +17,21 @@ const MaayanTests = (M) => {
   const T = [];
   const test = (group, name, fn) => T.push({ group, name, fn });
 
+  test("הפסק טהרה", "בלי רישום הפסק אין ספירה, גם אחרי שעבר המועד המוקדם", () => {
+    const now = new Date(new HDate(14, 1, 5785).greg().toISOString().slice(0, 10) + "T09:00:00Z");
+    const r = run([event("flow", N(1), "10:00")], {}, now);
+    a.equal(r.phase, "waiting"); a.equal(r.hefsek, undefined); a.ok(!r.cleanDay, "אין יום ספירה");
+    a.ok(!r.plans.some(p => p.kind === "bedikah" || p.kind === "mikvah"), "אין בדיקות או טבילה בלי הפסק");
+    const h = r.plans.find(p => p.kind === "hefsek"); a.ok(h, "יש תזכורת להפסק");
+    a.equal(h.date, toISO(new HDate(14, 1, 5785).greg()), "התזכורת עוברת ליום הנוכחי ולא נשארת ביום החמישי");
+  });
+  test("הפסק טהרה", "הפסק שנרשם כלא נקי אינו פותח שבעה נקיים", () => {
+    const now = new Date(new HDate(8, 1, 5785).greg().toISOString().slice(0, 10) + "T09:00:00Z");
+    const r = run([event("flow", N(1), "10:00"), event("hefsek", N(5), "15:00", { result: "bleeding" })], {}, now);
+    a.equal(r.phase, "waiting"); a.equal(r.hefsek, undefined);
+    const r2 = run([event("flow", N(1), "10:00"), event("hefsek", N(5), "15:00", { result: "bleeding" }), event("hefsek", N(6), "15:00")], {}, now);
+    a.equal(r2.phase, "clean"); a.equal(r2.hefsek.date, N(6), "הספירה מתחילה מההפסק הנקי בלבד");
+  });
   test("לוח עברי", "ראש השנה תשפ״ז חל ב-12 בספטמבר 2026", () => a.equal(N(1, 7, 5787), "2026-09-12"));
   test("לוח עברי", "ט״ו בניסן תשפ״ו חל ב-2 באפריל 2026", () => a.equal(N(15, 1, 5786), "2026-04-02"));
   test("לוח עברי", "התאמה ללוח העברי של הדפדפן ב-3,000 ימים", () => {
