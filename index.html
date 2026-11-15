@@ -13,7 +13,7 @@
   --bg: #fbf5f3; --surface: #ffffff; --soft: #f8edee; --line: #f0e1e3;
   --ink: #3b2330; --muted: #8d6f7b; --faint: #bba3ad;
   --accent: #b2486f; --accent-ink: #ffffff; --accent-soft: #fbe8ef; --accent-strong: #8e3157;
-  --peach: #fde9df; --blush: #f9dbe5;
+  --peach: #fde9df; --blush: #f9dbe5; --ring-a: rgb(178 72 111 / .14); --ring-b: rgb(178 72 111 / .04);
   --flow: #d8435f; --clean: #7487d6; --sep: #c98a2e; --mikvah: #2f9aa6;
   --warn-bg: #fdf1e4; --warn-ink: #93501a; --danger: #c8344f; --danger-soft: #fdecef; --good: #3f8a63; --good-soft: #eaf5ee;
   --shadow: 0 1px 2px rgb(120 40 70 / .05), 0 4px 14px rgb(150 60 90 / .07);
@@ -26,7 +26,7 @@
   --bg: #1b1217; --surface: #251a20; --soft: #2f222a; --line: #3b2b34;
   --ink: #f7e9ef; --muted: #c5a8b4; --faint: #8f7581;
   --accent: #f08fb2; --accent-ink: #3a0f22; --accent-soft: #452131; --accent-strong: #f8b8cf;
-  --peach: #3a2620; --blush: #3e2230;
+  --peach: #3a2620; --blush: #3e2230; --ring-a: rgb(240 143 178 / .16); --ring-b: rgb(240 143 178 / .05);
   --flow: #fb7f95; --clean: #9eaaf0; --sep: #f0b860; --mikvah: #5cc9d3;
   --warn-bg: #33231a; --warn-ink: #f6c08c; --danger: #fb8098; --danger-soft: #3a1a22; --good: #7fd1a2; --good-soft: #1b2e24;
   --shadow: 0 1px 2px rgb(0 0 0 / .45); color-scheme: dark; } }
@@ -34,7 +34,7 @@
   --bg: #1b1217; --surface: #251a20; --soft: #2f222a; --line: #3b2b34;
   --ink: #f7e9ef; --muted: #c5a8b4; --faint: #8f7581;
   --accent: #f08fb2; --accent-ink: #3a0f22; --accent-soft: #452131; --accent-strong: #f8b8cf;
-  --peach: #3a2620; --blush: #3e2230;
+  --peach: #3a2620; --blush: #3e2230; --ring-a: rgb(240 143 178 / .16); --ring-b: rgb(240 143 178 / .05);
   --flow: #fb7f95; --clean: #9eaaf0; --sep: #f0b860; --mikvah: #5cc9d3;
   --warn-bg: #33231a; --warn-ink: #f6c08c; --danger: #fb8098; --danger-soft: #3a1a22; --good: #7fd1a2; --good-soft: #1b2e24;
   --shadow: 0 1px 2px rgb(0 0 0 / .45); color-scheme: dark; }
@@ -125,7 +125,7 @@ main { padding-block: 24px 120px; padding-left: max(16px, env(safe-area-inset-le
 .grid-top { display: grid; grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr); gap: 16px; }
 .grid-bottom { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr); gap: 16px; align-items: start; }
 .hero { position: relative; overflow: hidden; border-radius: 28px; padding: 24px; background: radial-gradient(120% 90% at 100% 0%, var(--blush), transparent 60%), radial-gradient(90% 80% at 0% 100%, var(--peach), transparent 65%), var(--surface); box-shadow: var(--shadow); display: grid; gap: 22px; }
-.hero::after { content: ""; position: absolute; width: 180px; height: 180px; inset-inline-start: -60px; top: -70px; border-radius: 50%; border: 1px solid color-mix(in srgb, var(--accent) 18%, transparent); box-shadow: 0 0 0 22px color-mix(in srgb, var(--accent) 4%, transparent), 0 0 0 23px color-mix(in srgb, var(--accent) 12%, transparent); pointer-events: none; }
+.hero::after { content: ""; position: absolute; width: 180px; height: 180px; inset-inline-start: -60px; top: -70px; border-radius: 50%; border: 1px solid var(--ring-a); box-shadow: 0 0 0 22px var(--ring-b), 0 0 0 23px var(--ring-a); pointer-events: none; }
 .hero > * { position: relative; z-index: 1; }
 .hero-row { display: flex; gap: 18px; align-items: center; justify-content: space-between; }
 .hero-copy { display: grid; gap: 8px; justify-items: start; min-width: 0; }
