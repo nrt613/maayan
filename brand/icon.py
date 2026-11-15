@@ -1,4 +1,4 @@
-# מייצר את סמל מעיין: טיפה לבנה מעל אדוות, על רקע טורקיז מדורג
+# מייצר את סמל מעיין: טיפה לבנה מעל אדוות, על רקע ורוד-פטל מדורג
 from PIL import Image, ImageDraw, ImageFilter
 import math, sys
 S = 2048  # ציור בגודל כפול להחלקה
@@ -6,7 +6,7 @@ S = 2048  # ציור בגודל כפול להחלקה
 def gradient(size):
     img = Image.new("RGB", (size, size))
     px = img.load()
-    c0, c1, c2 = (45, 212, 191), (15, 118, 110), (17, 78, 74)
+    c0, c1, c2 = (246, 170, 196), (190, 80, 122), (118, 36, 80)
     for y in range(size):
         for x in range(0, size):
             t = (x * 0.35 + y * 0.9) / (size * 1.25)
@@ -30,12 +30,12 @@ def art(size, scale=1.0, with_bg=True, radius=0.225):
     gd.ellipse([-size * .3, -size * .6, size * .8, size * .35], fill=46)
     glow = glow.filter(ImageFilter.GaussianBlur(size * .16))
     bg = Image.composite(Image.new("RGBA", (size, size), (255, 255, 255, 255)), bg, glow)
-    fg = Image.new("RGBA", (size, size), (0, 0, 0, 0))
+    fg = Image.new("RGBA", (size, size), (255, 255, 255, 0))
     cx = size / 2; k = scale
     r = size * .205 * k; cy = size * (.5 + .035 * k); tip = cy - size * .40 * k
     # אדוות
     rip = Image.new("L", (size, size), 0); rd = ImageDraw.Draw(rip)
-    for i, (w, a) in enumerate([(0.30, 175), (0.43, 95)]):
+    for i, (w, a) in enumerate([(0.30, 190), (0.40, 110)]):
         rx = size * w * k; ry = rx * .30; y0 = cy + r * .86
         rd.ellipse([cx - rx, y0 - ry, cx + rx, y0 + ry], outline=a, width=max(2, int(size * .018 * k)))
     # מוחקים את החלק העליון של האדוות שמאחורי הטיפה
@@ -44,7 +44,7 @@ def art(size, scale=1.0, with_bg=True, radius=0.225):
     # צל עדין לטיפה
     dm = droplet_mask(size, cx, cy, r, tip)
     sh = dm.filter(ImageFilter.GaussianBlur(size * .02)).point(lambda v: int(v * .28))
-    sh_img = Image.new("RGBA", (size, size), (6, 60, 56, 255))
+    sh_img = Image.new("RGBA", (size, size), (90, 20, 55, 255))
     off = Image.new("L", (size, size), 0); off.paste(sh, (0, int(size * .018)))
     fg = Image.composite(sh_img, fg, off)
     fg = Image.composite(Image.new("RGBA", (size, size), (255, 255, 255, 255)), fg, dm)
@@ -52,7 +52,7 @@ def art(size, scale=1.0, with_bg=True, radius=0.225):
     hl = Image.new("L", (size, size), 0); hd = ImageDraw.Draw(hl)
     hd.ellipse([cx - r * .52, cy - r * .30, cx - r * .16, cy + r * .34], fill=255)
     hl = Image.composite(hl, Image.new("L", (size, size), 0), dm).filter(ImageFilter.GaussianBlur(size * .012)).point(lambda v: 0)
-    fg = Image.composite(Image.new("RGBA", (size, size), (94, 205, 190, 255)), fg, hl)
+    fg = Image.composite(Image.new("RGBA", (size, size), (250, 200, 218, 255)), fg, hl)
     if not with_bg: return fg
     out = Image.alpha_composite(bg, fg)
     if radius:
@@ -83,5 +83,5 @@ if __name__ == "__main__":
         fgl.resize((a, a), Image.LANCZOS).save(f"{p}/ic_launcher_foreground.png")
         bgl.resize((a, a), Image.LANCZOS).save(f"{p}/ic_launcher_background.png")
     # מסך פתיחה: סמל במרכז על רקע בהיר
-    sp = Image.new("RGB", (2732, 2732), (245, 246, 248)); ic = full.resize((560, 560), Image.LANCZOS); sp.paste(ic, ((2732 - 560) // 2, (2732 - 560) // 2), ic); sp.save(f"{out}/splash.png")
+    sp = Image.new("RGB", (2732, 2732), (251, 245, 243)); ic = full.resize((560, 560), Image.LANCZOS); sp.paste(ic, ((2732 - 560) // 2, (2732 - 560) // 2), ic); sp.save(f"{out}/splash.png")
     print("ok")

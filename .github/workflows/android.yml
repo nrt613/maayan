@@ -23,7 +23,7 @@ jobs:
         run: |
           pip install --quiet pillow
           mkdir -p www
-          curl -fsSL -o www/heebo.ttf "https://github.com/google/fonts/raw/main/ofl/heebo/Heebo%5Bwght%5D.ttf" || { rm -f www/heebo.ttf; echo "::warning::font download failed, using the system font"; }
+          cp ../fonts/assistant.ttf ../fonts/frank.ttf www/
           python3 prepare.py www
           npm install --no-audit --no-fund
           npx cap add android
