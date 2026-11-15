@@ -6,8 +6,11 @@ adb() { timeout 120 "$(command -v adb)" "$@"; }
 PKG=io.github.nrt613.maayan
 ROOT=$(pwd)
 mkdir -p android/e2e/shots; : > android/e2e/shots/log.txt
-adb root || true; sleep 3
-adb shell setprop persist.sys.timezone Asia/Jerusalem || true
+# בלי adb root: הפעלה מחדש של adbd מנתקת את המכשיר באמצע הבדיקה
+adb wait-for-device
+until [ "$(adb shell getprop sys.boot_completed | tr -d '\r')" = "1" ]; do sleep 2; done
+sleep 20
+adb shell cmd alarm set-timezone Asia/Jerusalem || adb shell service call alarm 3 s16 Asia/Jerusalem || true
 adb shell settings put secure location_mode 3 || true
 adb install -r out/maayan-debug.apk
 adb shell pm grant $PKG android.permission.POST_NOTIFICATIONS
