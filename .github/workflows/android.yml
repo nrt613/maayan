@@ -59,10 +59,10 @@ jobs:
         with:
           api-level: 34
           arch: x86_64
-          target: google_apis
+          target: default
           profile: pixel_6
           disable-animations: true
-          emulator-options: -no-window -gpu guest -noaudio -no-boot-anim -no-snapshot
+          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -no-snapshot
           script: bash android/e2e/run.sh
       - name: Publish test screenshots
         if: always() && github.ref == 'refs/heads/main'
