@@ -3,27 +3,18 @@ from PIL import Image, ImageDraw, ImageFilter
 import math, sys
 S = 2048  # ציור בגודל כפול להחלקה
 
-SAGE, GOLD, CREAM = (127, 149, 131), (184, 154, 94), (251, 246, 238)
+import os
+LOGO = Image.open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "src", "logo.png")).convert("RGBA")
 
 def gradient(size):
-    # רקע שמנת רך, מעט בהיר יותר למעלה
-    img = Image.new("RGB", (size, size)); px = img.load()
-    c0, c1 = (255, 252, 246), (244, 236, 222)
-    for y in range(size):
-        u = y / size; c = tuple(int(c0[i] + (c1[i] - c0[i]) * u) for i in range(3))
-        for x in range(size): px[x, y] = c
-    return img
+    return Image.new("RGB", (size, size), (255, 255, 255))
 
 def art(size, scale=1.0, with_bg=True, radius=0.225):
-    """אדוות מים: נקודה ושלושה עיגולים. scale: גודל הציור ביחס לקנבס"""
-    fg = Image.new("RGBA", (size, size), (0, 0, 0, 0)); d = ImageDraw.Draw(fg)
-    cx = cy = size / 2; k = size * scale
-    def ring(r, w, col):
-        r *= k; w = max(2, int(w * k)); d.ellipse([cx - r, cy - r, cx + r, cy + r], outline=col, width=w)
-    ring(.385, .020, GOLD + (235,))
-    ring(.285, .028, SAGE + (170,))
-    ring(.180, .036, SAGE + (255,))
-    r = .070 * k; d.ellipse([cx - r, cy - r, cx + r, cy + r], fill=SAGE + (255,))
+    """סמל מעיין (הלוגו של נתן) על רקע לבן. scale: גודל הציור ביחס לקנבס"""
+    fg = Image.new("RGBA", (size, size), (0, 0, 0, 0))
+    w = int(size * scale * 0.74); h = int(w * LOGO.height / LOGO.width)
+    lg = LOGO.resize((w, h), Image.LANCZOS)
+    fg.paste(lg, ((size - w) // 2, (size - h) // 2 + int(size * 0.01)), lg)
     if not with_bg: return fg
     out = Image.alpha_composite(gradient(size).convert("RGBA"), fg)
     if radius:
@@ -54,5 +45,5 @@ if __name__ == "__main__":
         fgl.resize((a, a), Image.LANCZOS).save(f"{p}/ic_launcher_foreground.png")
         bgl.resize((a, a), Image.LANCZOS).save(f"{p}/ic_launcher_background.png")
     # מסך פתיחה: סמל במרכז על רקע בהיר
-    sp = Image.new("RGB", (2732, 2732), (251, 246, 238)); ic = full.resize((560, 560), Image.LANCZOS); sp.paste(ic, ((2732 - 560) // 2, (2732 - 560) // 2), ic); sp.save(f"{out}/splash.png")
+    sp = Image.new("RGB", (2732, 2732), (255, 255, 255)); ic = full.resize((560, 560), Image.LANCZOS); sp.paste(ic, ((2732 - 560) // 2, (2732 - 560) // 2), ic); sp.save(f"{out}/splash.png")
     print("ok")
