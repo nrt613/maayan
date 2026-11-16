@@ -13,7 +13,7 @@ if stage == "www":
     html = re.sub(r'<link rel="stylesheet" href="https://fonts\.googleapis\.com[^>]*>', "", html)
     html = re.sub(r'<link rel="manifest"[^>]*>', "", html)
     html = re.sub(r'<link rel="apple-touch-icon"[^>]*>', "", html)
-    faces = "".join('@font-face{font-family:"%s";src:url("%s");font-weight:100 900;font-display:swap}' % (n, f) for n, f in [("Assistant", "assistant.ttf"), ("Frank Ruhl Libre", "frank.ttf")] if (here / "www" / f).exists())
+    faces = "".join('@font-face{font-family:"%s";src:url("%s");font-weight:100 900;font-display:swap}' % (n, f) for n, f in [("Bellefair", "bellefair.ttf"), ("Heebo", "heebo.ttf")] if (here / "www" / f).exists())
     html = html.replace("<style>", "<style>" + faces, 1)
     assert "fonts.googleapis" not in html
     (here / "www").mkdir(exist_ok=True)

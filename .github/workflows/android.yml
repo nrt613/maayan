@@ -23,7 +23,7 @@ jobs:
         run: |
           pip install --quiet pillow
           mkdir -p www
-          cp ../fonts/assistant.ttf ../fonts/frank.ttf www/
+          cp ../fonts/bellefair.ttf ../fonts/heebo.ttf www/
           python3 prepare.py www
           npm install --no-audit --no-fund
           npx cap add android

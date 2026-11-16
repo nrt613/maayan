@@ -6,7 +6,7 @@ S = 2048  # ציור בגודל כפול להחלקה
 def gradient(size):
     img = Image.new("RGB", (size, size))
     px = img.load()
-    c0, c1, c2 = (246, 170, 196), (190, 80, 122), (118, 36, 80)
+    c0, c1, c2 = (200, 168, 190), (127, 83, 112), (64, 40, 58)
     for y in range(size):
         for x in range(0, size):
             t = (x * 0.35 + y * 0.9) / (size * 1.25)
@@ -44,7 +44,7 @@ def art(size, scale=1.0, with_bg=True, radius=0.225):
     # צל עדין לטיפה
     dm = droplet_mask(size, cx, cy, r, tip)
     sh = dm.filter(ImageFilter.GaussianBlur(size * .02)).point(lambda v: int(v * .28))
-    sh_img = Image.new("RGBA", (size, size), (90, 20, 55, 255))
+    sh_img = Image.new("RGBA", (size, size), (40, 20, 35, 255))
     off = Image.new("L", (size, size), 0); off.paste(sh, (0, int(size * .018)))
     fg = Image.composite(sh_img, fg, off)
     fg = Image.composite(Image.new("RGBA", (size, size), (255, 255, 255, 255)), fg, dm)
@@ -52,7 +52,7 @@ def art(size, scale=1.0, with_bg=True, radius=0.225):
     hl = Image.new("L", (size, size), 0); hd = ImageDraw.Draw(hl)
     hd.ellipse([cx - r * .52, cy - r * .30, cx - r * .16, cy + r * .34], fill=255)
     hl = Image.composite(hl, Image.new("L", (size, size), 0), dm).filter(ImageFilter.GaussianBlur(size * .012)).point(lambda v: 0)
-    fg = Image.composite(Image.new("RGBA", (size, size), (250, 200, 218, 255)), fg, hl)
+    fg = Image.composite(Image.new("RGBA", (size, size), (222, 205, 216, 255)), fg, hl)
     if not with_bg: return fg
     out = Image.alpha_composite(bg, fg)
     if radius:
@@ -83,5 +83,5 @@ if __name__ == "__main__":
         fgl.resize((a, a), Image.LANCZOS).save(f"{p}/ic_launcher_foreground.png")
         bgl.resize((a, a), Image.LANCZOS).save(f"{p}/ic_launcher_background.png")
     # מסך פתיחה: סמל במרכז על רקע בהיר
-    sp = Image.new("RGB", (2732, 2732), (251, 245, 243)); ic = full.resize((560, 560), Image.LANCZOS); sp.paste(ic, ((2732 - 560) // 2, (2732 - 560) // 2), ic); sp.save(f"{out}/splash.png")
+    sp = Image.new("RGB", (2732, 2732), (244, 241, 242)); ic = full.resize((560, 560), Image.LANCZOS); sp.paste(ic, ((2732 - 560) // 2, (2732 - 560) // 2), ic); sp.save(f"{out}/splash.png")
     print("ok")

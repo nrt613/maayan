@@ -2,8 +2,8 @@
   "appId": "io.github.nrt613.maayan",
   "appName": "מעיין",
   "webDir": "www",
-  "android": { "allowMixedContent": false, "backgroundColor": "#FBF5F3" },
+  "android": { "allowMixedContent": false, "backgroundColor": "#F4F1F2" },
   "plugins": {
-    "LocalNotifications": { "smallIcon": "ic_stat_maayan", "iconColor": "#B2486F" }
+    "LocalNotifications": { "smallIcon": "ic_stat_maayan", "iconColor": "#7F5370" }
   }
 }

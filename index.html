@@ -5,38 +5,38 @@
 <title>מעיין</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <meta name="description" content="יומן טהרת המשפחה — חינמי, פרטי, פועל כולו בטלפון">
-<meta name="theme-color" content="#b2486f">
+<meta name="theme-color" content="#7f5370">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Assistant:wght@400;500;600;700&family=Frank+Ruhl+Libre:wght@500;600;700&display=swap">
-<style>/* Look: warm blush paper, deep rose-berry accent, plum ink. Serif headings (Frank Ruhl Libre) over a soft rounded body face (Assistant). Pill buttons, tinted rose shadows. */
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bellefair&family=Heebo:wght@300;400;500;600&display=swap">
+<style>/* Look: quiet luxury. Soft mauve-grey paper, deep mauve accent, sage detail line. Bellefair display serif over light Heebo text. Hairline borders instead of shadows, modest radii. */
 :root {
-  --bg: #fbf5f3; --surface: #ffffff; --soft: #f8edee; --line: #f0e1e3;
-  --ink: #3b2330; --muted: #8d6f7b; --faint: #bba3ad;
-  --accent: #b2486f; --accent-ink: #ffffff; --accent-soft: #fbe8ef; --accent-strong: #8e3157;
-  --peach: #fde9df; --blush: #f9dbe5; --ring-a: rgb(178 72 111 / .14); --ring-b: rgb(178 72 111 / .04);
-  --flow: #d8435f; --clean: #7487d6; --sep: #c98a2e; --mikvah: #2f9aa6;
-  --warn-bg: #fdf1e4; --warn-ink: #93501a; --danger: #c8344f; --danger-soft: #fdecef; --good: #3f8a63; --good-soft: #eaf5ee;
-  --shadow: 0 1px 2px rgb(120 40 70 / .05), 0 4px 14px rgb(150 60 90 / .07);
+  --bg: #f4f1f2; --surface: #fdfcfc; --soft: #efe9ec; --line: #e3dbdf;
+  --ink: #262125; --muted: #77696f; --faint: #a3959b;
+  --accent: #7f5370; --accent-ink: #ffffff; --accent-soft: #efe4ec; --accent-strong: #6b4560; --detail: #7f9583;
+  --peach: #f1ecee; --blush: #ece2e8; --ring-a: rgb(127 83 112 / .14); --ring-b: rgb(127 83 112 / .04);
+  --flow: #b5546a; --clean: #8592c4; --sep: #b9934f; --mikvah: #5e9a9b;
+  --warn-bg: #f7f0e6; --warn-ink: #85561f; --danger: #b23d55; --danger-soft: #f8eaee; --good: #4f8062; --good-soft: #e9f2ec;
+  --shadow: 0 1px 2px rgb(60 30 50 / .04), 0 2px 10px rgb(60 30 50 / .05);
   --shadow-up: 0 -1px 0 var(--line);
-  --r: 24px; --r-s: 16px;
-  --font: "Assistant", "Heebo", "Rubik", "Segoe UI", Arial, sans-serif;
-  --display: "Frank Ruhl Libre", "David Libre", "Times New Roman", serif;
+  --r: 18px; --r-s: 12px;
+  --font: "Heebo", "Segoe UI", Arial, sans-serif;
+  --display: "Bellefair", "Frank Ruhl Libre", "David Libre", "Times New Roman", serif;
 }
 @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
-  --bg: #1b1217; --surface: #251a20; --soft: #2f222a; --line: #3b2b34;
-  --ink: #f7e9ef; --muted: #c5a8b4; --faint: #8f7581;
-  --accent: #f08fb2; --accent-ink: #3a0f22; --accent-soft: #452131; --accent-strong: #f8b8cf;
-  --peach: #3a2620; --blush: #3e2230; --ring-a: rgb(240 143 178 / .16); --ring-b: rgb(240 143 178 / .05);
-  --flow: #fb7f95; --clean: #9eaaf0; --sep: #f0b860; --mikvah: #5cc9d3;
-  --warn-bg: #33231a; --warn-ink: #f6c08c; --danger: #fb8098; --danger-soft: #3a1a22; --good: #7fd1a2; --good-soft: #1b2e24;
+  --bg: #121113; --surface: #1a181b; --soft: #221f23; --line: #2e2a2f;
+  --ink: #ece6ea; --muted: #ada1a8; --faint: #776d73;
+  --accent: #c0a0b6; --accent-ink: #1e1219; --accent-soft: #2a2028; --accent-strong: #d8bfd0; --detail: #9fb5a3;
+  --peach: #1d1a1e; --blush: #261f26; --ring-a: rgb(192 160 182 / .16); --ring-b: rgb(192 160 182 / .05);
+  --flow: #e08a9c; --clean: #a9b3e0; --sep: #d9b673; --mikvah: #8cc6c6;
+  --warn-bg: #2c2419; --warn-ink: #e7c08b; --danger: #ec8ea1; --danger-soft: #33191f; --good: #8fc7a2; --good-soft: #1a2a20;
   --shadow: 0 1px 2px rgb(0 0 0 / .45); color-scheme: dark; } }
 :root[data-theme="dark"] {
-  --bg: #1b1217; --surface: #251a20; --soft: #2f222a; --line: #3b2b34;
-  --ink: #f7e9ef; --muted: #c5a8b4; --faint: #8f7581;
-  --accent: #f08fb2; --accent-ink: #3a0f22; --accent-soft: #452131; --accent-strong: #f8b8cf;
-  --peach: #3a2620; --blush: #3e2230; --ring-a: rgb(240 143 178 / .16); --ring-b: rgb(240 143 178 / .05);
-  --flow: #fb7f95; --clean: #9eaaf0; --sep: #f0b860; --mikvah: #5cc9d3;
-  --warn-bg: #33231a; --warn-ink: #f6c08c; --danger: #fb8098; --danger-soft: #3a1a22; --good: #7fd1a2; --good-soft: #1b2e24;
+  --bg: #121113; --surface: #1a181b; --soft: #221f23; --line: #2e2a2f;
+  --ink: #ece6ea; --muted: #ada1a8; --faint: #776d73;
+  --accent: #c0a0b6; --accent-ink: #1e1219; --accent-soft: #2a2028; --accent-strong: #d8bfd0; --detail: #9fb5a3;
+  --peach: #1d1a1e; --blush: #261f26; --ring-a: rgb(192 160 182 / .16); --ring-b: rgb(192 160 182 / .05);
+  --flow: #e08a9c; --clean: #a9b3e0; --sep: #d9b673; --mikvah: #8cc6c6;
+  --warn-bg: #2c2419; --warn-ink: #e7c08b; --danger: #ec8ea1; --danger-soft: #33191f; --good: #8fc7a2; --good-soft: #1a2a20;
   --shadow: 0 1px 2px rgb(0 0 0 / .45); color-scheme: dark; }
 
 *, *::before, *::after { box-sizing: border-box; }
@@ -365,6 +365,38 @@ textarea { resize: vertical; }
 .terms h4 { color: var(--ink); font-size: 14.5px; margin-top: 8px; }
 .terms p { color: var(--muted); font-size: 14px; }
 .link.inline { display: inline; padding: 0; font-size: inherit; }
+
+/* Refinement layer: hairlines, restrained shapes, typographic weight */
+.hero::after { display: none; }
+.hero, .review-hero { border-radius: 18px; background: var(--surface); }
+.card { border-radius: 18px; box-shadow: none; border: 1px solid var(--line); }
+.hero { box-shadow: none; border: 1px solid var(--line); border-top: 3px solid var(--detail); }
+.btn { border-radius: 12px; box-shadow: none; font-weight: 600; letter-spacing: .01em; }
+.btn.sm { border-radius: 10px; }
+.mark { border-radius: 12px; background: var(--accent); box-shadow: none; }
+.times dl div { border-radius: 12px; background: transparent; border: 1px solid var(--line); }
+.times dd { font-weight: 500; }
+.ring { width: 104px; height: 104px; background: radial-gradient(closest-side, var(--surface) 94%, transparent 95%), conic-gradient(var(--accent) calc(var(--p) * 100%), var(--line) 0) !important; }
+.ring.idle { background: radial-gradient(closest-side, var(--surface) 94%, transparent 95%), conic-gradient(var(--line) 100%, var(--line) 0) !important; color: var(--detail); }
+.ring strong { font-weight: 500; color: var(--ink); }
+.chip-light { background: transparent; border: 1px solid var(--line); color: var(--detail); font-size: 11.5px; letter-spacing: .06em; }
+h1, h2, .hero h2 { font-weight: 500; letter-spacing: -.005em; }
+.hero h2 { font-size: 27px; }
+.tabs button .ic { border-radius: 10px; }
+.tabs button.on .ic { background: transparent; }
+.tabs button.on { color: var(--accent-strong); }
+.tabs button.on::after { content: ""; width: 18px; height: 2px; border-radius: 2px; background: var(--detail); }
+.seg, .seg button, .search, .toast, .save-bar { border-radius: 12px; }
+.ev-ic { border-radius: 10px; }
+.day { border-radius: 10px; }
+body { font-weight: 300; }
+b, strong, .btn, label, .tabs button.on, .top-date .hebdate { font-weight: 500; }
+h1, h2, h3, .hero h2, .brand, .times dd, .ring strong, .cal-h h3, .welcome h2 { font-weight: 400 !important; }
+h1 { font-size: 34px; } h2 { font-size: 27px; } .hero h2 { font-size: 33px; } .welcome h2 { font-size: 32px; }
+.brand { font-size: 26px; } .times dd { font-size: 23px; } .cal-h h3 { font-size: 25px; } .ring strong { font-size: 44px; }
+.card-h h3 { font-family: var(--display); font-weight: 400; font-size: 20px; }
+.welcome::before { background: radial-gradient(80% 100% at 50% 0%, var(--blush), transparent 70%); }
+@media (max-width: 520px) { h1 { font-size: 30px; } .hero h2 { font-size: 29px; } .ring strong { font-size: 36px; } .times dd { font-size: 20px; } }
 </style>
 </head><body>
 <div id="app" dir="rtl" lang="he"></div><div id="modal" dir="rtl" lang="he"></div><div id="toast" dir="rtl" lang="he"></div>
