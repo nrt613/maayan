@@ -1,7 +1,7 @@
 name: android-app
 on:
   push:
-    paths: ["android/**", "index.html", ".github/workflows/android.yml"]
+    paths: ["android/**", "fonts/**", "index.html", ".github/workflows/android.yml"]
   workflow_dispatch:
 permissions:
   contents: write
