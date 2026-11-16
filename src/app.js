@@ -14,6 +14,7 @@
 
   /* ---------- אייקונים ---------- */
   const P = {
+    spring: '<circle cx="12" cy="12" r="1.6" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="9.2" opacity=".6"/>',
     droplet: '<path d="M12 22a7 7 0 0 0 7-7c0-2-1-3.9-3-5.5s-3.5-4-4-6.5c-.5 2.5-2 4.9-4 6.5C6 11.1 5 13 5 15a7 7 0 0 0 7 7z"/>',
     home: '<path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/>',
     calendar: '<rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/>',
@@ -116,17 +117,19 @@
     const date = ctx.date, loc = atLocation(st, date), times = sun(date, loc, Number(st.settings.nightfall));
     const upcoming = r.plans.filter(p => !p.done && new Date(p.end || p.start) >= now()).slice(0, 4);
     const phase = r.phase, cd = r.cleanDay;
+    const mk = r.plans.find(p => p.kind === "mikvah"), mikvahNight = !!mk && now() < new Date(new Date(mk.start).valueOf() + 14 * 3600000);
     const C = {
       empty: ["הרישום הראשון", "כדי לחשב מועדים, רשמי את תחילת הווסת: תאריך, שעה ומקום.", "רישום תחילת וסת", "flow"],
       waiting: ["ממתינה להפסק טהרה", r.earliestHefsek ? (r.earliestHefsek > date ? `הפסק טהרה עושים רק כשהדימום פסק בפועל. המועד המוקדם האפשרי: ${hebrew(r.earliestHefsek)}, ${civilLabel(r.earliestHefsek, true)}, לפני השקיעה.` : "אם הדימום פסק, אפשר לעשות הפסק טהרה היום לפני השקיעה. אם לא, ממתינים ומנסים שוב ביום שאחריו.") : "חסר מידע כדי לחשב את מועד ההפסק. פרטים בנקודות לבירור.", "רישום הפסק טהרה", "hefsek"],
-      clean: [cd ? `יום ${cd} מתוך 7` : "הפסק טהרה נרשם", cd ? "שבעה נקיים לפי ההפסק שנרשם." : "יום הספירה הראשון מתחיל בתאריך העברי הבא.", "רישום בדיקה", "bedikah"],
-      planned: ["מועד הטבילה המתוכנן עבר", "אפשר לרשום את הטבילה ולעיין בנקודות לבירור.", "רישום טבילה", "mikvah"],
+      clean: [cd ? `יום ${cd} מתוך 7` : "הפסק טהרה נרשם", cd === 7 && mk ? `היום השביעי. ליל הטבילה המתוכנן: הלילה, אחרי צאת הכוכבים (${timeInZone(new Date(mk.start), city(mk.cityId).tz)}), בכפוף לבדיקות ולבירור הנקודות הפתוחות.` : cd ? "שבעה נקיים לפי ההפסק שנרשם." : "יום הספירה הראשון מתחיל בתאריך העברי הבא.", "רישום בדיקה", "bedikah"],
+      planned: mikvahNight ? ["ליל הטבילה", `הספירה הושלמה. הטבילה אחרי צאת הכוכבים (${timeInZone(new Date(mk.start), city(mk.cityId).tz)}), בכפוף לבדיקות ולבירור הנקודות הפתוחות. אחרי הטבילה רושמים אותה כאן.`, "רישום טבילה", "mikvah"]
+        : ["הטבילה המתוכננת עדיין לא נרשמה", "אם הטבילה התקיימה, רושמים אותה כאן. עד שתירשם, היומן מחשב כאילו לא הייתה טבילה.", "רישום טבילה", "mikvah"],
       immersed: ["טבילה נרשמה", "המועדים הקרובים מופיעים למטה ובלוח השנה.", "רישום חדש", "note"],
     }[phase];
     const days = phase === "clean" ? `<ol class="seven" aria-label="שבעת הימים">${[1, 2, 3, 4, 5, 6, 7].map(d =>
       `<li class="${d < cd ? "past" : ""}${d === cd ? " now" : ""}"><span>${r.checks[d]?.length ? I("check", 16) : d}</span><small>${d === cd ? "היום" : "יום " + d}</small></li>`).join("")}</ol>` : "";
     const ring = phase === "clean" && cd ? `<div class="ring" style="--p:${cd / 7}"><strong>${cd}</strong><small>מתוך 7</small></div>`
-      : `<div class="ring idle">${I(phase === "waiting" ? "moon" : "droplet", 44)}</div>`;
+      : `<div class="ring idle">${I(phase === "waiting" ? "moon" : "spring", 44)}</div>`;
     return `
     ${app.mode === "personal" && !st.events.length ? onboardingCard() : ""}
     <div class="grid-top">
@@ -279,7 +282,7 @@
         <button class="action" data-act="report">${I("file", 19)}<span><strong>דוח לבירור</strong><small>טקסט גלוי לשליחה למורה הוראה</small></span></button>
         <button class="link danger" data-act="clear">מחיקת כל הרישומים</button></section>
       <section class="card"><div class="card-h">${I("info")}<div><h3>שפה</h3></div></div>${langSwitch()}</section>
-      <section class="card about"><div class="card-h">${I("droplet")}<div><h3>על מעיין</h3><p>גרסה ${APP_VERSION} · מנוע ${M.ENGINE_VERSION}</p></div></div>
+      <section class="card about"><div class="card-h">${I("spring")}<div><h3>על מעיין</h3><p>גרסה ${APP_VERSION} · מנוע ${M.ENGINE_VERSION}</p></div></div>
         <p>האפליקציה חינמית ופועלת כולה בטלפון, בלי חשבון ובלי שרת. שום מידע לא נשלח לאף אחד.</p>
         ${NATIVE ? "" : `<p>להתקנה: בתפריט הדפדפן (⋮) בוחרים ״הוספה למסך הבית״.</p><a class="link" href="https://github.com/nrt613/maayan/releases/latest/download/maayan.apk" target="_blank" rel="noopener">${I("download", 15)}אפליקציית אנדרואיד עם התראות</a>`}
         <button class="link" data-act="terms">${I("file", 15)}תנאי שימוש ופרטיות</button></section>
@@ -387,7 +390,7 @@
       </div>
       <nav class="tabs" aria-label="ניווט">${NAV.map(([id, t, ic]) => `<button class="${app.tab === id ? "on" : ""}" data-go="${id}"${app.tab === id ? ' aria-current="page"' : ""}>${I(ic, 21)}<span>${t.replace("לוח השנה", "לוח").replace("היומן שלי", "יומן")}</span></button>`).join("")}</nav>`;
   }
-  const mark = () => `<span class="mark">${I("droplet", 22)}</span>`;
+  const mark = () => `<span class="mark">${I("spring", 22)}</span>`;
   const langSwitch = () => `<div class="seg langs" role="group" aria-label="שפה" data-nt>${Object.entries(L.LANGS).map(([k, n]) => `<button type="button" data-lang="${k}" aria-pressed="${L.lang === k}" lang="${k}">${n}</button>`).join("")}</div>`;
   function applyLang(l, save) {
     L.set(l); M.setLang(L.lang);
@@ -479,7 +482,7 @@
         <p class="fine">המקום יישמר במכשיר וייקבע כמקום ברירת המחדל. רישומים קודמים לא משתנים.</p>
         ${m.error ? `<p class="err" role="alert">${esc(m.error)}</p>` : ""}
         <div class="m-actions"><button class="btn" type="submit">${I("check", 17)}שמירה כמקום שלי</button><button type="button" class="btn ghost" data-act="close-modal">ביטול</button></div></form>`;
-    if (m.kind === "welcome") return `<div class="welcome">${langSwitch()}<div class="mark big">${I("droplet", 34)}</div><h2 id="m-title">ברוכה הבאה למעיין</h2>
+    if (m.kind === "welcome") return `<div class="welcome">${langSwitch()}<div class="mark big">${I("spring", 34)}</div><h2 id="m-title">ברוכה הבאה למעיין</h2>
       <p>יומן אישי לטהרת המשפחה: רישום, חישוב עונות הפרישה, שבעה נקיים ותזכורות.</p>
       <ul class="promises"><li>${I("lock", 18)}<span><strong>פרטי לגמרי.</strong> הכול נשמר רק בטלפון הזה, בלי חשבון ובלי שרת.</span></li>
       <li>${I("scale", 18)}<span><strong>שקוף.</strong> לכל מועד מוצגים הכלל והמקור, ואת שיטת החישוב בוחרים לפי ההנחיה שקיבלת.</span></li>

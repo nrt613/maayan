@@ -1,60 +1,31 @@
-# מייצר את סמל מעיין: טיפה לבנה מעל אדוות, על רקע ורוד-פטל מדורג
+# מייצר את סמל מעיין: אדוות מים בירוק מרווה וזהב על רקע שמנת
 from PIL import Image, ImageDraw, ImageFilter
 import math, sys
 S = 2048  # ציור בגודל כפול להחלקה
 
+SAGE, GOLD, CREAM = (127, 149, 131), (184, 154, 94), (251, 246, 238)
+
 def gradient(size):
-    img = Image.new("RGB", (size, size))
-    px = img.load()
-    c0, c1, c2 = (200, 168, 190), (127, 83, 112), (64, 40, 58)
+    # רקע שמנת רך, מעט בהיר יותר למעלה
+    img = Image.new("RGB", (size, size)); px = img.load()
+    c0, c1 = (255, 252, 246), (244, 236, 222)
     for y in range(size):
-        for x in range(0, size):
-            t = (x * 0.35 + y * 0.9) / (size * 1.25)
-            if t < .5: a, b, u = c0, c1, t / .5
-            else: a, b, u = c1, c2, (t - .5) / .5
-            px[x, y] = tuple(int(a[i] + (b[i] - a[i]) * u) for i in range(3))
+        u = y / size; c = tuple(int(c0[i] + (c1[i] - c0[i]) * u) for i in range(3))
+        for x in range(size): px[x, y] = c
     return img
 
-def droplet_mask(size, cx, cy, r, tip):
-    m = Image.new("L", (size, size), 0); d = ImageDraw.Draw(m)
-    dd = cy - tip; c = r / dd; s = math.sqrt(1 - c * c)
-    d.ellipse([cx - r, cy - r, cx + r, cy + r], fill=255)
-    d.polygon([(cx, tip), (cx - r * s, cy - r * c), (cx + r * s, cy - r * c)], fill=255)
-    return m
-
 def art(size, scale=1.0, with_bg=True, radius=0.225):
-    """scale: גודל הציור ביחס לקנבס (לאייקון מותאם אנדרואיד צריך שוליים)"""
-    bg = gradient(size).convert("RGBA")
-    # הילה רכה למעלה
-    glow = Image.new("L", (size, size), 0); gd = ImageDraw.Draw(glow)
-    gd.ellipse([-size * .3, -size * .6, size * .8, size * .35], fill=46)
-    glow = glow.filter(ImageFilter.GaussianBlur(size * .16))
-    bg = Image.composite(Image.new("RGBA", (size, size), (255, 255, 255, 255)), bg, glow)
-    fg = Image.new("RGBA", (size, size), (255, 255, 255, 0))
-    cx = size / 2; k = scale
-    r = size * .205 * k; cy = size * (.5 + .035 * k); tip = cy - size * .40 * k
-    # אדוות
-    rip = Image.new("L", (size, size), 0); rd = ImageDraw.Draw(rip)
-    for i, (w, a) in enumerate([(0.30, 190), (0.40, 110)]):
-        rx = size * w * k; ry = rx * .30; y0 = cy + r * .86
-        rd.ellipse([cx - rx, y0 - ry, cx + rx, y0 + ry], outline=a, width=max(2, int(size * .018 * k)))
-    # מוחקים את החלק העליון של האדוות שמאחורי הטיפה
-    cut = ImageDraw.Draw(rip); cut.rectangle([0, 0, size, cy + r * .78], fill=0)
-    fg = Image.composite(Image.new("RGBA", (size, size), (255, 255, 255, 255)), fg, rip)
-    # צל עדין לטיפה
-    dm = droplet_mask(size, cx, cy, r, tip)
-    sh = dm.filter(ImageFilter.GaussianBlur(size * .02)).point(lambda v: int(v * .28))
-    sh_img = Image.new("RGBA", (size, size), (40, 20, 35, 255))
-    off = Image.new("L", (size, size), 0); off.paste(sh, (0, int(size * .018)))
-    fg = Image.composite(sh_img, fg, off)
-    fg = Image.composite(Image.new("RGBA", (size, size), (255, 255, 255, 255)), fg, dm)
-    # ברק קטן בתוך הטיפה
-    hl = Image.new("L", (size, size), 0); hd = ImageDraw.Draw(hl)
-    hd.ellipse([cx - r * .52, cy - r * .30, cx - r * .16, cy + r * .34], fill=255)
-    hl = Image.composite(hl, Image.new("L", (size, size), 0), dm).filter(ImageFilter.GaussianBlur(size * .012)).point(lambda v: 0)
-    fg = Image.composite(Image.new("RGBA", (size, size), (222, 205, 216, 255)), fg, hl)
+    """אדוות מים: נקודה ושלושה עיגולים. scale: גודל הציור ביחס לקנבס"""
+    fg = Image.new("RGBA", (size, size), (0, 0, 0, 0)); d = ImageDraw.Draw(fg)
+    cx = cy = size / 2; k = size * scale
+    def ring(r, w, col):
+        r *= k; w = max(2, int(w * k)); d.ellipse([cx - r, cy - r, cx + r, cy + r], outline=col, width=w)
+    ring(.385, .020, GOLD + (235,))
+    ring(.285, .028, SAGE + (170,))
+    ring(.180, .036, SAGE + (255,))
+    r = .070 * k; d.ellipse([cx - r, cy - r, cx + r, cy + r], fill=SAGE + (255,))
     if not with_bg: return fg
-    out = Image.alpha_composite(bg, fg)
+    out = Image.alpha_composite(gradient(size).convert("RGBA"), fg)
     if radius:
         mask = Image.new("L", (size, size), 0); ImageDraw.Draw(mask).rounded_rectangle([0, 0, size - 1, size - 1], radius=int(size * radius), fill=255)
         out.putalpha(mask)
@@ -83,5 +54,5 @@ if __name__ == "__main__":
         fgl.resize((a, a), Image.LANCZOS).save(f"{p}/ic_launcher_foreground.png")
         bgl.resize((a, a), Image.LANCZOS).save(f"{p}/ic_launcher_background.png")
     # מסך פתיחה: סמל במרכז על רקע בהיר
-    sp = Image.new("RGB", (2732, 2732), (244, 241, 242)); ic = full.resize((560, 560), Image.LANCZOS); sp.paste(ic, ((2732 - 560) // 2, (2732 - 560) // 2), ic); sp.save(f"{out}/splash.png")
+    sp = Image.new("RGB", (2732, 2732), (251, 246, 238)); ic = full.resize((560, 560), Image.LANCZOS); sp.paste(ic, ((2732 - 560) // 2, (2732 - 560) // 2), ic); sp.save(f"{out}/splash.png")
     print("ok")
