@@ -298,7 +298,10 @@ const Maayan = (() => {
   function calculateSun(date, c, degrees) {
     const [y, m, d] = date.split("-").map(Number), base = Date.UTC(y, m - 1, d);
     const at = (zenith, rising) => { const t = sunEventUTC(y, m, d, c.lat, c.lon, zenith, rising); return t === null ? null : new Date(base + Math.round(t * 60000)); };
-    return { sunrise: at(90.833, true), sunset: at(90.833, false), nightfall: at(90 + degrees, false), dawn: at(106.1, true) };
+    // עיגול לדקה לחומרא, כמו בלוחות: שקיעה כלפי מטה (מוקדם), צאת הכוכבים כלפי מעלה (מאוחר).
+    // לפני העיגול החישוב תואם את "שקיעה במישור" של עיתים לבינה בטווח של שניות.
+    const floorMin = t => t && new Date(Math.floor(t.valueOf() / 60000) * 60000), ceilMin = t => t && new Date(Math.ceil(t.valueOf() / 60000) * 60000);
+    return { sunrise: at(90.833, true), sunset: floorMin(at(90.833, false)), nightfall: ceilMin(at(90 + degrees, false)), dawn: at(106.1, true) };
   }
   function sun(date, c, degrees = 8.5) {
     const key = `${date}:${c.id}:${degrees}`;

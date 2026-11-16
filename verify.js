@@ -123,7 +123,8 @@ for (const c of M.CITIES.filter(c => c.id !== "tromso")) for (let i = 0; i < 365
     const mine = ((s[k].getUTCHours() * 60 + s[k].getUTCMinutes() + s[k].getUTCSeconds() / 60) % 1440 + 1440) % 1440;
     let dlt = Math.abs(mine - a); if (dlt > 720) dlt = 1440 - dlt;
     if (dlt > maxDiff) { maxDiff = dlt; worst = `${c.name} ${date} ${k}`; }
-    ok(dlt < 1.5, `sun ${c.name} ${date} ${k} diff ${dlt.toFixed(2)}m`);
+    // השקיעה מעוגלת כלפי מטה לדקה שלמה (לחומרא), ולכן מותרת דקה נוספת
+    ok(dlt < (k === "sunset" ? 2.5 : 1.5), `sun ${c.name} ${date} ${k} diff ${dlt.toFixed(2)}m`);
   }
 }
 console.log(`checks: ${checks}, failures: ${fails}, max sun diff vs 2nd algorithm: ${maxDiff.toFixed(2)} min (${worst})`);
