@@ -1,5 +1,6 @@
 /* Look: quiet luxury. Soft mauve-grey paper, deep mauve accent, sage detail line. Bellefair display serif over light Heebo text. Hairline borders instead of shadows, modest radii. */
 :root {
+  color-scheme: light;
   --bg: #f4f1f2; --surface: #fdfcfc; --soft: #efe9ec; --line: #e3dbdf;
   --ink: #262125; --muted: #77696f; --faint: #a3959b;
   --accent: #7f5370; --accent-ink: #ffffff; --accent-soft: #efe4ec; --accent-strong: #6b4560; --detail: #7f9583;
@@ -12,23 +13,6 @@
   --font: "Heebo", "Segoe UI", Arial, sans-serif;
   --display: "Bellefair", "Frank Ruhl Libre", "David Libre", "Times New Roman", serif;
 }
-@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
-  --bg: #121113; --surface: #1a181b; --soft: #221f23; --line: #2e2a2f;
-  --ink: #ece6ea; --muted: #ada1a8; --faint: #776d73;
-  --accent: #c0a0b6; --accent-ink: #1e1219; --accent-soft: #2a2028; --accent-strong: #d8bfd0; --detail: #9fb5a3;
-  --peach: #1d1a1e; --blush: #261f26; --ring-a: rgb(192 160 182 / .16); --ring-b: rgb(192 160 182 / .05);
-  --flow: #e08a9c; --clean: #a9b3e0; --sep: #d9b673; --mikvah: #8cc6c6;
-  --warn-bg: #2c2419; --warn-ink: #e7c08b; --danger: #ec8ea1; --danger-soft: #33191f; --good: #8fc7a2; --good-soft: #1a2a20;
-  --shadow: 0 1px 2px rgb(0 0 0 / .45); color-scheme: dark; } }
-:root[data-theme="dark"] {
-  --bg: #121113; --surface: #1a181b; --soft: #221f23; --line: #2e2a2f;
-  --ink: #ece6ea; --muted: #ada1a8; --faint: #776d73;
-  --accent: #c0a0b6; --accent-ink: #1e1219; --accent-soft: #2a2028; --accent-strong: #d8bfd0; --detail: #9fb5a3;
-  --peach: #1d1a1e; --blush: #261f26; --ring-a: rgb(192 160 182 / .16); --ring-b: rgb(192 160 182 / .05);
-  --flow: #e08a9c; --clean: #a9b3e0; --sep: #d9b673; --mikvah: #8cc6c6;
-  --warn-bg: #2c2419; --warn-ink: #e7c08b; --danger: #ec8ea1; --danger-soft: #33191f; --good: #8fc7a2; --good-soft: #1a2a20;
-  --shadow: 0 1px 2px rgb(0 0 0 / .45); color-scheme: dark; }
-
 *, *::before, *::after { box-sizing: border-box; }
 html { -webkit-text-size-adjust: 100%; -webkit-tap-highlight-color: transparent; }
 body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--font); font-size: 15.5px; line-height: 1.55; -webkit-font-smoothing: antialiased; }
