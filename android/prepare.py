@@ -33,6 +33,16 @@ if stage == "native":
         side = max(w, h)
         img = src.resize((side, side), Image.LANCZOS).crop(((side - w) // 2, (side - h) // 2, (side - w) // 2 + w, (side - h) // 2 + h))
         img.save(f)
+    # האפליקציה תמיד בהיר: ערכת נושא בהירה בלבד, וחוסמים "הכהיה כפויה" של אנדרואיד/היצרן
+    for st in (here / "android" / "app" / "src" / "main" / "res").glob("values*/styles.xml"):
+        t = st.read_text(encoding="utf-8")
+        t = t.replace("Theme.AppCompat.DayNight.NoActionBar", "Theme.AppCompat.Light.NoActionBar")
+        t = t.replace("Theme.AppCompat.DayNight", "Theme.AppCompat.Light")
+        t = re.sub(r'(<style name="(?:AppTheme|AppTheme\.NoActionBar)"[^>]*>)', r'\1<item name="android:forceDarkAllowed">false</item><item name="android:windowLightStatusBar">true</item>', t)
+        st.write_text(t, encoding="utf-8")
+    nd = here / "android" / "app" / "src" / "main" / "res" / "values-night"
+    if nd.exists():
+        shutil.rmtree(nd)
     man = here / "android" / "app" / "src" / "main" / "AndroidManifest.xml"
     x = man.read_text(encoding="utf-8")
     perms = """
