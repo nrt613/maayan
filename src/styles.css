@@ -385,7 +385,11 @@ body { font-weight: 350; }
 /* Touch targets: every tappable thing at least 44px high */
 .link { min-height: 44px; padding: 8px 4px; }
 .link.inline { min-height: 0; padding: 0; }
-.plan-more a, .rules details a { min-height: 40px; }
+.plan-more a, .rules details a, details.rules a { min-height: 40px; }
+details.rules > summary { display: flex; justify-content: space-between; align-items: center; gap: 10px; min-height: 44px; cursor: pointer; list-style: none; font-weight: 500; }
+details.rules > p a { display: inline-flex; align-items: center; gap: 4px; }
+.m-h .icon-btn, .card-h .icon-btn, .toast .icon-btn { flex-shrink: 0; }
+.pill { min-height: 40px; }
 .seg button { min-height: 40px; }
 .langs button { min-height: 44px; padding: 8px 14px; }
 .banner button { min-height: 40px; padding: 6px 14px; font-weight: 500; }
@@ -432,7 +436,7 @@ body { font-weight: 350; }
 .next:hover { background: var(--soft); }
 .next-l { flex-shrink: 0; font-size: 11.5px; font-weight: 500; color: var(--muted); writing-mode: horizontal-tb; padding-inline-end: 10px; border-inline-end: 1px solid var(--line); line-height: 1.25; max-width: 4.5em; }
 .next-main { flex: 1; display: grid; min-width: 0; }
-.next-main strong { font-size: 15px; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.next-main strong { font-size: 15px; font-weight: 500; line-height: 1.3; overflow-wrap: anywhere; }
 .next-main small { color: var(--muted); font-size: 12.5px; }
 .next time { font-size: 18px; font-weight: 500; font-family: var(--display); }
 .next > .ic:last-child { color: var(--faint); }
@@ -622,3 +626,6 @@ main.enter > * { animation: rise .22s ease-out both; }
 .nudge > p { color: var(--muted); font-size: 14px; }
 .nudge .card-h > .ic { color: var(--accent); }
 #backup-card .why { color: var(--muted); font-size: 13.5px; }
+
+/* Long diaries (years of entries): skip layout and paint of entries outside the screen */
+.entries > .entry { content-visibility: auto; contain-intrinsic-size: auto 64px; }

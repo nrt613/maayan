@@ -75,7 +75,7 @@
   const app = {
     mode: "personal", personal: null, sandbox: null, scenario: null, simNow: null,
     tab: "today", hidden: false, modal: null, toast: "", toastTimer: 0,
-    cal: { cursor: null, mode: "civil", selected: null }, filter: "all", query: "",
+    cal: { cursor: null, mode: "civil", selected: null }, filter: "all", query: "", jLimit: 150,
     testResults: null, openScenario: null, permission: "default", scheduled: 0, exact: null, notified: new Set(), loadWarning: "", blockSave: false, lastDayKey: "",
     locked: false, lock: null, lockedModal: null, bio: null, widgetDay: null,
   };
@@ -91,7 +91,7 @@
       if (!storage.set(STORE_KEY, JSON.stringify(parsed))) toast("השינוי נשמר רק עד סגירת הדף: הדפדפן חוסם שמירה במכשיר. מומלץ לגבות.");
       else toast("נשמר במכשיר");
       syncNotifications();
-      if (window.MaayanWidget) MaayanWidget.update(state(), now());
+      if (window.MaayanWidget) setTimeout(() => MaayanWidget.update(), 0); // אחרי הציור, כדי לא לעכב את המסך
     } else { app.sandbox = parsed; toast(app.mode === "scenario" ? "נשמר בתרחיש (לא ביומן האישי)" : "נשמר ביומן לדוגמה"); }
     render();
   }
@@ -170,7 +170,7 @@
   async function setPin(pin) {
     const salt = crypto.getRandomValues(new Uint8Array(16)), prev = lockCfg() || { after: 0, bio: false, secure: true };
     const hash = await pinHash(pin, salt, PIN_ITER);
-    storage.set(LOCK_KEY, JSON.stringify({ ...prev, v: 1, kdf: "PBKDF2-SHA256", iter: PIN_ITER, salt: b64e(salt), hash: b64e(hash), len: pin.length }));
+    if (!storage.set(LOCK_KEY, JSON.stringify({ ...prev, v: 1, kdf: "PBKDF2-SHA256", iter: PIN_ITER, salt: b64e(salt), hash: b64e(hash), len: pin.length }))) throw new Error("לא ניתן לשמור את הקוד במכשיר, ולכן הנעילה לא הופעלה.");
     try { localStorage.removeItem(LOCKFAIL_KEY); } catch { /* */ }
   }
   /** בודק קוד מול הגיבוב השמור, עם השהיה הולכת וגדלה אחרי ניסיונות שגויים. מחזיר true / false, או זורק אם צריך להמתין */
@@ -188,6 +188,7 @@
   function syncSecure() {
     const c = lockCfg();
     if (NATIVE && PL.MaayanPrivacy) PL.MaayanPrivacy.setSecure({ on: !!c && c.secure !== false }).catch(() => {});
+    if (window.MaayanWidget) MaayanWidget.update(); // נעילה פעילה = וידג׳ט דיסקרטי, מיד ולא רק בבדיקה הדקתית
   }
   /** יציאה צפויה מהאפליקציה (שיתוף קובץ, בחירת קובץ, הרשאה, טביעת אצבע): לא נועלים בחזרה ממנה */
   const expectAway = () => { app.awayOk = Date.now() + 10 * 60000; };
@@ -261,13 +262,18 @@
     return `<div class="lock" role="dialog" aria-modal="true" aria-labelledby="lock-h"><div class="lock-in">${logo}
       <h2 id="lock-h">מעיין</h2>
       <p class="lock-msg${lk.bad ? " bad" : ""}" role="status" aria-live="polite">${esc(msg)}</p>
-      <div class="pin-dots${lk.bad ? " shake" : ""}" aria-hidden="true">${Array.from({ length: len }, (_, i) => `<i class="${i < lk.entry.length ? "on" : ""}"></i>`).join("")}</div>
+      <div class="pin-dots${lk.bad ? " shake" : ""}" role="img" aria-label="הוזנו ${lk.entry.length} מתוך ${len} ספרות">${Array.from({ length: len }, (_, i) => `<i class="${i < lk.entry.length ? "on" : ""}"></i>`).join("")}</div>
       <div class="pad" dir="ltr">${[1, 2, 3, 4, 5, 6, 7, 8, 9].map(key).join("")}
         ${bio ? `<button class="key fn" data-act="lock-bio" aria-label="פתיחה בטביעת אצבע או בזיהוי פנים">${I("finger", 30)}</button>` : "<span></span>"}
         ${key(0)}<button class="key fn" data-pin="del" aria-label="מחיקת ספרה"${lk.entry ? "" : " disabled"}>${I("backspace", 28)}</button></div>
       <button class="link" data-act="lock-forgot">שכחתי את הקוד</button></div></div>`;
   }
-  function renderLock() { const root = $("#app"); root.innerHTML = lockScreen(); L.dom(root); }
+  function renderLock() {
+    // קורא מסך: אחרי כל הקשה המקלדת נבנית מחדש, ולכן מחזירים את המיקוד למקש שהיה ממוקד
+    const root = $("#app"), a = document.activeElement, was = a && root.contains(a) ? (a.dataset.pin ? `[data-pin="${a.dataset.pin}"]` : a.dataset.act ? `[data-act="${a.dataset.act}"]` : "") : "";
+    root.innerHTML = lockScreen(); L.dom(root);
+    if (was) root.querySelector(was)?.focus({ preventScroll: true });
+  }
   // ספירה לאחור על מסך הנעילה בזמן המתנה אחרי ניסיונות שגויים
   setInterval(() => { if (app.locked && app.lock?.view === "pin" && (waitLeft() || app.lock.wasWaiting)) { app.lock.wasWaiting = !!waitLeft(); if (!app.lock.wasWaiting) { app.lock.bad = false; app.lock.msg = ""; } renderLock(); } }, 1000);
   function lockSettings() {
@@ -405,7 +411,8 @@
     <section class="card"><div class="card-h">${I("book")}<h3>רישומים <span class="count">${st.events.length}</span></h3><button class="link" data-act="report">${I("file", 15)}דוח לבירור</button></div>
       <div class="filters"><label class="search">${I("search", 17)}<input id="q" type="search" placeholder="חיפוש לפי תאריך או הערה" value="${esc(app.query)}" aria-label="חיפוש"></label>
       <select id="filter" aria-label="סינון לפי סוג"><option value="all">כל הסוגים</option>${Object.entries(EVENT_NAMES).map(([v, n]) => `<option value="${v}"${app.filter === v ? " selected" : ""}>${n}</option>`).join("")}</select></div>
-      <div class="entries">${evs.map(entryRow).join("") || (st.events.length ? `<p class="empty">לא נמצאו רישומים מתאימים.</p>` : `<div class="empty-state">${I("book", 30)}<strong>אין עדיין רישומים</strong><p>כל רישום — וסת, הפסק, בדיקה או טבילה — יופיע כאן, מהחדש לישן.</p></div>`)}</div>
+      <div class="entries">${evs.slice(0, app.jLimit).map(entryRow).join("") || (st.events.length ? `<p class="empty">לא נמצאו רישומים מתאימים.</p>` : `<div class="empty-state">${I("book", 30)}<strong>אין עדיין רישומים</strong><p>כל רישום — וסת, הפסק, בדיקה או טבילה — יופיע כאן, מהחדש לישן.</p></div>`)}</div>
+      ${evs.length > app.jLimit ? `<button class="btn ghost full" data-act="more">הצגת רישומים קודמים (${evs.length - app.jLimit} נוספים)</button>` : ""}
       <div class="row-btns"><button class="btn" data-act="add">${I("plus", 17)}רישום חדש</button><button class="btn ghost" data-act="cycle">${I("calendar", 17)}הזנת מחזור קודם</button></div></section>`;
   }
 
@@ -516,7 +523,7 @@
       <section class="card"><div class="card-h">${I("shield")}<div><h3>בדיקות אוטומטיות</h3><p>${res ? `${passed} מתוך ${res.length} עברו` : `${MaayanTests(M).tests.length} בדיקות של מנוע החישוב`}</p></div>
         <button class="btn ghost sm" data-act="tests">${I(res ? "refresh" : "play", 16)}${res ? "הרצה חוזרת" : "הרצה"}</button></div>
         ${res ? `<div class="test-sum ${passed === res.length ? "good" : "bad"}">${passed === res.length ? I("check", 18) + "כל הבדיקות עברו במכשיר הזה" : I("x", 18) + `${res.length - passed} בדיקות נכשלו`}</div>
-          ${groups.map(g => `<details class="tgroup"><summary>${esc(g)} <span class="count">${res.filter(t => t.group === g && t.ok).length}/${res.filter(t => t.group === g).length}</span>${I("left", 15)}</summary><ul>${res.filter(t => t.group === g).map(t => `<li class="${t.ok ? "ok" : "no"}">${I(t.ok ? "check" : "x", 15)}<span>${esc(t.name)}${t.ok ? "" : `<small>${esc(t.error)}</small>`}</span></li>`).join("")}</ul></details>`).join("")}`
+          ${groups.map(g => `<details class="tgroup" data-nt lang="he" dir="rtl"><summary>${esc(g)} <span class="count">${res.filter(t => t.group === g && t.ok).length}/${res.filter(t => t.group === g).length}</span>${I("left", 15)}</summary><ul>${res.filter(t => t.group === g).map(t => `<li class="${t.ok ? "ok" : "no"}">${I(t.ok ? "check" : "x", 15)}<span>${esc(t.name)}${t.ok ? "" : `<small>${esc(t.error)}</small>`}</span></li>`).join("")}</ul></details>`).join("")}`
           : `<p>הבדיקות מוודאות את הלוח העברי, זמני השמש ואת כל כללי החישוב מול דוגמאות קבועות, כולל הדוגמה של מכון נשמת (ב׳ ניסן ← ל׳ ניסן ← כ״ח אייר).</p>`}
       </section>
       <section class="card"><div class="card-h">${I("copy")}<div><h3>שליחת הערות</h3><p>דוח עם ההגדרות, הרישומים והתוצאות</p></div></div>
@@ -713,7 +720,7 @@
       ${m.error ? `<p class="err" role="alert">${esc(m.error)}</p>` : ""}<div class="m-actions"><button class="btn" type="submit">${I("lock", 17)}יצירת גיבוי</button></div></form>`;
     if (m.kind === "restore") return `<div class="m-h"><h2 id="m-title">שחזור מגיבוי</h2>${close}</div>
       <form id="restore-form" class="stack-s"><label class="field" for="r-file">קובץ גיבוי<input id="r-file" type="file"${NATIVE && CAP.getPlatform?.() === "ios" ? "" : ' accept=".may,.json,.txt,application/json,text/plain"'}></label>
-      <label class="field" for="r-text">או הדבקת טקסט הגיבוי<textarea id="r-text" class="mono" rows="3" placeholder='{"format":"maayan-encrypted-v1",…}'></textarea></label>
+      <label class="field" for="r-text">או הדבקת טקסט הגיבוי<textarea id="r-text" class="mono" rows="3" placeholder='{"format":"maayan-encrypted-v1",…}'>${esc(m.text || "")}</textarea></label>
       <label class="field" for="r-pass">סיסמת הגיבוי<input id="r-pass" type="password" required autocomplete="off"></label>
       ${m.error ? `<p class="err" role="alert">${esc(m.error)}</p>` : ""}<div class="m-actions"><button class="btn" type="submit">${I("upload", 17)}פתיחת הגיבוי</button></div></form>`;
     if (m.kind === "confirm") return `<div class="m-h"><h2 id="m-title">${esc(m.title)}</h2>${close}</div><p>${esc(m.text)}</p>
@@ -853,6 +860,7 @@
     switch (d.act) {
       case "add": return openEvent({ type: d.type, date: d.date });
       case "quick": app.modal = { kind: "quick", date: d.date || currentContext(st, now()).date }; return renderModal();
+      case "more": app.jLimit += 200; return render();
       case "cycle": app.modal = { kind: "cycle", error: "", saved: 0 }; return renderModal();
       case "hide": app.hidden = !app.hidden; return render();
       case "lock-now": return lockNow();
@@ -921,6 +929,7 @@
     const cancel = () => { if (lp) { clearTimeout(lp.timer); lp = null; } };
     const openQuick = d => { app.cal.selected = d; app.modal = { kind: "quick", date: d }; render(); };
     document.addEventListener("pointerdown", e => {
+      app.suppressClick = false; // מחווה חדשה: הלחיצה הארוכה הקודמת כבר לא רלוונטית (לא תמיד מגיע אחריה click)
       const day = e.target.closest?.("[data-day]"); if (!day || e.button > 0) return;
       cancel();
       lp = { x: e.clientX, y: e.clientY, timer: setTimeout(() => { lp = null; app.suppressClick = true; try { navigator.vibrate?.(15); } catch { /* */ } openQuick(day.dataset.day); }, 500) };
@@ -986,7 +995,7 @@
         const restored = M.parseState(await M.decryptBackup(text, $("#r-pass").value));
         app.modal = { kind: "confirm", title: "להחליף את היומן?", text: `היומן הנוכחי יוחלף בגרסה מהגיבוי (${restored.events.length} רישומים).`, yes: "שחזור", run: () => { app.blockSave = false; app.loadWarning = ""; commit(restored); } };
         renderModal();
-      } catch (err) { app.modal.error = err.message; renderModal(); }
+      } catch (err) { app.modal.error = err.message; app.modal.text = $("#r-text")?.value || ""; renderModal(); }
     }
   });
   document.addEventListener("keydown", e => {
@@ -1016,12 +1025,14 @@
   async function wipeAll() {
     for (const k of [STORE_KEY, SEEN_KEY, LANG_KEY, LOCK_KEY, LOCKFAIL_KEY, BACKUP_KEY]) { try { localStorage.removeItem(k); } catch { /* */ } }
     Object.assign(app, { locked: false, covered: false, lock: null, lockedModal: null });
-    syncSecure();
-    if (NATIVE && PL.LocalNotifications) { try { const p = await PL.LocalNotifications.getPending(); if (p.notifications.length) await PL.LocalNotifications.cancel({ notifications: p.notifications.map(x => ({ id: x.id })) }); } catch { /* */ } }
     Object.assign(app, { mode: "personal", personal: M.emptyState(), sandbox: null, scenario: null, blockSave: false, loadWarning: "", cal: { cursor: null, mode: "civil", selected: null }, modal: { kind: "welcome" } });
-    if (window.MaayanWidget) MaayanWidget.update(state(), now());
+    syncSecure();
+    if (window.MaayanWidget) MaayanWidget.clear();
     toast("כל הנתונים נמחקו מהמכשיר");
     go("today");
+    // ביטול התזכורות דרך אותו תור של כל סנכרון: סנכרון שכבר רץ עם היומן הקודם יסתיים קודם, ואחריו הכול מבוטל
+    // (יומן ריק = שום תזכורת לא מתוזמנת מחדש)
+    await syncNotifications();
   }
 
   /* ---------- זיהוי מיקום ---------- */

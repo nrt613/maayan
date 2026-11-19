@@ -133,6 +133,9 @@ const MaayanDict = (() => {
     ["סינון לפי סוג", "Filter by type", "Filtrer par type", "Filtrar por tipo"],
     ["כל הסוגים", "All types", "Tous les types", "Todos los tipos"],
     ["לא נמצאו רישומים מתאימים.", "No matching entries.", "Aucune entrée correspondante.", "No hay entradas que coincidan."],
+    ["לא ניתן לשמור את הקוד במכשיר, ולכן הנעילה לא הופעלה.", "The code could not be saved on this device, so the lock was not turned on.", "Le code n'a pas pu être enregistré sur cet appareil : le verrouillage n'a pas été activé.", "No se pudo guardar el código en este dispositivo, así que el bloqueo no se activó."],
+    ["הוזנו {n} מתוך {n} ספרות", "{n} of {n} digits entered", "{n} chiffres saisis sur {n}", "{n} de {n} dígitos introducidos"],
+    ["הצגת רישומים קודמים ({n} נוספים)", "Show earlier entries ({n} more)", "Afficher les entrées précédentes ({n} de plus)", "Mostrar entradas anteriores ({n} más)"],
     ["אין עדיין רישומים.", "No entries yet.", "Pas encore d'entrées.", "Aún no hay entradas."],
     ["הזנת מחזור קודם", "Enter a past cycle", "Saisir un cycle passé", "Ingresar un ciclo anterior"],
 
