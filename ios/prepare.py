@@ -25,8 +25,7 @@ if stage == "www":
     # אותו עיבוד בדיוק כמו באנדרואיד (בלי פניות לרשת, הגופנים מתוך האפליקציה)
     a = root / "android"
     (a / "www").mkdir(exist_ok=True)
-    for f in ("bellefair.ttf", "heebo.ttf"):
-        shutil.copy(root / "fonts" / f, a / "www" / f)
+    # הגופנים מועתקים מ-fonts/ בתוך android/prepare.py www
     subprocess.run([sys.executable, str(a / "prepare.py"), "www"], check=True)
     if (here / "www").exists():
         shutil.rmtree(here / "www")
@@ -67,7 +66,7 @@ if stage == "native":
         shutil.copy(A / "splash-2732.png", f)
     sb = src / "Base.lproj" / "LaunchScreen.storyboard"
     t = sb.read_text(encoding="utf-8")
-    t = t.replace('<color key="backgroundColor" systemColor="systemBackgroundColor"/>', '<color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>')
+    t = t.replace('<color key="backgroundColor" systemColor="systemBackgroundColor"/>', '<color key="backgroundColor" red="0.984" green="0.973" blue="0.976" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>')
     t = t.replace('contentMode="scaleAspectFill"', 'contentMode="scaleAspectFit"')
     sb.write_text(t, encoding="utf-8")
 

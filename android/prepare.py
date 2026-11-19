@@ -26,7 +26,18 @@ if stage == "www":
     html = re.sub(r'<link rel="stylesheet" href="https://fonts\.googleapis\.com[^>]*>', "", html)
     html = re.sub(r'<link rel="manifest"[^>]*>', "", html)
     html = re.sub(r'<link rel="apple-touch-icon"[^>]*>', "", html)
-    faces = "".join('@font-face{font-family:"%s";src:url("%s");font-weight:100 900;font-display:swap}' % (n, f) for n, f in [("Bellefair", "bellefair.ttf"), ("Heebo", "heebo.ttf")] if (here / "www" / f).exists())
+    # הגופן (Rubik, OFL) נארז בתוך האפליקציה: מעתיקים מ-fonts/ ומסירים גופנים ישנים שהועתקו לכאן
+    (here / "www").mkdir(exist_ok=True)
+    for old in ("bellefair.ttf", "heebo.ttf"):
+        (here / "www" / old).unlink(missing_ok=True)
+    fonts = [("rubik-hebrew.woff2", "U+0307-0308,U+0590-05FF,U+200C-2010,U+20AA,U+25CC,U+FB1D-FB4F"),
+             ("rubik-latin.woff2", "U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD"),
+             ("rubik-latin-ext.woff2", "U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF")]
+    for f, _ in fonts:
+        shutil.copy(here.parent / "fonts" / f, here / "www" / f)
+    # הגופנים כבר מוגדרים ב-index.html (<style id="sf">) עם fonts/...; באפליקציה הקבצים נמצאים ליד הדף
+    html = re.sub(r'<style id="sf">.*?</style>', "", html, flags=re.S)
+    faces = "".join('@font-face{font-family:"Rubik";src:url("%s") format("woff2");font-weight:300 900;font-style:normal;font-display:swap;unicode-range:%s}' % (f, ur) for f, ur in fonts)
     html = html.replace("<style>", "<style>" + faces, 1)
     assert "fonts.googleapis" not in html
     (here / "www").mkdir(exist_ok=True)
