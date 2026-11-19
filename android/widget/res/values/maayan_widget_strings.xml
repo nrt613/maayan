@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="maayan_widget_label">מעיין</string>
+    <string name="maayan_widget_description">תזכורות אישיות במבט אחד. מפעילים בהגדרות האפליקציה.</string>
+</resources>

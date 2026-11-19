@@ -86,6 +86,7 @@
       if (!storage.set(STORE_KEY, JSON.stringify(parsed))) toast("השינוי נשמר רק עד סגירת הדף: הדפדפן חוסם שמירה במכשיר. מומלץ לגבות.");
       else toast("נשמר במכשיר");
       syncNotifications();
+      if (window.MaayanWidget) MaayanWidget.update(state(), now());
     } else { app.sandbox = parsed; toast(app.mode === "scenario" ? "נשמר בתרחיש (לא ביומן האישי)" : "נשמר ביומן לדוגמה"); }
     render();
   }
@@ -293,7 +294,13 @@
     <section class="card"><div class="card-h">${I("bell")}<div><h3>תזכורות</h3></div></div>
       ${tog("remindersEnabled", "התראות כשהיומן פתוח", "דורש הרשאה מהדפדפן", s)}${tog("neutralReminders", "נוסח דיסקרטי", "״תזכורת אישית״ בלי פירוט", s)}
       <div class="pair"><label class="field" for="s-reminderMinutes">דקות לפני השקיעה<input id="s-reminderMinutes" name="reminderMinutes" type="number" min="5" max="120" value="${s.reminderMinutes}" inputmode="numeric"></label>
-      <label class="field" for="s-morningTime">שעת בדיקת בוקר<input id="s-morningTime" name="morningTime" type="time" value="${s.morningTime}"></label></div></section>`;
+      <label class="field" for="s-morningTime">שעת בדיקת בוקר<input id="s-morningTime" name="morningTime" type="time" value="${s.morningTime}"></label></div></section>${WIDGET_FIELDS(s)}`;
+  /* ---------- וידג׳ט למסך הבית (src/widget.js): רק באנדרואיד וביומן האישי; כבוי כברירת מחדל ---------- */
+  const WIDGET_FIELDS = s => !(NATIVE && CAP.getPlatform && CAP.getPlatform() === "android" && app.mode === "personal") ? "" : `
+    <section class="card"><div class="card-h">${I("home")}<div><h3>וידג׳ט במסך הבית</h3><p>גלוי לכל מי שרואה את הטלפון. כבוי כברירת מחדל</p></div></div>
+      ${tog("widgetEnabled", "הצגת מצב בווידג׳ט", "אחרי ההפעלה: לחיצה ארוכה על מסך הבית ← ווידג׳טים ← מעיין", s)}
+      ${sel("widgetStyle", "נוסח הווידג׳ט", s, [["discreet", "דיסקרטי: ״תזכורת אישית״ וספירת ימים"], ["full", "מלא: שם המועד והשעה"]])}
+      <p class="fine">כשנעילת האפליקציה פעילה, הווידג׳ט תמיד דיסקרטי. לחיצה על הווידג׳ט פותחת את היומן.</p></section>`;
   /** הערות השיטה שנבחרה: מקור לכל ערך, סימון "לברר עם רב", ואילו הגדרות שונו ממנה */
   function methodNotes(s) {
     const p = M.METHOD_PRESETS[s.method];
@@ -776,6 +783,7 @@
     for (const k of ["cityId", "method", "wait", "haflagah", "beinonit", "missingMonthly", "bedikot", "nightfall", "beinHashmashot", "hefsekTwilight", "special", "methodNote", "morningTime"]) if (fd.has(k)) s[k] = String(fd.get(k));
     s.reminderMinutes = Number(fd.get("reminderMinutes"));
     for (const k of ["day31", "orZarua", "carryMonthly", "carryLongIntervals", "remindersEnabled", "neutralReminders"]) s[k] = fd.has(k);
+    if (f.querySelector('[name="widgetStyle"]')) { s.widgetEnabled = fd.has("widgetEnabled"); s.widgetStyle = fd.get("widgetStyle") === "full" ? "full" : "discreet"; } // וידג׳ט
     // בחירת שיטה חדשה קובעת את כל הגדרות החישוב שלה; שינוי הגדרה בודדת אחר כך נשמר כשינוי מהשיטה
     if (s.method !== st.settings.method) Object.assign(s, M.applyPreset(s, s.method));
     if (JSON.stringify(s) === JSON.stringify(st.settings)) return;

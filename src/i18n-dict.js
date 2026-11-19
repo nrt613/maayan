@@ -924,6 +924,24 @@ const MaayanDict = (() => {
     ["ראתה בין השמשות: מעיקר הדין חוששת לעונת הלילה בלבד, ויש להחמיר ולחשוש גם לעונת היום.", "Saw during bein hashmashot: by strict law she observes the night onah only, and one should be stringent and observe the day onah as well.", "Écoulement pendant bein hachmachot : selon la stricte loi, elle observe seulement l'onah de nuit, et il faut être rigoureux et observer aussi l'onah de jour.", "Sangrado en bein hashmashot: por ley estricta observa solo la onah de noche, y hay que ser estricto y observar también la onah de día."],
     ["הפסק טהרה רק לפני השקיעה.", "Hefsek tahara only before sunset.", "Hefsek tahara seulement avant le coucher du soleil.", "Hefsek tahará solo antes de la puesta del sol."],
     ["{n} עונות", "{n} onot", "{n} onot", "{n} onot"],
+    // וידג׳ט למסך הבית (src/widget.js) והגדרותיו
+    ["מוצ״ש", "Saturday night", "Samedi soir", "Sábado por la noche"],
+    ["הערב", "This evening", "Ce soir", "Esta tarde"],
+    ["מחר בערב", "Tomorrow evening", "Demain soir", "Mañana por la tarde"],
+    ["בערב", "evening", "soir", "por la tarde"],
+    ["אין מועד", "nothing scheduled", "rien de prévu", "nada previsto"],
+    ["עד {x}", "until {x}", "jusqu'à {x}", "hasta {x}"],
+    ["ליל טבילה", "Immersion night", "Nuit de la tevila", "Noche de la tevilá"],
+    ["פתיחת היומן", "Open the diary", "Ouvrir le journal", "Abrir el diario"],
+    ["לעדכון, פתחי את היומן", "Open the diary to update", "Ouvrez le journal pour mettre à jour", "Abra el diario para actualizar"],
+    ["וידג׳ט במסך הבית", "Home screen widget", "Widget sur l'écran d'accueil", "Widget en la pantalla de inicio"],
+    ["גלוי לכל מי שרואה את הטלפון. כבוי כברירת מחדל", "Visible to anyone who sees the phone. Off by default", "Visible par toute personne qui voit le téléphone. Désactivé par défaut", "Visible para cualquiera que vea el teléfono. Desactivado por defecto"],
+    ["הצגת מצב בווידג׳ט", "Show status in the widget", "Afficher l'état dans le widget", "Mostrar el estado en el widget"],
+    ["אחרי ההפעלה: לחיצה ארוכה על מסך הבית ← ווידג׳טים ← מעיין", "Then: long-press the home screen → Widgets → Maayan", "Ensuite : appui long sur l'écran d'accueil → Widgets → Maayan", "Después: mantenga pulsada la pantalla de inicio → Widgets → Maayan"],
+    ["נוסח הווידג׳ט", "Widget wording", "Formulation du widget", "Texto del widget"],
+    ["דיסקרטי: ״תזכורת אישית״ וספירת ימים", "Discreet: \"Personal reminder\" and day count", "Discret : « Rappel personnel » et décompte des jours", "Discreto: «Recordatorio personal» y conteo de días"],
+    ["מלא: שם המועד והשעה", "Full: name of the date and time", "Complet : nom de l'échéance et heure", "Completo: nombre de la fecha y hora"],
+    ["כשנעילת האפליקציה פעילה, הווידג׳ט תמיד דיסקרטי. לחיצה על הווידג׳ט פותחת את היומן.", "When the app lock is on, the widget is always discreet. Tapping the widget opens the diary.", "Quand le verrouillage de l'application est activé, le widget reste toujours discret. Toucher le widget ouvre le journal.", "Cuando el bloqueo de la aplicación está activado, el widget siempre es discreto. Al tocar el widget se abre el diario."],
   ];
   const d = {};
   for (const [he, en, fr, es] of R) d[he] = { en, fr, es };

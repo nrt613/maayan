@@ -20,6 +20,8 @@ adb shell appops set $PKG SCHEDULE_EXACT_ALARM allow || true
 timeout 20 adb emu geo fix 34.8532 32.3215 || true
 cd android/e2e && npm install --no-audit --no-fund playwright-core@1.48.2 >/dev/null 2>&1
 timeout 480 node test.js; code=$?
+# וידג'ט מסך הבית (על היומן ש-test.js יצר)
+timeout 240 node widget.js || code=1
 cd "$ROOT"
 adb logcat -d -t 400 | grep -iE "capacitor|maayan|chromium" | tail -80 >> android/e2e/shots/log.txt || true
 # בדיקת עשן לגרסה החתומה: מתקינה, נפתחת ונשארת פתוחה

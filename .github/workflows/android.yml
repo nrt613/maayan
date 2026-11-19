@@ -18,6 +18,8 @@ jobs:
         with: { node-version: 22 }
       - uses: actions/setup-java@v5
         with: { distribution: temurin, java-version: 21 }
+      - name: Check the home screen widget summary (src/widget.js)
+        run: node tests/widget.test.js
       - name: Build the Android project
         working-directory: android
         env:

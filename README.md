@@ -8,6 +8,7 @@
 - `src/core.js` — לוח עברי, זמני שמש (NOAA) ומנוע החישוב.
 - `src/tests.js` — בדיקות המנוע. הרצה: `node -e 'const M=require("./src/core.js");console.log(require("./src/tests.js")(M).run().filter(t=>!t.ok))'`
 - `src/scenarios.js` — תרחישים לבודקים.
+- `src/widget.js` — וידג׳ט למסך הבית באנדרואיד (כבוי כברירת מחדל, דיסקרטי כברירת מחדל). הצד הנייטיבי ב-`android/widget/`, ומוזרק ב-`android/prepare.py`. בדיקה: `node tests/widget.test.js`
 - `verify.js` — בדיקה עצמאית רחבה: כ-168,000 השוואות מול לוח עברי חיצוני (ICU) ומול אלגוריתם שמש שני. הרצה: `node verify.js`
 
 ## התקנה במחשב Windows בלי אינטרנט

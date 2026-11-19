@@ -95,6 +95,52 @@ if stage == "native":
     v = (here / "android" / "variables.gradle").read_text(encoding="utf-8")
     target = int(re.search(r"targetSdkVersion = (\d+)", v).group(1))
     assert target >= 36, f"targetSdkVersion {target} < 36"
+
+    # ---- וידג'ט למסך הבית (android/widget/): ספק הווידג'ט, תוסף מקומי שכותב את הסיכום, פריסות ומשאבים ----
+    # כבוי כברירת מחדל: עד שמפעילים אותו בהגדרות הוא מציג רק "מעיין" ו"פתיחת היומן".
+    wsrc = here / "widget"
+    main = here / "android" / "app" / "src" / "main"
+    pkg_dir = main / "java" / "io" / "github" / "nrt613" / "maayan"
+    for f in (wsrc / "java").glob("*.java"):
+        shutil.copy(f, pkg_dir / f.name)
+    for d in (wsrc / "res").iterdir():
+        (main / "res" / d.name).mkdir(exist_ok=True)
+        for f in d.iterdir():
+            shutil.copy(f, main / "res" / d.name / f.name)
+    # גרסאות משמאל לימין של הפריסות, לאנגלית, צרפתית וספרדית
+    for n in ("small", "medium"):
+        lay = (wsrc / "res" / "layout" / f"maayan_widget_{n}.xml").read_text(encoding="utf-8")
+        lay = lay.replace('android:layoutDirection="rtl"', 'android:layoutDirection="ltr"').replace('android:textDirection="rtl"', 'android:textDirection="ltr"')
+        (main / "res" / "layout" / f"maayan_widget_{n}_ltr.xml").write_text(lay, encoding="utf-8")
+    # רישום התוסף המקומי ב-MainActivity
+    ma = pkg_dir / "MainActivity.java"
+    w = ma.read_text(encoding="utf-8")
+    assert re.search(r"public class MainActivity extends BridgeActivity \{\s*\}", w), w
+    w = re.sub(r"public class MainActivity extends BridgeActivity \{\s*\}", """public class MainActivity extends BridgeActivity {
+    @Override
+    public void onCreate(android.os.Bundle savedInstanceState) {
+        registerPlugin(MaayanWidgetPlugin.class);
+        super.onCreate(savedInstanceState);
+    }
+}""", w)
+    ma.write_text(w, encoding="utf-8")
+    w = man.read_text(encoding="utf-8")
+    receiver = """
+        <receiver android:name=".MaayanWidgetProvider" android:exported="false" android:label="@string/maayan_widget_label">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+                <action android:name="android.intent.action.TIME_SET" />
+                <action android:name="android.intent.action.TIMEZONE_CHANGED" />
+                <action android:name="android.intent.action.DATE_CHANGED" />
+            </intent-filter>
+            <meta-data android:name="android.appwidget.provider" android:resource="@xml/maayan_widget_info" />
+        </receiver>
+    </application>"""
+    assert w.count("</application>") == 1
+    man.write_text(w.replace("</application>", receiver, 1), encoding="utf-8")
+    print("widget ready")
+    # ---- סוף הווידג'ט ----
+
     out = here.parent / "out"; out.mkdir(exist_ok=True)
     (out / "version.txt").write_text(version_name, encoding="utf-8")
     print("native ready, version", version_name, "code", version_code, "targetSdk", target, "exact alarms", exact)
