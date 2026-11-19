@@ -721,7 +721,7 @@
       const ctxd = currentContext(state(), now()).date, d = m.date;
       const head = d === ctxd ? "היום" : weekdayName(d);
       return `<div class="m-h"><div><h2 id="m-title">מה לרשום?</h2><p class="fine"><span>${esc(head)}</span> · <span class="hebdate">${esc(hebrew(d))}</span> · ${esc(civilLabel(d, true))}</p></div>${close}</div>
-        <div class="quick">${[...QUICK_TYPES, ["other", "list"]].map(([v, ic]) => `<button class="quick-btn t-${v}" data-qtype="${v}"><span class="ev-ic t-${v}">${I(ic, 22)}</span><span>${v === "other" ? "אחר…" : v === "flow" ? "ראייה / וסת" : EVENT_NAMES[v]}</span></button>`).join("")}</div>`;
+        <div class="quick">${[...QUICK_TYPES, ["other", "list"]].map(([v, ic]) => `<button class="quick-btn t-${v}" data-qtype="${v}"><span class="ev-ic t-${v}">${I(ic, 26)}</span><span>${v === "other" ? "אחר…" : v === "flow" ? "ראייה / וסת" : EVENT_NAMES[v]}</span></button>`).join("")}</div>`;
     }
     if (m.kind === "prep") {
       const list = state().settings.checklist, total = M.CHECKLIST.length, n = M.CHECKLIST.filter(x => list.includes(x)).length;

@@ -440,7 +440,7 @@ details.rules { border-radius: 14px; }
 .quick { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
 .quick-btn { display: grid; justify-items: start; align-content: space-between; gap: 14px; min-height: 108px; padding: 14px; border: 0; border-radius: 22px; background: var(--soft); color: var(--ink); font-size: 16px; font-weight: 600; text-align: start; transition: transform .12s var(--ease), background .15s; }
 .quick-btn:active { transform: scale(.97); }
-.quick-btn .ev-ic { width: 46px; height: 46px; border-radius: 15px; background: var(--surface); box-shadow: 0 2px 8px rgb(60 20 40 / .06); }
+.quick-btn .ev-ic { width: 50px; height: 50px; border-radius: 16px; background: var(--surface); box-shadow: 0 2px 8px rgb(60 20 40 / .06); }
 .quick-btn.t-flow { background: var(--niddah-bg); color: var(--niddah-ink); }
 .quick-btn.t-hefsek, .quick-btn.t-bedikah { background: var(--clean-bg); color: var(--clean-ink); }
 .quick-btn.t-mikvah { background: var(--mikvah-bg); color: var(--mikvah-ink); }
