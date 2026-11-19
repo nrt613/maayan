@@ -63,7 +63,7 @@ const MaayanTests = (M) => {
   });
 
   test("בסיס", "יומן ריק אינו ממציא מועדים", () => { const r = run([]); a.equal(r.phase, "empty"); a.equal(r.plans.length, 0); a.equal(r.hefsek, undefined); });
-  test("הפלגה", "וקטור נשמת: ב׳ ניסן ← ל׳ ניסן מחשב כ״ח אייר", () => {
+  test("הפלגה", "הפלגה בספירה כוללנית: ב׳ ניסן ← ל׳ ניסן מחשב כ״ח אייר", () => {
     const x = event("flow", N(2)), y = event("flow", N(30)); const p = run([x, y]).plans.find(p => p.kind === "interval");
     a.equal(p.date, N(28, 2)); a.equal(p.onah, "day"); a.match(p.title, /29/); a.deepEqual(p.eventIds, [x.id, y.id]);
   });
@@ -73,7 +73,7 @@ const MaayanTests = (M) => {
   test("עונת החודש", "שומרת על התאריך העברי גם כשאורך החודש הלועזי משתנה", () => { const p = run([event("flow", N(15))]).plans.find(p => p.kind === "monthly"); a.equal(p.date, N(15, 2)); });
   test("עונת החודש", "ל׳ בחודש שאחריו אין ל׳ — במדיניות דילוג אין גלישה שקטה", () => { const r = run([event("flow", N(30))], { missingMonthly: "skip" }); a.equal(r.plans.filter(p => p.kind === "monthly").length, 0); a.ok(r.reviews.some(r => r.id === "missing-month-day")); });
   test("עונת החודש", "ל׳ ניסן במדיניות ״א׳ בחודש שאחריו״ מגיע לא׳ סיון ולא לתמוז", () => { const p = run([event("flow", N(30))], { missingMonthly: "first-next-month" }).plans.find(p => p.kind === "monthly"); a.equal(p.date, N(1, 3)); });
-  test("עונת החודש", "ברירת המחדל לל׳ בחודש חסר היא א׳ בחודש שאחריו (כפסיקת נשמת)", () => { const p = run([event("flow", N(30))]).plans.find(p => p.kind === "monthly"); a.equal(p.date, N(1, 3)); });
+  test("עונת החודש", "ברירת המחדל לל׳ בחודש חסר היא א׳ בחודש שאחריו (לחומרא)", () => { const p = run([event("flow", N(30))]).plans.find(p => p.kind === "monthly"); a.equal(p.date, N(1, 3)); });
   test("עונת החודש", "ראתה פעמיים בחודש: עונת החודש של הראייה הראשונה נשמרת", () => {
     const pp = run([event("flow", N(5)), event("hefsek", N(9), "16:00"), event("flow", N(25))]).plans.filter(p => p.kind === "monthly");
     a.deepEqual(pp.map(p => p.date).sort(), [N(5, 2), N(25, 2)].sort());

@@ -629,3 +629,10 @@ main.enter > * { animation: rise .22s ease-out both; }
 
 /* Long diaries (years of entries): skip layout and paint of entries outside the screen */
 .entries > .entry { content-visibility: auto; contain-intrinsic-size: auto 64px; }
+/* מקורות: מקום בטקסט הראשוני, עם קישור לספריא כשנבדק */
+.cites { font-size: 13px; color: var(--muted); margin: 2px 0 10px; }
+.cites-h { font-weight: 600; }
+.cites ul { list-style: none; margin: 2px 0 0; padding: 0; display: grid; gap: 0; }
+.cites li { overflow-wrap: anywhere; line-height: 1.45; }
+.plan-more .cites a, .rules details .cites a, details.rules .cites a { display: inline-block; min-height: 0; margin: 0; padding: 7px 0; font-weight: 600; }
+.cites .nv { color: var(--warn-ink); font-size: 12px; }
