@@ -154,4 +154,17 @@ for (const c of [...WORLD, M.city("tromso"), M.city("sydney"), M.city("los-angel
   }
 }
 M.setPlaces([]);
+/* 6. בין השמשות: ראייה אחרי השקיעה ולפני צאת הכוכבים — מועדים לשתי העונות, והמתנה מהיום המאוחר */
+for (let i = 0; i < 600; i++) {
+  const date = addD("2024-01-01", Math.floor(rnd() * 900)), k = 1 + Math.floor(rnd() * 30), nightfall = pick(["8.5", "13.5z", "20m"]), wait = pick(["five", "four"]);
+  const t = M.timeInZone(new Date(M.sun(date, city).sunset.valueOf() + k * 60000), tz), e = ev("flow", date, t);
+  let st; try { st = M.stamp(e, nightfall); } catch { continue; }
+  const s = M.emptyState(); s.settings = { ...s.settings, nightfall, wait }; s.events = [e];
+  const r = M.calculate(s, new Date(Date.parse(date + "T12:00:00Z") + 3 * 864e5));
+  const later = addD(date, 1);
+  ok(r.earliestHefsek === addD(later, wait === "five" ? 4 : 3), `bhs wait ${date} +${k} ${wait}`);
+  const got = r.plans.filter(p => p.kind === "average").map(p => planHebDay(p) + "|" + p.onah).sort();
+  const want = (st.twilight || st.uncertain ? [addD(date, 29) + "|day", addD(later, 29) + "|night"] : [addD(later, 29) + "|night"]).sort();
+  ok(JSON.stringify(got) === JSON.stringify(want), `bhs average ${date} +${k}m ${nightfall} ${got} vs ${want}`);
+}
 console.log(`checks: ${checks}, failures: ${fails}, max sun diff vs 2nd algorithm: ${maxDiff.toFixed(2)} min (${worst})`);

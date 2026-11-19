@@ -121,7 +121,7 @@ const MaayanTests = (M) => {
   test("מקום וזמן", "נסיעה משנה את אזור הזמן של מועד עתידי בלי לשנות רישום קודם", () => { const s = emptyState(); s.events = [event("flow", N(2))]; const t = N(1, 2); s.trips = [{ id: uuid(), from: t, to: t, cityId: "paris" }]; const p = calculate(s, NOW).plans.find(p => p.kind === "average"); a.equal(p.cityId, "paris"); a.equal(s.events[0].cityId, "netanya"); });
   test("מקום וזמן", "מעבר קו התאריך מסומן ולא מנוחש", () => { const r = run([event("flow", N(2), "10:00", { cityId: "los-angeles" }), event("note", N(4), "10:00", { cityId: "sydney" })]); a.ok(r.reviews.some(r => r.id === "dateline")); a.equal(r.plans.filter(p => p.kind === "average").length, 0); });
   test("מקום וזמן", "עונת לילה ועונת יום נפגשות בדיוק בזריחה", () => { const x = hd(N(10)).abs(), n = onahWindow(x, "night", city("netanya")), d = onahWindow(x, "day", city("netanya")); a.equal(n.end.toISOString(), d.start.toISOString()); });
-  test("מקום וזמן", "רישום בשעת השקיעה מסומן כמסופק ואינו יוצר מועד ודאי", () => { const d = N(10), s = sun(d, city("netanya")), time = timeInZone(s.sunset, "Asia/Jerusalem"), e = event("flow", d, time); a.ok(stamp(e).uncertain); a.equal(run([e]).plans.filter(p => p.kind === "average").length, 0); });
+  test("מקום וזמן", "רישום בשעת השקיעה מסומן כמסופק; בבחירת ״השעיה״ אינו יוצר מועד ודאי", () => { const d = N(10), s = sun(d, city("netanya")), time = timeInZone(s.sunset, "Asia/Jerusalem"), e = event("flow", d, time); a.ok(stamp(e).uncertain); a.equal(run([e], { beinHashmashot: "flag" }).plans.filter(p => p.kind === "average").length, 0); });
   test("מקום וזמן", "שעה כפולה או חסרה במעבר שעון לא נבחרת בשקט", () => { a.throws(() => localInstant("2026-11-01", "01:30", "America/New_York"), /פעמיים/); a.throws(() => localInstant("2026-03-08", "02:30", "America/New_York"), /אינה קיימת/); });
   test("מקום וזמן", "שעה מקומית רגילה מחושבת נכון בלי תלות באזור הזמן של המכשיר", () => a.equal(localInstant("2026-11-10", "12:00", "America/New_York").toISOString(), "2026-11-10T17:00:00.000Z"));
   test("מקום וזמן", "ביום קוטבי לא ממציאים שקיעה או עונה", () => a.throws(() => stamp({ date: "2026-06-21", time: "12:00", cityId: "tromso" }), /אין זריחה/));
@@ -296,6 +296,91 @@ const MaayanTests = (M) => {
   test("המתנה", "ארבעה ימים מיחסים שקדמו בהרבה: ההפסק לא לפני יום הראייה", () => a.equal(run([event("intimacy", N(1), "10:00"), event("flow", N(20), "10:00")], { wait: "four-from-relations" }).earliestHefsek, N(20)));
   test("לוח עברי", "גבולות שנה ושנים רחוקות: יום אחרי כ״ט אלול הוא א׳ תשרי", () => {
     for (const y of [5760, 5800, 5860]) { const last = new HDate(29, 6, y), next = new HDate(last.abs() + 1); a.equal(next.getMonth(), 7); a.equal(next.getDate(), 1); a.equal(next.getFullYear(), y + 1); }
+  });
+
+  /* ---------- שיטות חישוב, בין השמשות והמתנת ארבעה ימים ---------- */
+  const minutesAfterSunset = (d, m) => timeInZone(new Date(sun(d, city("netanya")).sunset.valueOf() + m * 60000), "Asia/Jerusalem");
+  const avg = r => r.plans.filter(p => p.kind === "average").map(p => `${p.date}|${p.onah}`).sort();
+  test("המתנה", "ארבעה ימים מתחילת הראייה (הרב עובדיה): ראתה בליל שני — הפסק ביום חמישי", () => {
+    // 2026-11-01 הוא יום ראשון; ראייה בערב 21:00 שייכת לליל שני
+    const r = run([event("flow", "2026-11-01", "21:00")], { wait: "four" }, new Date("2026-11-02T10:00:00Z"));
+    a.equal(r.earliestHefsek, "2026-11-05");
+    const day = run([event("flow", "2026-11-02", "10:00")], { wait: "four" }, new Date("2026-11-02T12:00:00Z"));
+    a.equal(day.earliestHefsek, "2026-11-05", "ראייה ביום שני — גם כן הפסק ביום חמישי");
+    a.equal(run([event("flow", "2026-11-02", "10:00")], {}, new Date("2026-11-02T12:00:00Z")).earliestHefsek, "2026-11-06", "חמישה ימים — יום שישי");
+  });
+  test("בין השמשות", "ראייה בין השקיעה לצאת הכוכבים: חוששים לשתי העונות בעונה בינונית ובעונת החודש", () => {
+    const d = N(10), e = event("flow", d, minutesAfterSunset(d, 10)), r = run([e]);
+    a.ok(stamp(e).twilight); a.equal(stamp(e).onah, "night");
+    a.deepEqual(avg(r), [`${N(9, 2)}|day`, `${N(9, 2)}|night`].sort(), "יום 30 נספר משני הימים: עונת היום של י׳ ועונת הלילה של י״א");
+    const m = r.plans.filter(p => p.kind === "monthly").map(p => `${p.date}|${p.onah}`).sort();
+    a.deepEqual(m, [`${N(10, 2)}|day`, `${N(10, 2)}|night`].sort());
+    a.equal(r.earliestHefsek, N(15), "ההמתנה נספרת מהלילה (היום העברי המאוחר)");
+    a.ok(r.reviews.some(x => x.id === `boundary-${e.id}`), "נשאר סימון לבירור");
+  });
+  test("בין השמשות", "ראייה בדקות שלפני השקיעה: לחומרא גם עונת הלילה, וההמתנה מהיום המאוחר", () => {
+    const d = N(10), e = event("flow", d, minutesAfterSunset(d, -2)), r = run([e]);
+    a.equal(stamp(e).onah, "day"); a.ok(!stamp(e).twilight); a.ok(stamp(e).alt);
+    a.deepEqual(avg(r), [`${N(9, 2)}|day`, `${N(9, 2)}|night`].sort());
+    a.equal(r.earliestHefsek, N(15));
+  });
+  test("בין השמשות", "הגדרת ״השעיה״ שומרת על ההתנהגות הקודמת: אין מועדים ואין המתנה מחושבת", () => {
+    const d = N(10), r = run([event("flow", d, minutesAfterSunset(d, 10))], { beinHashmashot: "flag" });
+    a.equal(r.plans.length, 0); a.equal(r.earliestHefsek, undefined);
+  });
+  test("בין השמשות", "צאת הכוכבים לפי 13.5 דקות זמניות: 20 דקות אחרי השקיעה כבר לילה ודאי", () => {
+    const d = N(10), e = event("flow", d, minutesAfterSunset(d, 20));
+    a.ok(stamp(e).twilight, "לפי 8.5° עדיין בין השמשות");
+    const st = stamp(e, "13.5z"); a.ok(!st.twilight && !st.uncertain);
+    a.deepEqual(avg(run([e], { nightfall: "13.5z" })), [`${N(9, 2)}|night`]);
+  });
+  test("בין השמשות", "הפלגה כשהראייה האחרונה בין השמשות: נשמרות שתי העונות", () => {
+    const d = N(30), r = run([event("flow", N(2)), event("flow", d, minutesAfterSunset(d, 10))]);
+    const iv = r.plans.filter(p => p.kind === "interval");
+    a.ok(iv.length >= 2, "יותר ממועד הפלגה אחד"); a.ok(iv.some(p => p.onah === "day") && iv.some(p => p.onah === "night"));
+    a.ok(iv.some(p => p.date === N(28, 2) && p.onah === "day"), "הפלגת 29 מעונת היום");
+  });
+  test("בין השמשות", "חב״ד: ראייה בין השמשות מוסיפה את מספר העונות הסמוך", () => {
+    // ההמתנה נספרת מהיום המאוחר (ב׳ אייר), ולכן ההפסק בו׳ אייר
+    const h = event("hefsek", N(6, 2), "16:00"), d = N(1, 2);
+    const r = run([event("flow", N(1)), event("hefsek", N(5), "16:00"), event("flow", d, minutesAfterSunset(d, 10)), h], { haflagah: "chabad-onot" });
+    const t = r.plans.filter(p => p.kind === "interval").map(p => p.title).sort(); a.ok(t.some(x => /52/.test(x)) && t.some(x => /53/.test(x)), t.join());
+  });
+  test("הפסק טהרה", "הפסק אחרי השקיעה: באשכנז אינו תקף, ולפי הרב עובדיה תקף בדיעבד עד 13.5 דקות זמניות", () => {
+    const d = N(6), late = event("hefsek", d, minutesAfterSunset(d, 8)), flow = event("flow", N(2));
+    a.equal(run([flow, late]).hefsek, undefined);
+    const ov = run([flow, late], { hefsekTwilight: "ovadia" });
+    a.equal(ov.hefsek?.id, late.id); a.equal(ov.immersionDate, N(13), "היום הראשון הוא למחרת יום ההפסק"); a.ok(ov.reviews.some(x => x.id === `hefsek-bedieved-${late.id}`));
+    const tooLate = event("hefsek", d, minutesAfterSunset(d, 25));
+    a.equal(run([flow, tooLate], { hefsekTwilight: "ovadia" }).hefsek, undefined);
+  });
+  test("צאת הכוכבים", "צאת הכוכבים בדקות קבועות ובדקות זמניות", () => {
+    const c = city("netanya"), d = "2026-06-21", base = sun(d, c), z = sun(d, c, "13.5z").nightfall, m = sun(d, c, "20m").nightfall;
+    const dayLen = (base.sunset - base.sunrise) / 60000;
+    a.ok(Math.abs((z - base.sunset) / 60000 - 13.5 * dayLen / 720) <= 1.2, "13.5 דקות זמניות"); a.ok((z - base.sunset) / 60000 > 15, "בקיץ יותר מ-13.5 דקות שעון");
+    a.ok(Math.abs((m - base.sunset) / 60000 - 20) <= 1.1);
+    const p = run([event("flow", N(2)), event("hefsek", N(6), "16:00")], { nightfall: "18m" }).plans.find(p => p.kind === "mikvah");
+    a.equal(p.start, sun(N(13), c, "18m").nightfall.toISOString());
+  });
+  test("אור זרוע", "בשמירת ימים 30 ו-31 אור זרוע רק ליום 30", () => {
+    const pp = run([event("flow", N(2))], { day31: true, orZarua: true }).plans.filter(p => p.kind === "or-zarua" && p.id.startsWith("oz-average"));
+    a.equal(pp.length, 1); a.ok(pp[0].id.includes("-30-"));
+  });
+  test("שיטות", "שיטה מוגדרת מראש קובעת את כל ההגדרות ועוברת אימות", () => {
+    for (const [k, preset] of Object.entries(M.METHOD_PRESETS)) {
+      const s = emptyState(); s.settings = { ...s.settings, ...preset.settings, method: k };
+      const parsed = M.parseState(s); a.equal(parsed.settings.method, k); a.deepEqual(M.presetDiff(parsed.settings), [], k);
+      a.ok(preset.notes.length >= 5 && preset.notes.every(n => n.t && "src" in n), "לכל ערך מקור");
+    }
+    const sef = M.METHOD_PRESETS.sefard.settings; a.equal(sef.wait, "four"); a.equal(sef.orZarua, false); a.equal(sef.day31, false); a.equal(sef.hefsekTwilight, "ovadia");
+    const ash = M.METHOD_PRESETS.ashkenaz.settings; a.equal(ash.wait, "five"); a.equal(ash.hefsekTwilight, "before-sunset");
+    a.equal(M.METHOD_PRESETS.chabad.settings.haflagah, "chabad-onot"); a.equal(M.METHOD_PRESETS.chabad.settings.beinonit, "both");
+    a.deepEqual(M.presetDiff({ ...emptyState().settings, ...ash, method: "ashkenaz", day31: !ash.day31 }), ["day31"]);
+    a.deepEqual(M.presetDiff({ ...emptyState().settings, method: "custom" }), []);
+  });
+  test("שיטות", "יומן ישן בלי ההגדרות החדשות נטען עם ברירות המחדל", () => {
+    const s = emptyState(); delete s.settings.beinHashmashot; delete s.settings.hefsekTwilight; delete s.settings.method;
+    const p = M.parseState(s); a.equal(p.settings.method, "custom"); a.equal(p.settings.beinHashmashot, "both"); a.equal(p.settings.hefsekTwilight, "before-sunset");
   });
 
   return {

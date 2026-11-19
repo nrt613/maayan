@@ -126,7 +126,7 @@
 
   /* ---------- מסכים ---------- */
   function viewToday(st, r, ctx) {
-    const date = ctx.date, loc = atLocation(st, date), times = sun(date, loc, Number(st.settings.nightfall));
+    const date = ctx.date, loc = atLocation(st, date), times = sun(date, loc, st.settings.nightfall);
     const upcoming = r.plans.filter(p => !p.done && new Date(p.end || p.start) >= now()).slice(0, 5);
     const phase = r.phase, cd = r.cleanDay;
     const mk = r.plans.find(p => p.kind === "mikvah"), mikvahNight = !!mk && now() < new Date(new Date(mk.start).valueOf() + 14 * 3600000);
@@ -162,7 +162,7 @@
         ${nextLine}
       </section>
       ${first ? `<section class="card method"><div class="card-h">${I("scale")}<div><h3>שיטת החישוב שלך</h3><p>לבחור לפי ההנחיה שקיבלת. אפשר לשנות בכל עת</p></div></div>
-        <ul class="method-sum">${M.settingsSummary(st.settings).filter(x => /^(המתנה|הפלגה|עונה בינונית)/.test(x)).map(x => `<li>${esc(x)}</li>`).join("")}</ul>
+        <ul class="method-sum">${M.settingsSummary(st.settings).filter(x => /^(שיטה|המתנה|הפלגה|עונה בינונית)/.test(x)).map(x => `<li>${esc(x)}</li>`).join("")}</ul>
         <label class="toggle" for="q-orZarua"><span><strong>עונת אור זרוע</strong><small>העונה שלפני כל עונת פרישה — לפי הוראת הרב</small></span><input id="q-orZarua" type="checkbox" role="switch" data-quickset="orZarua"${st.settings.orZarua ? " checked" : ""}></label>
         <button class="btn ghost full" data-go="prefs">${I("sliders", 17)}כל אפשרויות החישוב</button></section>` : ""}
       ${r.reviews.length ? `<button class="notice" data-go="journal">${I("help", 22)}<span><strong>${r.reviews.length} ${r.reviews.length === 1 ? "נקודה לבירור" : "נקודות לבירור"}</strong><small>${esc(r.reviews[0].title)}</small></span>${I("left", 16)}</button>` : ""}
@@ -173,7 +173,7 @@
         <div class="card-h">${I("sunset")}<div><h3>זמני היום</h3><p>${esc(loc.name)} · ${esc(civilLabel(date, true))}</p></div></div>
         <dl>${[["זריחה", "sunrise", times.sunrise], ["שקיעה", "sunset", times.sunset], ["צאת הכוכבים", "moon", times.nightfall]].map(([n, ic, v]) =>
           `<div${ic === "sunset" ? ' class="hl"' : ""}>${I(ic, 18)}<dt>${n}</dt><dd dir="ltr">${timeInZone(v, loc.tz)}</dd></div>`).join("")}</dl>
-        <p class="fine">בגובה פני הים · מעוגל לחומרא · צאת הכוכבים ${esc(st.settings.nightfall)}° מתחת לאופק</p>
+        <p class="fine">בגובה פני הים · מעוגל לחומרא · צאת הכוכבים: ${esc(M.nightfallLabel(st.settings.nightfall))}</p>
       </section>
       <details class="card checklist"${checklistOpen ? " open" : ""}><summary class="card-h">${I("list")}<h3>רשימת הכנה למקווה</h3><span class="count">${st.settings.checklist.length}/${M.CHECKLIST.length}</span>${I("left", 15)}</summary>
         <div class="checks">${M.CHECKLIST.map((item, i) => `<label class="${st.settings.checklist.includes(item) ? "on" : ""}"><input type="checkbox" id="chk-${i}" data-check="${esc(item)}" ${st.settings.checklist.includes(item) ? "checked" : ""}><span>${esc(item)}</span></label>`).join("")}</div>
@@ -274,7 +274,9 @@
       ${(state().places || []).map(pl => `<div class="trip"><span><strong>${esc(pl.name)}</strong><small dir="ltr">${pl.lat.toFixed(3)}, ${pl.lon.toFixed(3)} · ${esc(pl.tz)}</small></span><button class="icon-btn" type="button" data-delplace="${pl.id}" aria-label="מחיקת מקום">${I("trash", 17)}</button></div>`).join("")}
       <p class="fine">זיהוי המיקום נעשה רק בלחיצה, והמיקום נשמר במכשיר בלבד. לכל רישום נשמר המקום שלו, ושינוי העיר אינו משנה רישומים קודמים.</p></section>
     <section class="card"><div class="card-h">${I("scale")}<div><h3>שיטת החישוב</h3><p>לבחור לפי ההנחיה שקיבלת</p></div></div>
-      ${sel("wait", "המתנה לפני שבעה נקיים", s, [["five", "חמישה ימים מתחילת הנידה"], ["four-from-relations", "ארבעה ימים ממועד היחסים — לפי הוראה"]])}
+      ${sel("method", "שיטה מוכנה", s, [["custom", "התאמה אישית"], ["ashkenaz", "מנהג אשכנז הרווח"], ["sefard", "שיטת הרב עובדיה יוסף / מנהג ספרד"], ["chabad", "מנהג חב״ד"]])}
+      ${methodNotes(s)}
+      ${sel("wait", "המתנה לפני שבעה נקיים", s, [["five", "חמישה ימים מתחילת הנידה"], ["four", "ארבעה ימים מתחילת הנידה — הרב עובדיה יוסף"], ["four-from-relations", "ארבעה ימים ממועד היחסים — לפי הוראה"]])}
       ${sel("haflagah", "שיטת חישוב ההפלגה", s, [["days", "ימים בין תחילות הווסתות"], ["chabad-onot", "עונות מהפסק טהרה — חב״ד"]])}
       ${sel("beinonit", "עונה בינונית ביום 30", s, [["same", "אותה עונה שבה התחילה הווסת"], ["both", "שתי העונות — לילה ויום"]])}
       ${tog("day31", "הוספת יום 31", "לפי המנהג או ההנחיה", s)}<div class="oz-box">${tog("orZarua", "עונת אור זרוע", "העונה שלפני כל עונת פרישה — לפי הוראת הרב. כבויה כברירת מחדל.", s)}</div>
@@ -282,7 +284,9 @@
       ${tog("carryMonthly", "שימור עונת חודש בזמן דימום", "דורש תיעוד מלא של הווסת וההפסק", s)}
       ${sel("missingMonthly", "יום ל׳, כשבחודש הבא אין ל׳", s, [["first-next-month", "א׳ בחודש שאחרי החודש החסר (מומלץ)"], ["skip", "בלי עונת חודש באותו חודש"]])}
       ${sel("bedikot", "תזכורות לבדיקות", s, [["twice", "בוקר וערב בכל אחד משבעת הימים"], ["first-last", "ראשון ושביעי בלבד — לפי הוראה"]])}
-      ${sel("nightfall", "צאת הכוכבים", s, [["8.5", "8.5° מתחת לאופק"], ["7.083", "7.083° מתחת לאופק"]])}
+      ${sel("nightfall", "צאת הכוכבים", s, [["8.5", "8.5° מתחת לאופק"], ["7.083", "7.083° מתחת לאופק"], ["13.5z", "13.5 דקות זמניות אחרי השקיעה (הגאונים)"], ["18m", "18 דקות אחרי השקיעה"], ["20m", "20 דקות אחרי השקיעה"]])}
+      ${sel("beinHashmashot", "ראייה סמוך לשקיעה או בין השמשות", s, [["both", "לחומרא: מועדים לשתי העונות"], ["flag", "השעיית החישוב עד בירור"]])}
+      ${sel("hefsekTwilight", "הפסק טהרה אחרי השקיעה", s, [["before-sunset", "רק הפסק לפני השקיעה"], ["ovadia", "בדיעבד עד 13.5 דקות זמניות — הרב עובדיה יוסף"]])}
       ${sel("special", "מצב מיוחד", s, [["regular", "מחזור רגיל"], ["pregnancy", "היריון"], ["postpartum", "אחרי לידה"], ["nursing", "הנקה"], ["hormonal", "טיפול הורמונלי / אמצעי מניעה"]])}
       <p class="fine">במצב מיוחד החישובים הרגילים מושעים, ואפשר לרשום עונות לפי הוראה.</p>
       <label class="field" for="s-methodNote">ממי ההנחיות<textarea id="s-methodNote" name="methodNote" rows="2" maxlength="1000" placeholder="שם מורה ההוראה או המנהג">${esc(s.methodNote)}</textarea></label></section>
@@ -290,6 +294,14 @@
       ${tog("remindersEnabled", "התראות כשהיומן פתוח", "דורש הרשאה מהדפדפן", s)}${tog("neutralReminders", "נוסח דיסקרטי", "״תזכורת אישית״ בלי פירוט", s)}
       <div class="pair"><label class="field" for="s-reminderMinutes">דקות לפני השקיעה<input id="s-reminderMinutes" name="reminderMinutes" type="number" min="5" max="120" value="${s.reminderMinutes}" inputmode="numeric"></label>
       <label class="field" for="s-morningTime">שעת בדיקת בוקר<input id="s-morningTime" name="morningTime" type="time" value="${s.morningTime}"></label></div></section>`;
+  /** הערות השיטה שנבחרה: מקור לכל ערך, סימון "לברר עם רב", ואילו הגדרות שונו ממנה */
+  function methodNotes(s) {
+    const p = M.METHOD_PRESETS[s.method];
+    if (!p) return `<p class="fine">בחירת שיטה מוכנה קובעת את כל ההגדרות שלמטה בבת אחת. אחר כך אפשר לשנות כל הגדרה.</p>`;
+    const changed = M.presetDiff(s);
+    return `<details class="rules"><summary>מה קובעת השיטה ומקורותיה${I("left", 15)}</summary>${p.notes.map(n => `<p>${n.ask ? "<strong>לברר עם רב:</strong> " : ""}${esc(n.t)}${n.src ? ` <a href="${n.src}" target="_blank" rel="noopener">מקור ${I("out", 13)}</a>` : ""}</p>`).join("")}</details>
+      ${changed.length ? `<p class="fine">שונו מהשיטה: ${changed.length} הגדרות. בחירה מחדש של השיטה מחזירה אותן.</p>` : ""}`;
+  }
   const sel = (name, label, s, opts) => `<label class="field" for="s-${name}">${label}<select id="s-${name}" name="${name}">${opts.map(([v, t]) => `<option value="${v}"${s[name] === v ? " selected" : ""}>${t}</option>`).join("")}</select></label>`;
   const tog = (name, label, detail, s) => `<label class="toggle" for="s-${name}"><span><strong>${label}</strong><small>${detail}</small></span><input id="s-${name}" name="${name}" type="checkbox" role="switch"${s[name] ? " checked" : ""}></label>`;
 
@@ -368,10 +380,10 @@
   }
   const PHASE_NAMES = { empty: "אין רישומים", waiting: "ממתינה להפסק", clean: "שבעה נקיים", planned: "מועד הטבילה עבר", immersed: "אחרי טבילה" };
   function diffSettings(s) {
-    const d = M.SETTING_DEFAULTS, keys = ["wait", "haflagah", "beinonit", "day31", "orZarua", "carryMonthly", "carryLongIntervals", "missingMonthly"];
+    const d = M.SETTING_DEFAULTS, keys = ["method", "wait", "haflagah", "beinonit", "day31", "orZarua", "carryMonthly", "carryLongIntervals", "missingMonthly", "beinHashmashot", "hefsekTwilight", "nightfall"];
     const changed = keys.filter(k => s[k] !== d[k]);
     if (!changed.length) return `<p class="fine">הגדרות ברירת המחדל: חמישה ימים, הפלגה בימים, עונה בינונית באותה עונה.</p>`;
-    return `<p class="fine">הגדרות התרחיש: ${changed.map(k => esc(M.settingsSummary(s).find(x => x.startsWith({ wait: "המתנה", haflagah: "הפלגה", beinonit: "עונה בינונית", day31: "יום 31", orZarua: "אור זרוע", carryMonthly: "שימור עונת", carryLongIntervals: "שימור הפלגות", missingMonthly: "יום ל׳" }[k])))).join(" · ")}</p>`;
+    return `<p class="fine">הגדרות התרחיש: ${changed.map(k => esc(M.settingsSummary(s).find(x => x.startsWith({ method: "שיטה", wait: "המתנה", haflagah: "הפלגה", beinonit: "עונה בינונית", day31: "יום 31", orZarua: "אור זרוע", carryMonthly: "שימור עונת", carryLongIntervals: "שימור הפלגות", missingMonthly: "יום ל׳", beinHashmashot: "ראייה בין השמשות", hefsekTwilight: "הפסק אחרי השקיעה", nightfall: "צאת הכוכבים" }[k])))).join(" · ")}</p>`;
   }
   const TERMS = [
     { t: "מה זה מעיין", p: ["מעיין היא כלי עזר אישי לרישום ולתכנון בענייני טהרת המשפחה. היא אינה פוסקת הלכה, אינה מורה הוראה ואינה ייעוץ רפואי.", "האפליקציה ניתנת בחינם, לשימוש אישי."] },
@@ -384,11 +396,15 @@
   ];
   const S = M.SOURCES;
   const RULES = [
-    { t: "היום העברי והעונה", p: ["כל רישום נשמר עם התאריך האזרחי, השעה המקומית והעיר. היום העברי מתחיל בשקיעה, ועונת היום נמשכת מהזריחה עד השקיעה.", "זמני השמש מחושבים בגובה פני הים. צאת הכוכבים לפי הזווית שנבחרה (8.5° או 7.083°).", "השקיעה מעוגלת לדקה כלפי מטה וצאת הכוכבים כלפי מעלה, לחומרא. החישוב נבדק מול ״שקיעה במישור״ בלוח עיתים לבינה ונמצא תואם בטווח של שניות. שקיעה נראית, שמושפעת מהרים ומבניינים בסביבה, אינה מחושבת.", "רישום בטווח שלוש דקות מהזריחה או מהשקיעה, או בין השקיעה לצאת הכוכבים, מסומן לבירור ואינו משמש לחישוב ודאי. שלוש הדקות הן סף לסימון ולא הגדרה של בין השמשות.", "שעה כפולה או חסרה במעבר שעון, ומקום בלי זריחה או שקיעה (קוטב), אינם מסווגים אוטומטית."], src: S.calendar },
-    { t: "המתנה לפני ההפסק", p: ["חמישה ימים: יום הראייה נספר כיום הראשון, וההפסק המוקדם ביום החמישי.", "ארבעה ימים: נספרים ממועד היחסים שנרשם כבסיס, ולא מהראייה. בלי בסיס רשום אין חישוב, ומופיעה נקודה לבירור.", "חידוש ספירה בתוך תקופת הנידה נשען על תחילת הנידה הקודמת ולא מוסיף חמישה ימים חדשים."], src: S.wait },
-    { t: "הפסק טהרה ושבעה נקיים", p: ["הספירה מתחילה רק מהפסק שנרשם כנקי, לפני השקיעה ולא בזמן מסופק, ולא לפני סוף ההמתנה. הפסק מוקדם מתקבל רק עם הוראה אישית מתועדת.", "יום א׳ הוא היום העברי שאחרי ההפסק. ליל הטבילה המתוכנן הוא במוצאי היום השביעי, וזה נשאר תכנון בלבד.", "חוסר רישום בדיקה ביום הראשון או השביעי מסומן לבירור, ואינו פוסל או מאשר. בדיקה שנרשמה כלא נקייה אינה מאפסת אוטומטית."], src: S.clean },
+    { t: "היום העברי והעונה", p: ["כל רישום נשמר עם התאריך האזרחי, השעה המקומית והעיר. היום העברי מתחיל בשקיעה, ועונת היום נמשכת מהזריחה עד השקיעה.", "זמני השמש מחושבים בגובה פני הים. צאת הכוכבים לפי ההגדרה שנבחרה: 8.5° או 7.083° מתחת לאופק, 13.5 דקות זמניות (הגאונים), או 18 או 20 דקות אחרי השקיעה.", "השקיעה מעוגלת לדקה כלפי מטה וצאת הכוכבים כלפי מעלה, לחומרא. החישוב נבדק מול ״שקיעה במישור״ בלוח עיתים לבינה ונמצא תואם בטווח של שניות. שקיעה נראית, שמושפעת מהרים ומבניינים בסביבה, אינה מחושבת.", "רישום בטווח שלוש דקות מהזריחה או מהשקיעה, או בין השקיעה לצאת הכוכבים, מסומן לבירור. שלוש הדקות הן סף לסימון ולא הגדרה של בין השמשות.", "שעה כפולה או חסרה במעבר שעון, ומקום בלי זריחה או שקיעה (קוטב), אינם מסווגים אוטומטית."], src: S.calendar },
+    { t: "המתנה לפני ההפסק", p: ["חמישה ימים: יום הראייה נספר כיום הראשון, וההפסק המוקדם ביום החמישי.", "ארבעה ימים מתחילת הנידה (הרב עובדיה יוסף, מנהג ספרד): יום הראייה הוא יום 1 וההפסק ביום הרביעי. ראתה בליל שני — ההפסק ביום חמישי.",
+      "ארבעה ימים ממועד היחסים: נספרים ממועד היחסים שנרשם כבסיס, ולא מהראייה. בלי בסיס רשום אין חישוב, ומופיעה נקודה לבירור.",
+      "ראייה סמוך לשקיעה או בין השמשות: ההמתנה נספרת מהיום העברי המאוחר, לחומרא.", "חידוש ספירה בתוך תקופת הנידה נשען על תחילת הנידה הקודמת ולא מוסיף חמישה ימים חדשים."], src: S.wait },
+    { t: "ראייה בין השמשות", p: ["ראייה בין השקיעה לצאת הכוכבים, או בשלוש הדקות שסביב השקיעה והזריחה: לפי ברירת המחדל חוששים לשתי העונות — העונה שהסתיימה והעונה שהתחילה — בעונה הבינונית, בעונת החודש ובהפלגה (ש״ך יו״ד קפד בשם הב״ח; כך נוהגים למעשה). הרישום מסומן גם לבירור.", "אפשר לבחור בהגדרות להשעות את החישוב עד בירור, כמו בגרסאות קודמות.", "סוף בין השמשות נקבע לפי הגדרת צאת הכוכבים. לפי 13.5 דקות זמניות (הגאונים, הרב עובדיה יוסף) ראייה מאוחרת יותר היא לילה ודאי."], src: M.METHOD_PRESETS.ashkenaz.notes.find(n => n.k === "beinHashmashot").src },
+    { t: "שיטות מוכנות", p: ["שיטה מוכנה (מנהג אשכנז הרווח, שיטת הרב עובדיה יוסף / מנהג ספרד, מנהג חב״ד) קובעת את כל הגדרות החישוב בבת אחת, ואפשר לשנות כל הגדרה אחר כך.", "לכל ערך בשיטה מופיע מקור בהגדרות. ערכים שהמקורות חלוקים בהם מסומנים ״לברר עם רב״. השיטות אינן תחליף להוראת רב."], src: "" },
+    { t: "הפסק טהרה ושבעה נקיים", p: ["הספירה מתחילה רק מהפסק שנרשם כנקי, לפני השקיעה ולא בזמן מסופק, ולא לפני סוף ההמתנה. הפסק מוקדם מתקבל רק עם הוראה אישית מתועדת.", "בבחירת שיטת הרב עובדיה יוסף: הפסק עד 13.5 דקות זמניות אחרי השקיעה מתקבל בדיעבד ונספר ליום שהסתיים, ומסומן לבירור. לכתחילה עושים הפסק לפני השקיעה.", "יום א׳ הוא היום העברי שאחרי ההפסק. ליל הטבילה המתוכנן הוא במוצאי היום השביעי, וזה נשאר תכנון בלבד.", "חוסר רישום בדיקה ביום הראשון או השביעי מסומן לבירור, ואינו פוסל או מאשר. בדיקה שנרשמה כלא נקייה אינה מאפסת אוטומטית."], src: S.clean },
     { t: "עונת החודש", p: ["אותו יום בחודש העברי הבא, באותה עונה.", "ראייה בל׳ כשבחודש הבא אין ל׳: ברירת המחדל היא א׳ בחודש שאחרי החודש החסר, כפסיקת מכון נשמת. אפשר לבחור דילוג.", "ראתה פעמיים באותו חודש: כל החישובים נעשים מהראייה האחרונה, ובנוסף נשמרת עונת החודש של הראייה הקודמת אם עוד לא הגיעה (נשמת; לוח חב״ד).", "בשנה מעוברת אדר א׳ עובר לאדר ב׳.", "שימור עונת חודש שחלה בזמן דימום הוא אפשרות נפרדת שדורשת תיעוד מלא."], src: S.monthly },
-    { t: "עונה בינונית", p: ["יום 30 בספירה כוללנית: יום הראייה הוא יום 1, כלומר 29 ימים אחריו, באותה עונה.", "שתי העונות, יום 31 ואור זרוע הם שלוש הגדרות נפרדות, ואף אחת מהן אינה נבחרת לפי עדה."], src: S.average },
+    { t: "עונה בינונית", p: ["יום 30 בספירה כוללנית: יום הראייה הוא יום 1, כלומר 29 ימים אחריו, באותה עונה.", "שתי העונות, יום 31 ואור זרוע הם שלוש הגדרות נפרדות. השיטות המוכנות קובעות אותן לפי המנהג, ואפשר לשנות.", "מי ששומרת ימים 30 ו-31 שומרת את עונת אור זרוע ליום 30 בלבד (יועצות הלכה)."], src: S.average },
     { t: "הפלגה", p: ["בשיטת הימים: ההפרש בין התאריכים העבריים של שתי הראיות ועוד 1. אותו מרווח נספר מהראייה האחרונה, באותה עונה.", "בשיטת חב״ד: מספר העונות מההפסק הקודם ועד הראייה הבאה. המועד החדש נספר מההפסק הנוכחי. מספר זוגי נופל ביום ואי-זוגי בלילה. הפלגה ארוכה נשמרת כשמגיעה קצרה ממנה.", "ראייה מסופקת באמצע אינה נמחקת כדי לייצר מרווח ארוך."], src: S.interval },
     { t: "וסת קבוע", p: ["שלוש ראיות רצופות באותו יום בחודש ובאותה עונה, או שלוש הפלגות שוות בארבע ראיות, מסומנות כדפוס אפשרי.", "המערכת אינה קובעת, עוקרת או משעה וסת קבוע בעצמה."], src: S.fixed },
     { t: "במה המערכת לא מכריעה", p: ["היריון, אחרי לידה, הנקה, טיפול הורמונלי, וסתות לא רגילים (דילוג, סירוג), מראות וכתמים, בדיקות שהוחסרו ומעבר קו התאריך.", "במצבים האלה החישוב הרגיל מושעה ואפשר לרשום עונות ידניות לפי הוראה. אין במערכת זיהוי מראות ואין ״שאלת רב״ אוטומטית."], src: "" },
@@ -757,9 +773,11 @@
   /** ההגדרות נשמרות מיד בכל שינוי, בלי כפתור שמירה */
   function saveSettings(f) {
     const st = state(), fd = new FormData(f), s = { ...st.settings };
-    for (const k of ["cityId", "wait", "haflagah", "beinonit", "missingMonthly", "bedikot", "nightfall", "special", "methodNote", "morningTime"]) s[k] = String(fd.get(k));
+    for (const k of ["cityId", "method", "wait", "haflagah", "beinonit", "missingMonthly", "bedikot", "nightfall", "beinHashmashot", "hefsekTwilight", "special", "methodNote", "morningTime"]) if (fd.has(k)) s[k] = String(fd.get(k));
     s.reminderMinutes = Number(fd.get("reminderMinutes"));
     for (const k of ["day31", "orZarua", "carryMonthly", "carryLongIntervals", "remindersEnabled", "neutralReminders"]) s[k] = fd.has(k);
+    // בחירת שיטה חדשה קובעת את כל הגדרות החישוב שלה; שינוי הגדרה בודדת אחר כך נשמר כשינוי מהשיטה
+    if (s.method !== st.settings.method) Object.assign(s, M.applyPreset(s, s.method));
     if (JSON.stringify(s) === JSON.stringify(st.settings)) return;
     try { commit({ ...st, settings: s }); } catch (err) { toast(err.message); render(); }
   }
@@ -841,7 +859,8 @@
       app.scheduled = 0;
       const st = app.personal;
       if (app.permission !== "granted" || !st.settings.remindersEnabled) return;
-      await LN.createChannel({ id: "maayan", name: L.t("תזכורות"), description: L.t("תזכורות אישיות מהיומן"), importance: 4, visibility: 0 });
+      // ערוצי התראות קיימים רק באנדרואיד; ב-iOS הקריאה נכשלת ועוצרת את תזמון כל התזכורות
+      if (CAP.getPlatform && CAP.getPlatform() === "android") { try { await LN.createChannel({ id: "maayan", name: L.t("תזכורות"), description: L.t("תזכורות אישיות מהיומן"), importance: 4, visibility: 0 }); } catch { /* ממשיכים בלי ערוץ */ } }
       const n = new Date(), r = calculate(st, n);
       const list = alertsFor(st, r, n).slice(0, 60).map(a => ({ id: hashId(a.key), channelId: "maayan", title: a.title, body: a.body, schedule: { at: a.at, allowWhileIdle: true } }));
       if (list.length) await LN.schedule({ notifications: list });
