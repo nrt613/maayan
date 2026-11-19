@@ -141,6 +141,33 @@ if stage == "native":
     print("widget ready")
     # ---- סוף הווידג'ט ----
 
+    # ---- נעילת האפליקציה (src/app.js): טביעת אצבע דרך @aparajita/capacitor-biometric-auth, ו-FLAG_SECURE כשהנעילה פעילה ----
+    # התוסף המקומי MaayanPrivacy (android/lock/) מסתיר את התוכן במסך האפליקציות האחרונות; נרשם ב-MainActivity.
+    main = here / "android" / "app" / "src" / "main"
+    ma = next((main / "java").rglob("MainActivity.java"))
+    shutil.copy(here / "lock" / "MaayanPrivacy.java", ma.parent / "MaayanPrivacy.java")
+    t = ma.read_text(encoding="utf-8")
+    if "MaayanPrivacy" not in t:
+        if "super.onCreate(" in t:  # כבר יש onCreate (למשל מהווידג'ט): מוסיפים לפניו ואחריו
+            t, n = re.subn(r"\n([ \t]*)super\.onCreate\((\w+)\);", r"\n\1registerPlugin(MaayanPrivacy.class);\n\1super.onCreate(\2);\n\1MaayanPrivacy.applySaved(this);", t, count=1)
+        else:
+            t, n = re.subn(r"public class MainActivity extends BridgeActivity \{\s*\}", """public class MainActivity extends BridgeActivity {
+    @Override
+    public void onCreate(android.os.Bundle savedInstanceState) {
+        registerPlugin(MaayanPrivacy.class);
+        super.onCreate(savedInstanceState);
+        MaayanPrivacy.applySaved(this);
+    }
+}""", t)
+        assert n == 1, t
+        ma.write_text(t, encoding="utf-8")
+    x = man.read_text(encoding="utf-8")
+    if "android.permission.USE_BIOMETRIC" not in x:
+        x = x.replace("</manifest>", '    <uses-permission android:name="android.permission.USE_BIOMETRIC" />\n</manifest>', 1)
+        man.write_text(x, encoding="utf-8")
+    print("app lock ready")
+    # ---- סוף נעילת האפליקציה ----
+
     out = here.parent / "out"; out.mkdir(exist_ok=True)
     (out / "version.txt").write_text(version_name, encoding="utf-8")
     print("native ready, version", version_name, "code", version_code, "targetSdk", target, "exact alarms", exact)

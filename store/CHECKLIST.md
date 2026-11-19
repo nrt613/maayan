@@ -76,7 +76,7 @@
   | `ASC_ISSUER_ID` | Issuer ID (מופיע מעל רשימת המפתחות) |
   | `ASC_KEY_P8_BASE64` | `base64 -i AuthKey_XXXX.p8` (במק) או `base64 -w0 AuthKey_XXXX.p8` (בלינוקס) |
 - [ ] להריץ: Actions → **ios-app** → Run workflow → לסמן **testflight** → Run. אחרי 10–30 דקות הבנייה מופיעה ב-App Store Connect → TestFlight.
-- [ ] לבדוק ב-TestFlight על אייפון אמיתי: התראות, מיקום, גיבוי/שחזור, RTL, אזורי המסך (notch / Dynamic Island).
+- [ ] לבדוק ב-TestFlight על אייפון אמיתי: התראות, מיקום, גיבוי/שחזור (שיתוף הקובץ ו״שמירה בקבצים״, ובחירתו בשחזור), נעילה בקוד ו-Face ID, RTL, אזורי המסך (notch / Dynamic Island).
 
 ### 2.4 דף האפליקציה וטפסים — התשובות ב-`store/declarations.md`
 - [ ] צילומי מסך: **iPhone 6.9"** (1320×2868) — `store/screenshots/he/apple-6.9/`. מספיק סט אחד של 6.9"; Apple מקטינה אוטומטית לגדלים הקטנים. 6.5" (1242×2688, `apple-6.5/`) נדרש רק אם אין 6.9". האפליקציה מוגדרת לאייפון בלבד, ולכן **אין צורך בצילומי iPad**.

@@ -5,6 +5,7 @@
   "description": "מעיין — מעטפת אנדרואיד (Capacitor) לאפליקציית הדפדפן. הגרסה (major.minor) נקבעת כאן; המספר השלישי הוא מספר הבנייה.",
   "engines": { "node": ">=22" },
   "dependencies": {
+    "@aparajita/capacitor-biometric-auth": "10.0.0",
     "@capacitor/android": "8.6.2",
     "@capacitor/app": "8.1.2",
     "@capacitor/core": "8.6.2",

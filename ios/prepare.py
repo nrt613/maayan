@@ -53,6 +53,12 @@ if stage == "native":
     p["UIStatusBarStyle"] = "UIStatusBarStyleDarkContent"
     ip.write_bytes(plistlib.dumps(p))
 
+    # ---- נעילת האפליקציה (src/app.js): הסבר לבקשת Face ID, לפתיחת היומן הנעול (@aparajita/capacitor-biometric-auth) ----
+    p = plistlib.loads(ip.read_bytes())
+    p["NSFaceIDUsageDescription"] = "מעיין משתמשת ב-Face ID רק כדי לפתוח את היומן הנעול. הזיהוי נעשה במכשיר, ושום מידע לא נשמר באפליקציה ולא נשלח לשום מקום."
+    ip.write_bytes(plistlib.dumps(p))
+    # ---- סוף נעילת האפליקציה ----
+
     # סמל (1024, בלי שקיפות) ומסך פתיחה
     icon = Image.open(A / "AppIcon-1024.png").convert("RGB")
     assert icon.size == (1024, 1024)

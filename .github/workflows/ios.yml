@@ -62,7 +62,7 @@ jobs:
           test -f "$APP/PrivacyInfo.xcprivacy"
           test -f "$APP/he.lproj/InfoPlist.strings"
           test -f "$APP/public/index.html"
-          plutil -p "$APP/Info.plist" | grep -E "CFBundleIdentifier|CFBundleDisplayName|CFBundleShortVersionString|CFBundleVersion|UIUserInterfaceStyle|DTXcode|DTSDKName|NSLocation"
+          plutil -p "$APP/Info.plist" | grep -E "CFBundleIdentifier|CFBundleDisplayName|CFBundleShortVersionString|CFBundleVersion|UIUserInterfaceStyle|DTXcode|DTSDKName|NSLocation|NSFaceID"
       - name: Launch in the simulator
         run: |
           APP=build/dd/Build/Products/Release-iphonesimulator/App.app

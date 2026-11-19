@@ -2,3 +2,5 @@
 "CFBundleDisplayName" = "מעיין";
 /* Location permission prompt */
 "NSLocationWhenInUseUsageDescription" = "Maayan uses your location only to calculate sunset and nightfall times on your device. Your location never leaves the device and is not sent anywhere.";
+/* Face ID permission prompt */
+"NSFaceIDUsageDescription" = "Maayan uses Face ID only to unlock your locked diary. Recognition happens on your device, and nothing is stored by the app or sent anywhere.";

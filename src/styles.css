@@ -588,3 +588,37 @@ main.enter > * { animation: rise .22s ease-out both; }
 .day > b, .day > i, .day > .dots { justify-self: center; }
 @media (min-width: 901px) { .day { aspect-ratio: auto; min-height: 64px; } }
 @media (max-width: 380px) { .ring.idle { display: none; } }
+
+/* מסך נעילה: לוגו ולוח מקשים גדול, בלי שום נתון מהיומן */
+#app.is-locked { display: block; }
+.lock { min-height: 100dvh; display: grid; place-items: center; padding: max(28px, env(safe-area-inset-top, 0px)) 16px max(24px, env(safe-area-inset-bottom, 0px)); background: radial-gradient(90% 45% at 50% 0%, var(--blush), transparent 70%), var(--bg); }
+.lock-in { width: min(100%, 320px); display: grid; gap: 16px; justify-items: center; text-align: center; }
+.lock-in.wide { width: min(100%, 420px); }
+.lock-in.wide > p { color: var(--muted); }
+.lock-in .full { width: 100%; }
+.lock h2 { font-family: var(--display); font-size: 32px; font-weight: 400; margin: 0; }
+.lock-msg { min-height: 1.6em; margin: -6px 0 0; color: var(--muted); font-size: 15px; }
+.lock-msg.bad { color: var(--danger); }
+.pin-dots { display: flex; gap: 18px; direction: ltr; height: 18px; align-items: center; }
+.pin-dots i { width: 15px; height: 15px; border-radius: 50%; border: 2px solid var(--accent); transition: background .12s, transform .12s; }
+.pin-dots i.on { background: var(--accent); transform: scale(1.06); }
+.pin-dots.shake { animation: pin-shake .38s; }
+.pin-dots.shake i { border-color: var(--danger); }
+@keyframes pin-shake { 20%, 60% { transform: translateX(-9px); } 40%, 80% { transform: translateX(9px); } }
+.pad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px 24px; width: 100%; margin-top: 8px; }
+.pad > * { justify-self: center; }
+.key { width: 76px; height: 76px; border-radius: 50%; border: 1px solid var(--line); background: var(--surface); color: var(--ink); font: 400 30px/1 var(--font); display: grid; place-items: center; touch-action: manipulation; -webkit-tap-highlight-color: transparent; transition: background .1s, transform .1s; }
+.key:active:not(:disabled) { background: var(--accent-soft); transform: scale(.96); }
+.key:disabled { opacity: .4; }
+.key.fn { background: transparent; border-color: transparent; color: var(--muted); }
+.key.fn:disabled { opacity: 0; }
+@media (max-height: 640px) { .key { width: 64px; height: 64px; font-size: 26px; } .lock-in { gap: 10px; } }
+.pin-in { font-size: 22px; letter-spacing: .4em; text-align: center; }
+.warn-box { display: flex; gap: 10px; align-items: flex-start; padding: 12px 14px; border-radius: 12px; background: var(--warn-bg); color: var(--warn-ink); font-size: 13.5px; }
+.warn-box .ic { flex-shrink: 0; margin-top: 2px; }
+.lockset { display: grid; gap: 6px; padding-inline-start: 2px; }
+/* תזכורת לגיבוי במסך היום */
+.nudge { border-color: color-mix(in srgb, var(--accent) 30%, var(--line)); background: color-mix(in srgb, var(--accent-soft) 45%, var(--surface)); }
+.nudge > p { color: var(--muted); font-size: 14px; }
+.nudge .card-h > .ic { color: var(--accent); }
+#backup-card .why { color: var(--muted); font-size: 13.5px; }
