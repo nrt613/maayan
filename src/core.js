@@ -196,8 +196,14 @@ const Maayan = (() => {
   /** מקבילה ל-stateSchema.parse: משלים ברירות מחדל וזורק שגיאה בעברית */
   function parseState(input) {
     if (!input || typeof input !== "object" || input.schemaVersion !== 1) fail("מבנה היומן אינו נתמך");
-    const s = { ...SETTING_DEFAULTS, ...(input.settings || {}) };
-    const places = (input.places || []).map(p => {
+    const list = (v, msg) => { if (v === undefined || v === null) return []; if (!Array.isArray(v)) fail(msg); return v; };
+    const raw = input.settings && typeof input.settings === "object" && !Array.isArray(input.settings) ? input.settings : {};
+    // ערך null ביומן ישן מתפרש כחסר; מספרים שנשמרו כמחרוזת (או להפך) מנורמלים לפני הבדיקה
+    const s = { ...SETTING_DEFAULTS, checklist: [], ...Object.fromEntries(Object.entries(raw).filter(([, v]) => v !== null && v !== undefined)) };
+    if (typeof s.nightfall === "number") s.nightfall = String(s.nightfall);
+    if (typeof s.reminderMinutes === "string" && /^\d{1,3}$/.test(s.reminderMinutes)) s.reminderMinutes = Number(s.reminderMinutes);
+    if (Array.isArray(s.checklist)) s.checklist = [...s.checklist];
+    const places = list(input.places, "מקום שמור לא תקין").map(p => {
       if (!p || !/^gps-[0-9a-f]{8}$/.test(p.id) || typeof p.name !== "string" || !p.name.trim() || p.name.length > 60) fail("מקום שמור לא תקין");
       if (typeof p.lat !== "number" || typeof p.lon !== "number" || !(Math.abs(p.lat) <= 90) || !(Math.abs(p.lon) <= 180) || !validTZ(p.tz)) fail("מקום שמור לא תקין");
       return { id: p.id, name: p.name.trim(), lat: p.lat, lon: p.lon, tz: p.tz };
@@ -211,8 +217,9 @@ const Maayan = (() => {
     if (!Number.isInteger(s.reminderMinutes) || s.reminderMinutes < 5 || s.reminderMinutes > 120) fail("דקות התזכורת צריכות להיות בין 5 ל-120");
     if (!TIME_RE.test(s.morningTime)) fail("שעת הבוקר אינה תקינה");
     if (!Array.isArray(s.checklist) || s.checklist.length > 40 || s.checklist.some(x => typeof x !== "string" || x.length > 80)) fail("רשימת ההכנה אינה תקינה");
-    const events = (input.events || []).map(e => {
-      const x = { result: "clear", note: "", authorityNote: "", ...e };
+    const events = list(input.events, "רשימת הרישומים אינה תקינה").map(e => {
+      if (!e || typeof e !== "object") fail("רישום לא תקין");
+      const x = { result: "clear", note: "", authorityNote: "", ...Object.fromEntries(Object.entries(e).filter(([, v]) => v !== null)) };
       if (!UUID_RE.test(x.id)) fail("מזהה רישום לא תקין");
       if (!EVENT_TYPES.includes(x.type)) fail("סוג רישום לא מוכר");
       if (!validISO(x.date)) fail("תאריך לא תקין או מחוץ לטווח 2000–2100");
@@ -230,8 +237,8 @@ const Maayan = (() => {
     });
     if (events.length > 5000) fail("יותר מדי רישומים");
     if (new Set(events.map(e => e.id)).size !== events.length) fail("אירועים כפולים");
-    const trips = (input.trips || []).map(t => {
-      if (!UUID_RE.test(t.id) || !validISO(t.from) || !validISO(t.to) || !known(t.cityId)) fail("נסיעה לא תקינה");
+    const trips = list(input.trips, "נסיעה לא תקינה").map(t => {
+      if (!t || typeof t !== "object" || !UUID_RE.test(t.id) || !validISO(t.from) || !validISO(t.to) || !known(t.cityId)) fail("נסיעה לא תקינה");
       if (t.to < t.from) fail("סיום הנסיעה חייב להיות אחרי תחילתה");
       return { id: t.id, from: t.from, to: t.to, cityId: t.cityId };
     });
@@ -297,7 +304,16 @@ const Maayan = (() => {
   const sunCache = new Map();
   function calculateSun(date, c, degrees) {
     const [y, m, d] = date.split("-").map(Number), base = Date.UTC(y, m - 1, d);
-    const at = (zenith, rising) => { const t = sunEventUTC(y, m, d, c.lat, c.lon, zenith, rising); return t === null ? null : new Date(base + Math.round(t * 60000)); };
+    // sunEventUTC מחשב סביב הצהריים השמשי של היום ב-UTC. כשאזור הזמן רחוק מקו האורך ביותר מחצי יממה
+    // (סמואה, טונגה, קיריבטי) זה יוצא היום המקומי הסמוך, ולכן מזיזים ביום שלם כדי לקבל את הזמנים של התאריך המקומי.
+    let shift = 0;
+    if (c.tz) {
+      try {
+        const noon = base + 12 * 3600000, p = localParts(noon, c.tz), offset = (Date.UTC(p[0], p[1] - 1, p[2], p[3], p[4]) - noon) / 60000;
+        if (Number.isFinite(offset)) shift = Math.round((4 * c.lon - offset) / 1440);
+      } catch { shift = 0; }
+    }
+    const at = (zenith, rising) => { const t = sunEventUTC(y, m, d + shift, c.lat, c.lon, zenith, rising); return t === null ? null : new Date(base + Math.round((t + shift * 1440) * 60000)); };
     // עיגול לדקה לחומרא, כמו בלוחות: שקיעה כלפי מטה (מוקדם), צאת הכוכבים כלפי מעלה (מאוחר).
     // לפני העיגול החישוב תואם את "שקיעה במישור" של עיתים לבינה בטווח של שניות.
     const floorMin = t => t && new Date(Math.floor(t.valueOf() / 60000) * 60000), ceilMin = t => t && new Date(Math.ceil(t.valueOf() / 60000) * 60000);
@@ -313,31 +329,54 @@ const Maayan = (() => {
     const trip = state.trips.find(t => t.from <= date && t.to >= date);
     return city(trip ? trip.cityId : state.settings.cityId);
   }
+  const NO_SUN = "אין זריחה או שקיעה בתאריך ובמיקום הזה; נדרשת הוראה אישית";
+  /** היום העברי של רגע נתון. בקווי רוחב גבוהים השקיעה יכולה להיות אחרי חצות, ואז רגע שלפני הזריחה
+   *  עדיין שייך ליום של התאריך האזרחי הקודם. מחזיר את זמני השמש של היום שהרגע שייך אליו. */
+  function locateDay(instant, date, c) {
+    const s = sun(date, c);
+    if (!s.sunrise || !s.sunset) return null;
+    if (instant >= s.sunset) return { abs: isoAbs(date) + 1, night: true, s, prev: null };
+    if (instant >= s.sunrise) return { abs: isoAbs(date), night: false, s, prev: null };
+    const prev = sun(addDays(date, -1), c);
+    if (!prev.sunset) return null; // אתמול לא הייתה שקיעה (יום קוטבי): גבול היום אינו מוגדר
+    if (instant < prev.sunset) return { abs: isoAbs(date) - 1, night: false, s: prev, prev: null };
+    return { abs: isoAbs(date), night: true, s, prev };
+  }
   function stamp(e) {
-    const c = city(e.cityId), instant = localInstant(e.date, e.time, c.tz), s = sun(e.date, c);
-    if (!s.sunrise || !s.sunset) throw new Error("אין זריחה או שקיעה בתאריך ובמיקום הזה; נדרשת הוראה אישית");
-    const after = instant >= s.sunset, night = after || instant < s.sunrise;
-    const abs = isoAbs(after ? addDays(e.date, 1) : e.date);
+    const c = city(e.cityId), instant = localInstant(e.date, e.time, c.tz), loc = locateDay(instant, e.date, c);
+    if (!loc) throw new Error(NO_SUN);
+    const { abs, night, s, prev } = loc;
     // מרווח של שלוש דקות הוא סימון לבירור, לא הגדרה של בין השמשות
-    const nearSunset = Math.abs(instant - s.sunset) <= 3 * 60000;
-    const twilight = instant >= s.sunset && (!s.nightfall || instant < s.nightfall);
-    const nearSunrise = Math.abs(instant - s.sunrise) <= 3 * 60000;
-    return { abs, onah: night ? "night" : "day", ordinal: 2 * abs + (night ? 0 : 1), instant, hebrewDate: new HDate(abs).renderGematriya(), uncertain: nearSunset || twilight || nearSunrise, sun: s };
+    const near = (t, x) => !!t && Math.abs(instant - t) <= 3 * 60000;
+    const dusk = x => !!x && !!x.sunset && instant >= x.sunset && (!x.nightfall || instant < x.nightfall);
+    const uncertain = near(s.sunset) || near(s.sunrise) || dusk(s) || (!!prev && (near(prev.sunset) || dusk(prev)));
+    return { abs, onah: night ? "night" : "day", ordinal: 2 * abs + (night ? 0 : 1), instant, hebrewDate: new HDate(abs).renderGematriya(), uncertain, sun: s };
   }
   function onahWindow(abs, onah, c, degrees = 8.5) {
     const date = fromAbs(abs), s = sun(date, c, degrees), prior = sun(addDays(date, -1), c, degrees);
     return { start: onah === "day" ? s.sunrise : prior.sunset, end: onah === "day" ? s.sunset : s.sunrise, date: onah === "day" ? date : addDays(date, -1) };
   }
+  /** שבת, יום טוב וצומות שבהם חל יום עברי (abs לפי התאריך האזרחי של שעות היום). יום טוב שני רק בחו״ל. */
+  function holyDayKinds(abs, israel) {
+    const h = new HDate(abs), m = h.getMonth(), d = h.getDate(), is = list => list.some(([mm, dd]) => mm === m && dd === d), out = [];
+    if (abs % 7 === 6) out.push("shabbat");
+    if (is([[NISAN, 15], [NISAN, 21], [SIVAN, 6], [TISHREI, 1], [TISHREI, 2], [TISHREI, 15], [TISHREI, 22]]) || (!israel && is([[NISAN, 16], [NISAN, 22], [SIVAN, 7], [TISHREI, 16], [TISHREI, 23]]))) out.push("yomtov");
+    if (m === TISHREI && d === 10) out.push("yomkippur");
+    if (m === AV && ((d === 9 && abs % 7 !== 6) || (d === 10 && (abs - 1) % 7 === 6))) out.push("tishabav");
+    return out;
+  }
   const today = (cityId = "netanya", now = new Date()) => dateInZone(now, city(cityId).tz);
   function currentContext(state, now = new Date()) {
     const trip = state.trips.find(t => { const d = dateInZone(now, city(t.cityId).tz); return t.from <= d && d <= t.to; });
     const c = city(trip ? trip.cityId : state.settings.cityId), date = dateInZone(now, c.tz), s = sun(date, c, Number(state.settings.nightfall));
-    const abs = isoAbs(s.sunset && now >= s.sunset ? addDays(date, 1) : date);
+    let abs = isoAbs(s.sunset && now >= s.sunset ? addDays(date, 1) : date);
+    // שקיעה של אתמול שחלה אחרי חצות (קווי רוחב גבוהים): עד אליה עדיין היום של אתמול
+    if (!(s.sunset && now >= s.sunset) && !(s.sunrise && now >= s.sunrise)) { const p = sun(addDays(date, -1), c, Number(state.settings.nightfall)); if (p.sunset && now < p.sunset) abs -= 1; }
     return { city: c, date, abs, time: timeInZone(now, c.tz), hebrewDate: new HDate(abs).renderGematriya(), afterSunset: !!(s.sunset && now >= s.sunset) };
   }
 
   /* ---------- מנוע ---------- */
-  const ENGINE_VERSION = "0.2.0-review";
+  const ENGINE_VERSION = "0.2.1-review";
   const SOURCES = {
     calendar: "https://www.yoatzot.org/548/", wait: "https://www.yoatzot.org/526/", hefsek: "https://www.yoatzot.org/527/",
     clean: "https://www.yoatzot.org/529/", monthly: "https://www.yoatzot.org/677/", interval: "https://www.yoatzot.org/670/",
@@ -353,6 +392,15 @@ const Maayan = (() => {
     const context = currentContext(state, now), date = context.date, currentAbs = context.abs;
     const nf = Number(state.settings.nightfall);
     const review = (id, title, detail, eventIds = []) => { if (!reviews.some(r => r.id === id)) reviews.push({ id, title, detail, eventIds }); };
+    /* ליל טבילה בשבת, ביום טוב או בצום, ויום שביעי שחל בשבת או ביום טוב: מסומן לבירור, לא מוזז */
+    const calendarReviews = (day7, c, id) => {
+      const israel = c.tz === "Asia/Jerusalem", night = holyDayKinds(isoAbs(day7) + 1, israel), day = holyDayKinds(isoAbs(day7), israel);
+      if (night.includes("yomkippur") || night.includes("tishabav")) review("mikvah-night-fast", "ליל הטבילה חל ביום הכיפורים או בתשעה באב", "בלילות אלה אין טובלים, והטבילה נדחית. יש לברר עם רב את המועד ואת סדר ההכנות.", [id]);
+      if (night.includes("shabbat")) review("mikvah-night-shabbat", "ליל הטבילה חל בליל שבת", "ההכנות (רחצה, חפיפה, ציפורניים) נעשות לפני כניסת השבת, ויש הלכות מיוחדות לטבילה בשבת. יש לברר עם רב ועם המקווה.", [id]);
+      if (night.includes("yomtov")) review("mikvah-night-yomtov", `ליל הטבילה חל ביום טוב${israel ? "" : " (כולל יום טוב שני של גלויות)"}`, "ההכנות נעשות לפני כניסת החג, ויש הלכות מיוחדות לטבילה ביום טוב. יש לברר עם רב ועם המקווה.", [id]);
+      if (day.includes("shabbat")) review("mikvah-day-shabbat", "היום השביעי חל בשבת", "הטבילה במוצאי שבת: את ההכנות שאינן מותרות בשבת עושים ביום שישי או במוצאי שבת. יש לברר את סדר ההכנות.", [id]);
+      if (day.some(k => k !== "shabbat")) review("mikvah-day-yomtov", "היום השביעי חל ביום טוב או בצום", "ההכנות לטבילה במוצאי היום מוגבלות ביום עצמו. יש לברר את סדר ההכנות עם רב.", [id]);
+    };
     for (const e of sorted(state.events)) {
       try {
         const s = stamp(e);
@@ -405,19 +453,24 @@ const Maayan = (() => {
       const beforeSunset = !!h.s.sun.sunset && h.s.instant < h.s.sun.sunset && !h.s.uncertain;
       if (!beforeSunset) { review(`hefsek-late-${h.e.id}`, "זמן ההפסק דורש בירור", "אין להתחיל ספירה אוטומטית מהפסק שנרשם אחרי השקיעה או בזמן מסופק.", [h.e.id]); continue; }
       if (!latestNiddah) { review(`hefsek-no-flow-${h.e.id}`, "חסר רישום תחילת התקופה", "נשמר ההפסק, אך חסרים נתוני הבסיס להמתנה. אפשר לתעד הוראה אישית.", [h.e.id]); if (!h.e.authorityNote) continue; }
-      if ((!earliestHefsek || h.e.date < earliestHefsek) && !h.e.authorityNote) { review(`hefsek-early-${h.e.id}`, "הפסק לפני מועד ההמתנה המחושב", "המערכת אינה משנה את ההמתנה ללא תיעוד הוראה אישית.", [h.e.id]); continue; }
+      if ((!earliestHefsek || fromAbs(h.s.abs) < earliestHefsek) && !h.e.authorityNote) { review(`hefsek-early-${h.e.id}`, "הפסק לפני מועד ההמתנה המחושב", "המערכת אינה משנה את ההמתנה ללא תיעוד הוראה אישית.", [h.e.id]); continue; }
+      if (h.s.onah === "night") review(`hefsek-night-${h.e.id}`, "הפסק שנרשם בלילה", "ההפסק נרשם לפני הזריחה. המערכת מונה את הספירה מהיום שלמחרת, אך הפסק נעשה בדרך כלל ביום סמוך לשקיעה; יש לוודא את הזמן ולברר.", [h.e.id]);
       validHefsek = h;
     }
     const checks = {};
     let cleanDay = 0, immersionDate;
     const addPlan = p => plans.push({ ...p, tentative: p.tentative ?? true });
+    const bedikahInDay = x => { const start = x.s.sun.dawn || x.s.sun.sunrise; return !!start && !!x.s.sun.sunset && x.s.instant >= start && x.s.instant < x.s.sun.sunset && !x.s.uncertain; };
     if (validHefsek) {
       const h = validHefsek;
+      for (const x of stamped) if (x.e.type === "bedikah" && x.e.result === "clear" && x.s.instant > h.s.instant && x.s.abs > h.s.abs && x.s.abs <= h.s.abs + 7 && !x.s.uncertain && !bedikahInDay(x))
+        review(`bedikah-outside-${x.e.id}`, "בדיקה שנרשמה מחוץ לשעות היום", "הבדיקה נרשמה בלילה או לפני עלות השחר, ולכן לא נספרה כבדיקה של יום מימי הספירה. יש לברר.", [x.e.id]);
       immersionDate = fromAbs(h.s.abs + 7);
       cleanDay = Math.max(0, Math.min(7, currentAbs - h.s.abs));
       for (let n = 1; n <= 7; n++) {
         const d = fromAbs(h.s.abs + n), c = atLocation(state, d), s = sun(d, c, nf);
-        checks[n] = stamped.filter(x => x.e.type === "bedikah" && x.e.result === "clear" && x.s.abs === h.s.abs + n && !!x.s.sun.dawn && !!x.s.sun.sunset && x.s.instant >= x.s.sun.dawn && x.s.instant < x.s.sun.sunset && !x.s.uncertain).map(x => x.e);
+        // כשאין עלות השחר מחושב (קיץ בקווי רוחב מעל כ-50°) תחילת חלון הבדיקה היא הזריחה, לחומרא
+        checks[n] = stamped.filter(x => x.e.type === "bedikah" && x.e.result === "clear" && x.s.abs === h.s.abs + n && bedikahInDay(x)).map(x => x.e);
         const morning = checks[n].some(e => e.time < "12:00"), afternoon = checks[n].some(e => e.time >= "12:00");
         if ((n === 1 || n === 7) && d < date && !checks[n].length) review(`missing-day-${n}`, `לא נרשמה בדיקה ביום ${n === 1 ? "הראשון" : "השביעי"}`, "חוסר רישום אינו מוכיח שלא בוצעה בדיקה. יש להשלים רישום או לברר; המערכת אינה פוסלת או מאשרת את הספירה בעצמה.", [h.e.id]);
         if (state.settings.bedikot === "first-last" && n !== 1 && n !== 7) continue;
@@ -433,9 +486,13 @@ const Maayan = (() => {
         } else review(`sun-${d}`, "חסרים זמני יום", "אין זמן שמש תקף למועד ולמיקום שנבחרו; נדרש בירור.");
       }
       const c = atLocation(state, immersionDate), s = sun(immersionDate, c, nf);
+      if (!s.nightfall) review("mikvah-no-nightfall", "אין צאת כוכבים מחושב בליל הטבילה", `במיקום ובתאריך הזה השמש אינה יורדת ${nf}° מתחת לאופק, ולכן לא נקבעה שעת ליל הטבילה. נדרשת הוראה אישית.`, [h.e.id]);
+      calendarReviews(immersionDate, c, h.e.id);
       if (s.nightfall) addPlan({ id: `mikvah-${h.e.id}`, kind: "mikvah", title: "ליל טבילה מתוכנן", date: immersionDate, onah: "evening", start: s.nightfall.toISOString(), reason: "הערב שלאחר היום השביעי. מותנה בהשלמת הספירה, הבדיקות ובירור הספקות; אינו אישור טבילה.", source: SOURCES.clean, eventIds: [h.e.id], cityId: c.id });
     } else if (earliestHefsek) {
-      const d = earliestHefsek < date ? date : earliestHefsek, c = atLocation(state, d), s = sun(d, c);
+      // אחרי השקיעה היום העברי כבר התחלף, ולכן התזכורת עוברת ליום הבא ולא נשארת בחלון שעבר
+      const currentDay = fromAbs(currentAbs), d = earliestHefsek < currentDay ? currentDay : earliestHefsek, c = atLocation(state, d), s = sun(d, c);
+      if (!s.sunset) review("hefsek-no-sunset", "אין שקיעה ביום ההפסק המוקדם", "במיקום ובתאריך הזה אין שקיעה, ולכן לא נקבעה תזכורת להפסק. נדרשת הוראה אישית.", latestNiddah ? [latestNiddah.e.id] : []);
       if (s.sunset) addPlan({ id: `hefsek-${latestNiddah?.e.id}`, kind: "hefsek", title: "הפסק טהרה, רק אם הדימום פסק", date: d, onah: "day", start: new Date(s.sunset.valueOf() - state.settings.reminderMinutes * 60000).toISOString(), end: s.sunset.toISOString(), reason: "זהו המועד המוקדם ביותר לפי ההמתנה שנבחרה, לא מועד קבוע. עושים הפסק רק אם הדימום פסק בפועל; אם לא, ממתינים והתזכורת עוברת ליום הבא. שבעה נקיים נספרים רק מהפסק שנרשם כנקי, והמערכת לעולם לא רושמת הפסק בעצמה.", source: SOURCES.wait, eventIds: latestNiddah ? [latestNiddah.e.id] : [], cityId: c.id });
     }
     const addOnah = (abs, onah, kind, title, reason, source, eventIds, id) => {
@@ -506,11 +563,14 @@ const Maayan = (() => {
           else intervals.length = 0;
           intervals.push({ value, ids: [a.e.id, b.e.id] });
         }
+        // בשיטת חב״ד המועד החדש נספר מההפסק שאחרי הראייה האחרונה — גם אחרי שכבר טבלה
+        const chabadBase = state.settings.haflagah !== "chabad-onot" ? undefined : validHefsek || (latestMikvah && latestMikvah.s.instant > last.s.instant ? stamped.filter(x => x.e.type === "hefsek" && x.e.result === "clear" && !x.s.uncertain && !!x.s.sun.sunset && x.s.instant < x.s.sun.sunset && x.s.instant > last.s.instant && x.s.instant < latestMikvah.s.instant && (x.s.abs >= last.s.abs + 4 || !!x.e.authorityNote)).at(-1) : undefined);
+        if (state.settings.haflagah === "chabad-onot" && intervals.length && !chabadBase) review("chabad-no-current-hefsek", "הפלגת חב״ד תחושב אחרי ההפסק", "בשיטה זו המועד נספר מההפסק שאחרי הראייה האחרונה. כשיירשם הפסק נקי יופיע המועד.", [last.e.id]);
         for (const interval of intervals) {
           if (state.settings.haflagah === "days") addOnah(last.s.abs + interval.value - 1, last.s.onah, "interval", `הפלגה · ${interval.value} ימים`, "הפרש התאריכים העבריים בתוספת 1, בספירה כוללנית. חוזרים על אותו מרווח מהווסת האחרונה ובאותה עונה.", SOURCES.interval, interval.ids, `interval-${interval.value}-${last.e.id}`);
-          else if (validHefsek) {
-            const ordinal = 2 * validHefsek.s.abs + 1 + interval.value;
-            addOnah(Math.floor(ordinal / 2), ordinal % 2 ? "day" : "night", "interval", `הפלגה · ${interval.value} עונות`, "מספר העונות מההפסק הקודם ועד הראייה הבאה, בספירה כוללנית; מועד חדש נספר מההפסק הנוכחי. מספרים גבוהים נשמרים כשמגיע מספר נמוך.", SOURCES.chabad, [...interval.ids, validHefsek.e.id], `chabad-${interval.value}-${last.e.id}`);
+          else if (chabadBase) {
+            const ordinal = 2 * chabadBase.s.abs + 1 + interval.value;
+            addOnah(Math.floor(ordinal / 2), ordinal % 2 ? "day" : "night", "interval", `הפלגה · ${interval.value} עונות`, "מספר העונות מההפסק הקודם ועד הראייה הבאה, בספירה כוללנית; מועד חדש נספר מההפסק הנוכחי. מספרים גבוהים נשמרים כשמגיע מספר נמוך.", SOURCES.chabad, [...interval.ids, chabadBase.e.id], `chabad-${interval.value}-${last.e.id}`);
           }
         }
       }
@@ -530,6 +590,15 @@ const Maayan = (() => {
       review("no-mikvah-after-flow", "לא נרשמו הפסק וטבילה אחרי הראייה האחרונה", "אם הוזנו מחזורים קודמים ללא הפסק וטבילה, המערכת מניחה שעדיין לא נעשו. כדי שהמצב יוצג נכון יש לרשום אותם.", [latestNiddah.e.id]);
     const immersed = !unresolvedActive && latestMikvah && (!latestNiddah || latestMikvah.s.instant > latestNiddah.s.instant);
     const phase = immersed ? "immersed" : validHefsek ? (currentAbs > validHefsek.s.abs + 7 ? "planned" : "clean") : latestNiddah || unresolvedActive ? "waiting" : "empty";
+    if (immersed) {
+      // טבילה שנרשמה לפני צאת הכוכבים של היום השביעי להפסק שקדם לה — מסומנת, לא נפסלת ולא מאושרת
+      const prevNiddah = stamped.filter(x => ["flow", "restart"].includes(x.e.type) && x.s.instant < latestMikvah.s.instant).at(-1);
+      const hef = stamped.filter(x => x.e.type === "hefsek" && x.e.result === "clear" && x.s.instant < latestMikvah.s.instant && (!prevNiddah || x.s.instant > prevNiddah.s.instant)).at(-1);
+      if (hef) {
+        const day7 = fromAbs(hef.s.abs + 7), t = sun(day7, city(latestMikvah.e.cityId), nf).nightfall;
+        if (!t || latestMikvah.s.instant < t) review("mikvah-early", "הטבילה נרשמה לפני ליל הטבילה המחושב", "לפי ההפסק שנרשם, ליל הטבילה הוא אחרי צאת הכוכבים של היום השביעי. ייתכן שהרישום שגוי או שהייתה הוראה מיוחדת; יש לברר.", [latestMikvah.e.id, hef.e.id]);
+      }
+    }
     if (immersed && !stamped.some(x => x.e.type === "hefsek" && x.s.instant < latestMikvah.s.instant)) review("immersion-no-history", "טבילה ללא תיעוד ספירה קודם", "נשמר רישום הטבילה כפי שהוזן. אין להסיק ממנו אישור הלכתי או השלמת בדיקות.", [latestMikvah.e.id]);
     // אור זרוע שחופף בדיוק לעונה שכבר נשמרת (למשל בעונה בינונית של יממה שלמה) אינו מוצג פעמיים
     const windows = new Set(plans.filter(p => p.kind !== "or-zarua").map(p => `${p.start}|${p.end}`));

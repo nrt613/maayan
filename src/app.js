@@ -63,8 +63,11 @@
   }
   const NAV = [
     ["today", "היום", "home"], ["calendar", "לוח השנה", "calendar"], ["journal", "היומן שלי", "book"],
-    ["dates", "מועדים", "bell"], ["review", "לבודקים", "scale"], ["prefs", "הגדרות", "sliders"],
+    ["dates", "מועדים", "bell"], ["prefs", "הגדרות", "sliders"], ["review", "לבודקים", "scale"],
   ];
+  // בסרגל הניווט: חמש לשוניות. מסך הבודקים נגיש מההגדרות ומקישורי "כללים ומקורות".
+  const MAIN_NAV = NAV.filter(n => n[0] !== "review");
+  const PRIVACY_URL = NATIVE ? "https://nrt613.github.io/maayan/privacy.html" : "privacy.html";
   const app = {
     mode: "personal", personal: null, sandbox: null, scenario: null, simNow: null,
     tab: "today", hidden: false, modal: null, toast: "", toastTimer: 0,
@@ -86,7 +89,14 @@
     } else { app.sandbox = parsed; toast(app.mode === "scenario" ? "נשמר בתרחיש (לא ביומן האישי)" : "נשמר ביומן לדוגמה"); }
     render();
   }
-  function toast(msg) { app.toast = msg; clearTimeout(app.toastTimer); app.toastTimer = setTimeout(() => { app.toast = ""; renderToast(); }, 4200); renderToast(); }
+  /** הודעה קצרה בתחתית. action: { label, run } — למשל ״ביטול״ אחרי מחיקה */
+  function toast(msg, action = null) { app.toast = msg; app.toastAction = action; clearTimeout(app.toastTimer); app.toastTimer = setTimeout(() => { app.toast = ""; app.toastAction = null; renderToast(); }, action ? 7000 : 4200); renderToast(); }
+  /** שמירה עם אפשרות ביטול: מציג הודעה עם כפתור שמחזיר את המצב הקודם */
+  function commitUndoable(next, msg) {
+    const before = state();
+    commit(next);
+    toast(msg, { label: "ביטול", run: () => { commit(before); toast("השינוי בוטל"); } });
+  }
 
   /* ---------- עזרים לתצוגה ---------- */
   const hebDay = d => hebrew(d).split(" ")[0];
@@ -99,12 +109,14 @@
   const onahLabel = o => o === "day" ? "עונת יום" : o === "night" ? "עונת לילה" : "ערב";
   const SEP_KINDS = ["monthly", "interval", "average", "or-zarua", "manual"];
 
+  /** שם המועד לתצוגה: עונת אור זרוע מסומנת במפורש, עם העונה שהיא קודמת לה */
+  const planTitle = p => p.kind === "or-zarua" ? `עונת אור זרוע · לפני ${String(p.title).replace(/^אור זרוע · /, "")}` : p.title;
   function planLine(p, { compact = false, open = false } = {}) {
     const c = city(p.cityId), start = timeInZone(new Date(p.start), c.tz);
     const prefix = p.onah === "day" ? "" : "ליל ";
     return `<details class="plan k-${p.kind}${p.done ? " done" : ""}"${open ? " open" : ""}>
       <summary><span class="plan-ic">${I(p.onah === "day" ? "sun" : "moon", 17)}</span>
-        <span class="plan-name"><strong>${esc(p.title)}</strong><small><span class="hebdate">${prefix}${esc(planHebrew(p))}</span>${compact ? "" : ` · ${esc(civilLabel(p.date, true))} · ${esc(c.name)}`}</small></span>
+        <span class="plan-name"><strong>${esc(planTitle(p))}</strong><small><span class="hebdate">${prefix}${esc(planHebrew(p))}</span>${compact ? "" : ` · ${esc(civilLabel(p.date, true))} · ${esc(c.name)}`}</small></span>
         <time dir="ltr">${start}</time>${I("left", 15)}</summary>
       <div class="plan-more"><p>${esc(p.reason)}</p>
         <small>${onahLabel(p.onah)} · ${p.end ? `מ-${start} עד ${timeInZone(new Date(p.end), c.tz)}` : `מ-${start}`} · ${esc(c.name)}</small>
@@ -115,11 +127,11 @@
   /* ---------- מסכים ---------- */
   function viewToday(st, r, ctx) {
     const date = ctx.date, loc = atLocation(st, date), times = sun(date, loc, Number(st.settings.nightfall));
-    const upcoming = r.plans.filter(p => !p.done && new Date(p.end || p.start) >= now()).slice(0, 4);
+    const upcoming = r.plans.filter(p => !p.done && new Date(p.end || p.start) >= now()).slice(0, 5);
     const phase = r.phase, cd = r.cleanDay;
     const mk = r.plans.find(p => p.kind === "mikvah"), mikvahNight = !!mk && now() < new Date(new Date(mk.start).valueOf() + 14 * 3600000);
     const C = {
-      empty: ["הרישום הראשון", "כדי לחשב מועדים, רשמי את תחילת הווסת: תאריך, שעה ומקום.", "רישום תחילת וסת", "flow"],
+      empty: [app.mode === "personal" && !st.events.length ? "ברוכה הבאה" : "הרישום הראשון", "כדי לחשב מועדים, רשמי את תחילת הווסת: תאריך, שעה ומקום.", "רישום תחילת וסת", "flow"],
       waiting: ["ממתינה להפסק טהרה", r.earliestHefsek ? (r.earliestHefsek > date ? `הפסק טהרה עושים רק כשהדימום פסק בפועל. המועד המוקדם האפשרי: ${hebrew(r.earliestHefsek)}, ${civilLabel(r.earliestHefsek, true)}, לפני השקיעה.` : "אם הדימום פסק, אפשר לעשות הפסק טהרה היום לפני השקיעה. אם לא, ממתינים ומנסים שוב ביום שאחריו.") : "חסר מידע כדי לחשב את מועד ההפסק. פרטים בנקודות לבירור.", "רישום הפסק טהרה", "hefsek"],
       clean: [cd ? `יום ${cd} מתוך 7` : "הפסק טהרה נרשם", cd === 7 && mk ? `היום השביעי. ליל הטבילה המתוכנן: הלילה, אחרי צאת הכוכבים (${timeInZone(new Date(mk.start), city(mk.cityId).tz)}), בכפוף לבדיקות ולבירור הנקודות הפתוחות.` : cd ? "שבעה נקיים לפי ההפסק שנרשם." : "יום הספירה הראשון מתחיל בתאריך העברי הבא.", "רישום בדיקה", "bedikah"],
       planned: mikvahNight ? ["ליל הטבילה", `הספירה הושלמה. הטבילה אחרי צאת הכוכבים (${timeInZone(new Date(mk.start), city(mk.cityId).tz)}), בכפוף לבדיקות ולבירור הנקודות הפתוחות. אחרי הטבילה רושמים אותה כאן.`, "רישום טבילה", "mikvah"]
@@ -130,15 +142,32 @@
       `<li class="${d < cd ? "past" : ""}${d === cd ? " now" : ""}"><span>${r.checks[d]?.length ? I("check", 16) : d}</span><small>${d === cd ? "היום" : "יום " + d}</small></li>`).join("")}</ol>` : "";
     const ring = phase === "clean" && cd ? `<div class="ring" style="--p:${cd / 7}"><strong>${cd}</strong><small>מתוך 7</small></div>`
       : `<div class="ring idle">${I(phase === "waiting" ? "moon" : "spring", 44)}</div>`;
+    const next = upcoming[0];
+    const nextLine = next ? (() => {
+      const c = city(next.cityId), when = new Date(next.start), dayDiff = M.isoAbs(next.date) - M.isoAbs(date);
+      const rel = dayDiff <= 0 ? (when < now() ? "עכשיו" : next.onah === "day" ? "היום" : "הלילה") : dayDiff === 1 ? "מחר" : `בעוד ${dayDiff} ימים`;
+      return `<button class="next k-${next.kind}" data-go="dates"><span class="next-l">המועד הבא</span><span class="next-main"><strong>${esc(planTitle(next))}</strong><small><span>${rel}</span> · <span class="hebdate">${esc(next.onah === "day" ? planHebrew(next) : `ליל ${planHebrew(next)}`)}</span></small></span><time dir="ltr">${timeInZone(when, c.tz)}</time>${I("left", 15)}</button>`;
+    })() : "";
+    const first = app.mode === "personal" && !st.events.length;
+    const checklistOpen = (phase === "clean" && cd >= 6) || (phase === "planned" && mikvahNight);
     return `
-    ${app.mode === "personal" && !st.events.length ? onboardingCard() : ""}
-    <div class="grid-top">
+    <div class="today">
       <section class="hero" data-phase="${phase}">
         <div class="hero-row"><div class="hero-copy">
-          <span class="chip-light">${phase === "clean" ? "שבעה נקיים" : "המצב לפי היומן"}</span>
-          <h2>${esc(C[0])}</h2><p>${esc(C[1])}</p>
-          <button class="btn light" data-act="add" data-type="${C[3]}">${I("plus", 18)}${esc(C[2])}</button>
+          <span class="chip-light"><i class="phase-dot"></i>${first ? "היומן שלך ריק" : esc(phase === "planned" && mikvahNight ? "ליל הטבילה" : PHASE_NAMES[phase])}</span>
+          <h2>${esc(C[0])}</h2><p>${esc(first ? "כדאי להתחיל מהזנת המחזורים האחרונים (לפחות שניים), כדי שההפלגה ועונת החודש יחושבו נכון. אפשר גם להתאים קודם את שיטת החישוב." : C[1])}</p>
         </div>${ring}</div>${days}
+        <button class="btn hero-btn" data-act="add" data-type="${C[3]}">${I("plus", 19)}${esc(C[2])}</button>
+        ${first ? `<div class="row-btns first-btns"><button class="btn ghost sm" data-act="cycle">${I("calendar", 16)}הזנת מחזורים קודמים</button><button class="btn ghost sm" data-go="prefs">${I("sliders", 16)}שיטת החישוב</button><button class="btn ghost sm" data-act="demo">${I("flask", 16)}יומן לדוגמה</button></div>` : ""}
+        ${nextLine}
+      </section>
+      ${first ? `<section class="card method"><div class="card-h">${I("scale")}<div><h3>שיטת החישוב שלך</h3><p>לבחור לפי ההנחיה שקיבלת. אפשר לשנות בכל עת</p></div></div>
+        <ul class="method-sum">${M.settingsSummary(st.settings).filter(x => /^(המתנה|הפלגה|עונה בינונית)/.test(x)).map(x => `<li>${esc(x)}</li>`).join("")}</ul>
+        <label class="toggle" for="q-orZarua"><span><strong>עונת אור זרוע</strong><small>העונה שלפני כל עונת פרישה — לפי הוראת הרב</small></span><input id="q-orZarua" type="checkbox" role="switch" data-quickset="orZarua"${st.settings.orZarua ? " checked" : ""}></label>
+        <button class="btn ghost full" data-go="prefs">${I("sliders", 17)}כל אפשרויות החישוב</button></section>` : ""}
+      ${r.reviews.length ? `<button class="notice" data-go="journal">${I("help", 22)}<span><strong>${r.reviews.length} ${r.reviews.length === 1 ? "נקודה לבירור" : "נקודות לבירור"}</strong><small>${esc(r.reviews[0].title)}</small></span>${I("left", 16)}</button>` : ""}
+      <section class="card upcoming"><div class="card-h">${I("bell")}<h3>מועדים קרובים</h3><button class="link" data-go="dates">הכול ${I("left", 14)}</button></div>
+        ${upcoming.length > 1 ? `<div class="plans">${upcoming.slice(1).map(p => planLine(p)).join("")}</div>` : `<p class="empty">${upcoming.length ? "אין מועדים נוספים בקרוב." : first ? "המועדים יופיעו כאן אחרי הרישום הראשון." : "אין מועדים קרובים."}</p>`}
       </section>
       <section class="card times">
         <div class="card-h">${I("sunset")}<div><h3>זמני היום</h3><p>${esc(loc.name)} · ${esc(civilLabel(date, true))}</p></div></div>
@@ -146,26 +175,11 @@
           `<div${ic === "sunset" ? ' class="hl"' : ""}>${I(ic, 18)}<dt>${n}</dt><dd dir="ltr">${timeInZone(v, loc.tz)}</dd></div>`).join("")}</dl>
         <p class="fine">בגובה פני הים · מעוגל לחומרא · צאת הכוכבים ${esc(st.settings.nightfall)}° מתחת לאופק</p>
       </section>
-    </div>
-    ${r.reviews.length ? `<button class="notice" data-go="journal">${I("help", 22)}<span><strong>${r.reviews.length} ${r.reviews.length === 1 ? "נקודה לבירור" : "נקודות לבירור"}</strong><small>${esc(r.reviews[0].title)}</small></span>${I("left", 16)}</button>` : ""}
-    <div class="grid-bottom">
-      <section class="card"><div class="card-h">${I("bell")}<h3>מועדים קרובים</h3><button class="link" data-go="dates">הכול ${I("left", 14)}</button></div>
-        ${upcoming.length ? `<div class="plans">${upcoming.map(p => planLine(p)).join("")}</div>` : `<p class="empty">אין מועדים קרובים.</p>`}
-      </section>
-      <section class="card"><div class="card-h">${I("list")}<h3>רשימת הכנה למקווה</h3></div>
+      <details class="card checklist"${checklistOpen ? " open" : ""}><summary class="card-h">${I("list")}<h3>רשימת הכנה למקווה</h3><span class="count">${st.settings.checklist.length}/${M.CHECKLIST.length}</span>${I("left", 15)}</summary>
         <div class="checks">${M.CHECKLIST.map((item, i) => `<label class="${st.settings.checklist.includes(item) ? "on" : ""}"><input type="checkbox" id="chk-${i}" data-check="${esc(item)}" ${st.settings.checklist.includes(item) ? "checked" : ""}><span>${esc(item)}</span></label>`).join("")}</div>
-      </section>
+      </details>
     </div>`;
   }
-  function onboardingCard() {
-    return `<section class="card welcome-inline"><div class="card-h">${I("shield")}<h3>היומן שלך ריק</h3></div>
-      <p>כדאי להתחיל מהזנת המחזורים האחרונים (לפחות שניים), כדי שההפלגה ועונת החודש יחושבו נכון. אפשר גם להתאים קודם את שיטת החישוב.</p>
-      <div class="row-btns"><button class="btn" data-act="add" data-type="flow">${I("plus", 17)}רישום ראשון</button>
-      <button class="btn ghost" data-act="cycle">${I("calendar", 17)}הזנת מחזורים קודמים</button>
-      <button class="btn ghost" data-go="prefs">${I("sliders", 17)}שיטת החישוב</button>
-      <button class="btn ghost" data-act="demo">${I("flask", 17)}יומן לדוגמה</button></div></section>`;
-  }
-
   function viewCalendar(st, r, ctx) {
     const c = app.cal; c.cursor ||= ctx.date; c.selected ||= ctx.date;
     let first, next;
@@ -173,14 +187,14 @@
     else { const d = fromISO(c.cursor); first = toISO(new Date(d.getFullYear(), d.getMonth(), 1, 12)); next = toISO(new Date(d.getFullYear(), d.getMonth() + 1, 1, 12)); }
     const offset = fromISO(first).getDay(), len = M.isoAbs(next) - M.isoAbs(first);
     const start = addDays(first, -offset), cells = Math.ceil((offset + len) / 7) * 7;
-    const hef = r.hefsek ? M.isoAbs(r.hefsek.date) : null;
+    const ranges = dayRanges(st, r, ctx.date);
     const title = c.mode === "hebrew" ? hebMonthTitle(first) : civilMonthTitle(first);
     const dayCells = Array.from({ length: cells }, (_, i) => {
       const d = addDays(start, i), ents = st.events.filter(e => e.date === d), pl = r.plans.filter(p => p.date === d);
-      const out = d < first || d >= next, abs = M.isoAbs(d), clean = hef !== null && abs > hef && abs <= hef + 7;
-      const flags = [ents.some(e => e.type === "flow") && "f", ents.some(e => e.type === "hefsek" || e.type === "bedikah") && "c", pl.some(p => SEP_KINDS.includes(p.kind)) && "s", pl.some(p => p.kind === "mikvah") && "m"].filter(Boolean);
+      const out = d < first || d >= next, abs = M.isoAbs(d), clean = ranges.clean.has(abs), niddah = !clean && ranges.niddah.has(abs);
+      const flags = [ents.some(e => e.type === "flow") && "f", ents.some(e => e.type === "hefsek" || e.type === "bedikah") && "c", pl.some(p => SEP_KINDS.includes(p.kind)) && "s", pl.some(p => p.kind === "or-zarua") && "z", pl.some(p => p.kind === "mikvah") && "m"].filter(Boolean);
       const main = c.mode === "civil" ? fromISO(d).getDate() : hebDay(d), sub = c.mode === "civil" ? hebDay(d) : fromISO(d).getDate();
-      return `<button class="day${out ? " out" : ""}${d === ctx.date ? " today" : ""}${d === c.selected ? " sel" : ""}${clean ? " clean" : ""}" data-day="${d}" aria-label="${esc(civilLabel(d))}, ${esc(hebrew(d))}${ents.length ? `, ${ents.length} רישומים` : ""}${pl.length ? `, ${pl.length} מועדים` : ""}" aria-pressed="${d === c.selected}">
+      return `<button class="day${out ? " out" : ""}${d === ctx.date ? " today" : ""}${d === c.selected ? " sel" : ""}${clean ? " clean" : ""}${niddah ? " niddah" : ""}${flags.includes("s") ? " sep" : ""}${flags.includes("z") ? " oz" : ""}${flags.includes("m") ? " mik" : ""}" data-day="${d}" aria-label="${esc(civilLabel(d))}, ${esc(hebrew(d))}${niddah ? ", ימי וסת" : ""}${clean ? ", שבעה נקיים" : ""}${ents.length ? `, ${ents.length} רישומים` : ""}${pl.length ? `, ${pl.length} מועדים` : ""}" aria-pressed="${d === c.selected}">
         <b>${main}</b><i>${sub}</i><span class="dots">${flags.map(f => `<em class="d-${f}"></em>`).join("")}</span></button>`;
     }).join("");
     const sel = c.selected, ents = M.sorted(st.events.filter(e => e.date === sel)), pl = r.plans.filter(p => p.date === sel);
@@ -192,13 +206,27 @@
       <div class="seg" role="group" aria-label="סוג לוח"><button data-calmode="civil" aria-pressed="${c.mode === "civil"}">לועזי</button><button data-calmode="hebrew" aria-pressed="${c.mode === "hebrew"}">עברי</button></div>
       <div class="wk" aria-hidden="true">${weekHeads().map(w => `<span>${w}</span>`).join("")}</div>
       <div class="days">${dayCells}</div>
-      <div class="legend"><span><em class="d-f"></em>וסת</span><span><em class="d-c"></em>הפסק ובדיקות</span><span><em class="d-s"></em>עונת פרישה</span><span><em class="d-m"></em>טבילה מתוכננת</span></div>
-      <p class="fine">התאריך העברי במשבצת שייך לשעות היום. בשקיעה מתחיל התאריך העברי הבא.</p>
+      <div class="legend" aria-label="מקרא"><span><i class="sw sw-niddah"></i>ימי וסת עד ההפסק</span><span><i class="sw sw-clean"></i>שבעה נקיים</span><span><i class="sw sw-sep"></i>עונת פרישה</span>${st.settings.orZarua ? `<span><em class="d-z"></em>עונת אור זרוע</span>` : ""}<span><i class="sw sw-mik"></i>טבילה</span><span><em class="d-f"></em>וסת נרשמה</span><span><em class="d-c"></em>הפסק או בדיקה</span></div>
+      <p class="fine">הצבעים מבוססים על הרישומים שלך ועל המועדים המחושבים. התאריך העברי במשבצת שייך לשעות היום; בשקיעה מתחיל התאריך העברי הבא.</p>
     </section>
     <section class="card dayp"><div class="card-h">${I("calendar")}<div><h3>${esc(weekdayName(sel))}, ${esc(civilLabel(sel))}</h3><p class="hebdate">${esc(hebrew(sel))} · שעות היום</p></div></div>
       ${ents.map(entryRow).join("")}${pl.length ? `<div class="plans">${pl.map(p => planLine(p, { compact: true })).join("")}</div>` : ""}
       ${!ents.length && !pl.length ? `<p class="empty">אין רישומים או מועדים ביום הזה.</p>` : ""}
-      <button class="btn ghost full" data-act="add" data-date="${sel}">${I("plus", 17)}רישום ליום הזה</button></section></div>`;
+      <button class="btn ghost full" data-act="quick" data-date="${sel}">${I("plus", 17)}רישום ליום הזה</button></section></div>`;
+  }
+  /** טווחי ימים לצביעת הלוח, רק מתוך הרישומים: מתחילת וסת עד ההפסק, ושבעה נקיים אחרי הפסק (הנוכחי לפי המנוע, וקודמים שנרשמה אחריהם טבילה) */
+  function dayRanges(st, r, todayISO) {
+    const niddah = new Set(), clean = new Set(), today = M.isoAbs(todayISO);
+    const evs = M.sorted(st.events), flows = evs.filter(e => e.type === "flow").map(e => M.isoAbs(e.date));
+    const hefs = evs.filter(e => e.type === "hefsek" && e.result === "clear").map(e => M.isoAbs(e.date)), miks = evs.filter(e => e.type === "mikvah").map(e => M.isoAbs(e.date));
+    flows.forEach((f, i) => {
+      const nextFlow = flows[i + 1] ?? Infinity, h = hefs.find(x => x >= f && x < nextFlow);
+      const end = h ?? (nextFlow === Infinity ? Math.min(today, f + 40) : f);
+      for (let a = f; a <= end && a < nextFlow; a++) niddah.add(a);
+      const ok = h !== undefined && ((r.hefsek && M.isoAbs(r.hefsek.date) === h) || miks.some(m => m > h && m < nextFlow));
+      if (ok) for (let a = h + 1; a <= h + 7 && a < nextFlow; a++) clean.add(a);
+    });
+    return { niddah, clean };
   }
   function entryRow(e) {
     let h = "זמן לבירור", onah = "";
@@ -219,14 +247,14 @@
     <section class="card"><div class="card-h">${I("book")}<h3>רישומים <span class="count">${st.events.length}</span></h3><button class="link" data-act="report">${I("file", 15)}דוח לבירור</button></div>
       <div class="filters"><label class="search">${I("search", 17)}<input id="q" type="search" placeholder="חיפוש לפי תאריך או הערה" value="${esc(app.query)}" aria-label="חיפוש"></label>
       <select id="filter" aria-label="סינון לפי סוג"><option value="all">כל הסוגים</option>${Object.entries(EVENT_NAMES).map(([v, n]) => `<option value="${v}"${app.filter === v ? " selected" : ""}>${n}</option>`).join("")}</select></div>
-      <div class="entries">${evs.map(entryRow).join("") || `<p class="empty">${st.events.length ? "לא נמצאו רישומים מתאימים." : "אין עדיין רישומים."}</p>`}</div>
+      <div class="entries">${evs.map(entryRow).join("") || (st.events.length ? `<p class="empty">לא נמצאו רישומים מתאימים.</p>` : `<div class="empty-state">${I("book", 30)}<strong>אין עדיין רישומים</strong><p>כל רישום — וסת, הפסק, בדיקה או טבילה — יופיע כאן, מהחדש לישן.</p></div>`)}</div>
       <div class="row-btns"><button class="btn" data-act="add">${I("plus", 17)}רישום חדש</button><button class="btn ghost" data-act="cycle">${I("calendar", 17)}הזנת מחזור קודם</button></div></section>`;
   }
 
   function viewDates(st, r) {
     const n = now(), up = r.plans.filter(p => !p.done && new Date(p.end || p.start) >= n), past = r.plans.filter(p => !up.includes(p));
     return `<div class="two"><section class="card"><div class="card-h">${I("bell")}<h3>מועדים עתידיים <span class="count">${up.length}</span></h3></div>
-      ${up.length ? `<div class="plans">${up.map(p => planLine(p)).join("")}</div>` : `<p class="empty">אין מועדים עתידיים כרגע.</p>`}
+      ${up.length ? `<div class="plans">${up.map(p => planLine(p)).join("")}</div>` : `<div class="empty-state">${I("bell", 30)}<strong>אין מועדים עתידיים כרגע</strong><p>${st.events.length ? "מועדים חדשים יחושבו מהרישומים הבאים." : "אחרי רישום תחילת וסת יופיעו כאן עונות הפרישה, ההפסק והבדיקות."}</p></div>`}
       ${past.length ? `<details class="past"><summary>מועדים שעברו או שהושלמו (${past.length})${I("left", 15)}</summary><div class="plans">${past.map(p => planLine(p)).join("")}</div></details>` : ""}
       <p class="fine">כל מועד הוא תכנון לפי השיטה שנבחרה בהגדרות. לחיצה על מועד מציגה את הכלל ואת המקור.</p></section>
     <aside class="stack"><section class="card"><div class="card-h">${I("calendar")}<h3>ייצוא ליומן הטלפון</h3></div>
@@ -249,7 +277,7 @@
       ${sel("wait", "המתנה לפני שבעה נקיים", s, [["five", "חמישה ימים מתחילת הנידה"], ["four-from-relations", "ארבעה ימים ממועד היחסים — לפי הוראה"]])}
       ${sel("haflagah", "שיטת חישוב ההפלגה", s, [["days", "ימים בין תחילות הווסתות"], ["chabad-onot", "עונות מהפסק טהרה — חב״ד"]])}
       ${sel("beinonit", "עונה בינונית ביום 30", s, [["same", "אותה עונה שבה התחילה הווסת"], ["both", "שתי העונות — לילה ויום"]])}
-      ${tog("day31", "הוספת יום 31", "לפי המנהג או ההנחיה", s)}${tog("orZarua", "עונת אור זרוע", "העונה שלפני כל חשש מחושב", s)}
+      ${tog("day31", "הוספת יום 31", "לפי המנהג או ההנחיה", s)}<div class="oz-box">${tog("orZarua", "עונת אור זרוע", "העונה שלפני כל עונת פרישה — לפי הוראת הרב. כבויה כברירת מחדל.", s)}</div>
       ${tog("carryLongIntervals", "שימור הפלגות ארוכות", "בחישוב ימים, כשווסת חדשה מקדימה את החשש הקודם", s)}
       ${tog("carryMonthly", "שימור עונת חודש בזמן דימום", "דורש תיעוד מלא של הווסת וההפסק", s)}
       ${sel("missingMonthly", "יום ל׳, כשבחודש הבא אין ל׳", s, [["first-next-month", "א׳ בחודש שאחרי החודש החסר (מומלץ)"], ["skip", "בלי עונת חודש באותו חודש"]])}
@@ -268,7 +296,7 @@
   function viewPrefs(st) {
     const where = app.mode === "personal" ? "היומן האישי" : app.mode === "scenario" ? "התרחיש הפתוח בלבד" : "היומן לדוגמה בלבד";
     return `<div class="two"><form id="settings-form" class="stack">${SETTINGS_FIELDS(st.settings)}
-      <div class="save-bar"><button class="btn" type="submit">${I("check", 17)}שמירת ההגדרות</button><small>יחול על ${where}</small></div></form>
+      <p class="autosave">${I("check", 15)}<span>כל שינוי נשמר מיד ויחול על ${where}</span></p></form>
     <aside class="stack">
       <section class="card"><div class="card-h">${I("pin")}<div><h3>נסיעות</h3><p>זמני המועדים לפי היעד</p></div></div>
         ${st.trips.map(t => `<div class="trip"><span><strong>${esc(city(t.cityId).name)}</strong><small dir="ltr">${t.from} — ${t.to}</small></span><button class="icon-btn" data-deltrip="${t.id}" aria-label="מחיקת נסיעה">${I("trash", 17)}</button></div>`).join("")}
@@ -279,13 +307,18 @@
       <section class="card"><div class="card-h">${I("lock")}<div><h3>גיבוי והעברה למכשיר אחר</h3><p>היומן שמור רק בטלפון הזה</p></div></div>
         <button class="action" data-act="backup">${I("download", 19)}<span><strong>גיבוי מוצפן</strong><small>בסיסמה שתבחרי</small></span></button>
         <button class="action" data-act="restore">${I("upload", 19)}<span><strong>שחזור מגיבוי</strong><small>מחליף את היומן לאחר אישור</small></span></button>
-        <button class="action" data-act="report">${I("file", 19)}<span><strong>דוח לבירור</strong><small>טקסט גלוי לשליחה למורה הוראה</small></span></button>
-        <button class="link danger" data-act="clear">מחיקת כל הרישומים</button></section>
+        <button class="action" data-act="report">${I("file", 19)}<span><strong>דוח לבירור</strong><small>טקסט גלוי לשליחה למורה הוראה</small></span></button></section>
       <section class="card"><div class="card-h">${I("info")}<div><h3>שפה</h3></div></div>${langSwitch()}</section>
+      <section class="card"><div class="card-h">${I("shield")}<div><h3>פרטיות ונתונים</h3><p>שום מידע לא יוצא מהמכשיר</p></div></div>
+        <a class="action" href="${PRIVACY_URL}" target="_blank" rel="noopener">${I("lock", 19)}<span><strong>מדיניות פרטיות</strong><small>מה נשמר, איפה, ומה לא נאסף</small></span>${I("out", 15)}</a>
+        <button class="action" data-act="terms">${I("file", 19)}<span><strong>תנאי שימוש</strong><small>אחריות, גרסת בדיקה ופרטיות בקצרה</small></span></button>
+        <button class="action danger" data-act="clear"${app.mode === "personal" && !st.events.length && !st.trips.length ? " disabled" : ""}>${I("trash", 19)}<span><strong>מחיקת כל הרישומים</strong><small>ההגדרות נשמרות. אפשר לבטל מיד אחרי המחיקה</small></span></button>
+        ${app.mode === "personal" ? `<button class="action danger" data-act="wipe">${I("x", 19)}<span><strong>מחיקת כל הנתונים שלי</strong><small>יומן, הגדרות, מקומות ותזכורות — מהמכשיר הזה, לצמיתות</small></span></button>` : ""}</section>
+      <section class="card"><div class="card-h">${I("scale")}<div><h3>לבודקים הלכתיים</h3><p>תרחישים מוכנים, בדיקות אוטומטיות וכללי החישוב</p></div></div>
+        <button class="btn ghost full" data-go="review">${I("flask", 17)}מסך הבודקים</button></section>
       <section class="card about"><div class="card-h">${I("spring")}<div><h3>על מעיין</h3><p>גרסה ${APP_VERSION} · מנוע ${M.ENGINE_VERSION}</p></div></div>
         <p>האפליקציה חינמית ופועלת כולה בטלפון, בלי חשבון ובלי שרת. שום מידע לא נשלח לאף אחד.</p>
-        ${NATIVE ? "" : `<p>להתקנה: בתפריט הדפדפן (⋮) בוחרים ״הוספה למסך הבית״.</p><a class="link" href="https://github.com/nrt613/maayan/releases/latest/download/maayan.apk" target="_blank" rel="noopener">${I("download", 15)}אפליקציית אנדרואיד עם התראות</a>`}
-        <button class="link" data-act="terms">${I("file", 15)}תנאי שימוש ופרטיות</button></section>
+        ${NATIVE ? "" : `<p>להתקנה: בתפריט הדפדפן (⋮) בוחרים ״הוספה למסך הבית״.</p>${/Android/i.test(navigator.userAgent) ? `<a class="link" href="https://github.com/nrt613/maayan/releases/latest/download/maayan.apk" target="_blank" rel="noopener">${I("download", 15)}אפליקציית אנדרואיד עם התראות</a>` : ""}`}</section>
     </aside></div>`;
   }
 
@@ -344,7 +377,7 @@
     { t: "מה זה מעיין", p: ["מעיין היא כלי עזר אישי לרישום ולתכנון בענייני טהרת המשפחה. היא אינה פוסקת הלכה, אינה מורה הוראה ואינה ייעוץ רפואי.", "האפליקציה ניתנת בחינם, לשימוש אישי."] },
     { t: "גרסת בדיקה", p: ["זו גרסת בדיקה. החישובים טרם קיבלו אישור הלכתי מגורם מוסמך."] },
     { t: "אחריות", p: ["החישובים והתזכורות ניתנים כמות שהם, וייתכנו בהם טעויות או אי-דיוקים, לרבות בזמני הזריחה והשקיעה.", "אין להסתמך על האפליקציה לבדה. בכל שאלה או ספק יש לפנות למורה הוראה.", "השימוש באפליקציה הוא באחריות המשתמשת בלבד. המפתח אינו אחראי לכל תוצאה או נזק שנובעים מהשימוש בה או מהסתמכות עליה."] },
-    { t: "פרטיות", p: ["כל הרישומים וההגדרות נשמרים במכשיר שלך בלבד. אין חשבון, אין שרת, אין מעקב, אין פרסומות ואין איסוף נתונים. למפתח אין גישה ליומן שלך.", "מחיקת האפליקציה או נתוני הדפדפן מוחקת את היומן. הגיבוי הוא באחריותך, ובלי סיסמת הגיבוי אי אפשר לשחזר אותו.", "בגרסת האתר נטען גופן משרתי Google. באפליקציית האנדרואיד אין שום פנייה לרשת."] },
+    { t: "פרטיות", p: ["כל הרישומים וההגדרות נשמרים במכשיר שלך בלבד. אין חשבון, אין שרת, אין מעקב, אין פרסומות ואין איסוף נתונים. למפתח אין גישה ליומן שלך.", "מחיקת האפליקציה או נתוני הדפדפן מוחקת את היומן. הגיבוי הוא באחריותך, ובלי סיסמת הגיבוי אי אפשר לשחזר אותו.", "האפליקציה אינה שולחת מידע לשום שרת. באתר, הדף והגופנים נטענים מהאתר עצמו; באפליקציה המותקנת אין שום פנייה לרשת."] },
     { t: "מיקום", p: ["זיהוי המיקום נעשה רק בלחיצה שלך. הקואורדינטות נשמרות במכשיר בלבד, משמשות לחישוב זמני היום, ואינן נשלחות לאף אחד."] },
     { t: "התראות", p: ["ההתראות תלויות במכשיר ובהגדרותיו, ועלולות להתעכב או לא להגיע, למשל במצב חיסכון בסוללה. אין להסתמך עליהן לבדן."] },
     { t: "שינויים", p: ["התנאים עשויים להתעדכן בגרסאות הבאות. המשך השימוש מהווה הסכמה לתנאים המעודכנים."] },
@@ -373,7 +406,8 @@
       : app.loadWarning ? `<div class="banner warn">${I("info", 17)}<span>${esc(app.loadWarning)}</span></div>` : "";
     const views = { today: viewToday, calendar: viewCalendar, journal: viewJournal, dates: viewDates, review: viewReview, prefs: viewPrefs };
     return `<aside class="side"><div class="brand">${mark()}<span>מעיין<small>יומן טהרת המשפחה</small></span></div>
-        <nav aria-label="ניווט">${NAV.map(([id, t, ic]) => `<button class="nav${app.tab === id ? " on" : ""}" data-go="${id}"${app.tab === id ? ' aria-current="page"' : ""}>${I(ic, 19)}<span>${t}</span>${id === "dates" && upcoming && !app.hidden ? `<small class="badge">${upcoming}</small>` : ""}</button>`).join("")}</nav>
+        <nav aria-label="ניווט">${MAIN_NAV.map(([id, t, ic]) => `<button class="nav${app.tab === id ? " on" : ""}" data-go="${id}"${app.tab === id ? ' aria-current="page"' : ""}>${I(ic, 19)}<span>${t}</span>${id === "dates" && upcoming && !app.hidden ? `<small class="badge">${upcoming}</small>` : ""}</button>`).join("")}</nav>
+        ${app.tab === "review" ? `<button class="nav on" data-go="review" aria-current="page">${I("scale", 19)}<span>לבודקים</span></button>` : ""}
         <p class="side-note">${I("lock", 15)}נשמר רק במכשיר הזה</p></aside>
       <div class="work">
         <header class="top"><div class="brand m">${mark()}<strong>מעיין</strong></div>
@@ -381,16 +415,23 @@
           <div class="top-act">${app.hidden ? "" : `<button class="pill" data-go="prefs" aria-label="עיר: ${esc(ctx.city.name)}">${I("pin", 15)}${esc(ctx.city.name)}</button>`}
             <button class="icon-btn" data-act="hide" aria-pressed="${app.hidden}" aria-label="${app.hidden ? "הצגת היומן" : "הסתרת היומן"}">${I(app.hidden ? "eye" : "eyeoff")}</button></div></header>
         ${banner}
-        <main ${app.hidden ? "hidden" : ""}>
-          <div class="page-h"><h1>${title}</h1>${["today", "calendar", "journal"].includes(app.tab) ? `<button class="btn" data-act="add">${I("plus", 18)}רישום חדש</button>` : ""}</div>
+        <main ${app.hidden ? "hidden" : ""} class="${app.enter ? "enter" : ""}">
+          <div class="page-h">${app.tab === "review" ? `<button class="icon-btn back" data-go="prefs" aria-label="חזרה להגדרות">${I("right")}</button>` : ""}<h1>${title}</h1>${["today", "calendar", "journal"].includes(app.tab) ? `<button class="btn" data-act="quick" data-date="${app.tab === "calendar" && app.cal.selected ? app.cal.selected : ctx.date}">${I("plus", 18)}רישום חדש</button>` : ""}</div>
           ${views[app.tab](st, r, ctx)}
-          <footer class="foot"><span>${I("info", 15)}החישובים טרם קיבלו אישור הלכתי. אין לראות בהם פסק.</span><span><button class="link" data-act="terms">תנאי שימוש</button> <button class="link" data-go="review">כללים ומקורות</button></span></footer>
+          <footer class="foot"><p class="disclaimer">${I("info", 16)}<span>גרסת בדיקה: החישובים טרם קיבלו אישור הלכתי, ואין לראות בהם פסק. בכל ספק פונים למורה הוראה.</span></p>
+            <span class="foot-links"><button class="link" data-act="terms">תנאי שימוש</button><a class="link" href="${PRIVACY_URL}" target="_blank" rel="noopener">מדיניות פרטיות</a><button class="link" data-go="review">כללים ומקורות</button></span></footer>
         </main>
+        ${!app.hidden && ["today", "calendar", "journal"].includes(app.tab) ? addBar(app.tab === "calendar" && app.cal.selected ? app.cal.selected : ctx.date, ctx.date) : ""}
         ${app.hidden ? `<div class="veil">${I("lock", 30)}<h2>היומן מוסתר</h2><button class="btn" data-act="hide">${I("eye", 18)}הצגת היומן</button></div>` : ""}
       </div>
-      <nav class="tabs" aria-label="ניווט">${NAV.map(([id, t, ic]) => `<button class="${app.tab === id ? "on" : ""}" data-go="${id}"${app.tab === id ? ' aria-current="page"' : ""}>${I(ic, 21)}<span>${t.replace("לוח השנה", "לוח").replace("היומן שלי", "יומן")}</span></button>`).join("")}</nav>`;
+      <nav class="tabs" aria-label="ניווט">${MAIN_NAV.map(([id, t, ic]) => `<button class="${app.tab === id ? "on" : ""}" data-go="${id}"${app.tab === id ? ' aria-current="page"' : ""}>${I(ic, 22)}<span>${t.replace("לוח השנה", "לוח").replace("היומן שלי", "יומן")}</span>${id === "dates" && upcoming && !app.hidden ? `<small class="tab-badge" aria-hidden="true"></small>` : ""}</button>`).join("")}</nav>`;
   }
   const LOGO_IMG = "data:image/png;base64,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";
+  /** סרגל ״רישום״ קבוע מעל סרגל הלשוניות: תמיד מציג את היום שנבחר (בלוח) או את היום */
+  function addBar(d, todayISO) {
+    const label = d === todayISO ? `היום, ${hebDay(d)} ${hd(d).monthTitle().split(" ")[0]}` : `${hebDay(d)} ${hd(d).monthTitle().split(" ")[0]}`;
+    return `<div class="addbar-wrap"><button class="addbar" data-act="quick" data-date="${d}">${I("plus", 22)}<span><strong>רישום</strong><small><span class="hebdate">${esc(label)}</span> · ${esc(civilLabel(d, true))}</small></span></button></div>`;
+  }
   const mark = () => `<span class="mark"><img src="${LOGO_IMG}" alt=""></span>`;
   const langSwitch = () => `<div class="seg langs" role="group" aria-label="שפה" data-nt>${Object.entries(L.LANGS).map(([k, n]) => `<button type="button" data-lang="${k}" aria-pressed="${L.lang === k}" lang="${k}">${n}</button>`).join("")}</div>`;
   function applyLang(l, save) {
@@ -404,14 +445,18 @@
 
   function render() {
     const root = $("#app"), scroll = window.scrollY, focusId = document.activeElement?.id, selStart = document.activeElement?.selectionStart;
-    root.innerHTML = shell(); L.dom(root);
+    root.innerHTML = shell(); app.enter = false; L.dom(root);
     if (focusId) { const el = document.getElementById(focusId); if (el) { el.focus(); try { if (selStart != null) el.setSelectionRange(selStart, selStart); } catch { /* */ } } }
     window.scrollTo(0, scroll);
     renderModal(); renderToast();
   }
-  function renderToast() { const el = $("#toast"); el.innerHTML = app.toast ? `<div class="toast" role="status">${esc(app.toast)}<button class="icon-btn" data-act="toast-x" aria-label="סגירה">${I("x", 16)}</button></div>` : ""; L.dom(el); }
+  function renderToast() {
+    const el = $("#toast");
+    el.innerHTML = app.toast ? `<div class="toast${app.toastAction ? " has-act" : ""}" role="status"><span>${esc(app.toast)}</span>${app.toastAction ? `<button class="toast-act" data-act="toast-undo">${esc(app.toastAction.label)}</button>` : ""}<button class="icon-btn" data-act="toast-x" aria-label="סגירה">${I("x", 16)}</button></div>` : "";
+    L.dom(el);
+  }
   function go(tab, top = true) {
-    app.tab = tab;
+    app.enter = tab !== app.tab; app.tab = tab;
     try { history.replaceState(null, "", "#" + tab); } catch { /* */ }
     render(); if (top) window.scrollTo(0, 0);
   }
@@ -419,22 +464,29 @@
   /* ---------- חלונות ---------- */
   function renderModal() {
     const host = $("#modal"), m = app.modal;
-    if (!m) { host.innerHTML = ""; document.body.classList.remove("locked"); return; }
+    if (!m) {
+      if (host.firstChild) { host.innerHTML = ""; document.body.classList.remove("locked"); app.modalReturn?.isConnected && app.modalReturn.focus({ preventScroll: true }); app.modalReturn = null; }
+      return;
+    }
+    const fresh = !host.firstChild, keep = !fresh && host.querySelector(".sheet")?.scrollTop;
+    if (fresh) app.modalReturn = document.activeElement;
     document.body.classList.add("locked");
-    host.innerHTML = `<div class="scrim" data-act="close-modal"></div><div class="sheet" role="dialog" aria-modal="true" aria-labelledby="m-title">${modalBody(m)}</div>`;
+    host.innerHTML = `<div class="scrim${fresh ? " in" : ""}" data-act="close-modal"></div><div class="sheet${fresh ? " in" : ""}" role="dialog" aria-modal="true" aria-labelledby="m-title">${modalBody(m)}</div>`;
     L.dom(host);
-    const first = host.querySelector("[autofocus]") || host.querySelector("input,select,textarea,button");
-    first?.focus({ preventScroll: true });
+    if (keep) host.querySelector(".sheet").scrollTop = keep;
+    const first = host.querySelector("[autofocus]") || host.querySelector("input:not([type=hidden]),select,textarea,button");
+    if (fresh) first?.focus({ preventScroll: true });
   }
   function modalBody(m) {
     const close = `<button class="icon-btn" data-act="close-modal" aria-label="סגירה">${I("x")}</button>`;
     if (m.kind === "event") {
-      const f = m.form, needsResult = ["hefsek", "bedikah", "question"].includes(f.type);
+      const f = m.form, needsResult = ["hefsek", "bedikah", "question"].includes(f.type), other = !QUICK_TYPES.some(q => q[0] === f.type);
       const HELP = { question: "שאלה לבירור נשמרת ומופיעה בנקודות לבירור. היא אינה הופכת לווסת.", restart: "רישום הוראה להתחיל ספירה חדשה בתוך תקופת הנידה.", intimacy: "משמש בסיס לחישוב כשנבחרה שיטת ארבעה ימים ממועד היחסים.", hefsek: "הפסק סמוך לשקיעה או לפני סוף ההמתנה יסומן לבירור.", manual: "עונה שנקבעה לפי הוראה אישית. אינה נוצרת מהחישוב.", flow: "השעה חשובה: אחרי השקיעה זה כבר היום העברי הבא." };
       let hebHint = ""; if (M.validISO(f.date)) hebHint = `${hebrew(f.date)} · עד השקיעה`;
       return `<div class="m-h"><h2 id="m-title">${m.editing ? "עריכת רישום" : "רישום חדש"}</h2>${close}</div>
       <form id="event-form" class="stack-s">
-        <label class="field" for="e-type">סוג<select id="e-type" name="type">${Object.entries(EVENT_NAMES).map(([v, n]) => `<option value="${v}"${f.type === v ? " selected" : ""}>${n}</option>`).join("")}</select></label>
+        <div class="field"><span id="e-type-l">מה לרשום</span><div class="types" role="radiogroup" aria-labelledby="e-type-l">${QUICK_TYPES.map(([v, ic]) => `<button type="button" role="radio" class="type-chip t-${v}" data-etype="${v}" aria-checked="${!other && f.type === v}">${I(ic, 18)}<span>${EVENT_NAMES[v]}</span></button>`).join("")}<button type="button" role="radio" class="type-chip" data-etype="other" aria-checked="${other}">${I("list", 18)}<span>אחר</span></button></div></div>
+        ${other ? `<label class="field" for="e-type">סוג הרישום<select id="e-type" name="type">${Object.entries(EVENT_NAMES).filter(([v]) => !QUICK_TYPES.some(q => q[0] === v)).map(([v, n]) => `<option value="${v}"${f.type === v ? " selected" : ""}>${n}</option>`).join("")}</select></label>` : `<input type="hidden" name="type" value="${f.type}">`}
         <div class="pair"><label class="field" for="e-date">${f.type === "manual" ? "התאריך של יום העונה" : "תאריך"}<input id="e-date" name="date" type="date" required min="2000-01-01" max="2100-12-31" value="${f.date}"><small class="hebdate" id="e-heb">${esc(hebHint)}</small></label>
         <label class="field" for="e-time">שעה<input id="e-time" name="time" type="time" required value="${f.time}"><small>לפי השעון במקום</small></label></div>
         <label class="field" for="e-city">מקום<select id="e-city" name="cityId">${placeOptions(state(), f.cityId)}</select></label>
@@ -447,6 +499,12 @@
         ${m.confirmDelete ? `<div class="confirm"><p>למחוק את הרישום? כל המועדים יחושבו מחדש.</p><div class="row-btns"><button type="button" class="btn danger" data-act="delete-yes">מחיקה</button><button type="button" class="btn ghost" data-act="delete-no">ביטול</button></div></div>`
           : `<div class="m-actions"><button class="btn" type="submit">${I("check", 17)}שמירה</button><button type="button" class="btn ghost" data-act="close-modal">ביטול</button>${m.editing ? `<button type="button" class="icon-btn danger push" data-act="delete" aria-label="מחיקת רישום">${I("trash", 19)}</button>` : ""}</div>`}
       </form>`;
+    }
+    if (m.kind === "quick") {
+      const ctxd = currentContext(state(), now()).date, d = m.date;
+      const head = d === ctxd ? "היום" : weekdayName(d);
+      return `<div class="m-h"><div><h2 id="m-title">מה לרשום?</h2><p class="fine"><span>${esc(head)}</span> · <span class="hebdate">${esc(hebrew(d))}</span> · ${esc(civilLabel(d, true))}</p></div>${close}</div>
+        <div class="quick">${[...QUICK_TYPES, ["other", "list"]].map(([v, ic]) => `<button class="quick-btn t-${v}" data-qtype="${v}"><span class="ev-ic t-${v}">${I(ic, 22)}</span><span>${v === "other" ? "אחר…" : v === "flow" ? "ראייה / וסת" : EVENT_NAMES[v]}</span></button>`).join("")}</div>`;
     }
     if (m.kind === "text") return `<div class="m-h"><h2 id="m-title">${esc(m.title)}</h2>${close}</div><p>${esc(m.intro)}</p>
       <textarea id="m-text" class="mono" rows="9" readonly>${esc(m.text)}</textarea>
@@ -474,7 +532,7 @@
     if (m.kind === "confirm") return `<div class="m-h"><h2 id="m-title">${esc(m.title)}</h2>${close}</div><p>${esc(m.text)}</p>
       <div class="m-actions"><button class="btn ${m.danger ? "danger" : ""}" data-act="confirm-yes">${esc(m.yes)}</button><button class="btn ghost" data-act="close-modal">ביטול</button></div>`;
     if (m.kind === "terms") return `<div class="m-h"><h2 id="m-title">תנאי שימוש ופרטיות</h2>${close}</div>
-      <div class="terms">${TERMS.map(sec => `<h4>${esc(sec.t)}</h4>${sec.p.map(x => `<p>${esc(x)}</p>`).join("")}`).join("")}<p class="fine">עדכון אחרון: ${TERMS_VERSION}</p></div>
+      <div class="terms">${TERMS.map(sec => `<h4>${esc(sec.t)}</h4>${sec.p.map(x => `<p>${esc(x)}</p>`).join("")}`).join("")}<p><a class="link" href="${PRIVACY_URL}" target="_blank" rel="noopener">${I("lock", 15)}מדיניות הפרטיות המלאה${I("out", 13)}</a></p><p class="fine">עדכון אחרון: ${TERMS_VERSION}</p></div>
       <div class="m-actions"><button class="btn" data-act="${m.back ? "terms-back" : "close-modal"}">הבנתי</button></div>`;
     if (m.kind === "place") return `<div class="m-h"><h2 id="m-title">המיקום שזוהה</h2>${close}</div>
       <form id="place-form" class="stack-s"><p>${m.near ? `המיקום נמצא ליד ${esc(m.near)}.` : "המיקום אינו קרוב לאחת הערים ברשימה."} זמני הזריחה והשקיעה יחושבו לפי הנקודה המדויקת.</p>
@@ -490,15 +548,17 @@
       <li>${I("help", 18)}<span><strong>לא פוסק.</strong> זו גרסת בדיקה שטרם קיבלה אישור הלכתי. במקום של ספק המערכת מסמנת לבירור.</span></li></ul>
       <div class="stack-s"><button class="btn full" data-act="start-personal">${I("plus", 18)}התחלת יומן אישי</button>
       <button class="btn ghost full" data-act="start-demo">${I("flask", 18)}צפייה ביומן לדוגמה</button>
-      <button class="btn ghost full" data-act="start-review">${I("scale", 18)}אני בודק/ת הלכתי/ת</button></div>
+      <button class="link reviewer-link" data-act="start-review">${I("scale", 16)}אני בודק/ת הלכתי/ת</button></div>
       <p class="fine">המשך השימוש מהווה הסכמה ל<button class="link inline" data-act="terms">תנאי השימוש והפרטיות</button></p></div>`;
     return "";
   }
+  const QUICK_TYPES = [["flow", "droplet"], ["hefsek", "check"], ["bedikah", "check"], ["mikvah", "moon"]];
   function openEvent(opts = {}) {
     const st = state(), ctx = currentContext(st, now());
     const date = opts.date || ctx.date, c = opts.date ? atLocation(st, date) : ctx.city;
     const form = opts.event ? { ...opts.event } : { id: M.uuid(), type: opts.type || (opts.date && opts.date > ctx.date ? "manual" : "flow"), date, time: timeInZone(now(), c.tz), cityId: c.id, result: "clear", note: "", authorityNote: "", createdAt: new Date().toISOString() };
     app.modal = { kind: "event", form, editing: !!opts.event, error: "", confirmDelete: false };
+    if (opts.other) form.type = "note";
     renderModal();
   }
   function readEventForm() {
@@ -533,6 +593,20 @@
   document.addEventListener("click", async e => {
     const lb = e.target.closest("[data-lang]");
     if (lb) { applyLang(lb.dataset.lang, true); render(); syncNotifications(); return; }
+    const qb = e.target.closest("[data-qtype]");
+    if (qb && app.modal?.kind === "quick") {
+      const v = qb.dataset.qtype, date = app.modal.date;
+      app.modal = null; document.getElementById("modal").innerHTML = "";
+      return openEvent({ type: v === "other" ? "note" : v, date, other: v === "other" });
+    }
+    if (app.suppressClick) { app.suppressClick = false; if (e.target.closest("[data-day]")) return; }
+    const chip = e.target.closest("[data-etype]");
+    if (chip && app.modal?.kind === "event") {
+      app.modal.form = readEventForm();
+      const v = chip.dataset.etype;
+      app.modal.form.type = v === "other" ? (QUICK_TYPES.some(q => q[0] === app.modal.form.type) ? "note" : app.modal.form.type) : v;
+      renderModal(); document.querySelector(`[data-etype="${v}"]`)?.focus({ preventScroll: true }); return;
+    }
     const t = e.target.closest("[data-go],[data-act],[data-edit],[data-day],[data-cal],[data-calmode],[data-scenario],[data-scenario-load],[data-deltrip],[data-delplace]");
     if (!t) return;
     const d = t.dataset;
@@ -558,14 +632,16 @@
       if (st.settings.cityId === id || st.events.some(x => x.cityId === id) || st.trips.some(x => x.cityId === id)) return toast("המקום בשימוש בהגדרות, ברישומים או בנסיעות, ולכן אי אפשר למחוק אותו.");
       try { commit({ ...st, places: st.places.filter(x => x.id !== id) }); } catch (err) { toast(err.message); } return;
     }
-    if (d.deltrip) { const st = state(); try { commit({ ...st, trips: st.trips.filter(x => x.id !== d.deltrip) }); } catch (err) { toast(err.message); } return; }
+    if (d.deltrip) { const st = state(); try { commitUndoable({ ...st, trips: st.trips.filter(x => x.id !== d.deltrip) }, "הנסיעה נמחקה"); } catch (err) { toast(err.message); } return; }
     const st = state();
     switch (d.act) {
       case "add": return openEvent({ type: d.type, date: d.date });
+      case "quick": app.modal = { kind: "quick", date: d.date || currentContext(st, now()).date }; return renderModal();
       case "cycle": app.modal = { kind: "cycle", error: "", saved: 0 }; return renderModal();
       case "hide": app.hidden = !app.hidden; return render();
       case "close-modal": if (app.modal?.kind === "terms" && app.modal.back) { app.modal = { kind: "welcome" }; return renderModal(); } if (app.modal?.kind === "welcome") markSeen(); app.modal = null; return renderModal();
-      case "toast-x": app.toast = ""; return renderToast();
+      case "toast-x": app.toast = ""; app.toastAction = null; return renderToast();
+      case "toast-undo": { const a = app.toastAction; app.toast = ""; app.toastAction = null; renderToast(); try { a?.run(); } catch (err) { toast(err.message); } return; }
       case "demo": Object.assign(app, { mode: "demo", sandbox: M.demoState(realNow()), cal: { cursor: null, mode: "civil", selected: null } }); return go("today");
       case "personal": Object.assign(app, { mode: "personal", sandbox: null, scenario: null, cal: { cursor: null, mode: "civil", selected: null } }); return go("today");
       case "start-personal": markSeen(); app.modal = null; return go("today");
@@ -573,17 +649,18 @@
       case "start-review": markSeen(); app.modal = null; return go("review");
       case "delete": app.modal.form = readEventForm(); app.modal.confirmDelete = true; return renderModal();
       case "delete-no": app.modal.confirmDelete = false; return renderModal();
-      case "delete-yes": try { const id = app.modal.form.id; app.modal = null; commit({ ...st, events: st.events.filter(x => x.id !== id) }); } catch (err) { toast(err.message); } return;
+      case "delete-yes": try { const id = app.modal.form.id; app.modal = null; commitUndoable({ ...st, events: st.events.filter(x => x.id !== id) }, "הרישום נמחק"); } catch (err) { toast(err.message); } return;
       case "report": return textModal("דוח לבירור", "טקסט גלוי עם ההגדרות, הרישומים, המועדים והנקודות לבירור. לא נשלח לאף אחד — את מחליטה למי להעביר.", L.tx(M.reportExport(st, now())), { name: `maayan-report-${currentContext(st, now()).date}.txt`, type: "text/plain;charset=utf-8" });
       case "review-report": { const text = reviewReport(); if (await copy(text)) return; return textModal("דוח לבודק", "סמנו את הטקסט והעתיקו.", text); }
-      case "ics": { const r = calculate(st, now()); return textModal("קובץ מועדים ליומן", "שומרים כקובץ ופותחים אותו ביומן הטלפון. אם השמירה לא עובדת כאן, פתחו את מעיין ישירות בדפדפן.", M.calendarExport(r.plans.map(p => ({ ...p, title: L.t(p.title), reason: L.t(p.reason) })), st.settings.neutralReminders, now(), { personal: L.t("תזכורת אישית"), details: L.t("פרטים ביומן האישי. מועד לתכנון בלבד.") }), { name: "maayan-dates.ics", type: "text/calendar;charset=utf-8" }); }
+      case "ics": { const r = calculate(st, now()); return textModal("קובץ מועדים ליומן", "שומרים כקובץ ופותחים אותו ביומן הטלפון. אם השמירה לא עובדת כאן, פתחו את מעיין ישירות בדפדפן.", M.calendarExport(r.plans.map(p => ({ ...p, title: L.t(planTitle(p)), reason: L.t(p.reason) })), st.settings.neutralReminders, now(), { personal: L.t("תזכורת אישית"), details: L.t("פרטים ביומן האישי. מועד לתכנון בלבד.") }), { name: "maayan-dates.ics", type: "text/calendar;charset=utf-8" }); }
       case "copy-text": return copy(app.modal.text);
       case "dl-text": try { const how = await download(app.modal.text, app.modal.file.name, app.modal.file.type); if (how !== "shared") toast("הקובץ נשמר בהורדות"); } catch { toast("השמירה כקובץ נחסמה. אפשר להעתיק."); } return;
       case "backup": app.modal = { kind: "backup", error: "" }; return renderModal();
       case "restore": app.modal = { kind: "restore", error: "" }; return renderModal();
-      case "clear": app.modal = { kind: "confirm", title: "למחוק את כל הרישומים?", text: "כל הרישומים והנסיעות יימחקו מהמכשיר. ההגדרות יישארו. אי אפשר לבטל.", yes: "מחיקה", danger: true, run: () => { app.blockSave = false; app.loadWarning = ""; commit({ ...st, events: [], trips: [] }); } }; return renderModal();
+      case "clear": app.modal = { kind: "confirm", title: "למחוק את כל הרישומים?", text: "כל הרישומים והנסיעות יימחקו מהמכשיר. ההגדרות יישארו. אי אפשר לבטל.", yes: "מחיקה", danger: true, run: () => { app.blockSave = false; app.loadWarning = ""; commitUndoable({ ...st, events: [], trips: [] }, "כל הרישומים נמחקו"); } }; return renderModal();
+      case "wipe": app.modal = { kind: "confirm", title: "למחוק את כל הנתונים?", text: "היומן, ההגדרות, המקומות והנסיעות יימחקו מהמכשיר הזה לצמיתות, וגם התזכורות המתוזמנות יבוטלו. אין עותק בשום שרת, ולכן אי אפשר לשחזר אלא מגיבוי ששמרת.", yes: "מחיקת כל הנתונים", danger: true, run: wipeAll }; return renderModal();
       case "confirm-yes": { const run = app.modal.run; app.modal = null; try { run(); } catch (err) { toast(err.message); } return renderModal(); }
-      case "tests": { t.disabled = true; setTimeout(() => { app.testResults = MaayanTests(M).run(); render(); }, 30); return; }
+      case "tests": { t.disabled = true; setTimeout(() => { app.testResults = MaayanTests(M).run(); M.setPlaces(state().places || []); render(); }, 30); return; }
       case "terms": app.modal = { kind: "terms", back: app.modal?.kind === "welcome" }; return renderModal();
       case "terms-back": app.modal = { kind: "welcome" }; return renderModal();
       case "locate": return detectLocation(t);
@@ -603,11 +680,27 @@
     if (t.dataset.check !== undefined && t.dataset.check) {
       const st = state(), list = st.settings.checklist, item = t.dataset.check;
       try { commit({ ...st, settings: { ...st.settings, checklist: t.checked ? [...list, item] : list.filter(x => x !== item) } }); } catch (err) { toast(err.message); }
-    } else if (t.id === "filter") { app.filter = t.value; render(); }
+    } else if (t.form?.id === "settings-form") { saveSettings(t.form); }
+    else if (t.dataset.quickset) { const st = state(); try { commit({ ...st, settings: { ...st.settings, [t.dataset.quickset]: t.checked } }); } catch (err) { toast(err.message); } }
+    else if (t.id === "filter") { app.filter = t.value; render(); }
     else if (t.id === "e-type") { app.modal.form = readEventForm(); renderModal(); $("#e-type")?.focus(); }
     else if (t.id === "e-date") { const h = $("#e-heb"); if (h) h.textContent = M.validISO(t.value) ? L.t(`${hebrew(t.value)} · עד השקיעה`) : ""; }
     else if (t.id === "r-file") { const f = t.files?.[0]; if (f && f.size < 4e6) f.text().then(x => { $("#r-text").value = x; }); }
   });
+  /* לחיצה ארוכה על יום בלוח (או תפריט הקשר) פותחת את תפריט הרישום המהיר לאותו יום */
+  {
+    let lp = null;
+    const cancel = () => { if (lp) { clearTimeout(lp.timer); lp = null; } };
+    const openQuick = d => { app.cal.selected = d; app.modal = { kind: "quick", date: d }; render(); };
+    document.addEventListener("pointerdown", e => {
+      const day = e.target.closest?.("[data-day]"); if (!day || e.button > 0) return;
+      cancel();
+      lp = { x: e.clientX, y: e.clientY, timer: setTimeout(() => { lp = null; app.suppressClick = true; try { navigator.vibrate?.(15); } catch { /* */ } openQuick(day.dataset.day); }, 500) };
+    });
+    document.addEventListener("pointermove", e => { if (lp && Math.hypot(e.clientX - lp.x, e.clientY - lp.y) > 10) cancel(); }, { passive: true });
+    for (const ev of ["pointerup", "pointercancel", "scroll"]) document.addEventListener(ev, cancel, { passive: true, capture: true });
+    document.addEventListener("contextmenu", e => { const day = e.target.closest?.("[data-day]"); if (!day) return; e.preventDefault(); cancel(); app.suppressClick = false; if (app.modal?.kind !== "quick") openQuick(day.dataset.day); });
+  }
   document.addEventListener("input", e => { if (e.target.id === "q") { app.query = e.target.value; render(); } });
   document.addEventListener("submit", async e => {
     e.preventDefault();
@@ -618,13 +711,7 @@
       if (!["hefsek", "bedikah", "question"].includes(ev.type)) ev.result = "clear";
       try { commit({ ...st, events: [...st.events.filter(x => x.id !== ev.id), ev] }); app.modal = null; renderModal(); }
       catch (err) { app.modal.form = ev; app.modal.error = err.message; renderModal(); }
-    } else if (f.id === "settings-form") {
-      const fd = new FormData(f), s = { ...st.settings };
-      for (const k of ["cityId", "wait", "haflagah", "beinonit", "missingMonthly", "bedikot", "nightfall", "special", "methodNote", "morningTime"]) s[k] = String(fd.get(k));
-      s.reminderMinutes = Number(fd.get("reminderMinutes"));
-      for (const k of ["day31", "orZarua", "carryMonthly", "carryLongIntervals", "remindersEnabled", "neutralReminders"]) s[k] = fd.has(k);
-      try { commit({ ...st, settings: s }); } catch (err) { toast(err.message); }
-    } else if (f.id === "trip-form") {
+    } else if (f.id === "settings-form") { saveSettings(f); } else if (f.id === "trip-form") {
       const fd = new FormData(f);
       try { commit({ ...st, trips: [...st.trips, { id: M.uuid(), cityId: String(fd.get("cityId")), from: String(fd.get("from")), to: String(fd.get("to")) }] }); } catch (err) { toast(err.message); }
     } else if (f.id === "place-form") {
@@ -657,8 +744,34 @@
       } catch (err) { app.modal.error = err.message; renderModal(); }
     }
   });
+  document.addEventListener("keydown", e => {
+    // מקלדת: Tab נשאר בתוך החלון הפתוח
+    if (e.key === "Tab" && app.modal) {
+      const f = [...document.querySelectorAll("#modal .sheet :is(button,input:not([type=hidden]),select,textarea,a[href],summary):not(:disabled)")].filter(x => x.offsetParent);
+      if (f.length && !f.includes(document.activeElement)) { e.preventDefault(); f[0].focus(); }
+      else if (f.length && e.shiftKey && document.activeElement === f[0]) { e.preventDefault(); f[f.length - 1].focus(); }
+      else if (f.length && !e.shiftKey && document.activeElement === f[f.length - 1]) { e.preventDefault(); f[0].focus(); }
+    }
+  });
   document.addEventListener("keydown", e => { if (e.key === "Escape" && app.modal) { if (app.modal.kind === "welcome") markSeen(); app.modal = null; renderModal(); } });
+  /** ההגדרות נשמרות מיד בכל שינוי, בלי כפתור שמירה */
+  function saveSettings(f) {
+    const st = state(), fd = new FormData(f), s = { ...st.settings };
+    for (const k of ["cityId", "wait", "haflagah", "beinonit", "missingMonthly", "bedikot", "nightfall", "special", "methodNote", "morningTime"]) s[k] = String(fd.get(k));
+    s.reminderMinutes = Number(fd.get("reminderMinutes"));
+    for (const k of ["day31", "orZarua", "carryMonthly", "carryLongIntervals", "remindersEnabled", "neutralReminders"]) s[k] = fd.has(k);
+    if (JSON.stringify(s) === JSON.stringify(st.settings)) return;
+    try { commit({ ...st, settings: s }); } catch (err) { toast(err.message); render(); }
+  }
   function markSeen() { storage.set(SEEN_KEY, "1"); }
+  /** מחיקת כל הנתונים מהמכשיר (דרישת חנויות האפליקציות): יומן, הגדרות, שפה, ותזכורות מתוזמנות */
+  async function wipeAll() {
+    for (const k of [STORE_KEY, SEEN_KEY, LANG_KEY]) { try { localStorage.removeItem(k); } catch { /* */ } }
+    if (NATIVE && PL.LocalNotifications) { try { const p = await PL.LocalNotifications.getPending(); if (p.notifications.length) await PL.LocalNotifications.cancel({ notifications: p.notifications.map(x => ({ id: x.id })) }); } catch { /* */ } }
+    Object.assign(app, { mode: "personal", personal: M.emptyState(), sandbox: null, scenario: null, blockSave: false, loadWarning: "", cal: { cursor: null, mode: "civil", selected: null }, modal: { kind: "welcome" } });
+    toast("כל הנתונים נמחקו מהמכשיר");
+    go("today");
+  }
 
   /* ---------- זיהוי מיקום ---------- */
   function webLocation(gps) {
@@ -690,6 +803,30 @@
 
   /* ---------- התראות מתוזמנות (אפליקציית אנדרואיד) ---------- */
   const hashId = str => { let h = 7; for (let i = 0; i < str.length; i++) h = (h * 31 + str.charCodeAt(i)) | 0; return Math.abs(h) % 2000000000 + 1; };
+  /**
+   * מתי להתריע על כל מועד. עונת פרישה שמתחילה בשקיעה (כולל אור זרוע): ההתראה מגיעה ״דקות לפני השקיעה״ לפני תחילתה,
+   * כדי שיהיה זמן להתכונן. עונת יום: התראה בבוקר, בשעת בדיקת הבוקר. שאר המועדים (הפסק, בדיקות, טבילה) — כפי שחושבו.
+   */
+  function alertsFor(st, r, n) {
+    const s = st.settings, neutral = s.neutralReminders, out = [];
+    for (const p of r.plans) {
+      if (p.done) continue;
+      const c = city(p.cityId), start = new Date(p.start), sep = SEP_KINDS.includes(p.kind);
+      let at = start, body = `${p.onah === "day" ? planHebrew(p) : L.t(`ליל ${planHebrew(p)}`)} · ${L.t(onahLabel(p.onah))}`;
+      if (sep && p.onah === "night") {
+        at = new Date(start.valueOf() - Number(s.reminderMinutes || 0) * 60000);
+        body = L.t(`הערב (מהשקיעה ${timeInZone(start, c.tz)}) ${planTitle(p)}`);
+      } else if (sep && p.onah === "day") {
+        let morning = null;
+        try { morning = M.localInstant(p.date, s.morningTime || "08:00", c.tz); } catch { /* */ }
+        if (morning && morning > start && (!p.end || morning < new Date(p.end))) at = morning;
+        body = L.t(`היום${p.end ? ` (עד השקיעה ${timeInZone(new Date(p.end), c.tz)})` : ""} ${planTitle(p)}`);
+      }
+      if (at <= n) continue;
+      out.push({ key: p.id, at, title: L.t(neutral ? "תזכורת אישית" : planTitle(p)), body: neutral ? L.t("פרטים ביומן האישי") : body });
+    }
+    return out.sort((a, b) => a.at - b.at);
+  }
   let syncing = Promise.resolve();
   function syncNotifications() { syncing = syncing.then(doSync, doSync); return syncing; }
   async function doSync() {
@@ -705,13 +842,8 @@
       const st = app.personal;
       if (app.permission !== "granted" || !st.settings.remindersEnabled) return;
       await LN.createChannel({ id: "maayan", name: L.t("תזכורות"), description: L.t("תזכורות אישיות מהיומן"), importance: 4, visibility: 0 });
-      const n = new Date(), r = calculate(st, n), neutral = st.settings.neutralReminders;
-      const list = r.plans.filter(p => !p.done && new Date(p.start) > n).slice(0, 60).map(p => ({
-        id: hashId(p.id), channelId: "maayan",
-        title: L.t(neutral ? "תזכורת אישית" : p.title),
-        body: neutral ? L.t("פרטים ביומן האישי") : `${p.onah === "day" ? planHebrew(p) : L.t(`ליל ${planHebrew(p)}`)} · ${L.t(onahLabel(p.onah))}`,
-        schedule: { at: new Date(p.start), allowWhileIdle: true },
-      }));
+      const n = new Date(), r = calculate(st, n);
+      const list = alertsFor(st, r, n).slice(0, 60).map(a => ({ id: hashId(a.key), channelId: "maayan", title: a.title, body: a.body, schedule: { at: a.at, allowWhileIdle: true } }));
       if (list.length) await LN.schedule({ notifications: list });
       app.scheduled = list.length;
     } catch (err) { console.warn("notifications", err); }
@@ -722,11 +854,11 @@
     if (app.mode === "scenario") return;
     const st = state(), n = now(), r = calculate(st, n), ctx = currentContext(st, n);
     if (!NATIVE && app.permission === "granted" && st.settings.remindersEnabled && app.mode === "personal") {
-      for (const p of r.plans) {
-        const delta = n - new Date(p.start);
-        if (p.done || delta < 0 || delta > 90000 || app.notified.has(p.id)) continue;
-        app.notified.add(p.id);
-        try { new Notification(L.t(st.settings.neutralReminders ? "תזכורת אישית" : p.title), { body: L.t("פרטים ביומן האישי"), tag: p.id }); } catch { /* */ }
+      // אותו חישוב כמו באפליקציה: מסתכלים 90 שניות אחורה, כי השעון מתקתק כל 30 שניות
+      for (const al of alertsFor(st, r, new Date(n.valueOf() - 90000))) {
+        if (al.at > n || app.notified.has(al.key)) continue;
+        app.notified.add(al.key);
+        try { new Notification(al.title, { body: al.body, tag: al.key }); } catch { /* */ }
       }
     }
     if (`${ctx.abs}|${r.phase}|${app.mode}` !== app.lastDayKey && !app.modal) render();
@@ -748,6 +880,7 @@
   document.addEventListener("visibilitychange", () => { if (!document.hidden) { tick(); if (NATIVE) syncNotifications().then(() => { if (app.tab === "dates" && !app.modal) render(); }); } });
   if (NATIVE && PL.App) PL.App.addListener("backButton", () => {
     if (app.modal) { if (app.modal.kind === "welcome") markSeen(); app.modal = null; renderModal(); }
+    else if (app.tab === "review") go("prefs");
     else if (app.tab !== "today") go("today");
     else PL.App.minimizeApp();
   });
