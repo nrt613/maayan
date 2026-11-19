@@ -30,10 +30,10 @@ jobs:
     runs-on: macos-26
     timeout-minutes: 40
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
         with: { node-version: 22 }
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v6
         with: { python-version: "3.12" }
       - name: Choose the newest Xcode
         run: |
@@ -76,7 +76,7 @@ jobs:
           mkdir -p out
           xcrun simctl io "$UDID" screenshot out/ios-simulator.png
           xcrun simctl spawn "$UDID" launchctl list | grep -i maayan || { echo "::error::the app is not running"; exit 1; }
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v5
         if: always()
         with:
           name: maayan-ios-simulator-${{ github.run_number }}
@@ -90,10 +90,10 @@ jobs:
     runs-on: macos-26
     timeout-minutes: 45
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
         with: { node-version: 22 }
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v6
         with: { python-version: "3.12" }
       - name: Check the secrets
         env:
