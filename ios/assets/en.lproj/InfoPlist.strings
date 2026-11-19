@@ -1,0 +1,4 @@
+/* App name under the icon */
+"CFBundleDisplayName" = "מעיין";
+/* Location permission prompt */
+"NSLocationWhenInUseUsageDescription" = "Maayan uses your location only to calculate sunset and nightfall times on your device. Your location never leaves the device and is not sent anywhere.";

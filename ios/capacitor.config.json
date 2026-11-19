@@ -1,0 +1,14 @@
+{
+  "appId": "io.github.nrt613.maayan",
+  "appName": "מעיין",
+  "webDir": "www",
+  "ios": {
+    "contentInset": "never",
+    "backgroundColor": "#F4F1F2"
+  },
+  "plugins": {
+    "LocalNotifications": {
+      "iconColor": "#7F5370"
+    }
+  }
+}
