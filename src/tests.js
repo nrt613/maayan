@@ -382,6 +382,24 @@ const MaayanTests = (M) => {
     const s = emptyState(); delete s.settings.beinHashmashot; delete s.settings.hefsekTwilight; delete s.settings.method;
     const p = M.parseState(s); a.equal(p.settings.method, "custom"); a.equal(p.settings.beinHashmashot, "both"); a.equal(p.settings.hefsekTwilight, "before-sunset");
   });
+  test("נתונים", "יומן שנשמר בגרסה 1.0.0 (בלי מקומות, שיטה, בין השמשות ווידג׳ט) נטען ומחושב", () => {
+    // המבנה המדויק שגרסה 1.0.0 שמרה ב-maayan.v1.diary
+    const v1 = { schemaVersion: 1, settings: { cityId: "jerusalem", wait: "five", haflagah: "days", beinonit: "same", day31: false, orZarua: false, carryMonthly: false, carryLongIntervals: false, missingMonthly: "skip", bedikot: "twice", nightfall: "8.5", special: "regular", methodNote: "", neutralReminders: true, reminderMinutes: 30, morningTime: "08:00", remindersEnabled: true, checklist: ["רחצה וחפיפה"] },
+      events: [event("flow", N(1), "10:00", { cityId: "jerusalem" }), event("hefsek", N(5), "15:00", { cityId: "jerusalem" })], trips: [] };
+    const p = M.parseState(JSON.parse(JSON.stringify(v1)));
+    a.deepEqual(p.places, []); a.equal(p.settings.method, "custom"); a.equal(p.settings.beinHashmashot, "both"); a.equal(p.settings.hefsekTwilight, "before-sunset");
+    a.equal(p.settings.missingMonthly, "skip", "בחירה קיימת נשמרת"); a.equal(p.settings.widgetEnabled, undefined, "הווידג׳ט נשאר כבוי");
+    a.equal(p.events.length, 2); a.deepEqual(M.presetDiff ? typeof M.presetDiff(p.settings) : "object", "object");
+    const r = calculate(p, new Date(new HDate(8, 1, 5785).greg().toISOString().slice(0, 10) + "T09:00:00Z"));
+    a.equal(r.phase, "clean"); a.ok(r.plans.length > 0, "יש מועדים");
+    a.deepEqual(M.parseState(JSON.parse(JSON.stringify(p))), p, "שמירה וטעינה חוזרת יציבות");
+  });
+  test("מקום וזמן", "חישוב שעה מקומית חוזר נותן תוצאה זהה ועצמאית, גם במעבר שעון", () => {
+    const x = localInstant("2026-11-20", "10:00", "Asia/Jerusalem"), y = localInstant("2026-11-20", "10:00", "Asia/Jerusalem");
+    a.equal(x.toISOString(), "2026-11-20T08:00:00.000Z"); a.ok(x !== y, "אובייקט חדש בכל קריאה");
+    x.setTime(0); a.equal(localInstant("2026-11-20", "10:00", "Asia/Jerusalem").toISOString(), "2026-11-20T08:00:00.000Z", "שינוי תוצאה קודמת אינו משפיע");
+    for (let i = 0; i < 2; i++) { a.throws(() => localInstant("2026-03-27", "02:30", "Asia/Jerusalem"), /אינה קיימת/); a.throws(() => localInstant("2026-10-25", "01:30", "Asia/Jerusalem"), /פעמיים/); }
+  });
 
   return {
     tests: T,

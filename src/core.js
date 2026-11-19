@@ -290,7 +290,20 @@ const Maayan = (() => {
     return [p("year"), p("month"), p("day"), p("hour") % 24, p("minute")];
   }
   /** שעה מקומית לרגע מוחלט, בלי לבחור בשקט שעה כפולה במעבר שעון */
+  // זיכרון: פונקציה טהורה של תאריך, שעה ואזור זמן, והחלק הכבד בכל חישוב (Intl). מחזירים תמיד אובייקט Date חדש.
+  const instantCache = new Map();
   function localInstant(date, time, tz) {
+    const key = `${date}|${time}|${tz}`;
+    let hit = instantCache.get(key);
+    if (hit === undefined) {
+      try { hit = localInstantRaw(date, time, tz); } catch (e) { hit = { error: e.message }; }
+      if (instantCache.size > 20000) instantCache.clear();
+      instantCache.set(key, hit);
+    }
+    if (typeof hit === "number") return new Date(hit);
+    throw new Error(hit.error);
+  }
+  function localInstantRaw(date, time, tz) {
     const target = [...date.split("-").map(Number), ...time.split(":").map(Number)];
     const naive = Date.UTC(target[0], target[1] - 1, target[2], target[3], target[4]);
     const offsets = new Set();
@@ -300,7 +313,7 @@ const Maayan = (() => {
     }
     const matches = [...offsets].map(o => naive - o).filter(ms => localParts(ms, tz).every((n, i) => n === target[i]));
     if (matches.length !== 1) throw new Error(matches.length ? "השעה מופיעה פעמיים במעבר שעון; נדרש בירור" : "השעה אינה קיימת במעבר שעון");
-    return new Date(matches[0]);
+    return matches[0];
   }
   const sunCache = new Map();
   /* הגדרת צאת הכוכבים: מספר = מעלות מתחת לאופק; "18m" = דקות קבועות אחרי השקיעה; "13.5z" = דקות זמניות
