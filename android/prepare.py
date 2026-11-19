@@ -1,9 +1,22 @@
-"""מכין את פרויקט האנדרואיד אחרי `npx cap add android`: דף האפליקציה, סמלים, הרשאות ומספר גרסה."""
-import pathlib, re, shutil, sys, os
+"""מכין את פרויקט האנדרואיד אחרי `npx cap add android`: דף האפליקציה, סמלים, הרשאות ומספר גרסה.
+
+שלבים: `www` (לפני npm/cap) ו-`native` (אחרי `npx cap add android`).
+גרסה: major.minor מ-package.json, והמספר השלישי הוא מספר הבנייה ב-GitHub Actions.
+versionCode = מספר הבנייה + VERSION_CODE_OFFSET (ברירת מחדל 0), ולכן תמיד עולה. Google Play דורש
+שכל העלאה תהיה עם versionCode גבוה מהקודם; אם ה-workflow יוחלף ומספרי הבנייה יתאפסו, מגדירים
+VERSION_CODE_OFFSET כמשתנה (Variables) במאגר כדי להמשיך מעל הגרסה האחרונה שהועלתה.
+EXACT_ALARM=0 מסיר את ההרשאה SCHEDULE_EXACT_ALARM (אם Google תבקש): התזכורות ימשיכו לפעול כהתראות
+לא-מדויקות (setAndAllowWhileIdle) שעלולות להתעכב מעט כשהמכשיר במצב חיסכון.
+"""
+import json, pathlib, re, shutil, sys, os
 from PIL import Image
 
 here = pathlib.Path(__file__).parent
 run = int(os.environ.get("GITHUB_RUN_NUMBER", "1"))
+offset = int(os.environ.get("VERSION_CODE_OFFSET") or "0")
+major_minor = ".".join(json.loads((here / "package.json").read_text(encoding="utf-8"))["version"].split(".")[:2])
+version_name = f"{major_minor}.{run}"
+version_code = run + offset
 stage = sys.argv[1]
 
 if stage == "www":
@@ -45,15 +58,28 @@ if stage == "native":
         shutil.rmtree(nd)
     man = here / "android" / "app" / "src" / "main" / "AndroidManifest.xml"
     x = man.read_text(encoding="utf-8")
+    exact = os.environ.get("EXACT_ALARM", "1") != "0"
+    # רק ההרשאות שהאפליקציה צריכה. INTERNET מוסר: האפליקציה לא פונה לרשת בכלל (הדף נטען מתוך ה-APK).
+    # USE_EXACT_ALARM ו-AD_ID חסומים במפורש, גם אם ספרייה כלשהי תוסיף אותם בעתיד.
     perms = """
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-feature android:name="android.hardware.location.gps" android:required="false" />
+    <uses-feature android:name="android.hardware.location" android:required="false" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
-    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+""" + ("""    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
+""" if exact else """    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" tools:node="remove" />
+""") + """    <uses-permission android:name="android.permission.USE_EXACT_ALARM" tools:node="remove" />
+    <uses-permission android:name="android.permission.INTERNET" tools:node="remove" />
+    <uses-permission android:name="com.google.android.gms.permission.AD_ID" tools:node="remove" />
 """
     assert "</manifest>" in x
+    x = re.sub(r'\s*<uses-permission android:name="android.permission.INTERNET"\s*/>', "", x)
+    if "xmlns:tools" not in x:
+        x = x.replace('<manifest xmlns:android="http://schemas.android.com/apk/res/android"', '<manifest xmlns:android="http://schemas.android.com/apk/res/android" xmlns:tools="http://schemas.android.com/tools"', 1)
+    assert "xmlns:tools" in x
     x = x.replace("</manifest>", perms + "</manifest>")
     # היומן לא מגובה לענן של Google: נשאר במכשיר בלבד
     x = x.replace('android:allowBackup="true"', 'android:allowBackup="false" android:fullBackupContent="false"')
@@ -61,8 +87,14 @@ if stage == "native":
     man.write_text(x, encoding="utf-8")
     g = here / "android" / "app" / "build.gradle"
     y = g.read_text(encoding="utf-8")
-    y, n1 = re.subn(r"versionCode \d+", f"versionCode {run}", y)
-    y, n2 = re.subn(r'versionName "[^"]+"', f'versionName "1.1.{run}"', y)
+    y, n1 = re.subn(r"versionCode \d+", f"versionCode {version_code}", y)
+    y, n2 = re.subn(r'versionName "[^"]+"', f'versionName "{version_name}"', y)
     assert n1 == 1 and n2 == 1
     g.write_text(y, encoding="utf-8")
-    print("native ready, version", run)
+    # היעד של Google Play: API 36 לפחות (מאז 31.8.2026)
+    v = (here / "android" / "variables.gradle").read_text(encoding="utf-8")
+    target = int(re.search(r"targetSdkVersion = (\d+)", v).group(1))
+    assert target >= 36, f"targetSdkVersion {target} < 36"
+    out = here.parent / "out"; out.mkdir(exist_ok=True)
+    (out / "version.txt").write_text(version_name, encoding="utf-8")
+    print("native ready, version", version_name, "code", version_code, "targetSdk", target, "exact alarms", exact)
