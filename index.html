@@ -982,7 +982,8 @@ const Maayan = (() => {
       } catch { shift = 0; }
     }
     const at = (zenith, rising) => { const t = sunEventUTC(y, m, d + shift, c.lat, c.lon, zenith, rising); return t === null ? null : new Date(base + Math.round((t + shift * 1440) * 60000)); };
-    // עיגול לדקה לחומרא, כמו בלוחות: שקיעה כלפי מטה (מוקדם), צאת הכוכבים כלפי מעלה (מאוחר).
+    // עיגול לדקה לחומרא, כמו בלוחות: שקיעה כלפי מטה (מוקדם), צאת הכוכבים כלפי מעלה (מאוחר),
+    // וזריחה כלפי מעלה (סוף עונת הלילה מאוחר, ולא מוצג דקה מוקדם מדי כשהתצוגה קוטעת את השניות).
     // לפני העיגול החישוב תואם את "שקיעה במישור" של עיתים לבינה בטווח של שניות.
     const floorMin = t => t && new Date(Math.floor(t.valueOf() / 60000) * 60000), ceilMin = t => t && new Date(Math.ceil(t.valueOf() / 60000) * 60000);
     const sunrise = at(90.833, true), rawSunset = at(90.833, false), spec = nightfallSpec(degrees);
@@ -991,7 +992,7 @@ const Maayan = (() => {
     else if (!rawSunset) nightfall = null;
     else if (spec.kind === "m") nightfall = new Date(rawSunset.valueOf() + spec.n * 60000);
     else nightfall = sunrise ? new Date(rawSunset.valueOf() + spec.n * (rawSunset - sunrise) / 720) : null;
-    return { sunrise, sunset: floorMin(rawSunset), nightfall: ceilMin(nightfall), dawn: at(106.1, true) };
+    return { sunrise: ceilMin(sunrise), sunset: floorMin(rawSunset), nightfall: ceilMin(nightfall), dawn: at(106.1, true) };
   }
   function sun(date, c, degrees = 8.5) {
     if (typeof degrees === "string" && /^\d+(\.\d+)?$/.test(degrees)) degrees = Number(degrees);
@@ -1086,12 +1087,15 @@ const Maayan = (() => {
       if (day.includes("shabbat")) review("mikvah-day-shabbat", "היום השביעי חל בשבת", "הטבילה במוצאי שבת: את ההכנות שאינן מותרות בשבת עושים ביום שישי או במוצאי שבת. יש לברר את סדר ההכנות.", [id]);
       if (day.some(k => k !== "shabbat")) review("mikvah-day-yomtov", "היום השביעי חל ביום טוב או בצום", "ההכנות לטבילה במוצאי היום מוגבלות ביום עצמו. יש לברר את סדר ההכנות עם רב.", [id]);
     };
+    // חלון הבדיקה: מעלות השחר (ואם אין, מהזריחה) ועד השקיעה. רק הגבול של השקיעה מסופק לבדיקה;
+    // בדיקה סמוך לזריחה היא ודאי אחרי עלות השחר, ולכן מרווח שלוש הדקות של הזריחה אינו חל עליה.
+    const bedikahInDay = x => { const start = x.s.sun.dawn || x.s.sun.sunrise, ss = x.s.sun.sunset; return !!start && !!ss && x.s.instant >= start && x.s.instant < ss.valueOf() - 3 * 60000 && !x.s.twilight; };
     for (const e of sorted(state.events)) {
       try {
         const s = stamp(e, nf);
         if (s.instant > now && e.type !== "manual" && e.type !== "note") { review(`future-${e.id}`, "רישום עתידי", "אירוע שטרם התרחש אינו משמש כחישוב בפועל.", [e.id]); continue; }
         stamped.push({ e, s });
-        if (s.uncertain && ["flow", "hefsek", "restart", "bedikah"].includes(e.type)) review(`boundary-${e.id}`, "רישום סמוך לגבול היום או העונה", bhs && e.type === "flow" ? "הראייה הייתה סמוך לשקיעה או לזריחה, או בין השקיעה לצאת הכוכבים. לחומרא חושבו מועדי הפרישה לשתי העונות, וההמתנה נספרת מהיום המאוחר. יש לברר." : "נשמרו השעה והמקום. שיוך האירוע דורש בירור, והוא לא משמש לבדו לחישוב ודאי.", [e.id]);
+        if (s.uncertain && ["flow", "hefsek", "restart", "bedikah"].includes(e.type) && !(e.type === "bedikah" && bedikahInDay({ e, s }))) review(`boundary-${e.id}`, "רישום סמוך לגבול היום או העונה", bhs && e.type === "flow" ? "הראייה הייתה סמוך לשקיעה או לזריחה, או בין השקיעה לצאת הכוכבים. לחומרא חושבו מועדי הפרישה לשתי העונות, וההמתנה נספרת מהיום המאוחר. יש לברר." : "נשמרו השעה והמקום. שיוך האירוע דורש בירור, והוא לא משמש לבדו לחישוב ודאי.", [e.id]);
         if (e.type === "question" || e.result === "uncertain") review(`question-${e.id}`, "רישום שממתין לבירור", e.note || "שאלה על דימום או מראה אינה הופכת אוטומטית לווסת או להפסק תקף.", [e.id]);
       } catch (err) {
         if (e.type === "flow" || e.type === "restart") {
@@ -1141,24 +1145,25 @@ const Maayan = (() => {
     let validHefsek;
     for (const raw of hefsekCandidates) {
       let h = raw, bedieved = false;
-      // לפי הרב עובדיה יוסף (טהרת הבית): הפסק שנעשה אחרי השקיעה, עד 13.5 דקות זמניות, תקף בדיעבד ונחשב ליום שהסתיים
-      if (set.hefsekTwilight === "ovadia" && raw.s.alt) {
-        const dayAbs = raw.s.onah === "day" ? raw.s.abs : raw.s.alt.onah === "day" ? raw.s.alt.abs : null;
-        const limit = dayAbs === null ? null : sun(fromAbs(dayAbs), city(raw.e.cityId), "13.5z").nightfall;
-        if (limit && raw.s.instant < limit) { h = { e: raw.e, s: { ...raw.s, abs: dayAbs, onah: "day", ordinal: 2 * dayAbs + 1, uncertain: false, sun: sun(fromAbs(dayAbs), city(raw.e.cityId), nf) } }; bedieved = true; }
+      // לפי הרב עובדיה יוסף (טהרת הבית): הפסק שנעשה אחרי השקיעה, עד 13.5 דקות זמניות, תקף בדיעבד ונחשב ליום שהסתיים.
+      // היום שהסתיים נקבע לפי העונה: הפסק בלילה שייך לליל היום העברי הבא, ולכן היום שהסתיים הוא היום שלפניו.
+      // רק הפסק סמוך לשקיעה או אחריה (ולא סמוך לזריחה) נכנס לכלל הזה.
+      if (set.hefsekTwilight === "ovadia" && (raw.s.uncertain || raw.s.onah === "night")) {
+        const dayAbs = raw.s.onah === "day" ? raw.s.abs : raw.s.abs - 1, c = city(raw.e.cityId), ds = sun(fromAbs(dayAbs), c, nf);
+        const limit = sun(fromAbs(dayAbs), c, "13.5z").nightfall;
+        if (ds.sunset && limit && raw.s.instant >= ds.sunset - 3 * 60000 && raw.s.instant < limit) { h = { e: raw.e, s: { ...raw.s, abs: dayAbs, onah: "day", ordinal: 2 * dayAbs + 1, uncertain: false, sun: ds } }; bedieved = true; }
       }
-      const beforeSunset = bedieved || (!!h.s.sun.sunset && h.s.instant < h.s.sun.sunset && !h.s.uncertain);
+      // הפסק לכתחילה: בעונת היום של היום העברי שלו, לפני השקיעה ולא בזמן מסופק. הפסק בלילה (גם אחרי חצות) אינו לפני השקיעה של שום יום.
+      const beforeSunset = bedieved || (h.s.onah === "day" && !!h.s.sun.sunset && h.s.instant < h.s.sun.sunset && !h.s.uncertain);
       if (!beforeSunset) { review(`hefsek-late-${h.e.id}`, "זמן ההפסק דורש בירור", "אין להתחיל ספירה אוטומטית מהפסק שנרשם אחרי השקיעה או בזמן מסופק.", [h.e.id]); continue; }
       if (!latestNiddah) { review(`hefsek-no-flow-${h.e.id}`, "חסר רישום תחילת התקופה", "נשמר ההפסק, אך חסרים נתוני הבסיס להמתנה. אפשר לתעד הוראה אישית.", [h.e.id]); if (!h.e.authorityNote) continue; }
       if ((!earliestHefsek || fromAbs(h.s.abs) < earliestHefsek) && !h.e.authorityNote) { review(`hefsek-early-${h.e.id}`, "הפסק לפני מועד ההמתנה המחושב", "המערכת אינה משנה את ההמתנה ללא תיעוד הוראה אישית.", [h.e.id]); continue; }
       if (bedieved) review(`hefsek-bedieved-${h.e.id}`, "הפסק סמוך לשקיעה או אחריה — תקף בדיעבד לפי השיטה שנבחרה", "לפי פסק הרב עובדיה יוסף הפסק שנעשה עד 13.5 דקות זמניות אחרי השקיעה תקף בדיעבד, ונספר ליום שהסתיים. לכתחילה עושים את ההפסק לפני השקיעה. יש לוודא עם רב, ובפרט לגבי המקום (יש שכתבו שבארץ ישראל השיעור קצר יותר).", [h.e.id]);
-      if (h.s.onah === "night") review(`hefsek-night-${h.e.id}`, "הפסק שנרשם בלילה", "ההפסק נרשם לפני הזריחה. המערכת מונה את הספירה מהיום שלמחרת, אך הפסק נעשה בדרך כלל ביום סמוך לשקיעה; יש לוודא את הזמן ולברר.", [h.e.id]);
       validHefsek = h;
     }
     const checks = {};
     let cleanDay = 0, immersionDate;
     const addPlan = p => plans.push({ ...p, tentative: p.tentative ?? true });
-    const bedikahInDay = x => { const start = x.s.sun.dawn || x.s.sun.sunrise; return !!start && !!x.s.sun.sunset && x.s.instant >= start && x.s.instant < x.s.sun.sunset && !x.s.uncertain; };
     if (validHefsek) {
       const h = validHefsek;
       for (const x of stamped) if (x.e.type === "bedikah" && x.e.result === "clear" && x.s.instant > h.s.instant && x.s.abs > h.s.abs && x.s.abs <= h.s.abs + 7 && !x.s.uncertain && !bedikahInDay(x))
@@ -1168,10 +1173,16 @@ const Maayan = (() => {
       for (let n = 1; n <= 7; n++) {
         const d = fromAbs(h.s.abs + n), c = atLocation(state, d), s = sun(d, c, nf);
         // כשאין עלות השחר מחושב (קיץ בקווי רוחב מעל כ-50°) תחילת חלון הבדיקה היא הזריחה, לחומרא
-        checks[n] = stamped.filter(x => x.e.type === "bedikah" && x.e.result === "clear" && x.s.abs === h.s.abs + n && bedikahInDay(x)).map(x => x.e);
-        const morning = checks[n].some(e => e.time < "12:00"), afternoon = checks[n].some(e => e.time >= "12:00");
-        if ((n === 1 || n === 7) && d < date && !checks[n].length) review(`missing-day-${n}`, `לא נרשמה בדיקה ביום ${n === 1 ? "הראשון" : "השביעי"}`, "חוסר רישום אינו מוכיח שלא בוצעה בדיקה. יש להשלים רישום או לברר; המערכת אינה פוסלת או מאשרת את הספירה בעצמה.", [h.e.id]);
-        if (state.settings.bedikot === "first-last" && n !== 1 && n !== 7) continue;
+        const counted = stamped.filter(x => x.e.type === "bedikah" && x.e.result === "clear" && x.s.abs === h.s.abs + n && bedikahInDay(x));
+        checks[n] = counted.map(x => x.e);
+        // בוקר וערב לפי חצות היום (אמצע הזמן שבין הזריחה לשקיעה), ולא לפי 12:00 בשעון
+        const beforeNoon = x => x.s.instant < (x.s.sun.sunrise.valueOf() + x.s.sun.sunset.valueOf()) / 2;
+        const morning = counted.some(beforeNoon), afternoon = counted.some(x => !beforeNoon(x));
+        const required = state.settings.bedikot !== "first-last" || n === 1 || n === 7;
+        // היום הסתיים בשקיעתו (היום השביעי: בכניסת ליל הטבילה); כשאין שקיעה, כשהתאריך האזרחי עבר
+        const ended = s.sunset ? now >= s.sunset : d < date;
+        if (required && ended && !checks[n].length) review(`missing-day-${n}`, `לא נרשמה בדיקה ביום ${["הראשון", "השני", "השלישי", "הרביעי", "החמישי", "השישי", "השביעי"][n - 1]}`, "חוסר רישום אינו מוכיח שלא בוצעה בדיקה. יש להשלים רישום או לברר; המערכת אינה פוסלת או מאשרת את הספירה בעצמה.", [h.e.id]);
+        if (!required) continue;
         if (s.sunrise && s.sunset) {
           const base = { kind: "bedikah", date: d, onah: "day", source: SOURCES.clean, eventIds: [h.e.id], cityId: c.id, day: n };
           let morningInstant = s.sunrise;
@@ -1184,9 +1195,10 @@ const Maayan = (() => {
         } else review(`sun-${d}`, "חסרים זמני יום", "אין זמן שמש תקף למועד ולמיקום שנבחרו; נדרש בירור.");
       }
       const c = atLocation(state, immersionDate), s = sun(immersionDate, c, nf);
-      if (!s.nightfall) review("mikvah-no-nightfall", "אין צאת כוכבים מחושב בליל הטבילה", nightfallSpec(nf).kind === "deg" ? `במיקום ובתאריך הזה השמש אינה יורדת ${nightfallSpec(nf).n}° מתחת לאופק, ולכן לא נקבעה שעת ליל הטבילה. נדרשת הוראה אישית.` : "במיקום ובתאריך הזה אין שקיעה, ולכן לא נקבעה שעת ליל הטבילה. נדרשת הוראה אישית.", [h.e.id]);
+      if (!s.nightfall || !s.sunset) review("mikvah-no-nightfall", "אין צאת כוכבים מחושב בליל הטבילה", nightfallSpec(nf).kind === "deg" && s.sunset ? `במיקום ובתאריך הזה השמש אינה יורדת ${nightfallSpec(nf).n}° מתחת לאופק, ולכן לא נקבעה שעת ליל הטבילה. נדרשת הוראה אישית.` : "במיקום ובתאריך הזה אין שקיעה, ולכן לא נקבעה שעת ליל הטבילה. נדרשת הוראה אישית.", [h.e.id]);
       calendarReviews(immersionDate, c, h.e.id);
-      if (s.nightfall) addPlan({ id: `mikvah-${h.e.id}`, kind: "mikvah", title: "ליל טבילה מתוכנן", date: immersionDate, onah: "evening", start: s.nightfall.toISOString(), reason: "הערב שלאחר היום השביעי. מותנה בהשלמת הספירה, הבדיקות ובירור הספקות; אינו אישור טבילה.", source: SOURCES.clean, eventIds: [h.e.id], cityId: c.id });
+      // בלי שקיעה (לילה קוטבי) אין ״מוצאי היום השביעי״, גם אם השמש יורדת לזווית של צאת הכוכבים בצהריים
+      if (s.nightfall && s.sunset) addPlan({ id: `mikvah-${h.e.id}`, kind: "mikvah", title: "ליל טבילה מתוכנן", date: immersionDate, onah: "evening", start: s.nightfall.toISOString(), reason: "הערב שלאחר היום השביעי. מותנה בהשלמת הספירה, הבדיקות ובירור הספקות; אינו אישור טבילה.", source: SOURCES.clean, eventIds: [h.e.id], cityId: c.id });
     } else if (earliestHefsek) {
       // אחרי השקיעה היום העברי כבר התחלף, ולכן התזכורת עוברת ליום הבא ולא נשארת בחלון שעבר
       const currentDay = fromAbs(currentAbs), d = earliestHefsek < currentDay ? currentDay : earliestHefsek, c = atLocation(state, d), s = sun(d, c);
@@ -1626,7 +1638,7 @@ const MaayanDict = (() => {
     ["זריחה", "Sunrise", "Lever du soleil", "Salida del sol"],
     ["שקיעה", "Sunset", "Coucher du soleil", "Puesta del sol"],
     ["צאת הכוכבים", "Nightfall", "Sortie des étoiles", "Salida de las estrellas"],
-    ["השקיעה מעוגלת לדקה כלפי מטה וצאת הכוכבים כלפי מעלה, לחומרא. החישוב נבדק מול ״שקיעה במישור״ בלוח עיתים לבינה ונמצא תואם בטווח של שניות. שקיעה נראית, שמושפעת מהרים ומבניינים בסביבה, אינה מחושבת.", "Sunset is rounded down to the minute and nightfall up, as a stringency. The calculation was checked against “sunset at plain level” in the Itim Lebinah luach and matches within seconds. Visible sunset, which depends on nearby hills and buildings, is not calculated.", "Le coucher du soleil est arrondi à la minute inférieure et la sortie des étoiles à la minute supérieure, par rigueur. Le calcul a été vérifié par rapport au « coucher au niveau de la plaine » du calendrier Itim Lebinah et concorde à quelques secondes près. Le coucher visible, qui dépend des collines et des bâtiments alentour, n'est pas calculé.", "La puesta del sol se redondea al minuto inferior y la salida de las estrellas al superior, por rigor. El cálculo se comprobó frente a la “puesta en llano” del calendario Itim Lebiná y coincide con diferencia de segundos. La puesta visible, que depende de colinas y edificios cercanos, no se calcula."],
+    ["השקיעה מעוגלת לדקה כלפי מטה, והזריחה וצאת הכוכבים כלפי מעלה, לחומרא. החישוב נבדק מול ״שקיעה במישור״ בלוח עיתים לבינה ונמצא תואם בטווח של שניות. שקיעה נראית, שמושפעת מהרים ומבניינים בסביבה, אינה מחושבת.", "Sunset is rounded down to the minute, and sunrise and nightfall up, as a stringency. The calculation was checked against “sunset at plain level” in the Itim Lebinah luach and matches within seconds. Visible sunset, which depends on nearby hills and buildings, is not calculated.", "Le coucher du soleil est arrondi à la minute inférieure, le lever et la sortie des étoiles à la minute supérieure, par rigueur. Le calcul a été vérifié par rapport au « coucher au niveau de la plaine » du calendrier Itim Lebinah et concorde à quelques secondes près. Le coucher visible, qui dépend des collines et des bâtiments alentour, n'est pas calculé.", "La puesta del sol se redondea al minuto inferior, y la salida del sol y de las estrellas al superior, por rigor. El cálculo se comprobó frente a la “puesta en llano” del calendario Itim Lebiná y coincide con diferencia de segundos. La puesta visible, que depende de colinas y edificios cercanos, no se calcula."],
     ["מעוגל לחומרא", "Rounded stringently", "Arrondi par rigueur", "Redondeado con rigor"],
     ["בגובה פני הים", "At sea level", "Au niveau de la mer", "A nivel del mar"],
     ["צאת הכוכבים {n}° מתחת לאופק", "Nightfall {n}° below the horizon", "Sortie des étoiles {n}° sous l'horizon", "Salida de las estrellas {n}° bajo el horizonte"],
@@ -1777,6 +1789,11 @@ const MaayanDict = (() => {
     ["המערכת אינה משנה את ההמתנה ללא תיעוד הוראה אישית.", "The app does not change the waiting period without a documented personal ruling.", "L'application ne modifie pas l'attente sans instruction personnelle documentée.", "La aplicación no cambia la espera sin una indicación personal documentada."],
     ["לא נרשמה בדיקה ביום הראשון", "No bedikah recorded on the first day", "Aucune bedika notée le premier jour", "No se registró bedicá el primer día"],
     ["לא נרשמה בדיקה ביום השביעי", "No bedikah recorded on the seventh day", "Aucune bedika notée le septième jour", "No se registró bedicá el séptimo día"],
+    ["לא נרשמה בדיקה ביום השני", "No bedikah recorded on the second day", "Aucune bedika notée le deuxième jour", "No se registró bedicá el segundo día"],
+    ["לא נרשמה בדיקה ביום השלישי", "No bedikah recorded on the third day", "Aucune bedika notée le troisième jour", "No se registró bedicá el tercer día"],
+    ["לא נרשמה בדיקה ביום הרביעי", "No bedikah recorded on the fourth day", "Aucune bedika notée le quatrième jour", "No se registró bedicá el cuarto día"],
+    ["לא נרשמה בדיקה ביום החמישי", "No bedikah recorded on the fifth day", "Aucune bedika notée le cinquième jour", "No se registró bedicá el quinto día"],
+    ["לא נרשמה בדיקה ביום השישי", "No bedikah recorded on the sixth day", "Aucune bedika notée le sixième jour", "No se registró bedicá el sexto día"],
     ["חוסר רישום אינו מוכיח שלא בוצעה בדיקה. יש להשלים רישום או לברר; המערכת אינה פוסלת או מאשרת את הספירה בעצמה.", "A missing entry does not prove no bedikah was done. Complete the record or ask; the app does not invalidate or approve the count by itself.", "L'absence d'entrée ne prouve pas qu'aucune bedika n'a été faite. Complétez ou demandez ; l'application n'invalide ni n'approuve le décompte elle-même.", "La falta de registro no prueba que no se hizo la bedicá. Complete el registro o consulte; la aplicación no invalida ni aprueba el conteo por sí misma."],
     ["שעת התזכורת דורשת התאמה במעבר שעון", "Reminder time needs adjusting for the clock change", "L'heure du rappel doit être ajustée au changement d'heure", "La hora del recordatorio requiere ajuste por el cambio de hora"],
     ["תזכורת הבוקר הועברה לשעת הזריחה המקומית ביום הזה.", "The morning reminder was moved to local sunrise on this day.", "Le rappel du matin a été déplacé au lever du soleil local ce jour-là.", "El recordatorio de la mañana se movió a la salida del sol local de ese día."],
@@ -2128,7 +2145,7 @@ const MaayanDict = (() => {
     ["הפסק טהרה ושבעה נקיים", "Hefsek taharah and the seven clean days", "Hefsek tahara et sept jours propres", "Hefsek tahará y siete días limpios"],
     ["הספירה מתחילה רק מהפסק שנרשם כנקי, לפני השקיעה ולא בזמן מסופק, ולא לפני סוף ההמתנה. הפסק מוקדם מתקבל רק עם הוראה אישית מתועדת.", "The count starts only from a hefsek recorded as clean, before sunset and not at a doubtful time, and not before the wait ends. An early hefsek is accepted only with a documented personal ruling.", "Le décompte ne démarre que d'un hefsek noté propre, avant le coucher du soleil et pas à une heure douteuse, et pas avant la fin de l'attente. Un hefsek anticipé n'est accepté qu'avec une instruction personnelle documentée.", "El conteo solo empieza con un hefsek registrado como limpio, antes de la puesta del sol y no en hora dudosa, y no antes de terminar la espera. Un hefsek anticipado solo se acepta con una indicación personal documentada."],
     ["יום א׳ הוא היום העברי שאחרי ההפסק. ליל הטבילה המתוכנן הוא במוצאי היום השביעי, וזה נשאר תכנון בלבד.", "Day 1 is the Hebrew day after the hefsek. The planned immersion night is after the seventh day, and remains only a plan.", "Le jour 1 est le jour hébraïque qui suit le hefsek. La nuit de tevila prévue est à l'issue du septième jour, et reste une simple prévision.", "El día 1 es el día hebreo siguiente al hefsek. La noche de tevilá prevista es al terminar el séptimo día y sigue siendo solo un plan."],
-    ["חוסר רישום בדיקה ביום הראשון או השביעי מסומן לבירור, ואינו פוסל או מאשר. בדיקה שנרשמה כלא נקייה אינה מאפסת אוטומטית.", "A missing bedikah record on the first or seventh day is marked for clarification; it neither invalidates nor approves. A bedikah recorded as not clean does not reset automatically.", "L'absence de bedika notée le premier ou le septième jour est signalée à clarifier ; cela n'invalide ni n'approuve. Une bedika notée non propre ne remet pas à zéro automatiquement.", "La falta de registro de bedicá el primer o séptimo día se marca para aclarar; no invalida ni aprueba. Una bedicá registrada como no limpia no reinicia automáticamente."],
+    ["חוסר רישום בדיקה באחד מימי הספירה (לפי הגדרת הבדיקות) מסומן לבירור כשהיום מסתיים בשקיעה, ואינו פוסל או מאשר. בוקר וערב נקבעים לפי חצות היום. בדיקה שנרשמה כלא נקייה אינה מאפסת אוטומטית.", "A missing bedikah record on any of the counted days (per the bedikot setting) is marked for clarification when that day ends at sunset; it neither invalidates nor approves. Morning and evening are divided at halachic midday (chatzot). A bedikah recorded as not clean does not reset automatically.", "L'absence de bedika notée l'un des jours comptés (selon le réglage des bedikot) est signalée à clarifier quand ce jour se termine au coucher du soleil ; cela n'invalide ni n'approuve. Matin et soir sont séparés à la mi-journée halakhique ('hatsot). Une bedika notée non propre ne remet pas à zéro automatiquement.", "La falta de registro de bedicá en cualquiera de los días contados (según el ajuste de bedikot) se marca para aclarar cuando ese día termina a la puesta del sol; no invalida ni aprueba. Mañana y tarde se dividen en el mediodía halájico (jatzot). Una bedicá registrada como no limpia no reinicia automáticamente."],
     ["אותו יום בחודש העברי הבא, באותה עונה.", "The same day in the next Hebrew month, in the same onah.", "Le même jour du mois hébraïque suivant, dans la même ona.", "El mismo día del siguiente mes hebreo, en la misma oná."],
     ["ראייה בל׳ כשבחודש הבא אין ל׳: ברירת המחדל היא א׳ בחודש שאחרי החודש החסר, כפסיקת מכון נשמת. אפשר לבחור דילוג.", "A period on the 30th when the next month has no 30th: the default is the 1st of the month after the short month, as ruled by Nishmat. You can choose to skip.", "Règles le 30 quand le mois suivant n'a pas de 30 : par défaut, le 1er du mois qui suit le mois court, selon Nishmat. Vous pouvez choisir de sauter.", "Período el día 30 cuando el mes siguiente no tiene 30: por defecto, el día 1 del mes posterior al mes corto, según Nishmat. Puede elegir omitirlo."],
     ["ראתה פעמיים באותו חודש: כל החישובים נעשים מהראייה האחרונה, ובנוסף נשמרת עונת החודש של הראייה הקודמת אם עוד לא הגיעה (נשמת; לוח חב״ד).", "Two periods in the same month: all calculations use the latest period, and the Veset HaChodesh of the earlier one is also kept if it has not arrived yet (Nishmat; Chabad calendar).", "Deux fois dans le même mois : tous les calculs partent des dernières règles, et le vésset ha'hodech des précédentes est aussi gardé s'il n'est pas encore arrivé (Nishmat ; calendrier Habad).", "Dos veces en el mismo mes: todos los cálculos parten del último período, y también se mantiene el veset hajódesh del anterior si aún no llegó (Nishmat; calendario de Jabad)."],
@@ -2685,7 +2702,7 @@ const MaayanTests = (M) => {
   test("שבעה נקיים", "הפסק אחרי השקיעה אינו מתקבל אוטומטית", () => { const r = run([event("flow", N(2)), event("hefsek", N(6), "22:00")]); a.equal(r.hefsek, undefined); a.ok(r.reviews.some(r => r.id.startsWith("hefsek-late"))); });
   test("שבעה נקיים", "הפסק מסופק אינו פותח ספירה", () => a.equal(run([event("flow", N(2)), event("hefsek", N(6), "16:00", { result: "uncertain" })]).hefsek, undefined));
   test("שבעה נקיים", "חוסר בדיקה ביום הראשון או השביעי מסומן לבירור, לא מאושר", () => { const r = run([event("flow", N(2)), event("hefsek", N(6), "16:00")]); a.ok(r.reviews.some(r => r.id === "missing-day-1")); a.ok(r.reviews.some(r => r.id === "missing-day-7")); });
-  test("שבעה נקיים", "בדיקות מתועדות ביום הראשון והשביעי מסירות את הסימון", () => { const r = run([event("flow", N(2)), event("hefsek", N(6), "16:00"), event("bedikah", N(7)), event("bedikah", N(13))]); a.ok(!r.reviews.some(r => r.id.startsWith("missing-day"))); a.equal(r.checks[1].length, 1); });
+  test("שבעה נקיים", "בדיקות מתועדות ביום הראשון והשביעי מסירות את הסימון", () => { const r = run([event("flow", N(2)), event("hefsek", N(6), "16:00"), event("bedikah", N(7)), event("bedikah", N(13))]); a.ok(!r.reviews.some(r => r.id === "missing-day-1" || r.id === "missing-day-7")); a.equal(r.checks[1].length, 1); });
   test("שבעה נקיים", "חידוש ספירה בתוך תקופת נידה אינו מחייב חמישה ימים חדשים", () => { const r = run([event("flow", N(2)), event("hefsek", N(6), "16:00"), event("restart", N(9))]); a.equal(r.earliestHefsek, N(9)); a.equal(r.hefsek, undefined); });
   test("ספקות", "כתם מסופק אינו יוצר הפלגה חדשה", () => { const r = run([event("flow", N(2)), event("question", N(20), "10:00", { result: "uncertain" })]); a.equal(r.plans.filter(p => p.kind === "interval").length, 0); a.ok(r.reviews.some(r => r.id.startsWith("question"))); });
   test("שבעה נקיים", "טבילה אינה נרשמת רק משום שהמועד עבר", () => { const r = run([event("flow", N(2)), event("hefsek", N(6), "16:00")]); a.equal(r.phase, "planned"); });
@@ -2773,7 +2790,7 @@ const MaayanTests = (M) => {
   test("שבעה נקיים", "בלונדון בקיץ אין עלות השחר מחושב — בדיקת בוקר אחרי הזריחה עדיין נספרת", () => {
     const L = { cityId: "london" };
     const r = run([event("flow", "2026-06-01", "10:00", L), event("hefsek", "2026-06-06", "16:00", L), event("bedikah", "2026-06-07", "09:00", L), event("bedikah", "2026-06-13", "09:00", L)], L, new Date("2026-06-15T12:00:00Z"));
-    a.equal(r.checks[1].length, 1); a.equal(r.checks[7].length, 1); a.ok(!r.reviews.some(x => x.id.startsWith("missing-day")));
+    a.equal(r.checks[1].length, 1); a.equal(r.checks[7].length, 1); a.ok(!r.reviews.some(x => x.id === "missing-day-1" || x.id === "missing-day-7"));
   });
   test("שבעה נקיים", "בדיקה בימי הספירה שלא נספרה (בלילה) מסומנת לבירור ולא נעלמת בשקט", () => {
     const b = event("bedikah", N(9), "23:00");
@@ -2827,10 +2844,11 @@ const MaayanTests = (M) => {
     const fri = run([event("flow", "2025-07-20", "10:00"), event("hefsek", "2025-07-25", "16:00")]);
     a.equal(fri.immersionDate, "2025-08-01"); a.ok(!fri.reviews.some(x => x.id === "mikvah-night-fast")); a.ok(fri.reviews.some(x => x.id === "mikvah-night-shabbat"));
   });
-  test("שבעה נקיים", "הפסק שנרשם בלילה (לפני הזריחה) מתקבל אך מסומן לבירור", () => {
-    const h = event("hefsek", N(6), "04:00"), r = run([event("flow", N(2)), h]);
-    a.equal(r.hefsek?.id, h.id); a.ok(r.reviews.some(x => x.id === `hefsek-night-${h.id}`));
-    a.ok(!run([event("flow", N(2)), event("hefsek", N(6), "16:00")]).reviews.some(x => x.id.startsWith("hefsek-night")));
+  test("שבעה נקיים", "הפסק בלילה (אחרי חצות ולפני הזריחה) שייך ללילה ואינו מתקבל, כמו הפסק בערב של אותו לילה", () => {
+    for (const settings of [{}, { hefsekTwilight: "ovadia" }]) for (const [date, time] of [[N(6), "04:00"], [N(7), "01:00"], [N(6), "21:00"]]) {
+      const h = event("hefsek", date, time), r = run([event("flow", N(2)), h], settings);
+      a.equal(r.hefsek, undefined, `${date} ${time} ${JSON.stringify(settings)}`); a.ok(r.reviews.some(x => x.id === `hefsek-late-${h.id}`), "מסומן לבירור");
+    }
   });
   test("נתונים", "יומן שמור פגום נדחה בשגיאת אימות ולא בקריסה", () => {
     const s = emptyState();
@@ -2984,6 +3002,45 @@ const MaayanTests = (M) => {
     a.equal(x.toISOString(), "2026-11-20T08:00:00.000Z"); a.ok(x !== y, "אובייקט חדש בכל קריאה");
     x.setTime(0); a.equal(localInstant("2026-11-20", "10:00", "Asia/Jerusalem").toISOString(), "2026-11-20T08:00:00.000Z", "שינוי תוצאה קודמת אינו משפיע");
     for (let i = 0; i < 2; i++) { a.throws(() => localInstant("2026-03-27", "02:30", "Asia/Jerusalem"), /אינה קיימת/); a.throws(() => localInstant("2026-10-25", "01:30", "Asia/Jerusalem"), /פעמיים/); }
+  });
+  test("שבעה נקיים", "בדיקה דקה אחרי הזריחה נספרת (חלון הבדיקה מתחיל בעלות השחר)", () => {
+    const d = N(7), sr = sun(d, city("netanya")).sunrise, t = timeInZone(new Date(sr.valueOf() + 60000), "Asia/Jerusalem");
+    const b = event("bedikah", d, t), r = run([event("flow", N(2)), event("hefsek", N(6), "16:00"), b]);
+    a.equal(r.checks[1].length, 1, "נספרה ביום 1"); a.ok(!r.reviews.some(x => x.id === `boundary-${b.id}`), "לא מסומנת כסמוכה לגבול");
+    const late = event("bedikah", d, timeInZone(new Date(sun(d, city("netanya")).sunset.valueOf() - 60000), "Asia/Jerusalem"));
+    a.equal(run([event("flow", N(2)), event("hefsek", N(6), "16:00"), late]).checks[1].length, 0, "סמוך לשקיעה עדיין לא נספרת");
+  });
+  test("טבילה", "לילה קוטבי (טרומסה בדצמבר): בלי שקיעה אין ליל טבילה מתוכנן, ומופיע סימון", () => {
+    const r = runAt([event("flow", "2026-12-01", "10:00"), event("hefsek", "2026-12-05", "16:00")], {}, new Date("2026-12-08T10:00:00Z"), [], [{ id: uuid(), from: "2026-12-07", to: "2026-12-20", cityId: "tromso" }]);
+    a.equal(r.immersionDate, "2026-12-12"); a.ok(!r.plans.some(p => p.kind === "mikvah"), "אין טבילה בצהריים"); a.ok(r.reviews.some(x => x.id === "mikvah-no-nightfall"));
+  });
+  test("שבעה נקיים", "בדיקה חסרה בכל אחד מימי הספירה מסומנת כשהיום הסתיים, והיום השביעי כבר בשקיעתו", () => {
+    const evs = [event("flow", N(2)), event("hefsek", N(6), "16:00"), event("bedikah", N(7)), event("bedikah", N(8))];
+    const day3end = sun(N(9), city("netanya")).sunset, mid3 = new Date(day3end.valueOf() - 3600000);
+    a.ok(!run(evs, {}, mid3).reviews.some(x => x.id === "missing-day-3"), "יום 3 עוד לא הסתיים");
+    a.ok(run(evs, {}, new Date(day3end.valueOf() + 60000)).reviews.some(x => x.id === "missing-day-3"), "יום 3 הסתיים");
+    a.ok(!run(evs, { bedikot: "first-last" }, new Date(day3end.valueOf() + 60000)).reviews.some(x => x.id === "missing-day-3"), "בראשון ושביעי אין חובה ביום 3");
+    const ss7 = sun(N(13), city("netanya")).sunset;
+    a.ok(!run(evs, {}, new Date(ss7.valueOf() - 60000)).reviews.some(x => x.id === "missing-day-7"));
+    a.ok(run(evs, {}, new Date(ss7.valueOf() + 60000)).reviews.some(x => x.id === "missing-day-7"), "בליל הטבילה עצמו");
+  });
+  test("הפסק טהרה", "לפי הרב עובדיה, הפסק סמוך לזריחה אינו מקבל את נוסח ״אחרי השקיעה, בדיעבד״", () => {
+    const d = N(6), sr = sun(d, city("netanya")).sunrise, h = event("hefsek", d, timeInZone(new Date(sr.valueOf() + 60000), "Asia/Jerusalem"));
+    const r = run([event("flow", N(2)), h], { hefsekTwilight: "ovadia" });
+    a.ok(!r.reviews.some(x => x.id === `hefsek-bedieved-${h.id}`));
+  });
+  test("מקום וזמן", "הזריחה מעוגלת לדקה כלפי מעלה (סוף עונת הלילה לחומרא), כמו השקיעה כלפי מטה", () => {
+    for (const d of ["2026-01-10", "2026-04-02", "2026-07-15", "2026-10-20"]) for (const id of ["netanya", "london", "new-york"]) {
+      const s = sun(d, city(id)); a.equal(s.sunrise.valueOf() % 60000, 0, `${d} ${id}`); a.equal(s.sunset.valueOf() % 60000, 0);
+      const n = onahWindow(M.isoAbs(d), "night", city(id)); a.equal(n.end.valueOf() % 60000, 0);
+    }
+  });
+  test("שבעה נקיים", "בוקר וערב לפי חצות היום ולא לפי 12:00 בשעון", () => {
+    const J = { cityId: "jerusalem" }, d = "2026-07-13", s = sun(d, city("jerusalem")), chatzot = new Date((s.sunrise.valueOf() + s.sunset.valueOf()) / 2);
+    a.ok(timeInZone(chatzot, "Asia/Jerusalem") > "12:30", "בקיץ חצות אחרי 12:30");
+    const r = run([event("flow", "2026-07-05", "10:00", J), event("hefsek", "2026-07-09", "16:00", J), event("bedikah", d, "12:10", J)], J, new Date("2026-07-18T09:00:00Z"));
+    const am = r.plans.find(p => p.kind === "bedikah" && p.day === 4 && /-am$/.test(p.id)), pm = r.plans.find(p => p.kind === "bedikah" && p.day === 4 && /-pm$/.test(p.id));
+    a.ok(am.done, "12:10 לפני חצות = בוקר"); a.ok(!pm.done, "בדיקת הערב עוד לא נרשמה");
   });
 
   return {
@@ -3795,13 +3852,13 @@ if (typeof module !== "undefined") module.exports = MaayanWidget;
   ];
   const S = M.SOURCES;
   const RULES = [
-    { t: "היום העברי והעונה", p: ["כל רישום נשמר עם התאריך האזרחי, השעה המקומית והעיר. היום העברי מתחיל בשקיעה, ועונת היום נמשכת מהזריחה עד השקיעה.", "זמני השמש מחושבים בגובה פני הים. צאת הכוכבים לפי ההגדרה שנבחרה: 8.5° או 7.083° מתחת לאופק, 13.5 דקות זמניות (הגאונים), או 18 או 20 דקות אחרי השקיעה.", "השקיעה מעוגלת לדקה כלפי מטה וצאת הכוכבים כלפי מעלה, לחומרא. החישוב נבדק מול ״שקיעה במישור״ בלוח עיתים לבינה ונמצא תואם בטווח של שניות. שקיעה נראית, שמושפעת מהרים ומבניינים בסביבה, אינה מחושבת.", "רישום בטווח שלוש דקות מהזריחה או מהשקיעה, או בין השקיעה לצאת הכוכבים, מסומן לבירור. שלוש הדקות הן סף לסימון ולא הגדרה של בין השמשות.", "שעה כפולה או חסרה במעבר שעון, ומקום בלי זריחה או שקיעה (קוטב), אינם מסווגים אוטומטית."], src: S.calendar },
+    { t: "היום העברי והעונה", p: ["כל רישום נשמר עם התאריך האזרחי, השעה המקומית והעיר. היום העברי מתחיל בשקיעה, ועונת היום נמשכת מהזריחה עד השקיעה.", "זמני השמש מחושבים בגובה פני הים. צאת הכוכבים לפי ההגדרה שנבחרה: 8.5° או 7.083° מתחת לאופק, 13.5 דקות זמניות (הגאונים), או 18 או 20 דקות אחרי השקיעה.", "השקיעה מעוגלת לדקה כלפי מטה, והזריחה וצאת הכוכבים כלפי מעלה, לחומרא. החישוב נבדק מול ״שקיעה במישור״ בלוח עיתים לבינה ונמצא תואם בטווח של שניות. שקיעה נראית, שמושפעת מהרים ומבניינים בסביבה, אינה מחושבת.", "רישום בטווח שלוש דקות מהזריחה או מהשקיעה, או בין השקיעה לצאת הכוכבים, מסומן לבירור. שלוש הדקות הן סף לסימון ולא הגדרה של בין השמשות.", "שעה כפולה או חסרה במעבר שעון, ומקום בלי זריחה או שקיעה (קוטב), אינם מסווגים אוטומטית."], src: S.calendar },
     { t: "המתנה לפני ההפסק", p: ["חמישה ימים: יום הראייה נספר כיום הראשון, וההפסק המוקדם ביום החמישי.", "ארבעה ימים מתחילת הנידה (הרב עובדיה יוסף, מנהג ספרד): יום הראייה הוא יום 1 וההפסק ביום הרביעי. ראתה בליל שני — ההפסק ביום חמישי.",
       "ארבעה ימים ממועד היחסים: נספרים ממועד היחסים שנרשם כבסיס, ולא מהראייה. בלי בסיס רשום אין חישוב, ומופיעה נקודה לבירור.",
       "ראייה סמוך לשקיעה או בין השמשות: ההמתנה נספרת מהיום העברי המאוחר, לחומרא.", "חידוש ספירה בתוך תקופת הנידה נשען על תחילת הנידה הקודמת ולא מוסיף חמישה ימים חדשים."], src: S.wait },
     { t: "ראייה בין השמשות", p: ["ראייה בין השקיעה לצאת הכוכבים, או בשלוש הדקות שסביב השקיעה והזריחה: לפי ברירת המחדל חוששים לשתי העונות — העונה שהסתיימה והעונה שהתחילה — בעונה הבינונית, בעונת החודש ובהפלגה (ש״ך יו״ד קפד בשם הב״ח; כך נוהגים למעשה). הרישום מסומן גם לבירור.", "אפשר לבחור בהגדרות להשעות את החישוב עד בירור, כמו בגרסאות קודמות.", "סוף בין השמשות נקבע לפי הגדרת צאת הכוכבים. לפי 13.5 דקות זמניות (הגאונים, הרב עובדיה יוסף) ראייה מאוחרת יותר היא לילה ודאי."], src: M.METHOD_PRESETS.ashkenaz.notes.find(n => n.k === "beinHashmashot").src },
     { t: "שיטות מוכנות", p: ["שיטה מוכנה (מנהג אשכנז הרווח, שיטת הרב עובדיה יוסף / מנהג ספרד, מנהג חב״ד) קובעת את כל הגדרות החישוב בבת אחת, ואפשר לשנות כל הגדרה אחר כך.", "לכל ערך בשיטה מופיע מקור בהגדרות. ערכים שהמקורות חלוקים בהם מסומנים ״לברר עם רב״. השיטות אינן תחליף להוראת רב."], src: "" },
-    { t: "הפסק טהרה ושבעה נקיים", p: ["הספירה מתחילה רק מהפסק שנרשם כנקי, לפני השקיעה ולא בזמן מסופק, ולא לפני סוף ההמתנה. הפסק מוקדם מתקבל רק עם הוראה אישית מתועדת.", "בבחירת שיטת הרב עובדיה יוסף: הפסק עד 13.5 דקות זמניות אחרי השקיעה מתקבל בדיעבד ונספר ליום שהסתיים, ומסומן לבירור. לכתחילה עושים הפסק לפני השקיעה.", "יום א׳ הוא היום העברי שאחרי ההפסק. ליל הטבילה המתוכנן הוא במוצאי היום השביעי, וזה נשאר תכנון בלבד.", "חוסר רישום בדיקה ביום הראשון או השביעי מסומן לבירור, ואינו פוסל או מאשר. בדיקה שנרשמה כלא נקייה אינה מאפסת אוטומטית."], src: S.clean },
+    { t: "הפסק טהרה ושבעה נקיים", p: ["הספירה מתחילה רק מהפסק שנרשם כנקי, לפני השקיעה ולא בזמן מסופק, ולא לפני סוף ההמתנה. הפסק מוקדם מתקבל רק עם הוראה אישית מתועדת.", "בבחירת שיטת הרב עובדיה יוסף: הפסק עד 13.5 דקות זמניות אחרי השקיעה מתקבל בדיעבד ונספר ליום שהסתיים, ומסומן לבירור. לכתחילה עושים הפסק לפני השקיעה.", "יום א׳ הוא היום העברי שאחרי ההפסק. ליל הטבילה המתוכנן הוא במוצאי היום השביעי, וזה נשאר תכנון בלבד.", "חוסר רישום בדיקה באחד מימי הספירה (לפי הגדרת הבדיקות) מסומן לבירור כשהיום מסתיים בשקיעה, ואינו פוסל או מאשר. בוקר וערב נקבעים לפי חצות היום. בדיקה שנרשמה כלא נקייה אינה מאפסת אוטומטית."], src: S.clean },
     { t: "עונת החודש", p: ["אותו יום בחודש העברי הבא, באותה עונה.", "ראייה בל׳ כשבחודש הבא אין ל׳: ברירת המחדל היא א׳ בחודש שאחרי החודש החסר, כפסיקת מכון נשמת. אפשר לבחור דילוג.", "ראתה פעמיים באותו חודש: כל החישובים נעשים מהראייה האחרונה, ובנוסף נשמרת עונת החודש של הראייה הקודמת אם עוד לא הגיעה (נשמת; לוח חב״ד).", "בשנה מעוברת אדר א׳ עובר לאדר ב׳.", "שימור עונת חודש שחלה בזמן דימום הוא אפשרות נפרדת שדורשת תיעוד מלא."], src: S.monthly },
     { t: "עונה בינונית", p: ["יום 30 בספירה כוללנית: יום הראייה הוא יום 1, כלומר 29 ימים אחריו, באותה עונה.", "שתי העונות, יום 31 ואור זרוע הם שלוש הגדרות נפרדות. השיטות המוכנות קובעות אותן לפי המנהג, ואפשר לשנות.", "מי ששומרת ימים 30 ו-31 שומרת את עונת אור זרוע ליום 30 בלבד (יועצות הלכה)."], src: S.average },
     { t: "הפלגה", p: ["בשיטת הימים: ההפרש בין התאריכים העבריים של שתי הראיות ועוד 1. אותו מרווח נספר מהראייה האחרונה, באותה עונה.", "בשיטת חב״ד: מספר העונות מההפסק הקודם ועד הראייה הבאה. המועד החדש נספר מההפסק הנוכחי. מספר זוגי נופל ביום ואי-זוגי בלילה. הפלגה ארוכה נשמרת כשמגיעה קצרה ממנה.", "ראייה מסופקת באמצע אינה נמחקת כדי לייצר מרווח ארוך."], src: S.interval },

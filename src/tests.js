@@ -100,7 +100,7 @@ const MaayanTests = (M) => {
   test("שבעה נקיים", "הפסק אחרי השקיעה אינו מתקבל אוטומטית", () => { const r = run([event("flow", N(2)), event("hefsek", N(6), "22:00")]); a.equal(r.hefsek, undefined); a.ok(r.reviews.some(r => r.id.startsWith("hefsek-late"))); });
   test("שבעה נקיים", "הפסק מסופק אינו פותח ספירה", () => a.equal(run([event("flow", N(2)), event("hefsek", N(6), "16:00", { result: "uncertain" })]).hefsek, undefined));
   test("שבעה נקיים", "חוסר בדיקה ביום הראשון או השביעי מסומן לבירור, לא מאושר", () => { const r = run([event("flow", N(2)), event("hefsek", N(6), "16:00")]); a.ok(r.reviews.some(r => r.id === "missing-day-1")); a.ok(r.reviews.some(r => r.id === "missing-day-7")); });
-  test("שבעה נקיים", "בדיקות מתועדות ביום הראשון והשביעי מסירות את הסימון", () => { const r = run([event("flow", N(2)), event("hefsek", N(6), "16:00"), event("bedikah", N(7)), event("bedikah", N(13))]); a.ok(!r.reviews.some(r => r.id.startsWith("missing-day"))); a.equal(r.checks[1].length, 1); });
+  test("שבעה נקיים", "בדיקות מתועדות ביום הראשון והשביעי מסירות את הסימון", () => { const r = run([event("flow", N(2)), event("hefsek", N(6), "16:00"), event("bedikah", N(7)), event("bedikah", N(13))]); a.ok(!r.reviews.some(r => r.id === "missing-day-1" || r.id === "missing-day-7")); a.equal(r.checks[1].length, 1); });
   test("שבעה נקיים", "חידוש ספירה בתוך תקופת נידה אינו מחייב חמישה ימים חדשים", () => { const r = run([event("flow", N(2)), event("hefsek", N(6), "16:00"), event("restart", N(9))]); a.equal(r.earliestHefsek, N(9)); a.equal(r.hefsek, undefined); });
   test("ספקות", "כתם מסופק אינו יוצר הפלגה חדשה", () => { const r = run([event("flow", N(2)), event("question", N(20), "10:00", { result: "uncertain" })]); a.equal(r.plans.filter(p => p.kind === "interval").length, 0); a.ok(r.reviews.some(r => r.id.startsWith("question"))); });
   test("שבעה נקיים", "טבילה אינה נרשמת רק משום שהמועד עבר", () => { const r = run([event("flow", N(2)), event("hefsek", N(6), "16:00")]); a.equal(r.phase, "planned"); });
@@ -188,7 +188,7 @@ const MaayanTests = (M) => {
   test("שבעה נקיים", "בלונדון בקיץ אין עלות השחר מחושב — בדיקת בוקר אחרי הזריחה עדיין נספרת", () => {
     const L = { cityId: "london" };
     const r = run([event("flow", "2026-06-01", "10:00", L), event("hefsek", "2026-06-06", "16:00", L), event("bedikah", "2026-06-07", "09:00", L), event("bedikah", "2026-06-13", "09:00", L)], L, new Date("2026-06-15T12:00:00Z"));
-    a.equal(r.checks[1].length, 1); a.equal(r.checks[7].length, 1); a.ok(!r.reviews.some(x => x.id.startsWith("missing-day")));
+    a.equal(r.checks[1].length, 1); a.equal(r.checks[7].length, 1); a.ok(!r.reviews.some(x => x.id === "missing-day-1" || x.id === "missing-day-7"));
   });
   test("שבעה נקיים", "בדיקה בימי הספירה שלא נספרה (בלילה) מסומנת לבירור ולא נעלמת בשקט", () => {
     const b = event("bedikah", N(9), "23:00");
@@ -242,10 +242,11 @@ const MaayanTests = (M) => {
     const fri = run([event("flow", "2025-07-20", "10:00"), event("hefsek", "2025-07-25", "16:00")]);
     a.equal(fri.immersionDate, "2025-08-01"); a.ok(!fri.reviews.some(x => x.id === "mikvah-night-fast")); a.ok(fri.reviews.some(x => x.id === "mikvah-night-shabbat"));
   });
-  test("שבעה נקיים", "הפסק שנרשם בלילה (לפני הזריחה) מתקבל אך מסומן לבירור", () => {
-    const h = event("hefsek", N(6), "04:00"), r = run([event("flow", N(2)), h]);
-    a.equal(r.hefsek?.id, h.id); a.ok(r.reviews.some(x => x.id === `hefsek-night-${h.id}`));
-    a.ok(!run([event("flow", N(2)), event("hefsek", N(6), "16:00")]).reviews.some(x => x.id.startsWith("hefsek-night")));
+  test("שבעה נקיים", "הפסק בלילה (אחרי חצות ולפני הזריחה) שייך ללילה ואינו מתקבל, כמו הפסק בערב של אותו לילה", () => {
+    for (const settings of [{}, { hefsekTwilight: "ovadia" }]) for (const [date, time] of [[N(6), "04:00"], [N(7), "01:00"], [N(6), "21:00"]]) {
+      const h = event("hefsek", date, time), r = run([event("flow", N(2)), h], settings);
+      a.equal(r.hefsek, undefined, `${date} ${time} ${JSON.stringify(settings)}`); a.ok(r.reviews.some(x => x.id === `hefsek-late-${h.id}`), "מסומן לבירור");
+    }
   });
   test("נתונים", "יומן שמור פגום נדחה בשגיאת אימות ולא בקריסה", () => {
     const s = emptyState();
@@ -399,6 +400,45 @@ const MaayanTests = (M) => {
     a.equal(x.toISOString(), "2026-11-20T08:00:00.000Z"); a.ok(x !== y, "אובייקט חדש בכל קריאה");
     x.setTime(0); a.equal(localInstant("2026-11-20", "10:00", "Asia/Jerusalem").toISOString(), "2026-11-20T08:00:00.000Z", "שינוי תוצאה קודמת אינו משפיע");
     for (let i = 0; i < 2; i++) { a.throws(() => localInstant("2026-03-27", "02:30", "Asia/Jerusalem"), /אינה קיימת/); a.throws(() => localInstant("2026-10-25", "01:30", "Asia/Jerusalem"), /פעמיים/); }
+  });
+  test("שבעה נקיים", "בדיקה דקה אחרי הזריחה נספרת (חלון הבדיקה מתחיל בעלות השחר)", () => {
+    const d = N(7), sr = sun(d, city("netanya")).sunrise, t = timeInZone(new Date(sr.valueOf() + 60000), "Asia/Jerusalem");
+    const b = event("bedikah", d, t), r = run([event("flow", N(2)), event("hefsek", N(6), "16:00"), b]);
+    a.equal(r.checks[1].length, 1, "נספרה ביום 1"); a.ok(!r.reviews.some(x => x.id === `boundary-${b.id}`), "לא מסומנת כסמוכה לגבול");
+    const late = event("bedikah", d, timeInZone(new Date(sun(d, city("netanya")).sunset.valueOf() - 60000), "Asia/Jerusalem"));
+    a.equal(run([event("flow", N(2)), event("hefsek", N(6), "16:00"), late]).checks[1].length, 0, "סמוך לשקיעה עדיין לא נספרת");
+  });
+  test("טבילה", "לילה קוטבי (טרומסה בדצמבר): בלי שקיעה אין ליל טבילה מתוכנן, ומופיע סימון", () => {
+    const r = runAt([event("flow", "2026-12-01", "10:00"), event("hefsek", "2026-12-05", "16:00")], {}, new Date("2026-12-08T10:00:00Z"), [], [{ id: uuid(), from: "2026-12-07", to: "2026-12-20", cityId: "tromso" }]);
+    a.equal(r.immersionDate, "2026-12-12"); a.ok(!r.plans.some(p => p.kind === "mikvah"), "אין טבילה בצהריים"); a.ok(r.reviews.some(x => x.id === "mikvah-no-nightfall"));
+  });
+  test("שבעה נקיים", "בדיקה חסרה בכל אחד מימי הספירה מסומנת כשהיום הסתיים, והיום השביעי כבר בשקיעתו", () => {
+    const evs = [event("flow", N(2)), event("hefsek", N(6), "16:00"), event("bedikah", N(7)), event("bedikah", N(8))];
+    const day3end = sun(N(9), city("netanya")).sunset, mid3 = new Date(day3end.valueOf() - 3600000);
+    a.ok(!run(evs, {}, mid3).reviews.some(x => x.id === "missing-day-3"), "יום 3 עוד לא הסתיים");
+    a.ok(run(evs, {}, new Date(day3end.valueOf() + 60000)).reviews.some(x => x.id === "missing-day-3"), "יום 3 הסתיים");
+    a.ok(!run(evs, { bedikot: "first-last" }, new Date(day3end.valueOf() + 60000)).reviews.some(x => x.id === "missing-day-3"), "בראשון ושביעי אין חובה ביום 3");
+    const ss7 = sun(N(13), city("netanya")).sunset;
+    a.ok(!run(evs, {}, new Date(ss7.valueOf() - 60000)).reviews.some(x => x.id === "missing-day-7"));
+    a.ok(run(evs, {}, new Date(ss7.valueOf() + 60000)).reviews.some(x => x.id === "missing-day-7"), "בליל הטבילה עצמו");
+  });
+  test("הפסק טהרה", "לפי הרב עובדיה, הפסק סמוך לזריחה אינו מקבל את נוסח ״אחרי השקיעה, בדיעבד״", () => {
+    const d = N(6), sr = sun(d, city("netanya")).sunrise, h = event("hefsek", d, timeInZone(new Date(sr.valueOf() + 60000), "Asia/Jerusalem"));
+    const r = run([event("flow", N(2)), h], { hefsekTwilight: "ovadia" });
+    a.ok(!r.reviews.some(x => x.id === `hefsek-bedieved-${h.id}`));
+  });
+  test("מקום וזמן", "הזריחה מעוגלת לדקה כלפי מעלה (סוף עונת הלילה לחומרא), כמו השקיעה כלפי מטה", () => {
+    for (const d of ["2026-01-10", "2026-04-02", "2026-07-15", "2026-10-20"]) for (const id of ["netanya", "london", "new-york"]) {
+      const s = sun(d, city(id)); a.equal(s.sunrise.valueOf() % 60000, 0, `${d} ${id}`); a.equal(s.sunset.valueOf() % 60000, 0);
+      const n = onahWindow(M.isoAbs(d), "night", city(id)); a.equal(n.end.valueOf() % 60000, 0);
+    }
+  });
+  test("שבעה נקיים", "בוקר וערב לפי חצות היום ולא לפי 12:00 בשעון", () => {
+    const J = { cityId: "jerusalem" }, d = "2026-07-13", s = sun(d, city("jerusalem")), chatzot = new Date((s.sunrise.valueOf() + s.sunset.valueOf()) / 2);
+    a.ok(timeInZone(chatzot, "Asia/Jerusalem") > "12:30", "בקיץ חצות אחרי 12:30");
+    const r = run([event("flow", "2026-07-05", "10:00", J), event("hefsek", "2026-07-09", "16:00", J), event("bedikah", d, "12:10", J)], J, new Date("2026-07-18T09:00:00Z"));
+    const am = r.plans.find(p => p.kind === "bedikah" && p.day === 4 && /-am$/.test(p.id)), pm = r.plans.find(p => p.kind === "bedikah" && p.day === 4 && /-pm$/.test(p.id));
+    a.ok(am.done, "12:10 לפני חצות = בוקר"); a.ok(!pm.done, "בדיקת הערב עוד לא נרשמה");
   });
 
   return {
