@@ -61,13 +61,15 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
   // Google Play: סמל 512×512 וגרפיקה ראשית 1024×500
   const page = await browser.newPage({ viewport: { width: 1024, height: 500 } });
   const icon = "data:image/png;base64," + fs.readFileSync(path.join(ROOT, "ios", "assets", "AppIcon-1024.png")).toString("base64");
-  const font = f => "data:font/ttf;base64," + fs.readFileSync(path.join(ROOT, "fonts", f)).toString("base64");
+  const font = f => "data:font/woff2;base64," + fs.readFileSync(path.join(ROOT, "fonts", f)).toString("base64");
   await page.setContent(`<html dir="rtl"><style>
-    @font-face{font-family:Heebo;src:url("${font("heebo.ttf")}");font-weight:100 900} @font-face{font-family:Bellefair;src:url("${font("bellefair.ttf")}")}
-    body{margin:0;width:1024px;height:500px;background:#f4f1f2;display:flex;align-items:center;justify-content:center;gap:56px;font-family:Heebo,sans-serif}
-    img{width:250px;height:250px;border-radius:56px;box-shadow:0 10px 40px rgb(127 83 112 / .18)}
-    h1{font-family:Bellefair;font-weight:400;font-size:112px;margin:0;color:#6b4560;line-height:1}
-    p{margin:14px 0 0;font-size:30px;color:#6f6168;font-weight:300}</style>
+    @font-face{font-family:Rubik;src:url("${font("rubik-hebrew.woff2")}") format("woff2");font-weight:300 900;unicode-range:U+0590-05FF,U+200C-2010,U+FB1D-FB4F}
+    @font-face{font-family:Rubik;src:url("${font("rubik-latin.woff2")}") format("woff2");font-weight:300 900;unicode-range:U+0000-00FF,U+2000-206F}
+    body{margin:0;width:1024px;height:500px;display:flex;align-items:center;justify-content:center;gap:56px;font-family:Rubik,sans-serif;
+      background:radial-gradient(60% 90% at 85% 10%,#fbe9f0,transparent 70%),radial-gradient(60% 90% at 10% 100%,#f1ecff,transparent 70%),#fbf8f9}
+    img{width:240px;height:240px;border-radius:56px;box-shadow:0 18px 50px rgb(184 51 106 / .28)}
+    h1{font-weight:700;font-size:104px;margin:0;color:#1f1a1e;line-height:1;letter-spacing:-.02em}
+    p{margin:16px 0 0;font-size:30px;color:#6b6270;font-weight:400}</style>
     <body><img src="${icon}"><div><h1>מעיין</h1><p>יומן טהרת המשפחה. פרטי, במכשיר שלך.</p></div></body></html>`);
   await page.evaluate(() => document.fonts.ready);
   await sleep(300);
