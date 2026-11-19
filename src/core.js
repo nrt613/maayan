@@ -732,7 +732,7 @@ const Maayan = (() => {
   }
   const SETTING_LABELS = {
     wait: { five: "חמישה ימים מתחילת הנידה", four: "ארבעה ימים מתחילת הנידה (הרב עובדיה יוסף)", "four-from-relations": "ארבעה ימים ממועד היחסים" },
-    method: { custom: "התאמה אישית", ashkenaz: "מנהג אשכנז הרווח", sefard: "שיטת הרב עובדיה יוסף / מנהג ספרד", chabad: "מנהג חב״ד" },
+    method: { custom: "התאמה אישית", ashkenaz: "מנהג אשכנז הרווח", sefard: "שיטת הרב עובדיה יוסף (ספרדי)", chabad: "מנהג חב״ד" },
     beinHashmashot: { both: "לחומרא שתי העונות", flag: "השעיית החישוב ובירור" },
     hefsekTwilight: { "before-sunset": "רק לפני השקיעה", ovadia: "בדיעבד עד 13.5 דקות זמניות אחרי השקיעה (הרב עובדיה יוסף)" },
     haflagah: { days: "ימים בין תחילות הווסתות", "chabad-onot": "עונות מהפסק טהרה (חב״ד)" },
@@ -777,7 +777,7 @@ const Maayan = (() => {
       label: SETTING_LABELS.method.sefard,
       settings: { wait: "four", haflagah: "days", beinonit: "same", day31: false, orZarua: false, carryLongIntervals: true, carryMonthly: false, missingMonthly: "first-next-month", bedikot: "twice", nightfall: "20m", beinHashmashot: "both", hefsekTwilight: "ovadia" },
       notes: [
-        note("wait", "ארבעה ימים: יום הראייה הוא יום 1 וההפסק ביום הרביעי (ראתה בליל שני — הפסק ביום חמישי). לפי הרב עובדיה יסוד הדין הוא 72 שעות מהתשמיש; אם לא היו יחסים בארבעת הימים שלפני הראייה, יש שמתירים הפסק מיד כשפסק הדם. רבים מפוסקי ספרד ממתינים חמישה ימים.", PS.ovadiaWait, true),
+        note("wait", "ארבעה ימים: יום הראייה הוא יום 1 וההפסק ביום הרביעי (ראתה בליל שני — הפסק ביום חמישי). לפי הרב עובדיה יסוד הדין הוא 72 שעות מהתשמיש; אם לא היו יחסים בארבעת הימים שלפני הראייה, יש שמתירים הפסק מיד כשפסק הדם. רבים מהפוסקים הספרדים ממתינים חמישה ימים.", PS.ovadiaWait, true),
         note("beinonit", "עונה בינונית ביום 30 בלבד, בעונת הראייה (שו״ע יו״ד קפט, א).", PS.average),
         note("day31", "יום 31 אינו נדרש לפי השו״ע. יש מספרדים שמחמירים.", PS.day31, true),
         note("orZarua", "לפי טהרת הבית ספרדים אינם חוששים לעונת אור זרוע. הבן איש חי חשש לה.", PS.ozSefard, true),
