@@ -21,44 +21,54 @@
   };
 
   /* ---------- אייקונים ---------- */
+  // סט אייקונים אחיד: רשת 24, קו 1.75 עם קצוות מעוגלים. class="f" = מילוי רך (במצב פעיל או באריח צבעוני), class="s" = כוכב מלא, class="dot" = נקודה
   const P = {
     spring: '<path d="M3.6 10.2C6.2 6 11.2 6.6 12.4 18.2"/><path d="M20.4 12.4C18.3 9.4 13.9 10 12.4 18.2"/><ellipse cx="12" cy="18.6" rx="7.2" ry="2.3"/>',
-    droplet: '<path d="M12 22a7 7 0 0 0 7-7c0-2-1-3.9-3-5.5s-3.5-4-4-6.5c-.5 2.5-2 4.9-4 6.5C6 11.1 5 13 5 15a7 7 0 0 0 7 7z"/>',
-    home: '<path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/>',
-    calendar: '<rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/>',
-    book: '<path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20V2H6.5A2.5 2.5 0 0 0 4 4.5z"/><path d="M6.5 17A2.5 2.5 0 0 0 4 19.5 2.5 2.5 0 0 0 6.5 22H20v-5"/>',
-    bell: '<path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/>',
-    sliders: '<path d="M4 21v-7M4 10V3M12 21v-9M12 8V3M20 21v-5M20 12V3M1 14h6M9 8h6M17 16h6"/>',
+    droplet: '<path class="f" d="M12 3.4s6.2 6.5 6.2 11.2a6.2 6.2 0 0 1-12.4 0C5.8 9.9 12 3.4 12 3.4z"/><path d="M12 3.4s6.2 6.5 6.2 11.2a6.2 6.2 0 0 1-12.4 0C5.8 9.9 12 3.4 12 3.4z"/><path d="M9.1 14.9a3 3 0 0 0 2.4 2.8"/>',
+    home: '<path class="f" d="M5.5 9 12 4l6.5 5v10.2a1.3 1.3 0 0 1-1.3 1.3H6.8a1.3 1.3 0 0 1-1.3-1.3z"/><path d="M3.5 10.6 10.7 4.6a2 2 0 0 1 2.6 0l7.2 6"/><path d="M5.5 9.2v9.8a1.5 1.5 0 0 0 1.5 1.5h10a1.5 1.5 0 0 0 1.5-1.5V9.2"/><path d="M9.8 20.5v-4.3a2.2 2.2 0 0 1 4.4 0v4.3"/>',
+    calendar: '<path class="f" d="M3.5 9.5h17v8a3 3 0 0 1-3 3h-11a3 3 0 0 1-3-3z"/><rect x="3.5" y="5" width="17" height="15.5" rx="3.5"/><path d="M8 3v3.5M16 3v3.5M3.5 9.5h17"/><path class="dot" d="M8 14h.01M12 14h.01M16 14h.01M8 17.4h.01"/>',
+    book: '<path class="f" d="M6.5 3.5h11a1.5 1.5 0 0 1 1.5 1.5v14a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 5 19V5a1.5 1.5 0 0 1 1.5-1.5z"/><path d="M6.8 3.5h10.4A1.8 1.8 0 0 1 19 5.3v13.4a1.8 1.8 0 0 1-1.8 1.8H6.8A1.8 1.8 0 0 1 5 18.7V5.3a1.8 1.8 0 0 1 1.8-1.8z"/><path d="M9 3.5v17M12.5 8.5h3.5M12.5 12h3.5"/>',
+    bell: '<path class="f" d="M6 10.5a6 6 0 0 1 12 0v3.6c0 .9.3 1.7.9 2.4l.6.7a.6.6 0 0 1-.4 1H4.9a.6.6 0 0 1-.4-1l.6-.7c.6-.7.9-1.5.9-2.4z"/><path d="M6 10.5a6 6 0 0 1 12 0v3.6c0 .9.3 1.7.9 2.4l.6.7a.6.6 0 0 1-.4 1H4.9a.6.6 0 0 1-.4-1l.6-.7c.6-.7.9-1.5.9-2.4z"/><path d="M9.8 20.6a2.4 2.4 0 0 0 4.4 0"/>',
+    sliders: '<path class="f" d="M18.6 7.5a2.6 2.6 0 1 1-5.2 0 2.6 2.6 0 0 1 5.2 0zM10.6 16.5a2.6 2.6 0 1 1-5.2 0 2.6 2.6 0 0 1 5.2 0z"/><path d="M4 7.5h9.4M18.6 7.5H20M4 16.5h1.4M10.6 16.5H20"/><circle cx="16" cy="7.5" r="2.6"/><circle cx="8" cy="16.5" r="2.6"/>',
     plus: '<path d="M12 5v14M5 12h14"/>',
-    eye: '<path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/>',
-    eyeoff: '<path d="M9.9 4.2A10 10 0 0 1 12 4c7 0 10 8 10 8a17 17 0 0 1-2.2 3.2M6.6 6.6C3.6 8.6 2 12 2 12s3 8 10 8a9.7 9.7 0 0 0 5.4-1.6M2 2l20 20M9.9 9.9a3 3 0 0 0 4.2 4.2"/>',
-    pin: '<path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0z"/><circle cx="12" cy="10" r="3"/>',
-    sun: '<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M6.3 17.7l-1.4 1.4M19.1 4.9l-1.4 1.4"/>',
-    moon: '<path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9z"/>',
-    sunrise: '<path d="M12 2v8M4.9 10.9l1.4 1.4M2 18h2M20 18h2M19.1 10.9l-1.4 1.4M22 22H2M8 6l4-4 4 4M16 18a4 4 0 0 0-8 0"/>',
-    sunset: '<path d="M12 10V2M4.9 10.9l1.4 1.4M2 18h2M20 18h2M19.1 10.9l-1.4 1.4M22 22H2M16 6l-4 4-4-4M16 18a4 4 0 0 0-8 0"/>',
-    check: '<path d="M20 6 9 17l-5-5"/>', x: '<path d="M18 6 6 18M6 6l12 12"/>',
-    left: '<path d="m15 18-6-6 6-6"/>', right: '<path d="m9 18 6-6-6-6"/>', out: '<path d="M17 17 7 7M7 17V7h10"/>',
-    pencil: '<path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/>',
-    trash: '<path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>',
-    download: '<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/>',
-    upload: '<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/>',
-    lock: '<rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>',
-    help: '<circle cx="12" cy="12" r="10"/><path d="M9.1 9a3 3 0 0 1 5.8 1c0 2-3 3-3 3M12 17h.01"/>',
-    list: '<path d="M10 6h11M10 12h11M10 18h11M3 6l1 1 2-2M3 12l1 1 2-2M3 18l1 1 2-2"/>',
-    flask: '<path d="M10 2v7.3L4.3 19a2 2 0 0 0 1.7 3h12a2 2 0 0 0 1.7-3L14 9.3V2M8.5 2h7M7 16h10"/>',
-    copy: '<rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>',
-    search: '<circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/>',
-    info: '<circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/>',
-    shield: '<path d="M20 13c0 5-3.5 7.5-7.7 9a1 1 0 0 1-.7 0C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.2-2.7a1.2 1.2 0 0 1 1.5 0C14.5 3.8 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/>',
-    play: '<path d="m7 4 12 8-12 8z"/>',
-    file: '<path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7z"/><path d="M14 2v4a2 2 0 0 0 2 2h4M16 13H8M16 17H8"/>',
-    refresh: '<path d="M3 12a9 9 0 0 1 15-6.7L21 8M21 3v5h-5M21 12a9 9 0 0 1-15 6.7L3 16M8 16H3v5"/>',
-    scale: '<path d="M12 3v18M5 21h14M3 7h18M6 7l-3 7a3 3 0 0 0 6 0zM18 7l-3 7a3 3 0 0 0 6 0z"/>',
+    eye: '<path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12z"/><circle cx="12" cy="12" r="3"/>',
+    eyeoff: '<path d="M10 5.7a9 9 0 0 1 2-.2c6 0 9.5 6.5 9.5 6.5a16 16 0 0 1-2.4 3.2M6.6 6.9C4 8.6 2.5 12 2.5 12S6 18.5 12 18.5a8.6 8.6 0 0 0 4.6-1.3M3.5 3.5l17 17M9.9 9.9a3 3 0 0 0 4.2 4.2"/>',
+    pin: '<path class="f" d="M12 21s-6.5-5.6-6.5-11a6.5 6.5 0 0 1 13 0c0 5.4-6.5 11-6.5 11z"/><path d="M12 21s-6.5-5.6-6.5-11a6.5 6.5 0 0 1 13 0c0 5.4-6.5 11-6.5 11z"/><circle cx="12" cy="10" r="2.4"/>',
+    sun: '<circle cx="12" cy="12" r="4"/><path d="M19 12L20.9 12M16.95 7.05L18.29 5.71M12 5L12 3.1M7.05 7.05L5.71 5.71M5 12L3.1 12M7.05 16.95L5.71 18.29M12 19L12 20.9M16.95 16.95L18.29 18.29"/>',
+    moon: '<path class="f" d="M10.78 5.5A7.5 7.5 0 1 0 18.22 15.02A6.2 6.2 0 0 1 10.78 5.5Z"/><path d="M10.78 5.5A7.5 7.5 0 1 0 18.22 15.02A6.2 6.2 0 0 1 10.78 5.5Z"/><path class="s" d="M18.3 1.9C18.7 3.55 19.15 4 20.8 4.4C19.15 4.8 18.7 5.25 18.3 6.9C17.9 5.25 17.45 4.8 15.8 4.4C17.45 4 17.9 3.55 18.3 1.9Z"/><path class="s" d="M21.2 7.9C21.44 8.89 21.71 9.16 22.7 9.4C21.71 9.64 21.44 9.91 21.2 10.9C20.96 9.91 20.69 9.64 19.7 9.4C20.69 9.16 20.96 8.89 21.2 7.9Z"/>',
+    mikvah: '<path class="f" d="M11.53 3.8A6.2 6.2 0 1 0 17.48 11.65A5 5 0 0 1 11.53 3.8Z"/><path d="M11.53 3.8A6.2 6.2 0 1 0 17.48 11.65A5 5 0 0 1 11.53 3.8Z"/><path class="s" d="M18.6 1.7C18.9 2.95 19.25 3.3 20.5 3.6C19.25 3.9 18.9 4.25 18.6 5.5C18.3 4.25 17.95 3.9 16.7 3.6C17.95 3.3 18.3 2.95 18.6 1.7Z"/><path d="M3.5 19.6c1.4 0 1.4-1.1 2.8-1.1s1.4 1.1 2.8 1.1 1.4-1.1 2.9-1.1 1.4 1.1 2.8 1.1 1.4-1.1 2.8-1.1 1.4 1.1 2.9 1.1"/>',
+    sunrise: '<path d="M3 18.5h18M6.8 18.5a5.2 5.2 0 0 1 10.4 0"/><path d="M5.23 16.04L3.64 15.46M7.57 12.83L6.52 11.49M16.43 12.83L17.48 11.49M18.77 16.04L20.36 15.46"/><path d="M12 2.8v5.4M9.8 5 12 2.8 14.2 5"/>',
+    sunset: '<path d="M3 18.5h18M6.8 18.5a5.2 5.2 0 0 1 10.4 0"/><path d="M5.23 16.04L3.64 15.46M7.57 12.83L6.52 11.49M16.43 12.83L17.48 11.49M18.77 16.04L20.36 15.46"/><path d="M12 2.8v5.4M9.8 6 12 8.2 14.2 6"/>',
+    check: '<path d="M5 12.6 9.6 17 19 7.4"/>',
+    hefsek: '<path class="f" d="M20.5 12a8.5 8.5 0 1 1-17 0 8.5 8.5 0 0 1 17 0z"/><circle cx="12" cy="12" r="8.5"/><path d="M8.3 12.3l2.5 2.5 4.9-5.1"/>',
+    bedikah: '<path class="f" d="M8.5 3.5h7a5 5 0 0 1 5 5v7a5 5 0 0 1-5 5h-7a5 5 0 0 1-5-5v-7a5 5 0 0 1 5-5z"/><rect x="3.5" y="3.5" width="17" height="17" rx="5"/><path d="M8.3 12.3l2.5 2.5 4.9-5.1"/>',
+    x: '<path d="M6.5 6.5l11 11M17.5 6.5l-11 11"/>',
+    left: '<path d="M14.5 6l-6 6 6 6"/>',
+    right: '<path d="M9.5 6l6 6-6 6"/>',
+    out: '<path d="M14 4h6v6M20 4l-8.5 8.5M18 14v3.5a2.5 2.5 0 0 1-2.5 2.5h-9A2.5 2.5 0 0 1 4 17.5v-9A2.5 2.5 0 0 1 6.5 6H10"/>',
+    pencil: '<path d="M4.5 19.5l1-4.2L16.2 4.6a1.9 1.9 0 0 1 2.7 0l.5.5a1.9 1.9 0 0 1 0 2.7L8.7 18.5zM14.5 6.3l3.2 3.2"/>',
+    trash: '<path d="M4.5 7h15M9.5 11v5.5M14.5 11v5.5M6.5 7l.8 11.7a2 2 0 0 0 2 1.8h5.4a2 2 0 0 0 2-1.8L17.5 7M9 7V5.5A1.5 1.5 0 0 1 10.5 4h3A1.5 1.5 0 0 1 15 5.5V7"/>',
+    download: '<path d="M12 4v11M7.5 10.5 12 15l4.5-4.5M5 20h14"/>',
+    upload: '<path d="M12 15V4M7.5 8.5 12 4l4.5 4.5M5 20h14"/>',
+    lock: '<path class="f" d="M8 10.5h8a3 3 0 0 1 3 3v4a3 3 0 0 1-3 3H8a3 3 0 0 1-3-3v-4a3 3 0 0 1 3-3z"/><rect x="5" y="10.5" width="14" height="10" rx="3"/><path d="M8.5 10.5V8a3.5 3.5 0 0 1 7 0v2.5M12 14.5v2"/>',
+    help: '<circle cx="12" cy="12" r="9"/><path d="M9.6 9.4a2.5 2.5 0 0 1 4.8.9c0 1.7-2.4 2.1-2.4 3.7"/><path class="dot" d="M12 17.2h.01"/>',
+    info: '<circle cx="12" cy="12" r="9"/><path d="M12 11v5.5"/><path class="dot" d="M12 7.8h.01"/>',
+    list: '<path d="M9.5 6.5H20M9.5 12H20M9.5 17.5H20"/><path class="dot" d="M4.8 6.5h.01M4.8 12h.01M4.8 17.5h.01"/>',
+    flask: '<path d="M9.5 3.5h5M10.5 3.5v5.3L5.3 17.7a1.9 1.9 0 0 0 1.7 2.8h10a1.9 1.9 0 0 0 1.7-2.8L13.5 8.8V3.5M7.6 14.5h8.8"/>',
+    copy: '<rect x="8.5" y="8.5" width="12" height="12" rx="2.8"/><path d="M15.5 8.5V6.3a2.8 2.8 0 0 0-2.8-2.8H6.3a2.8 2.8 0 0 0-2.8 2.8v6.4a2.8 2.8 0 0 0 2.8 2.8h2.2"/>',
+    search: '<circle cx="11" cy="11" r="6.5"/><path d="M16 16l4 4"/>',
+    shield: '<path d="M12 3.5 19 6v5.7c0 4.2-2.9 7.6-7 8.8-4.1-1.2-7-4.6-7-8.8V6z"/><path d="M9 12l2.1 2.1 4-4.2"/>',
+    play: '<path d="M8 5.6v12.8a.8.8 0 0 0 1.2.7l10-6.4a.8.8 0 0 0 0-1.4l-10-6.4a.8.8 0 0 0-1.2.7z"/>',
+    file: '<path d="M14 3.5H7.3a2.8 2.8 0 0 0-2.8 2.8v11.4a2.8 2.8 0 0 0 2.8 2.8h9.4a2.8 2.8 0 0 0 2.8-2.8V9z"/><path d="M14 3.5v3.7A1.8 1.8 0 0 0 15.8 9h3.7M8.5 13h7M8.5 16.5h4.5"/>',
+    refresh: '<path d="M19.5 12a7.5 7.5 0 0 1-13.4 4.6M4.5 12a7.5 7.5 0 0 1 13.4-4.6M18.5 3.8v3.8h-3.8M5.5 20.2v-3.8h3.8"/>',
+    scale: '<path d="M12 4v16M8 20h8M5 7.5h14"/><path d="M5 7.5 2.7 13a2.4 2.4 0 0 0 4.6 0zM19 7.5 16.7 13a2.4 2.4 0 0 0 4.6 0z"/>',
     finger: '<path d="M12 10a2 2 0 0 0-2 2c0 1.02-.1 2.51-.26 4"/><path d="M14 13.12c0 2.38 0 6.38-1 8.88"/><path d="M17.29 21.02c.12-.6.43-2.3.5-3.02"/><path d="M2 12a10 10 0 0 1 18-6"/><path d="M2 16h.01"/><path d="M21.8 16c.2-2 .131-5.354 0-6"/><path d="M5 19.5C5.5 18 6 15 6 12a6 6 0 0 1 .34-2"/><path d="M8.65 22c.21-.66.45-1.32.57-2"/><path d="M9 6.8a6 6 0 0 1 9 5.2v2"/>',
-    backspace: '<path d="M10 5a2 2 0 0 0-1.34.52l-6.33 5.74a1 1 0 0 0 0 1.48l6.33 5.74A2 2 0 0 0 10 19h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2z"/><path d="m12 9 6 6M18 9l-6 6"/>',
+    backspace: '<path d="M9.6 5.5h9.4a2.5 2.5 0 0 1 2.5 2.5v8a2.5 2.5 0 0 1-2.5 2.5H9.6a2 2 0 0 1-1.5-.7l-5-5.3a.8.8 0 0 1 0-1.1l5-5.3a2 2 0 0 1 1.5-.6z"/><path d="M12.5 9.5l5 5M17.5 9.5l-5 5"/>',
+    sparkle: '<path class="s" d="M12 4C13.28 9.28 14.72 10.72 20 12C14.72 13.28 13.28 14.72 12 20C10.72 14.72 9.28 13.28 4 12C9.28 10.72 10.72 9.28 12 4Z"/>',
+    hourglass: '<path d="M7 3.5h10M7 20.5h10"/><path class="f" d="M9.4 17.2 12 15l2.6 2.2c.6.5.9 1.1.9 1.9v1.4h-7v-1.4c0-.8.3-1.4.9-1.9z"/><path d="M8 3.5v2.3a4 4 0 0 0 1.6 3.2L12 11l2.4-2A4 4 0 0 0 16 5.8V3.5M8 20.5v-2.3a4 4 0 0 1 1.6-3.2L12 13l2.4 2a4 4 0 0 1 1.6 3.2v2.3"/>',
+    checklist: '<path d="M10 7h10M10 12.5h10M10 18h6"/><path d="M3.8 7l1.4 1.4L7.8 5.8M3.8 12.5l1.4 1.4 2.6-2.6"/><circle cx="5.6" cy="18" r="1.6"/>',
   };
-  const I = (n, s = 20) => `<svg class="ic${n === "left" || n === "right" || n === "out" ? " dirflip" : ""}" width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${P[n]}</svg>`;
+  const I = (n, s = 20) => `<svg class="ic${n === "left" || n === "right" || n === "out" ? " dirflip" : ""}" width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${P[n]}</svg>`;
 
   /* ---------- מצב ---------- */
   const storage = {
@@ -123,16 +133,22 @@
 
   /** שם המועד לתצוגה: עונת אור זרוע מסומנת במפורש, עם העונה שהיא קודמת לה */
   const planTitle = p => p.kind === "or-zarua" ? `עונת אור זרוע · לפני ${String(p.title).replace(/^אור זרוע · /, "")}` : p.title;
-  function planLine(p, { compact = false, open = false } = {}) {
+  /** אייקון ואריח צבע לפי סוג המועד */
+  const planIcon = p => p.kind === "mikvah" ? "mikvah" : p.kind === "bedikah" ? "bedikah" : p.kind === "hefsek" ? "hefsek" : p.onah === "day" ? "sun" : "moon";
+  const planTone = k => k === "mikvah" ? "mik" : k === "bedikah" || k === "hefsek" ? "clean" : "sep";
+  /** כפתור ״הכנות לטבילה״: נפתח מליל הטבילה (במועדים, בלוח ובמסך היום) ולא כרשימה קבועה */
+  const prepButton = (st, cls = "btn ghost sm prep-link") => { const n = M.CHECKLIST.filter(x => st.settings.checklist.includes(x)).length; return `<button type="button" class="${cls}" data-act="prep">${I("checklist", 17)}<span>הכנות לטבילה</span><span class="count">${n}/${M.CHECKLIST.length}</span></button>`; };
+  function planLine(p, { compact = false, open = false, prep = true } = {}) {
     const c = city(p.cityId), start = timeInZone(new Date(p.start), c.tz);
     const prefix = p.onah === "day" ? "" : "ליל ";
-    return `<details class="plan k-${p.kind}${p.done ? " done" : ""}"${open ? " open" : ""}>
-      <summary><span class="plan-ic">${I(p.onah === "day" ? "sun" : "moon", 17)}</span>
+    return `<details class="plan k-${p.kind} tone-${planTone(p.kind)}${p.done ? " done" : ""}"${open ? " open" : ""}>
+      <summary><span class="plan-ic">${I(planIcon(p), 18)}</span>
         <span class="plan-name"><strong>${esc(planTitle(p))}</strong><small><span class="hebdate">${prefix}${esc(planHebrew(p))}</span>${compact ? "" : ` · ${esc(civilLabel(p.date, true))} · ${esc(c.name)}`}</small></span>
-        <time dir="ltr">${start}</time>${I("left", 15)}</summary>
+        <time dir="ltr">${start}</time>${I("left", 16)}</summary>
       <div class="plan-more"><p>${esc(p.reason)}</p>
         <small>${onahLabel(p.onah)} · ${p.end ? `מ-${start} עד ${timeInZone(new Date(p.end), c.tz)}` : `מ-${start}`} · ${esc(c.name)}</small>
         ${p.done ? '<small class="ok-text">בדיקה נרשמה</small>' : ""}
+        ${p.kind === "mikvah" && prep ? prepButton(state()) : ""}
         ${citeList(p.source, "מקור הכלל")}</div></details>`;
   }
 
@@ -307,47 +323,48 @@
         : ["הטבילה המתוכננת עדיין לא נרשמה", "אם הטבילה התקיימה, רושמים אותה כאן. עד שתירשם, היומן מחשב כאילו לא הייתה טבילה.", "רישום טבילה", "mikvah"],
       immersed: ["טבילה נרשמה", "המועדים הקרובים מופיעים למטה ובלוח השנה.", "רישום חדש", "note"],
     }[phase];
+    const heroPhase = phase === "planned" && mikvahNight ? "mikvah" : phase;
     const days = phase === "clean" ? `<ol class="seven" aria-label="שבעת הימים">${[1, 2, 3, 4, 5, 6, 7].map(d =>
-      `<li class="${d < cd ? "past" : ""}${d === cd ? " now" : ""}"><span>${r.checks[d]?.length ? I("check", 16) : d}</span><small>${d === cd ? "היום" : "יום " + d}</small></li>`).join("")}</ol>` : "";
-    const ring = phase === "clean" && cd ? `<div class="ring" style="--p:${cd / 7}"><strong>${cd}</strong><small>מתוך 7</small></div>`
-      : `<div class="ring idle">${I(phase === "waiting" ? "moon" : "spring", 44)}</div>`;
+      `<li class="${d < cd ? "past" : ""}${d === cd ? " now" : ""}"><span>${r.checks[d]?.length ? I("check", 15) : d}</span><small>${d === cd ? "היום" : "יום " + d}</small></li>`).join("")}</ol>` : "";
+    // טבעת מקוטעת לשבעה נקיים: מקטע לכל יום; בשאר המצבים — סמל המצב
+    const seg = (i, cls) => `<circle class="${cls}" cx="52" cy="52" r="44" pathLength="700" stroke-dasharray="64 636" transform="rotate(${-90 + i * 360 / 7 + 9.3} 52 52)"/>`;
+    const ring = phase === "clean" && cd ? `<div class="ring" role="img" aria-label="יום ${cd} מתוך 7"><svg viewBox="0 0 104 104" aria-hidden="true"><defs><linearGradient id="rg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#e8668f"/><stop offset="1" stop-color="#8c5be0"/></linearGradient></defs>${[0, 1, 2, 3, 4, 5, 6].map(i => seg(i, i + 1 < cd ? "on" : i + 1 === cd ? "now" : "off")).join("")}</svg><span aria-hidden="true"><strong>${cd}</strong><small>מתוך 7</small></span></div>`
+      : `<div class="ring idle">${I({ waiting: "hourglass", planned: "mikvah", immersed: "spring", empty: "spring" }[phase] || "spring", 34)}</div>`;
     const next = upcoming[0];
     const nextLine = next ? (() => {
       const c = city(next.cityId), when = new Date(next.start), dayDiff = M.isoAbs(next.date) - M.isoAbs(date);
       const rel = dayDiff <= 0 ? (when < now() ? "עכשיו" : next.onah === "day" ? "היום" : "הלילה") : dayDiff === 1 ? "מחר" : `בעוד ${dayDiff} ימים`;
-      return `<button class="next k-${next.kind}" data-go="dates"><span class="next-l">המועד הבא</span><span class="next-main"><strong>${esc(planTitle(next))}</strong><small><span>${rel}</span> · <span class="hebdate">${esc(next.onah === "day" ? planHebrew(next) : `ליל ${planHebrew(next)}`)}</span></small></span><time dir="ltr">${timeInZone(when, c.tz)}</time>${I("left", 15)}</button>`;
+      return `<button class="next tone-${planTone(next.kind)}" data-go="dates"><span class="plan-ic">${I(planIcon(next), 20)}</span><span class="next-main"><small class="next-l"><span>המועד הבא</span> · <span>${rel}</span></small><strong>${esc(planTitle(next))}</strong><small class="hebdate">${esc(next.onah === "day" ? planHebrew(next) : `ליל ${planHebrew(next)}`)}</small></span><time dir="ltr">${timeInZone(when, c.tz)}</time>${I("left", 16)}</button>`;
     })() : "";
     const first = app.mode === "personal" && !st.events.length;
-    const checklistOpen = (phase === "clean" && cd >= 6) || (phase === "planned" && mikvahNight);
+    // הכנות לטבילה: רק ביום השביעי ובליל הטבילה, ככפתור שפותח את הרשימה (לא כרשימה קבועה במסך)
+    const prepNow = !first && ((phase === "clean" && cd === 7) || (phase === "planned" && mikvahNight));
     return `
     <div class="today">
-      <section class="hero" data-phase="${phase}">
+      <section class="hero" data-phase="${heroPhase}">
         <div class="hero-row"><div class="hero-copy">
-          <span class="chip-light"><i class="phase-dot"></i>${first ? "היומן שלך ריק" : esc(phase === "planned" && mikvahNight ? "ליל הטבילה" : PHASE_NAMES[phase])}</span>
+          <span class="chip-phase"><i class="phase-dot"></i>${first ? "היומן שלך ריק" : esc(phase === "planned" && mikvahNight ? "ליל הטבילה" : PHASE_NAMES[phase])}</span>
           <h2>${esc(C[0])}</h2><p>${esc(first ? "כדאי להתחיל מהזנת המחזורים האחרונים (לפחות שניים), כדי שההפלגה ועונת החודש יחושבו נכון. אפשר גם להתאים קודם את שיטת החישוב." : C[1])}</p>
         </div>${ring}</div>${days}
-        <button class="btn hero-btn" data-act="add" data-type="${C[3]}">${I("plus", 19)}${esc(C[2])}</button>
-        ${first ? `<div class="row-btns first-btns"><button class="btn ghost sm" data-act="cycle">${I("calendar", 16)}הזנת מחזורים קודמים</button><button class="btn ghost sm" data-go="prefs">${I("sliders", 16)}שיטת החישוב</button><button class="btn ghost sm" data-act="demo">${I("flask", 16)}יומן לדוגמה</button></div>` : ""}
+        ${first ? `<div class="first-btns"><button class="btn" data-act="cycle">${I("calendar", 18)}הזנת מחזורים קודמים</button><div class="row-btns"><button class="btn ghost sm" data-go="prefs">${I("sliders", 16)}שיטת החישוב</button><button class="btn ghost sm" data-act="demo">${I("flask", 16)}יומן לדוגמה</button></div></div>` : ""}
         ${nextLine}
+        ${prepNow ? prepButton(st, "prep-btn") : ""}
       </section>
       ${backupNudge(st)}
       ${first ? `<section class="card method"><div class="card-h">${I("scale")}<div><h3>שיטת החישוב שלך</h3><p>לבחור לפי ההנחיה שקיבלת. אפשר לשנות בכל עת</p></div></div>
         <ul class="method-sum">${M.settingsSummary(st.settings).filter(x => /^(שיטה|המתנה|הפלגה|עונה בינונית)/.test(x)).map(x => `<li>${esc(x)}</li>`).join("")}</ul>
         <label class="toggle" for="q-orZarua"><span><strong>עונת אור זרוע</strong><small>העונה שלפני כל עונת פרישה — לפי הוראת הרב</small></span><input id="q-orZarua" type="checkbox" role="switch" data-quickset="orZarua"${st.settings.orZarua ? " checked" : ""}></label>
         <button class="btn ghost full" data-go="prefs">${I("sliders", 17)}כל אפשרויות החישוב</button></section>` : ""}
-      ${r.reviews.length ? `<button class="notice" data-go="journal">${I("help", 22)}<span><strong>${r.reviews.length} ${r.reviews.length === 1 ? "נקודה לבירור" : "נקודות לבירור"}</strong><small>${esc(r.reviews[0].title)}</small></span>${I("left", 16)}</button>` : ""}
-      <section class="card upcoming"><div class="card-h">${I("bell")}<h3>מועדים קרובים</h3><button class="link" data-go="dates">הכול ${I("left", 14)}</button></div>
-        ${upcoming.length > 1 ? `<div class="plans">${upcoming.slice(1).map(p => planLine(p)).join("")}</div>` : `<p class="empty">${upcoming.length ? "אין מועדים נוספים בקרוב." : first ? "המועדים יופיעו כאן אחרי הרישום הראשון." : "אין מועדים קרובים."}</p>`}
+      ${r.reviews.length ? `<button class="notice" data-go="journal"><span class="notice-ic">${I("help", 20)}</span><span><strong>${r.reviews.length} ${r.reviews.length === 1 ? "נקודה לבירור" : "נקודות לבירור"}</strong><small>${esc(r.reviews[0].title)}</small></span>${I("left", 16)}</button>` : ""}
+      <section class="card upcoming"><div class="card-h"><h3>מועדים קרובים</h3><button class="link" data-go="dates">הכול ${I("left", 14)}</button></div>
+        ${upcoming.length > 1 ? `<div class="plans">${upcoming.slice(1).map(p => planLine(p, { compact: true })).join("")}</div>` : `<p class="empty">${upcoming.length ? "אין מועדים נוספים בקרוב." : first ? "המועדים יופיעו כאן אחרי הרישום הראשון." : "אין מועדים קרובים."}</p>`}
       </section>
-      <section class="card times">
-        <div class="card-h">${I("sunset")}<div><h3>זמני היום</h3><p>${esc(loc.name)} · ${esc(civilLabel(date, true))}</p></div></div>
+      <section class="card times" aria-labelledby="times-h">
+        <div class="card-h"><h3 id="times-h">זמני היום</h3><small class="times-where">${I("pin", 14)}${esc(loc.name)}</small></div>
         <dl>${[["זריחה", "sunrise", times.sunrise], ["שקיעה", "sunset", times.sunset], ["צאת הכוכבים", "moon", times.nightfall]].map(([n, ic, v]) =>
-          `<div${ic === "sunset" ? ' class="hl"' : ""}>${I(ic, 18)}<dt>${n}</dt><dd dir="ltr">${timeInZone(v, loc.tz)}</dd></div>`).join("")}</dl>
+          `<div class="t-${ic}"><dt>${I(ic, 20)}<span>${n}</span></dt><dd dir="ltr">${timeInZone(v, loc.tz)}</dd></div>`).join("")}</dl>
         <p class="fine">בגובה פני הים · מעוגל לחומרא · צאת הכוכבים: ${esc(M.nightfallLabel(st.settings.nightfall))}</p>
       </section>
-      <details class="card checklist"${checklistOpen ? " open" : ""}><summary class="card-h">${I("list")}<h3>רשימת הכנה למקווה</h3><span class="count">${st.settings.checklist.length}/${M.CHECKLIST.length}</span>${I("left", 15)}</summary>
-        <div class="checks">${M.CHECKLIST.map((item, i) => `<label class="${st.settings.checklist.includes(item) ? "on" : ""}"><input type="checkbox" id="chk-${i}" data-check="${esc(item)}" ${st.settings.checklist.includes(item) ? "checked" : ""}><span>${esc(item)}</span></label>`).join("")}</div>
-      </details>
     </div>`;
   }
   function viewCalendar(st, r, ctx) {
@@ -376,13 +393,13 @@
       <div class="seg" role="group" aria-label="סוג לוח"><button data-calmode="civil" aria-pressed="${c.mode === "civil"}">לועזי</button><button data-calmode="hebrew" aria-pressed="${c.mode === "hebrew"}">עברי</button></div>
       <div class="wk" aria-hidden="true">${weekHeads().map(w => `<span>${w}</span>`).join("")}</div>
       <div class="days">${dayCells}</div>
-      <div class="legend" aria-label="מקרא"><span><i class="sw sw-niddah"></i>ימי וסת עד ההפסק</span><span><i class="sw sw-clean"></i>שבעה נקיים</span><span><i class="sw sw-sep"></i>עונת פרישה</span>${st.settings.orZarua ? `<span><em class="d-z"></em>עונת אור זרוע</span>` : ""}<span><i class="sw sw-mik"></i>טבילה</span><span><em class="d-f"></em>וסת נרשמה</span><span><em class="d-c"></em>הפסק או בדיקה</span></div>
+      <div class="legend" role="list" aria-label="מקרא"><span role="listitem"><i class="sw sw-niddah"></i>ימי וסת עד ההפסק</span><span role="listitem"><i class="sw sw-clean"></i>שבעה נקיים</span><span role="listitem"><em class="d-s"></em>עונת פרישה</span>${st.settings.orZarua ? `<span role="listitem"><em class="d-z"></em>עונת אור זרוע</span>` : ""}<span role="listitem"><em class="d-m"></em>טבילה</span><span role="listitem"><em class="d-f"></em>וסת נרשמה</span><span role="listitem"><em class="d-c"></em>הפסק או בדיקה</span></div>
       <p class="fine">הצבעים מבוססים על הרישומים שלך ועל המועדים המחושבים. התאריך העברי במשבצת שייך לשעות היום; בשקיעה מתחיל התאריך העברי הבא.</p>
     </section>
-    <section class="card dayp"><div class="card-h">${I("calendar")}<div><h3>${esc(weekdayName(sel))}, ${esc(civilLabel(sel))}</h3><p class="hebdate">${esc(hebrew(sel))} · שעות היום</p></div></div>
+    <section class="card dayp"><div class="card-h"><div><h3>${esc(weekdayName(sel))}, ${esc(civilLabel(sel))}</h3><p class="hebdate">${esc(hebrew(sel))} · שעות היום</p></div></div>
       ${ents.map(entryRow).join("")}${pl.length ? `<div class="plans">${pl.map(p => planLine(p, { compact: true })).join("")}</div>` : ""}
       ${!ents.length && !pl.length ? `<p class="empty">אין רישומים או מועדים ביום הזה.</p>` : ""}
-      <button class="btn ghost full" data-act="quick" data-date="${sel}">${I("plus", 17)}רישום ליום הזה</button></section></div>`;
+      <p class="fine day-hint">לחיצה ארוכה על יום בלוח פותחת רישום ליום הזה.</p></section></div>`;
   }
   /** טווחי ימים לצביעת הלוח, רק מתוך הרישומים: מתחילת וסת עד ההפסק, ושבעה נקיים אחרי הפסק (הנוכחי לפי המנוע, וקודמים שנרשמה אחריהם טבילה) */
   function dayRanges(st, r, todayISO) {
@@ -402,7 +419,7 @@
     let h = "זמן לבירור", onah = "";
     try { const s = M.stamp(e); h = s.hebrewDate; onah = s.onah === "day" ? "יום" : "לילה"; } catch { /* מסומן לבירור */ }
     const status = e.result === "uncertain" ? "ממתין לבירור" : e.result === "bleeding" ? "נרשמה כלא נקייה" : city(e.cityId).name;
-    return `<button class="entry" data-edit="${e.id}"><span class="ev-ic t-${e.type}">${I(e.type === "flow" ? "droplet" : e.type === "mikvah" ? "moon" : ["bedikah", "hefsek"].includes(e.type) ? "check" : "book", 17)}</span>
+    return `<button class="entry" data-edit="${e.id}"><span class="ev-ic t-${e.type}">${I(e.type === "flow" ? "droplet" : e.type === "mikvah" ? "mikvah" : e.type === "bedikah" ? "bedikah" : e.type === "hefsek" ? "hefsek" : "book", 19)}</span>
       <span class="entry-main"><strong>${esc(EVENT_NAMES[e.type])}</strong><small>${esc(civilLabel(e.date, true))} · <span dir="ltr">${e.time}</span> · <span class="hebdate">${esc(h)}</span>${onah ? ` · ${onah}` : ""}</small>${e.note ? `<small class="note" data-nt>${esc(e.note)}</small>` : ""}</span>
       <span class="entry-side"><small>${esc(status)}</small>${I("pencil", 15)}</span></button>`;
   }
@@ -419,7 +436,7 @@
       <select id="filter" aria-label="סינון לפי סוג"><option value="all">כל הסוגים</option>${Object.entries(EVENT_NAMES).map(([v, n]) => `<option value="${v}"${app.filter === v ? " selected" : ""}>${n}</option>`).join("")}</select></div>
       <div class="entries">${evs.slice(0, app.jLimit).map(entryRow).join("") || (st.events.length ? `<p class="empty">לא נמצאו רישומים מתאימים.</p>` : `<div class="empty-state">${I("book", 30)}<strong>אין עדיין רישומים</strong><p>כל רישום — וסת, הפסק, בדיקה או טבילה — יופיע כאן, מהחדש לישן.</p></div>`)}</div>
       ${evs.length > app.jLimit ? `<button class="btn ghost full" data-act="more">הצגת רישומים קודמים (${evs.length - app.jLimit} נוספים)</button>` : ""}
-      <div class="row-btns"><button class="btn" data-act="add">${I("plus", 17)}רישום חדש</button><button class="btn ghost" data-act="cycle">${I("calendar", 17)}הזנת מחזור קודם</button></div></section>`;
+      <button class="btn ghost full" data-act="cycle">${I("calendar", 17)}הזנת מחזור קודם</button></section>`;
   }
 
   function viewDates(st, r) {
@@ -551,7 +568,7 @@
         ${diffSettings(s.settings)}
         <h4>מה הוזן</h4><ul class="inputs">${M.sorted(s.events).map(e => `<li>${esc(M.eventLine(e).split("\n")[0].split(" | ").slice(1).join(" · "))}</li>`).join("")}${s.trips.map(t => `<li>נסיעה ל${esc(city(t.cityId).name)}: ${esc(hebrew(t.from))} עד ${esc(hebrew(t.to))}</li>`).join("")}</ul>
         <h4>מה חושב</h4><p class="phase">מצב: <strong>${esc(PHASE_NAMES[r.phase])}</strong>${r.earliestHefsek && r.phase === "waiting" ? ` · הפסק מוקדם: <span class="hebdate">${esc(hebrew(r.earliestHefsek))}</span>` : ""}${r.phase === "clean" ? ` · יום ${r.cleanDay} מתוך 7` : ""}</p>
-        <div class="plans">${plans.map(p => planLine(p)).join("") || '<p class="empty">אין מועדים מחושבים.</p>'}</div>
+        <div class="plans">${plans.map(p => planLine(p, { prep: false })).join("") || '<p class="empty">אין מועדים מחושבים.</p>'}</div>
         ${bed.length ? `<p class="fine">ועוד ${bed.length} תזכורות לבדיקות בשבעה נקיים (מופיעות ביומן המלא).</p>` : ""}
         ${r.reviews.length ? `<h4>נקודות לבירור</h4><ul class="rv">${r.reviews.map(v => `<li><strong>${esc(v.title)}</strong> — ${esc(v.detail)}</li>`).join("")}</ul>` : ""}
         <button class="btn full" data-scenario-load="${sc.id}">${I("play", 16)}פתיחה ביומן המלא</button></div>`;
@@ -606,7 +623,7 @@
         ${app.tab === "review" ? `<button class="nav on" data-go="review" aria-current="page">${I("scale", 19)}<span>לבודקים</span></button>` : ""}
         <p class="side-note">${I("lock", 15)}נשמר רק במכשיר הזה</p></aside>
       <div class="work">
-        <header class="top"><div class="brand m">${mark()}<strong>מעיין</strong></div>
+        <header class="top"><div class="brand m">${mark()}</div>
           <div class="top-date"><span class="hebdate">${esc(ctx.hebrewDate)}</span><small>${esc(civilLabel(ctx.date, true))}${ctx.afterSunset ? " · אחרי השקיעה" : ""}</small></div>
           <div class="top-act">${app.hidden ? "" : `<button class="pill" data-go="prefs" aria-label="עיר: ${esc(ctx.city.name)}">${I("pin", 15)}${esc(ctx.city.name)}</button>`}
             ${lockCfg() && !app.hidden ? `<button class="icon-btn" data-act="lock-now" aria-label="נעילת היומן">${I("lock")}</button>` : `<button class="icon-btn" data-act="hide" aria-pressed="${app.hidden}" aria-label="${app.hidden ? "הצגת היומן" : "הסתרת היומן"}">${I(app.hidden ? "eye" : "eyeoff")}</button>`}</div></header>
@@ -620,13 +637,13 @@
         ${!app.hidden && ["today", "calendar", "journal"].includes(app.tab) ? addBar(app.tab === "calendar" && app.cal.selected ? app.cal.selected : ctx.date, ctx.date) : ""}
         ${app.hidden ? `<div class="veil">${I("lock", 30)}<h2>היומן מוסתר</h2><button class="btn" data-act="hide">${I("eye", 18)}הצגת היומן</button></div>` : ""}
       </div>
-      <nav class="tabs" aria-label="ניווט">${MAIN_NAV.map(([id, t, ic]) => `<button class="${app.tab === id ? "on" : ""}" data-go="${id}"${app.tab === id ? ' aria-current="page"' : ""}>${I(ic, 22)}<span>${t.replace("לוח השנה", "לוח").replace("היומן שלי", "יומן")}</span>${id === "dates" && upcoming && !app.hidden ? `<small class="tab-badge" aria-hidden="true"></small>` : ""}</button>`).join("")}</nav>`;
+      <nav class="tabs" aria-label="ניווט">${MAIN_NAV.map(([id, t, ic]) => `<button class="${app.tab === id ? "on" : ""}" data-go="${id}"${app.tab === id ? ' aria-current="page"' : ""}><i class="tab-ic">${I(ic, 22)}</i><span>${t.replace("לוח השנה", "לוח").replace("היומן שלי", "יומן")}</span>${id === "dates" && upcoming && !app.hidden ? `<small class="tab-badge" aria-hidden="true"></small>` : ""}</button>`).join("")}</nav>`;
   }
-  const LOGO_IMG = "data:image/png;base64,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";
-  /** סרגל ״רישום״ קבוע מעל סרגל הלשוניות: תמיד מציג את היום שנבחר (בלוח) או את היום */
+  const LOGO_IMG = "data:image/png;base64,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";
+  /** כפתור ״רישום״ צף מעל סרגל הלשוניות: פותח בלחיצה אחת את התפריט המהיר, ליום שנבחר בלוח או להיום */
   function addBar(d, todayISO) {
-    const label = d === todayISO ? `היום, ${hebDay(d)} ${hd(d).monthTitle().split(" ")[0]}` : `${hebDay(d)} ${hd(d).monthTitle().split(" ")[0]}`;
-    return `<div class="addbar-wrap"><button class="addbar" data-act="quick" data-date="${d}">${I("plus", 22)}<span><strong>רישום</strong><small><span class="hebdate">${esc(label)}</span> · ${esc(civilLabel(d, true))}</small></span></button></div>`;
+    const label = d === todayISO ? "" : `${hebDay(d)} ${hd(d).monthTitle().split(" ")[0]}`;
+    return `<div class="fab-wrap"><button class="fab" data-act="quick" data-date="${d}" aria-label="רישום · ${esc(d === todayISO ? "היום" : civilLabel(d, true))}">${I("plus", 22)}<span>רישום</span>${label ? `<small class="hebdate">${esc(label)}</small>` : ""}</button></div>`;
   }
   const mark = () => `<span class="mark"><img src="${LOGO_IMG}" alt=""></span>`;
   const langSwitch = () => `<div class="seg langs" role="group" aria-label="שפה" data-nt>${Object.entries(L.LANGS).map(([k, n]) => `<button type="button" data-lang="${k}" aria-pressed="${L.lang === k}" lang="${k}">${n}</button>`).join("")}</div>`;
@@ -706,6 +723,13 @@
       return `<div class="m-h"><div><h2 id="m-title">מה לרשום?</h2><p class="fine"><span>${esc(head)}</span> · <span class="hebdate">${esc(hebrew(d))}</span> · ${esc(civilLabel(d, true))}</p></div>${close}</div>
         <div class="quick">${[...QUICK_TYPES, ["other", "list"]].map(([v, ic]) => `<button class="quick-btn t-${v}" data-qtype="${v}"><span class="ev-ic t-${v}">${I(ic, 22)}</span><span>${v === "other" ? "אחר…" : v === "flow" ? "ראייה / וסת" : EVENT_NAMES[v]}</span></button>`).join("")}</div>`;
     }
+    if (m.kind === "prep") {
+      const list = state().settings.checklist, total = M.CHECKLIST.length, n = M.CHECKLIST.filter(x => list.includes(x)).length;
+      return `<div class="m-h"><div><h2 id="m-title">הכנות לטבילה</h2><p class="fine">${n} מתוך ${total}. הרשימה נשמרת במכשיר בלבד.</p></div>${close}</div>
+        <div class="prep-bar" role="progressbar" aria-label="הכנות לטבילה" aria-valuemin="0" aria-valuemax="${total}" aria-valuenow="${n}"><i style="width:${Math.round(n / total * 100)}%"></i></div>
+        <div class="checks">${M.CHECKLIST.map((item, i) => { const on = list.includes(item); return `<label class="${on ? "on" : ""}" for="chk-${i}"><input type="checkbox" id="chk-${i}" data-check="${esc(item)}"${on ? " checked" : ""}><span class="box" aria-hidden="true">${I("check", 15)}</span><span>${esc(item)}</span></label>`; }).join("")}</div>
+        <div class="m-actions"><button class="btn" data-act="close-modal">${I("check", 17)}סיום</button></div>`;
+    }
     if (m.kind === "text") return `<div class="m-h"><h2 id="m-title">${esc(m.title)}</h2>${close}</div><p>${esc(m.intro)}</p>
       <textarea id="m-text" class="mono" rows="9" readonly>${esc(m.text)}</textarea>
       <div class="m-actions"><button class="btn" data-act="copy-text">${I("copy", 17)}העתקה</button>${m.file ? `<button class="btn ghost" data-act="dl-text">${I("download", 17)}שמירה כקובץ</button>` : ""}</div>
@@ -753,7 +777,7 @@
         <label class="field" for="pin-cur">הקוד הנוכחי<input id="pin-cur" type="password" inputmode="numeric" pattern="[0-9]{4,6}" minlength="4" maxlength="6" required autocomplete="off" dir="ltr" class="pin-in" autofocus></label>
         ${m.error ? `<p class="err" role="alert">${esc(m.error)}</p>` : ""}
         <div class="m-actions"><button class="btn" type="submit">כיבוי הנעילה</button><button type="button" class="btn ghost" data-act="close-modal">ביטול</button></div></form>`;
-    if (m.kind === "welcome") return `<div class="welcome">${langSwitch()}<div class="mark big"><img src="${LOGO_IMG}" alt=""></div><h2 id="m-title">ברוכה הבאה למעיין</h2>
+    if (m.kind === "welcome") return `<div class="welcome">${langSwitch()}<div class="mark big"><img src="${LOGO_IMG}" alt=""></div><h2 id="m-title" tabindex="-1" autofocus>ברוכה הבאה למעיין</h2>
       <p>יומן אישי לטהרת המשפחה: רישום, חישוב עונות הפרישה, שבעה נקיים ותזכורות.</p>
       <ul class="promises"><li>${I("lock", 18)}<span><strong>פרטי לגמרי.</strong> הכול נשמר רק בטלפון הזה, בלי חשבון ובלי שרת.</span></li>
       <li>${I("scale", 18)}<span><strong>שקוף.</strong> לכל מועד מוצגים הכלל והמקור, ואת שיטת החישוב בוחרים לפי ההנחיה שקיבלת.</span></li>
@@ -764,7 +788,7 @@
       <p class="fine">המשך השימוש מהווה הסכמה ל<button class="link inline" data-act="terms">תנאי השימוש והפרטיות</button></p></div>`;
     return "";
   }
-  const QUICK_TYPES = [["flow", "droplet"], ["hefsek", "check"], ["bedikah", "check"], ["mikvah", "moon"]];
+  const QUICK_TYPES = [["flow", "droplet"], ["hefsek", "hefsek"], ["bedikah", "bedikah"], ["mikvah", "mikvah"]];
   function openEvent(opts = {}) {
     const st = state(), ctx = currentContext(st, now());
     const date = opts.date || ctx.date, c = opts.date ? atLocation(st, date) : ctx.city;
@@ -866,6 +890,7 @@
     switch (d.act) {
       case "add": return openEvent({ type: d.type, date: d.date });
       case "quick": app.modal = { kind: "quick", date: d.date || currentContext(st, now()).date }; return renderModal();
+      case "prep": app.modal = { kind: "prep" }; return renderModal();
       case "more": app.jLimit += 200; return render();
       case "cycle": app.modal = { kind: "cycle", error: "", saved: 0 }; return renderModal();
       case "hide": app.hidden = !app.hidden; return render();
