@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- וידג'ט מעיין, בינוני: כותרת, שורת היום/הערב והמועד הבא. מימין לשמאל (prepare.py יוצר גם גרסת _ltr) -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/maayan_widget_root"
+    android:layout_width="match_parent" android:layout_height="match_parent"
+    android:orientation="vertical" android:gravity="center_vertical"
+    android:layoutDirection="rtl"
+    android:background="@drawable/maayan_widget_bg"
+    android:padding="14dp">
+    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:orientation="horizontal" android:gravity="center_vertical" android:layoutDirection="rtl">
+        <ImageView android:id="@+id/maayan_widget_icon" android:layout_width="22dp" android:layout_height="22dp"
+            android:src="@drawable/maayan_widget_icon" android:contentDescription="@null"/>
+        <TextView android:id="@+id/maayan_widget_head" android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content"
+            android:layout_marginStart="8dp" android:textDirection="rtl" android:textAlignment="viewStart"
+            android:maxLines="1" android:ellipsize="end"
+            android:textColor="#FF7F5370" android:textSize="16sp" android:textStyle="bold"
+            android:text="מעיין"/>
+    </LinearLayout>
+    <TextView android:id="@+id/maayan_widget_now" android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:layout_marginTop="8dp" android:textDirection="rtl" android:textAlignment="viewStart"
+        android:maxLines="2" android:ellipsize="end"
+        android:textColor="#FF2B2230" android:textSize="14sp"
+        android:text="היום: אין מועד"/>
+    <TextView android:id="@+id/maayan_widget_next" android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:layout_marginTop="4dp" android:textDirection="rtl" android:textAlignment="viewStart"
+        android:maxLines="1" android:ellipsize="end"
+        android:textColor="#FF6E6370" android:textSize="13sp"
+        android:text=""/>
+</LinearLayout>

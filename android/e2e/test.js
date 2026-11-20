@@ -104,6 +104,45 @@ const geoFix = () => { exec("adb emu geo fix 34.8532 32.3215", { timeout: 8000 }
   check("notifications still scheduled after restart", again.pending >= 3, `count=${again.pending}`);
   await shot("8-after-restart");
 
+  // נעילה בקוד: הפעלה מההגדרות, פתיחה מחדש מציגה רק את מסך הנעילה, FLAG_SECURE, קוד שגוי, פתיחה וכיבוי
+  const secureNow = async () => {
+    const blocks = (await device.shell("dumpsys window windows")).toString().split(/Window #\d+/).filter(b => b.includes(`${PKG}/${PKG}.MainActivity`) || b.includes(`${PKG}/.MainActivity`));
+    log("window flags", blocks.map(b => (b.match(/\bfl=[^\n]*/) || ["?"])[0]).join(" | ").slice(0, 300));
+    return blocks.some(b => /\bfl=[^\n]*\bSECURE\b/.test(b));
+  };
+  check("lock plugins available", await page2.evaluate(() => Capacitor.isPluginAvailable("BiometricAuthNative") && Capacitor.isPluginAvailable("MaayanPrivacy")));
+  log("biometry", JSON.stringify(await page2.evaluate(async () => { try { return await Capacitor.Plugins.BiometricAuthNative.checkBiometry(); } catch (e) { return String(e); } })));
+  await page2.click('.tabs [data-go="prefs"]'); await sleep(800);
+  await page2.click('label[for="lk-on"]');
+  await page2.waitForSelector("#pin-form", { timeout: 10000 });
+  await page2.fill("#pin-new", "2468"); await page2.fill("#pin-new2", "2468");
+  await page2.click("#pin-form button[type=submit]"); await sleep(3000);
+  const cfg = await page2.evaluate(() => localStorage.getItem("maayan.v1.lock"));
+  check("PIN stored only as a salted hash", !!cfg && !cfg.includes("2468") && !!JSON.parse(cfg).hash && !!JSON.parse(cfg).salt, cfg || "");
+  check("recents screen hidden while lock is on (FLAG_SECURE)", await secureNow());
+  await device.shell(`am force-stop ${PKG}`); await sleep(1000);
+  await device.shell(`am start -n ${PKG}/.MainActivity`);
+  const page3 = await (await device.webView({ pkg: PKG }, { timeout: 60000 })).page();
+  await page3.waitForSelector(".lock .pad", { timeout: 60000 }); await sleep(1500);
+  const locked = await page3.evaluate(() => ({ tabs: !!document.querySelector(".tabs"), main: !!document.querySelector("main"), text: document.body.innerText.replace(/\s+/g, " ").slice(0, 200) }));
+  check("relaunch shows only the lock screen", !locked.tabs && !locked.main && !/וסת|הפסק|טבילה|מועדים/.test(locked.text), JSON.stringify(locked));
+  check("FLAG_SECURE applied from the first frame after relaunch", await secureNow());
+  for (const k of "1111") await page3.click(`[data-pin="${k}"]`);
+  await sleep(2500);
+  const wrong = await page3.evaluate(() => ({ msg: document.querySelector(".lock-msg")?.textContent, tabs: !!document.querySelector(".tabs") }));
+  check("wrong PIN rejected", !wrong.tabs && /שגוי/.test(wrong.msg || ""), wrong.msg);
+  for (const k of "2468") await page3.click(`[data-pin="${k}"]`);
+  await page3.waitForSelector("#app .tabs", { state: "attached", timeout: 20000 }).catch(() => {});
+  const opened = await page3.evaluate(() => ({ tabs: !!document.querySelector(".tabs"), events: JSON.parse(localStorage.getItem("maayan.v1.diary")).events.length }));
+  check("correct PIN unlocks the diary", opened.tabs && opened.events === 1, JSON.stringify(opened));
+  // כיבוי הנעילה (הבדיקות הבאות רצות על אפליקציה לא נעולה)
+  await page3.click('.tabs [data-go="prefs"]'); await sleep(800);
+  await page3.click('label[for="lk-on"]');
+  await page3.waitForSelector("#pin-off-form", { timeout: 10000 });
+  await page3.fill("#pin-cur", "2468"); await page3.click("#pin-off-form button[type=submit]"); await sleep(3000);
+  check("lock turned off", await page3.evaluate(() => !localStorage.getItem("maayan.v1.lock")));
+  check("FLAG_SECURE cleared when the lock is off", !(await secureNow()));
+
   const failed = results.filter(r => !r.ok);
   log(`E2E SUMMARY ${results.length - failed.length}/${results.length} passed`);
   await device.close();

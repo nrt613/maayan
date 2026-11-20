@@ -1,0 +1,5 @@
+# נוצרים בבנייה (prepare.py + npx cap add ios)
+ios/
+www/
+node_modules/
+build/

@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- וידג'ט מעיין, קטן: סמל, כותרת ושורת היום/הערב. מימין לשמאל (prepare.py יוצר גם גרסת _ltr) -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/maayan_widget_root"
+    android:layout_width="match_parent" android:layout_height="match_parent"
+    android:orientation="horizontal" android:gravity="center_vertical"
+    android:layoutDirection="rtl"
+    android:background="@drawable/maayan_widget_bg"
+    android:paddingStart="12dp" android:paddingEnd="12dp" android:paddingTop="6dp" android:paddingBottom="6dp">
+    <ImageView android:id="@+id/maayan_widget_icon" android:layout_width="24dp" android:layout_height="24dp"
+        android:src="@drawable/maayan_widget_icon" android:contentDescription="@null"/>
+    <LinearLayout android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content"
+        android:layout_marginStart="8dp" android:orientation="vertical">
+        <TextView android:id="@+id/maayan_widget_head" android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:textDirection="rtl" android:textAlignment="viewStart" android:maxLines="1" android:ellipsize="end"
+            android:textColor="#FF7F5370" android:textSize="14sp" android:textStyle="bold"
+            android:text="מעיין"/>
+        <TextView android:id="@+id/maayan_widget_now" android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:textDirection="rtl" android:textAlignment="viewStart" android:maxLines="1" android:ellipsize="end"
+            android:textColor="#FF2B2230" android:textSize="12sp"
+            android:text="היום: אין מועד"/>
+    </LinearLayout>
+</LinearLayout>

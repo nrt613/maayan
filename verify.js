@@ -123,8 +123,48 @@ for (const c of M.CITIES.filter(c => c.id !== "tromso")) for (let i = 0; i < 365
     const mine = ((s[k].getUTCHours() * 60 + s[k].getUTCMinutes() + s[k].getUTCSeconds() / 60) % 1440 + 1440) % 1440;
     let dlt = Math.abs(mine - a); if (dlt > 720) dlt = 1440 - dlt;
     if (dlt > maxDiff) { maxDiff = dlt; worst = `${c.name} ${date} ${k}`; }
-    // השקיעה מעוגלת כלפי מטה לדקה שלמה (לחומרא), ולכן מותרת דקה נוספת
-    ok(dlt < (k === "sunset" ? 2.5 : 1.5), `sun ${c.name} ${date} ${k} diff ${dlt.toFixed(2)}m`);
+    // השקיעה מעוגלת כלפי מטה והזריחה כלפי מעלה לדקה שלמה (לחומרא), ולכן מותרת דקה נוספת בשתיהן
+    ok(dlt < 2.5, `sun ${c.name} ${date} ${k} diff ${dlt.toFixed(2)}m`);
   }
+}
+/* 5. זמני שמש ושיוך ליום העברי במקומות קיצוניים: אזורי זמן רחוקים מקו האורך, קווי רוחב גבוהים, חצאי שעות */
+const WORLD = [
+  ["apia", -13.83, -171.75, "Pacific/Apia"], ["kiritimati", 1.87, -157.43, "Pacific/Kiritimati"], ["tongatapu", -21.14, -175.2, "Pacific/Tongatapu"],
+  ["honolulu", 21.31, -157.86, "Pacific/Honolulu"], ["anchorage", 61.22, -149.9, "America/Anchorage"], ["reykjavik", 64.15, -21.94, "Atlantic/Reykjavik"],
+  ["auckland", -36.85, 174.76, "Pacific/Auckland"], ["kolkata", 22.57, 88.36, "Asia/Kolkata"], ["kathmandu", 27.72, 85.32, "Asia/Kathmandu"],
+  ["buenos-aires", -34.6, -58.38, "America/Argentina/Buenos_Aires"], ["madrid", 40.42, -3.7, "Europe/Madrid"], ["stockholm", 59.33, 18.07, "Europe/Stockholm"],
+].map(([id, lat, lon, tz], i) => ({ id: "gps-" + String(i + 1).padStart(8, "0"), name: id, lat, lon, tz }));
+M.setPlaces(WORLD);
+for (const c of [...WORLD, M.city("tromso"), M.city("sydney"), M.city("los-angeles")]) for (let i = 0; i < 365; i += 4) {
+  const date = addD("2026-01-01", i), s = M.sun(date, c);
+  if (s.sunrise) ok(M.dateInZone(s.sunrise, c.tz) === date, `sunrise local date ${c.name} ${date}`);
+  if (s.sunset) { const sd = M.dateInZone(s.sunset, c.tz); ok(sd === date || (sd === addD(date, 1) && Math.abs(c.lat) > 55 && M.timeInZone(s.sunset, c.tz) < "03:00"), `sunset local date ${c.name} ${date} ${sd}`); }
+  if (s.sunrise && s.sunset) ok(s.sunrise < s.sunset, `sunrise before sunset ${c.name} ${date}`);
+  if (!s.sunrise || !s.sunset) continue;
+  // שיוך רגעים לאורך היממה: הסדר העונתי אינו יורד, ומתחלף רק בזריחה או בשקיעה
+  let prev = null;
+  for (let m = 0; m < 1440; m += 20) {
+    const time = `${String(Math.floor(m / 60)).padStart(2, "0")}:${String(m % 60).padStart(2, "0")}`;
+    let st; try { st = M.stamp({ date, time, cityId: c.id }); } catch { prev = null; continue; }
+    if (prev) {
+      ok(st.ordinal >= prev.ordinal && st.ordinal - prev.ordinal <= 1, `ordinal order ${c.name} ${date} ${time}`);
+      if (st.ordinal !== prev.ordinal) { const edge = st.onah === "day" ? M.sun(M.fromAbs(st.abs), c).sunrise : M.sun(M.fromAbs(st.abs - 1), c).sunset; ok(edge && edge > prev.instant && edge <= st.instant, `onah edge ${c.name} ${date} ${time}`); }
+    }
+    prev = st;
+  }
+}
+M.setPlaces([]);
+/* 6. בין השמשות: ראייה אחרי השקיעה ולפני צאת הכוכבים — מועדים לשתי העונות, והמתנה מהיום המאוחר */
+for (let i = 0; i < 600; i++) {
+  const date = addD("2024-01-01", Math.floor(rnd() * 900)), k = 1 + Math.floor(rnd() * 30), nightfall = pick(["8.5", "13.5z", "20m"]), wait = pick(["five", "four"]);
+  const t = M.timeInZone(new Date(M.sun(date, city).sunset.valueOf() + k * 60000), tz), e = ev("flow", date, t);
+  let st; try { st = M.stamp(e, nightfall); } catch { continue; }
+  const s = M.emptyState(); s.settings = { ...s.settings, nightfall, wait }; s.events = [e];
+  const r = M.calculate(s, new Date(Date.parse(date + "T12:00:00Z") + 3 * 864e5));
+  const later = addD(date, 1);
+  ok(r.earliestHefsek === addD(later, wait === "five" ? 4 : 3), `bhs wait ${date} +${k} ${wait}`);
+  const got = r.plans.filter(p => p.kind === "average").map(p => planHebDay(p) + "|" + p.onah).sort();
+  const want = (st.twilight || st.uncertain ? [addD(date, 29) + "|day", addD(later, 29) + "|night"] : [addD(later, 29) + "|night"]).sort();
+  ok(JSON.stringify(got) === JSON.stringify(want), `bhs average ${date} +${k}m ${nightfall} ${got} vs ${want}`);
 }
 console.log(`checks: ${checks}, failures: ${fails}, max sun diff vs 2nd algorithm: ${maxDiff.toFixed(2)} min (${worst})`);
