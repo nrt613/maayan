@@ -1,0 +1,127 @@
+device sdk_gphone64_x86_64 android 15
+info {"native":true,"platform":"android","plugins":["LocalNotifications","Geolocation","Filesystem","Share","App"],"url":"https://localhost/","lang":"en-US","tz":"Asia/Jerusalem","fonts":"Rubik:loaded,Rubik:loaded,Rubik:unloaded"}
+E2E OK   runs as native app 
+E2E OK   all plugins available LocalNotifications,Geolocation,Filesystem,Share,App
+E2E OK   no network requests []
+E2E OK   terms screen 
+E2E OK   entry saved on device events=1
+pending [{"id":1757601340,"title":"תזכורת אישית","at":"Sat Nov 21 16:07:00 GMT+02:00 2026"},{"id":953046923,"title":"תזכורת אישית","at":"Thu Dec 17 08:00:00 GMT+02:00 2026"},{"id":1419538292,"title":"תזכורת אישית","at":"Wed Dec 16 08:00:00 GMT+02:00 2026"}]
+E2E OK   notifications scheduled count=3
+E2E OK   notification text is discreet תזכורת אישית
+permissions {"p":{"display":"granted"},"e":{"exact_alarm":"granted"}}
+E2E OK   dates screen shows scheduled count התראות במכשיר ההתראות מגיעות גם כשהאפליקציה סגורה. הן מתעדכנות בכל שינוי ביומן.מתוזמנות כרגע: 3 התראות ההרשאה פעילה
+E2E OK   system alarms registered lines=9
+E2E OK   notification delivered while app in background records=2
+console error {message: Could not obtain location in time. Try with a higher timeout., code: OS-PLUG-GLOC-0010}
+E2E OK   location detected 32.3215, 34.8532 · Asia/Jerusalem
+E2E OK   detected place is the default 
+E2E OK   diary survives app restart {"events":1,"welcome":false,"pending":3,"lang":"he"}
+E2E OK   notifications still scheduled after restart count=3
+E2E OK   lock plugins available 
+biometry {"reason":"The user does not have any biometrics enrolled.","code":"biometryNotEnrolled","isAvailable":false,"strongReason":"The user does not have any biometrics enrolled.","strongCode":"biometryNotEnrolled","strongBiometryIsAvailable":false,"biometryType":3,"biometryTypes":[3,4],"deviceIsSecure":false}
+E2E OK   PIN stored only as a salted hash {"after":0,"bio":false,"secure":true,"v":1,"kdf":"PBKDF2-SHA256","iter":210000,"salt":"dagECqxnPtPTMS3HZ7d0rw==","hash":"O28/+TNCvQ9Pxg8Vvl/9d2bXIjK2+2yyxxq/R16CbLo=","len":4}
+window flags fl=KEEP_SCREEN_ON LAYOUT_IN_SCREEN SECURE LAYOUT_INSET_DECOR SPLIT_TOUCH HARDWARE_ACCELERATED DRAWS_SYSTEM_BAR_BACKGROUNDS | fl=NOT_FOCUSABLE NOT_TOUCHABLE LAYOUT_IN_SCREEN LAYOUT_NO_LIMITS SCALED LAYOUT_INSET_DECOR
+E2E OK   recents screen hidden while lock is on (FLAG_SECURE) 
+E2E OK   relaunch shows only the lock screen {"tabs":false,"main":false,"text":"מעיין הזיני את הקוד 1 2 3 4 5 6 7 8 9 0 שכחתי את הקוד"}
+window flags fl=KEEP_SCREEN_ON LAYOUT_IN_SCREEN SECURE LAYOUT_INSET_DECOR SPLIT_TOUCH HARDWARE_ACCELERATED DRAWS_SYSTEM_BAR_BACKGROUNDS | fl=NOT_FOCUSABLE NOT_TOUCHABLE LAYOUT_IN_SCREEN LAYOUT_NO_LIMITS SCALED LAYOUT_INSET_DECOR
+E2E OK   FLAG_SECURE applied from the first frame after relaunch 
+E2E OK   wrong PIN rejected קוד שגוי. נסי שוב
+E2E OK   correct PIN unlocks the diary {"tabs":true,"events":1}
+E2E OK   lock turned off 
+window flags fl=KEEP_SCREEN_ON LAYOUT_IN_SCREEN LAYOUT_INSET_DECOR SPLIT_TOUCH HARDWARE_ACCELERATED DRAWS_SYSTEM_BAR_BACKGROUNDS | fl=NOT_FOCUSABLE NOT_TOUCHABLE LAYOUT_IN_SCREEN LAYOUT_NO_LIMITS SCALED LAYOUT_INSET_DECOR
+E2E OK   FLAG_SECURE cleared when the lock is off 
+E2E SUMMARY 23/23 passed
+E2E OK   widget: provider registered 
+E2E OK   widget: plugin available 
+E2E OK   widget: off by default {"v":1,"lang":"he","dir":"rtl","generated":1795163869187,"app":"מעיין","open":"פתיחת היומן","enabled":false,"entries":[]}
+E2E OK   widget: setting shown on Android 
+widget discreet [{"from":1795163878911,"until":1795185420000,"head":"","now":"היום: אין מועד","next":"תזכורת אישית: מחר 16:07"},{"from":1795185420000,"until":1795212000000,"head":"","now":"הערב: אין מועד","next":"תזכורת אישית: מחר 16:07"},{"from":1795212000000,"until":1795270020000,"head":"","now":"היום: תזכורת אישית · מ-16:07","next":"תזכורת אישית: 16.12 06:35"}]
+E2E OK   widget: enabled writes a discreet summary entries=8
+E2E OK   widget: discreet text has no halachic words 
+widget full [{"from":1795163881714,"until":1795185420000,"head":"ממתינה להפסק טהרה","now":"היום: אין מועד","next":"הפסק טהרה: מחר 16:07"},{"from":1795185420000,"until":1795212000000,"head":"ממתינה להפסק טהרה","now":"הערב: אין מועד","next":"הפסק טהרה: מחר 16:07"},{"from":1795212000000,"until":1795270020000,"head":"ממתינה להפסק טהרה","now":"היום: הפסק טהרה · מ-16:07","next":"עונה בינונית · יום 30: 16.12 06:35"}]
+E2E OK   widget: full style written 
+E2E OK   widget: a line is valid now ממתינה להפסק טהרה | היום: אין מועד | הפסק טהרה: מחר 16:07
+E2E OK   widget: stored in SharedPreferences bytes=2232
+E2E OK   widget: no crash 
+E2E WIDGET SUMMARY 10/10 passed
+11-20 10:37:58.930   557  1119 I AppsFilter: interaction: PackageSetting{2a152f4 io.github.nrt613.maayan/10209} -> PackageSetting{7b962ea com.google.android.inputmethod.latin/10154} BLOCKED
+11-20 10:37:58.970  5593  5593 I Capacitor/Console: File:  - Line 334 - Msg: {"display":"granted"}
+11-20 10:37:58.971  5593  5593 I Capacitor/Console: File:  - Line 350 - Msg: [object Object]
+11-20 10:37:58.972  5593  5593 V Capacitor/Plugin: To native (Capacitor plugin): callbackId: 108110214, pluginId: MaayanWidget, methodName: setData
+11-20 10:37:58.974  5593  5593 V Capacitor: callback: 108110214, pluginId: MaayanWidget, methodName: setData, methodData: {"json":"{\"v\":1,\"lang\":\"he\",\"dir\":\"rtl\",\"generated\":1795163878911,\"app\":\"מעיין\",\"open\":\"פתיחת היומן\",\"enabled\":true,\"style\":\"discreet\",\"locked\":false,\"until\":1795423078911,\"entries\":[{\"from\":1795163878911,\"until\":1795185420000,\"head\":\"\",\"now\":\"היום: אין מועד\",\"next\":\"תזכורת אישית: מחר 16:07\"},{\"from\":1795185420000,\"until\":1795212000000,\"head\":\"\",\"now\":\"הערב: אין מועד\",\"next\":\"תזכורת אישית: מחר 16:07\"},{\"from\":1795212000000,\"until\":1795270020000,\"head\":\"\",\"now\":\"היום: תזכורת אישית · מ-16:07\",\"next\":\"תזכורת אישית: 16.12 06:35\"},{\"from\":1795270020000,\"until\":1795271820000,\"head\":\"\",\"now\":\"עכשיו: תזכורת אישית · עד 16:37\",\"next\":\"תזכורת אישית: 16.12 06:35\"},{\"from\":1795271820000,\"until\":1795298400000,\"head\":\"\",\"now\":\"הערב: אין מועד\",\"next\":\"תזכורת אישית: מחר 16:07\"},{\"from\":1795298400000,\"until\":1795358220000,\"head\":\"\",\"now\":\"היום: תזכורת אישית · מ-16:07\",\"next\":\"תזכורת אישית: 16.12 06:35\"},{\"from\":1795358220000,\"until\":1795384800000,\"head\":\"\",\"now\":\"הערב: אין מועד\",\"next\":\"תזכורת אישית: מחר 16:06\"},{\"from\":1795384800000,\"until\":1795423078911,\"head\":\"\",\"now\":\"היום: תזכורת אישית · מ-16:06\",\"next\":\"תזכורת אישית: 16.12 06:35\"}],\"stale\":\"לעדכון, פתחי את היומן\"}"}
+11-20 10:37:58.978   557  1119 D ContentCapturePerUserService: Notified activity assist data for activity: Token{6f4da48 ActivityRecord{b2a883a u0 io.github.nrt613.maayan/.MainActivity t10}} without a session Id
+11-20 10:37:59.354  5593  5593 V Capacitor/Plugin: To native (Capacitor plugin): callbackId: 108110215, pluginId: LocalNotifications, methodName: checkExactNotificationSetting
+11-20 10:37:59.354  5593  5593 V Capacitor: callback: 108110215, pluginId: LocalNotifications, methodName: checkExactNotificationSetting, methodData: {}
+11-20 10:37:59.509  5593  5593 I Capacitor/Console: File:  - Line 334 - Msg: undefined
+11-20 10:37:59.786  5593  5593 I Capacitor/Console: File:  - Line 334 - Msg: {"exact_alarm":"granted"}
+11-20 10:37:59.786  5593  5593 I Capacitor/Console: File:  - Line 350 - Msg: [object Object]
+11-20 10:37:59.873  5593  5593 V Capacitor/Plugin: To native (Capacitor plugin): callbackId: 108110216, pluginId: LocalNotifications, methodName: getPending
+11-20 10:37:59.874  5593  5593 V Capacitor: callback: 108110216, pluginId: LocalNotifications, methodName: getPending, methodData: {}
+11-20 10:38:00.166  5593  5593 I Capacitor/Console: File:  - Line 334 - Msg: {"notifications":[{"id":1757601340,"title":"תזכורת אישית","body":"פרטים ביומן האישי","schedule":{"at":"Sat Nov 21 16:07:00 GMT+02:00 2026","count":1,"repeats":false}},{"id":953046923,"title":"תזכורת אישית","body":"פרטים ביומן האישי","schedule":{"at":"Thu Dec 17 08:00:00 GMT+02:00 2026","count":1,"repeats":false}},{"id":1419538292,"title":"תזכורת אישית","body":"פרטים ביומן האישי","schedule":{"at":"Wed Dec 16 08:00:00 GMT+02:00 2026","count":1,"repeats":false}}]}
+11-20 10:38:00.169  5593  5593 I Capacitor/Console: File:  - Line 350 - Msg: [object Object]
+11-20 10:38:00.173  5593  5593 V Capacitor/Plugin: To native (Capacitor plugin): callbackId: 108110217, pluginId: LocalNotifications, methodName: cancel
+11-20 10:38:00.173  5593  5593 V Capacitor: callback: 108110217, pluginId: LocalNotifications, methodName: cancel, methodData: {"notifications":[{"id":1757601340},{"id":953046923},{"id":1419538292}]}
+11-20 10:38:00.244  5593  5593 I Capacitor/Console: File:  - Line 334 - Msg: undefined
+11-20 10:38:00.244  5593  5593 I Capacitor/Console: File:  - Line 350 - Msg: [object Object]
+11-20 10:38:00.258  5593  5593 V Capacitor/Plugin: To native (Capacitor plugin): callbackId: 108110218, pluginId: LocalNotifications, methodName: createChannel
+11-20 10:38:00.258  5593  5593 V Capacitor: callback: 108110218, pluginId: LocalNotifications, methodName: createChannel, methodData: {"id":"maayan","name":"תזכורות","description":"תזכורות אישיות מהיומן","importance":4,"visibility":0}
+11-20 10:38:00.266  5593  5593 I Capacitor/Console: File:  - Line 334 - Msg: undefined
+11-20 10:38:00.269  5593  5593 I Capacitor/Console: File:  - Line 350 - Msg: [object Object]
+11-20 10:38:00.272  5593  5593 V Capacitor/Plugin: To native (Capacitor plugin): callbackId: 108110219, pluginId: LocalNotifications, methodName: schedule
+11-20 10:38:00.272  5593  5593 V Capacitor: callback: 108110219, pluginId: LocalNotifications, methodName: schedule, methodData: {"notifications":[{"id":1757601340,"channelId":"maayan","title":"תזכורת אישית","body":"פרטים ביומן האישי","schedule":{"at":"2026-11-21T14:07:00.000Z","allowWhileIdle":true}},{"id":1419538292,"channelId":"maayan","title":"תזכורת אישית","body":"פרטים ביומן האישי","schedule":{"at":"2026-12-16T06:00:00.000Z","allowWhileIdle":true}},{"id":953046923,"channelId":"maayan","title":"תזכורת אישית","body":"פרטים ביומן האישי","schedule":{"at":"2026-12-17T06:00:00.000Z","allowWhileIdle":true}}]}
+11-20 10:38:00.280  5593  5593 I Capacitor/Console: File:  - Line 334 - Msg: {"notifications":[{"id":1757601340},{"id":1419538292},{"id":953046923}]}
+11-20 10:38:01.669  5593  5593 I Capacitor/Console: File:  - Line 350 - Msg: [object Object]
+11-20 10:38:01.670  5593  5593 V Capacitor/Plugin: To native (Capacitor plugin): callbackId: 108110220, pluginId: MaayanWidget, methodName: getData
+11-20 10:38:01.670  5593  5593 V Capacitor: callback: 108110220, pluginId: MaayanWidget, methodName: getData, methodData: {}
+11-20 10:38:01.671  5593  5593 I Capacitor/Console: File:  - Line 334 - Msg: {"json":"{\"v\":1,\"lang\":\"he\",\"dir\":\"rtl\",\"generated\":1795163878911,\"app\":\"מעיין\",\"open\":\"פתיחת היומן\",\"enabled\":true,\"style\":\"discreet\",\"locked\":false,\"until\":1795423078911,\"entries\":[{\"from\":1795163878911,\"until\":1795185420000,\"head\":\"\",\"now\":\"היום: אין מועד\",\"next\":\"תזכורת אישית: מחר 16:07\"},{\"from\":1795185420000,\"until\":1795212000000,\"head\":\"\",\"now\":\"הערב: אין מועד\",\"next\":\"תזכורת אישית: מחר 16:07\"},{\"from\":1795212000000,\"until\":1795270020000,\"head\":\"\",\"now\":\"היום: תזכורת אישית · מ-16:07\",\"next\":\"תזכורת אישית: 16.12 06:35\"},{\"from\":1795270020000,\"until\":1795271820000,\"head\":\"\",\"now\":\"עכשיו: תזכורת אישית · עד 16:37\",\"next\":\"תזכורת אישית: 16.12 06:35\"},{\"from\":1795271820000,\"until\":1795298400000,\"head\":\"\",\"now\":\"הערב: אין מועד\",\"next\":\"תזכורת אישית: מחר 16:07\"},{\"from\":1795298400000,\"until\":1795358220000,\"head\":\"\",\"now\":\"היום: תזכורת אישית · מ-16:07\",\"next\":\"תזכורת אישית: 16.12 06:35\"},{\"from\":1795358220000,\"until\":1795384800000,\"head\":\"\",\"now\":\"הערב: אין מועד\",\"next\":\"תזכורת אישית: מחר 16:06\"},{\"from\":1795384800000,\"until\":1795423078911,\"head\":\"\",\"now\":\"היום: תזכורת אישית · מ-16:06\",\"next\":\"תזכורת אישית: 16.12 06:35\"}],\"stale\":\"לעדכון, פתחי את היומן\"}"}
+11-20 10:38:01.691  5628  5652 I chromium: [INFO:document_style_environment_variables.cc(104)] E2E_Used SafeAreaInsetBottom
+11-20 10:38:01.708  5593  5593 I Capacitor/Console: File:  - Line 350 - Msg: [object Object]
+11-20 10:38:01.709  5628  5652 I chromium: [INFO:document_style_environment_variables.cc(104)] E2E_Used SafeAreaInsetBottom
+11-20 10:38:01.709  5593  5593 V Capacitor/Plugin: To native (Capacitor plugin): callbackId: 108110221, pluginId: LocalNotifications, methodName: checkPermissions
+11-20 10:38:01.709  5593  5593 V Capacitor: callback: 108110221, pluginId: LocalNotifications, methodName: checkPermissions, methodData: {}
+11-20 10:38:01.716  5593  5593 I Capacitor/Console: File:  - Line 350 - Msg: [object Object]
+11-20 10:38:01.717   557  1119 I AppsFilter: interaction: PackageSetting{2a152f4 io.github.nrt613.maayan/10209} -> PackageSetting{7b962ea com.google.android.inputmethod.latin/10154} BLOCKED
+11-20 10:38:01.718  5593  5593 I Capacitor/Console: File:  - Line 334 - Msg: {"display":"granted"}
+11-20 10:38:01.719  5593  5593 I Capacitor/Console: File:  - Line 350 - Msg: [object Object]
+11-20 10:38:01.719  5593  5593 V Capacitor/Plugin: To native (Capacitor plugin): callbackId: 108110222, pluginId: MaayanWidget, methodName: setData
+11-20 10:38:01.719  5593  5593 V Capacitor: callback: 108110222, pluginId: MaayanWidget, methodName: setData, methodData: {"json":"{\"v\":1,\"lang\":\"he\",\"dir\":\"rtl\",\"generated\":1795163881714,\"app\":\"מעיין\",\"open\":\"פתיחת היומן\",\"enabled\":true,\"style\":\"full\",\"locked\":false,\"until\":1795423081714,\"entries\":[{\"from\":1795163881714,\"until\":1795185420000,\"head\":\"ממתינה להפסק טהרה\",\"now\":\"היום: אין מועד\",\"next\":\"הפסק טהרה: מחר 16:07\"},{\"from\":1795185420000,\"until\":1795212000000,\"head\":\"ממתינה להפסק טהרה\",\"now\":\"הערב: אין מועד\",\"next\":\"הפסק טהרה: מחר 16:07\"},{\"from\":1795212000000,\"until\":1795270020000,\"head\":\"ממתינה להפסק טהרה\",\"now\":\"היום: הפסק טהרה · מ-16:07\",\"next\":\"עונה בינונית · יום 30: 16.12 06:35\"},{\"from\":1795270020000,\"until\":1795271820000,\"head\":\"ממתינה להפסק טהרה\",\"now\":\"עכשיו: הפסק טהרה · עד 16:37\",\"next\":\"עונה בינונית · יום 30: 16.12 06:35\"},{\"from\":1795271820000,\"until\":1795298400000,\"head\":\"ממתינה להפסק טהרה\",\"now\":\"הערב: אין מועד\",\"next\":\"הפסק טהרה: מחר 16:07\"},{\"from\":1795298400000,\"until\":1795358220000,\"head\":\"ממתינה להפסק טהרה\",\"now\":\"היום: הפסק טהרה · מ-16:07\",\"next\":\"עונה בינונית · יום 30: 16.12 06:35\"},{\"from\":1795358220000,\"until\":1795384800000,\"head\":\"ממתינה להפסק טהרה\",\"now\":\"הערב: אין מועד\",\"next\":\"הפסק טהרה: מחר 16:06\"},{\"from\":1795384800000,\"until\":1795423081714,\"head\":\"ממתינה להפסק טהרה\",\"now\":\"היום: הפסק טהרה · מ-16:06\",\"next\":\"עונה בינונית · יום 30: 16.12 06:35\"}],\"stale\":\"לעדכון, פתחי את היומן\"}"}
+11-20 10:38:01.728   557  1690 D ContentCapturePerUserService: Notified activity assist data for activity: Token{6f4da48 ActivityRecord{b2a883a u0 io.github.nrt613.maayan/.MainActivity t10}} without a session Id
+11-20 10:38:01.729  5593  5593 I Capacitor/Console: File:  - Line 334 - Msg: undefined
+11-20 10:38:01.729  5593  5593 V Capacitor/Plugin: To native (Capacitor plugin): callbackId: 108110223, pluginId: LocalNotifications, methodName: checkExactNotificationSetting
+11-20 10:38:01.729  5593  5593 V Capacitor: callback: 108110223, pluginId: LocalNotifications, methodName: checkExactNotificationSetting, methodData: {}
+11-20 10:38:01.731  5593  5593 I Capacitor/Console: File:  - Line 334 - Msg: {"exact_alarm":"granted"}
+11-20 10:38:01.731  5593  5593 I Capacitor/Console: File:  - Line 350 - Msg: [object Object]
+11-20 10:38:01.732  5593  5593 V Capacitor/Plugin: To native (Capacitor plugin): callbackId: 108110224, pluginId: LocalNotifications, methodName: getPending
+11-20 10:38:01.732  5593  5593 V Capacitor: callback: 108110224, pluginId: LocalNotifications, methodName: getPending, methodData: {}
+11-20 10:38:01.735  5593  5593 I Capacitor/Console: File:  - Line 334 - Msg: {"notifications":[{"id":1757601340,"title":"תזכורת אישית","body":"פרטים ביומן האישי","schedule":{"at":"Sat Nov 21 16:07:00 GMT+02:00 2026","count":1,"repeats":false}},{"id":953046923,"title":"תזכורת אישית","body":"פרטים ביומן האישי","schedule":{"at":"Thu Dec 17 08:00:00 GMT+02:00 2026","count":1,"repeats":false}},{"id":1419538292,"title":"תזכורת אישית","body":"פרטים ביומן האישי","schedule":{"at":"Wed Dec 16 08:00:00 GMT+02:00 2026","count":1,"repeats":false}}]}
+11-20 10:38:02.032  5593  5593 I Capacitor/Console: File:  - Line 350 - Msg: [object Object]
+11-20 10:38:02.188  5593  5593 V Capacitor/Plugin: To native (Capacitor plugin): callbackId: 108110225, pluginId: LocalNotifications, methodName: cancel
+11-20 10:38:02.188  5593  5593 V Capacitor: callback: 108110225, pluginId: LocalNotifications, methodName: cancel, methodData: {"notifications":[{"id":1757601340},{"id":953046923},{"id":1419538292}]}
+11-20 10:38:02.380  5593  5593 I Capacitor/Console: File:  - Line 334 - Msg: undefined
+11-20 10:38:02.380  5593  5593 I Capacitor/Console: File:  - Line 350 - Msg: [object Object]
+11-20 10:38:02.381  5593  5593 V Capacitor/Plugin: To native (Capacitor plugin): callbackId: 108110226, pluginId: LocalNotifications, methodName: createChannel
+11-20 10:38:02.381  5593  5593 V Capacitor: callback: 108110226, pluginId: LocalNotifications, methodName: createChannel, methodData: {"id":"maayan","name":"תזכורות","description":"תזכורות אישיות מהיומן","importance":4,"visibility":0}
+11-20 10:38:02.404  5593  5593 I Capacitor/Console: File:  - Line 334 - Msg: undefined
+11-20 10:38:02.411  5593  5593 I Capacitor/Console: File:  - Line 350 - Msg: [object Object]
+11-20 10:38:02.430  5593  5593 V Capacitor/Plugin: To native (Capacitor plugin): callbackId: 108110227, pluginId: LocalNotifications, methodName: schedule
+11-20 10:38:02.430  5593  5593 V Capacitor: callback: 108110227, pluginId: LocalNotifications, methodName: schedule, methodData: {"notifications":[{"id":1757601340,"channelId":"maayan","title":"תזכורת אישית","body":"פרטים ביומן האישי","schedule":{"at":"2026-11-21T14:07:00.000Z","allowWhileIdle":true}},{"id":1419538292,"channelId":"maayan","title":"תזכורת אישית","body":"פרטים ביומן האישי","schedule":{"at":"2026-12-16T06:00:00.000Z","allowWhileIdle":true}},{"id":953046923,"channelId":"maayan","title":"תזכורת אישית","body":"פרטים ביומן האישי","schedule":{"at":"2026-12-17T06:00:00.000Z","allowWhileIdle":true}}]}
+11-20 10:38:02.445  5593  5593 I Capacitor/Console: File:  - Line 334 - Msg: {"notifications":[{"id":1757601340},{"id":1419538292},{"id":953046923}]}
+11-20 10:38:03.738  5593  5593 I Capacitor/Console: File:  - Line 350 - Msg: [object Object]
+11-20 10:38:03.739  5593  5593 V Capacitor/Plugin: To native (Capacitor plugin): callbackId: 108110228, pluginId: MaayanWidget, methodName: getData
+11-20 10:38:03.739  5593  5593 V Capacitor: callback: 108110228, pluginId: MaayanWidget, methodName: getData, methodData: {}
+11-20 10:38:03.741  5593  5593 I Capacitor/Console: File:  - Line 334 - Msg: {"json":"{\"v\":1,\"lang\":\"he\",\"dir\":\"rtl\",\"generated\":1795163881714,\"app\":\"מעיין\",\"open\":\"פתיחת היומן\",\"enabled\":true,\"style\":\"full\",\"locked\":false,\"until\":1795423081714,\"entries\":[{\"from\":1795163881714,\"until\":1795185420000,\"head\":\"ממתינה להפסק טהרה\",\"now\":\"היום: אין מועד\",\"next\":\"הפסק טהרה: מחר 16:07\"},{\"from\":1795185420000,\"until\":1795212000000,\"head\":\"ממתינה להפסק טהרה\",\"now\":\"הערב: אין מועד\",\"next\":\"הפסק טהרה: מחר 16:07\"},{\"from\":1795212000000,\"until\":1795270020000,\"head\":\"ממתינה להפסק טהרה\",\"now\":\"היום: הפסק טהרה · מ-16:07\",\"next\":\"עונה בינונית · יום 30: 16.12 06:35\"},{\"from\":1795270020000,\"until\":1795271820000,\"head\":\"ממתינה להפסק טהרה\",\"now\":\"עכשיו: הפסק טהרה · עד 16:37\",\"next\":\"עונה בינונית · יום 30: 16.12 06:35\"},{\"from\":1795271820000,\"until\":1795298400000,\"head\":\"ממתינה להפסק טהרה\",\"now\":\"הערב: אין מועד\",\"next\":\"הפסק טהרה: מחר 16:07\"},{\"from\":1795298400000,\"until\":1795358220000,\"head\":\"ממתינה להפסק טהרה\",\"now\":\"היום: הפסק טהרה · מ-16:07\",\"next\":\"עונה בינונית · יום 30: 16.12 06:35\"},{\"from\":1795358220000,\"until\":1795384800000,\"head\":\"ממתינה להפסק טהרה\",\"now\":\"הערב: אין מועד\",\"next\":\"הפסק טהרה: מחר 16:06\"},{\"from\":1795384800000,\"until\":1795423081714,\"head\":\"ממתינה להפסק טהרה\",\"now\":\"היום: הפסק טהרה · מ-16:06\",\"next\":\"עונה בינונית · יום 30: 16.12 06:35\"}],\"stale\":\"לעדכון, פתחי את היומן\"}"}
+11-20 10:38:03.815  5593  5593 V Capacitor/AppPlugin: Notifying listeners for event pause
+11-20 10:38:03.815  5593  5593 D Capacitor/AppPlugin: No listeners found for event pause
+11-20 10:38:03.815  5593  5593 D Capacitor: App paused
+11-20 10:38:03.876   557   641 D ActivityManager: sync unfroze 3108 com.google.android.webview:sandboxed_process0:org.chromium.content.app.SandboxedProcessService0:0 for 6
+11-20 10:38:04.174   557   579 V WindowManager:         {WCT{RemoteToken{78b13f2 Task{d79dceb #10 type=standard A=10209:io.github.nrt613.maayan}}} m=TO_BACK f=NONE leash=Surface(name=Task=10)/@0x5c95b54 sb=Rect(0, 0 - 1080, 2400) eb=Rect(0, 0 - 1080, 2400) d=0 taskParent=-1},
+11-20 10:38:04.671  5593  5593 D Capacitor/AppPlugin: Firing change: false
+11-20 10:38:04.671  5593  5593 V Capacitor/AppPlugin: Notifying listeners for event appStateChange
+11-20 10:38:04.671  5593  5593 D Capacitor: App stopped
+11-20 10:38:04.672  5593  5593 D Capacitor: Saving instance state!
+11-20 10:38:04.703  5593  5593 I Capacitor/Console: File:  - Line 334 - Msg: {"isActive":false}
+11-20 10:38:05.542  5593  5593 I Capacitor/Console: File:  - Line 350 - Msg: [object Object]
+11-20 10:38:05.544  5593  5593 V Capacitor/Plugin: To native (Capacitor plugin): callbackId: 108110229, pluginId: MaayanWidget, methodName: setData
+11-20 10:38:05.545  5593  5593 V Capacitor: callback: 108110229, pluginId: MaayanWidget, methodName: setData, methodData: {"json":"{\"v\":1,\"lang\":\"he\",\"dir\":\"rtl\",\"generated\":1795163885529,\"app\":\"מעיין\",\"open\":\"פתיחת היומן\",\"enabled\":true,\"style\":\"full\",\"locked\":false,\"until\":1795423085529,\"entries\":[{\"from\":1795163885529,\"until\":1795185420000,\"head\":\"ממתינה להפסק טהרה\",\"now\":\"היום: אין מועד\",\"next\":\"הפסק טהרה: מחר 16:07\"},{\"from\":1795185420000,\"until\":1795212000000,\"head\":\"ממתינה להפסק טהרה\",\"now\":\"הערב: אין מועד\",\"next\":\"הפסק טהרה: מחר 16:07\"},{\"from\":1795212000000,\"until\":1795270020000,\"head\":\"ממתינה להפסק טהרה\",\"now\":\"היום: הפסק טהרה · מ-16:07\",\"next\":\"עונה בינונית · יום 30: 16.12 06:35\"},{\"from\":1795270020000,\"until\":1795271820000,\"head\":\"ממתינה להפסק טהרה\",\"now\":\"עכשיו: הפסק טהרה · עד 16:37\",\"next\":\"עונה בינונית · יום 30: 16.12 06:35\"},{\"from\":1795271820000,\"until\":1795298400000,\"head\":\"ממתינה להפסק טהרה\",\"now\":\"הערב: אין מועד\",\"next\":\"הפסק טהרה: מחר 16:07\"},{\"from\":1795298400000,\"until\":1795358220000,\"head\":\"ממתינה להפסק טהרה\",\"now\":\"היום: הפסק טהרה · מ-16:07\",\"next\":\"עונה בינונית · יום 30: 16.12 06:35\"},{\"from\":1795358220000,\"until\":1795384800000,\"head\":\"ממתינה להפסק טהרה\",\"now\":\"הערב: אין מועד\",\"next\":\"הפסק טהרה: מחר 16:06\"},{\"from\":1795384800000,\"until\":1795423085529,\"head\":\"ממתינה להפסק טהרה\",\"now\":\"היום: הפסק טהרה · מ-16:06\",\"next\":\"עונה בינונית · יום 30: 16.12 06:35\"}],\"stale\":\"לעדכון, פתחי את היומן\"}"}
+11-20 10:38:05.548  5593  5593 I Capacitor/Console: File:  - Line 334 - Msg: undefined
+E2E OK   signed release launches
