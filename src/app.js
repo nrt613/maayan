@@ -20,6 +20,9 @@
     return `<div class="cites"><span class="cites-h">${label}:</span><ul>${list.map(([id, c]) => `<li>${c.ref ? `<a href="${esc(M.citeUrl(id))}" target="_blank" rel="noopener">${esc(c.t)}</a>` : `<span>${esc(c.t)}</span> <small class="nv">⚠ לא אומת מול לשון הספר — לבדיקת הרב</small>`}</li>`).join("")}</ul></div>`;
   };
 
+  /** נקודות לבירור: שאלות ״יש לשאול רב״ קודם, ואחריהן השאר בסדרן */
+  const askFirst = list => [...list.filter(v => v.ask), ...list.filter(v => !v.ask)];
+
   /* ---------- אייקונים ---------- */
   // סט אייקונים אחיד: רשת 24, קו 1.75 עם קצוות מעוגלים. class="f" = מילוי רך (במצב פעיל או באריח צבעוני), class="s" = כוכב מלא, class="dot" = נקודה
   const P = {
@@ -356,7 +359,7 @@
         ${methodChooser(st.settings, "first")}
         <ul class="method-sum">${M.settingsSummary(st.settings).filter(x => /^(שיטה|המתנה|הפלגה|עונה בינונית|יום 31|אור זרוע)/.test(x)).map(x => `<li>${esc(x)}</li>`).join("")}</ul>
         <button class="btn ghost full" data-go="prefs">${I("sliders", 17)}התאמה אישית לפי הוראת הרב</button></section>` : ""}
-      ${r.reviews.length ? `<button class="notice" data-go="journal"><span class="notice-ic">${I("help", 20)}</span><span><strong>${r.reviews.length} ${r.reviews.length === 1 ? "נקודה לבירור" : "נקודות לבירור"}</strong><small>${esc(r.reviews[0].title)}</small></span>${I("left", 16)}</button>` : ""}
+      ${r.reviews.length ? `<button class="notice" data-go="journal"><span class="notice-ic">${I("help", 20)}</span><span><strong>${r.reviews.length} ${r.reviews.length === 1 ? "נקודה לבירור" : "נקודות לבירור"}</strong><small>${esc(askFirst(r.reviews).slice(0, 2).map(v => v.title).join(" · "))}</small></span>${I("left", 16)}</button>` : ""}
       <section class="card upcoming"><div class="card-h"><h3>מועדים קרובים</h3><button class="link" data-go="dates">הכול ${I("left", 14)}</button></div>
         ${upcoming.length > 1 ? `<div class="plans">${upcoming.slice(1).map(p => planLine(p, { compact: true })).join("")}</div>` : `<p class="empty">${upcoming.length ? "אין מועדים נוספים בקרוב." : first ? "המועדים יופיעו כאן אחרי הרישום הראשון." : "אין מועדים קרובים."}</p>`}
       </section>
@@ -421,7 +424,7 @@
     try { const s = M.stamp(e); h = s.hebrewDate; onah = s.onah === "day" ? "יום" : "לילה"; } catch { /* מסומן לבירור */ }
     const status = e.result === "uncertain" ? "ממתין לבירור" : e.result === "bleeding" ? "נרשמה כלא נקייה" : city(e.cityId).name;
     return `<button class="entry" data-edit="${e.id}"><span class="ev-ic t-${e.type}">${I(e.type === "flow" ? "droplet" : e.type === "mikvah" ? "mikvah" : e.type === "bedikah" ? "bedikah" : e.type === "hefsek" ? "hefsek" : "book", 19)}</span>
-      <span class="entry-main"><strong>${esc(EVENT_NAMES[e.type])}</strong><small>${esc(civilLabel(e.date, true))} · <span dir="ltr">${e.time}</span> · <span class="hebdate">${esc(h)}</span>${onah ? ` · ${onah}` : ""}</small>${e.note ? `<small class="note" data-nt>${esc(e.note)}</small>` : ""}</span>
+      <span class="entry-main"><strong>${esc(EVENT_NAMES[e.type])}</strong><small>${esc(civilLabel(e.date, true))} · <span dir="ltr">${e.time}</span> · <span class="hebdate">${esc(h)}</span>${onah ? ` · ${onah}` : ""}${e.foundOnWaking ? " · נמצא בהתעוררות" : ""}</small>${e.note ? `<small class="note" data-nt>${esc(e.note)}</small>` : ""}</span>
       <span class="entry-side"><small>${esc(status)}</small>${I("pencil", 15)}</span></button>`;
   }
 
@@ -431,7 +434,7 @@
       .filter(e => (app.filter === "all" || e.type === app.filter) && (!q || `${EVENT_NAMES[e.type]} ${e.date} ${e.note} ${hebrew(e.date)}`.toLowerCase().includes(q)));
     return `${r.reviews.length ? `<section class="card reviews"><div class="card-h">${I("help")}<h3>נקודות לבירור <span class="count">${r.reviews.length}</span></h3></div>
       <p class="fine">המערכת אינה מכריעה בנקודות אלה. כל נקודה מפנה לרישומים הנוגעים בה.</p>
-      ${r.reviews.map(v => `<details><summary>${esc(v.title)}${I("left", 15)}</summary><p>${esc(v.detail)}</p>${v.eventIds.map(id => { const e = st.events.find(x => x.id === id); return e ? `<button class="link" data-edit="${id}">${esc(EVENT_NAMES[e.type])} · ${esc(civilLabel(e.date, true))} ${I("pencil", 13)}</button>` : ""; }).join("")}</details>`).join("")}</section>` : ""}
+      ${askFirst(r.reviews).map(v => `<details${v.ask ? ` class="ask" data-review="${esc(v.id)}"` : ` data-review="${esc(v.id)}"`}><summary>${v.ask ? `<span class="ask-ic">${I("scale", 16)}</span>` : ""}<span class="rv-t">${esc(v.title)}</span>${I("left", 15)}</summary><p>${esc(v.detail)}</p>${citeList(v.source)}${v.eventIds.map(id => { const e = st.events.find(x => x.id === id); return e ? `<button class="link" data-edit="${id}">${esc(EVENT_NAMES[e.type])} · ${esc(civilLabel(e.date, true))} ${I("pencil", 13)}</button>` : ""; }).join("")}</details>`).join("")}</section>` : ""}
     <section class="card"><div class="card-h">${I("book")}<h3>רישומים <span class="count">${st.events.length}</span></h3><button class="link" data-act="report">${I("file", 15)}דוח לבירור</button></div>
       <div class="filters"><label class="search">${I("search", 17)}<input id="q" type="search" placeholder="חיפוש לפי תאריך או הערה" value="${esc(app.query)}" aria-label="חיפוש"></label>
       <select id="filter" aria-label="סינון לפי סוג"><option value="all">כל הסוגים</option>${Object.entries(EVENT_NAMES).map(([v, n]) => `<option value="${v}"${app.filter === v ? " selected" : ""}>${n}</option>`).join("")}</select></div>
@@ -597,7 +600,7 @@
         <h4>מה חושב</h4><p class="phase">מצב: <strong>${esc(PHASE_NAMES[r.phase])}</strong>${r.earliestHefsek && r.phase === "waiting" ? ` · הפסק מוקדם: <span class="hebdate">${esc(hebrew(r.earliestHefsek))}</span>` : ""}${r.phase === "clean" ? ` · יום ${r.cleanDay} מתוך 7` : ""}</p>
         <div class="plans">${plans.map(p => planLine(p, { prep: false })).join("") || '<p class="empty">אין מועדים מחושבים.</p>'}</div>
         ${bed.length ? `<p class="fine">ועוד ${bed.length} תזכורות לבדיקות בשבעה נקיים (מופיעות ביומן המלא).</p>` : ""}
-        ${r.reviews.length ? `<h4>נקודות לבירור</h4><ul class="rv">${r.reviews.map(v => `<li><strong>${esc(v.title)}</strong> — ${esc(v.detail)}</li>`).join("")}</ul>` : ""}
+        ${r.reviews.length ? `<h4>נקודות לבירור</h4><ul class="rv">${askFirst(r.reviews).map(v => `<li><strong>${esc(v.title)}</strong> — ${esc(v.detail)}${citeList(v.source)}</li>`).join("")}</ul>` : ""}
         <button class="btn full" data-scenario-load="${sc.id}">${I("play", 16)}פתיחה ביומן המלא</button></div>`;
     }
     return `<article class="scen${open ? " open" : ""}"><button class="scen-h" data-scenario="${sc.id}" aria-expanded="${open}"><span class="tag">${esc(sc.tag)}</span><strong>${esc(sc.title)}</strong>${I("left", 16)}</button>${body}</article>`;
@@ -736,6 +739,7 @@
         <label class="field" for="e-city">מקום<select id="e-city" name="cityId">${placeOptions(state(), f.cityId)}</select></label>
         ${f.type === "manual" ? `<label class="field" for="e-onah">עונה<select id="e-onah" name="onah" required><option value="" ${f.onah ? "" : "selected"} disabled>בחירה</option><option value="day"${f.onah === "day" ? " selected" : ""}>יום · מהזריחה עד השקיעה</option><option value="night"${f.onah === "night" ? " selected" : ""}>לילה · מהשקיעה הקודמת עד הזריחה</option></select></label>` : ""}
         ${needsResult ? `<label class="field" for="e-result">תוצאה<select id="e-result" name="result"><option value="clear"${f.result === "clear" ? " selected" : ""}>נקייה</option><option value="uncertain"${f.result === "uncertain" ? " selected" : ""}>ממתינה לבירור</option><option value="bleeding"${f.result === "bleeding" ? " selected" : ""}>לא נקייה</option></select></label>` : ""}
+        ${f.type === "flow" ? `<label class="toggle wake" for="e-wake"><span><strong>נמצא בבדיקה/בהתעוררות — לא ידוע מתי התחיל</strong><small>לא חובה. מעיין תחשוש לשתי העונות של היום ותסמן ״יש לשאול רב״.</small></span><input id="e-wake" name="foundOnWaking" type="checkbox"${f.foundOnWaking ? " checked" : ""}></label>` : ""}
         <label class="field" for="e-note">הערה <span class="opt">לא חובה</span><textarea id="e-note" name="note" rows="2" maxlength="2000">${esc(f.note)}</textarea></label>
         <details class="adv"${f.authorityNote ? " open" : ""}><summary>הוראה אישית שקיבלת${I("left", 14)}</summary><label class="field" for="e-auth">תיעוד ההוראה<textarea id="e-auth" name="authorityNote" rows="2" maxlength="1000" placeholder="מי הורה, מתי ומה נאמר">${esc(f.authorityNote)}</textarea></label></details>
         ${HELP[f.type] ? `<p class="hint">${I("info", 16)}${HELP[f.type]}</p>` : ""}
@@ -829,6 +833,7 @@
     for (const k of ["type", "date", "time", "cityId", "note", "authorityNote"]) if (fd.has(k)) f[k] = String(fd.get(k));
     f.result = fd.has("result") ? String(fd.get("result")) : f.result;
     f.onah = fd.has("onah") ? String(fd.get("onah")) || undefined : f.onah;
+    if ($("#e-wake")) f.foundOnWaking = fd.has("foundOnWaking");
     return f;
   }
   function textModal(title, intro, text, file) { app.modal = { kind: "text", title, intro, text, file }; renderModal(); }
@@ -1007,6 +1012,7 @@
     if (f.id === "event-form") {
       const ev = readEventForm();
       if (ev.type !== "manual") delete ev.onah;
+      if (ev.type === "flow") ev.foundOnWaking = !!ev.foundOnWaking; else delete ev.foundOnWaking;
       if (!["hefsek", "bedikah", "question"].includes(ev.type)) ev.result = "clear";
       try { commit({ ...st, events: [...st.events.filter(x => x.id !== ev.id), ev] }); app.modal = null; renderModal(); }
       catch (err) { app.modal.form = ev; app.modal.error = err.message; renderModal(); }

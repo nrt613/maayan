@@ -538,6 +538,94 @@ const MaayanTests = (M) => {
     a.ok(am.done, "12:10 לפני חצות = בוקר"); a.ok(!pm.done, "בדיקת הערב עוד לא נרשמה");
   });
 
+  /* ---------- ״יש לשאול רב״: שאלות פתוחות מסומנות כשהמצב נוצר, והחישוב נשאר לחומרא ---------- */
+  const rv = (r, id) => r.reviews.find(x => x.id === id);
+  const askOk = (v, ids) => {
+    a.ok(v, "הסימון קיים"); a.ok(v.ask, "מסומן כשאלה לרב"); a.match(v.title, /— יש לשאול רב$/);
+    a.ok(v.detail && /מעיין/.test(v.detail), "הפירוט אומר מה מעיין עושה בינתיים");
+    a.ok(Array.isArray(v.source) && v.source.length && v.source.every(id => M.cite(id)), "מקורות מתוך CITES");
+    for (const id of ids || []) a.ok(v.source.includes(id), `המקור ${id}`);
+  };
+  test("יש לשאול רב", "ל׳ בחודש והחודש הבא חסר: ask-30-short, ובינתיים חוששת לא׳ בחודש שאחריו", () => {
+    const f = event("flow", N(30, 1)), r = run([f]);
+    const v = rv(r, "ask-30-short"); askOk(v, ["aruch189_12", "missing30", "secHeichal"]);
+    a.deepEqual(v.eventIds, [f.id]); a.match(v.detail, /א׳ סיון/);
+    a.ok(r.plans.some(p => p.kind === "monthly" && p.date === N(1, 3)), "החישוב לחומרא נשאר: א׳ סיון");
+    a.ok(!rv(r, "ask-30-full"), "לא סימון של חודש מלא");
+    a.ok(!rv(run([event("flow", N(29, 1))]), "ask-30-short"), "כ״ט ניסן — אין סימון");
+    a.ok(!rv(run([event("flow", N(15, 1))]), "ask-30-short"), "ט״ו ניסן — אין סימון");
+    a.ok(!rv(run([event("flow", N(30, 1)), event("flow", N(25, 2))]), "ask-30-short"), "רק כשהראייה האחרונה בל׳");
+  });
+  test("יש לשאול רב", "ל׳ בחודש והחודש הבא מלא: ask-30-full, ובינתיים חוששת רק לל׳", () => {
+    // תשפ״ד מעוברת: אחרי ל׳ שבט בא אדר א׳ מלא (ראש חודש אדר ב׳ שני ימים)
+    const f = event("flow", N(30, 11, 5784)), r = run([f]);
+    const v = rv(r, "ask-30-full"); askOk(v, ["missing30", "taz189_14"]); a.ok(M.cite("taz189_14").ok, "הט״ז אומת בספריא");
+    a.deepEqual(v.eventIds, [f.id]); a.match(v.detail, /ל׳ אדר א׳/); a.match(v.detail, /א׳ אדר ב׳/);
+    const mon = r.plans.filter(p => p.kind === "monthly").map(p => p.date);
+    a.deepEqual(mon, [N(30, 12, 5784)], "עונת החודש רק בל׳ אדר א׳"); a.ok(!rv(r, "ask-30-short"));
+    a.ok(!rv(run([event("flow", N(30, 1))]), "ask-30-full"), "חודש חסר — אין סימון של חודש מלא");
+    a.ok(!rv(run([event("flow", N(29, 11, 5784))]), "ask-30-full"), "כ״ט שבט — אין סימון");
+  });
+  test("יש לשאול רב", "הפלגה ארוכה של ראייה קודמת שנעקרה (מקרה הרמ״א): ask-uprooted-haflagah בלי שימור, עם התאריך", () => {
+    const evs = [event("flow", N(1, 1)), event("flow", N(20, 1)), event("flow", N(1, 2))];
+    for (const pk of ["ashkenaz", "sefard", "sefard-bic"]) {
+      const r = calculate(presetState(pk, evs), NOW), v = rv(r, "ask-uprooted-haflagah");
+      askOk(v, ["rema189_13", "shach189_31"]); a.match(v.detail, /ט׳ אייר/, `${pk}: התאריך שהרמ״א מוסיף`);
+      a.ok(!r.plans.some(p => p.kind === "interval" && p.date === N(9, 2)), `${pk}: החישוב לא השתנה`);
+      a.ok(v.eventIds.includes(evs[1].id));
+    }
+    a.ok(!rv(calculate(presetState("ashkenaz-kreiti", evs), NOW), "ask-uprooted-haflagah"), "בכרתי ופלתי ההפלגה נשמרת — אין סימון");
+    a.ok(!rv(calculate(presetState("ashkenaz", [event("flow", N(1, 1)), event("flow", N(20, 1)), event("flow", N(10, 2))]), NOW), "ask-uprooted-haflagah"), "הפלגה ארוכה יותר אחריה — אין סימון");
+    a.ok(!rv(calculate(presetState("ashkenaz", [event("flow", N(1, 1)), event("flow", N(20, 1))]), NOW), "ask-uprooted-haflagah"), "שתי ראיות — אין סימון");
+    // הפלגה ארוכה שנעקרה (36 ← 22): התאריך מחושב כמו בשימור של כרתי ופלתי
+    const r2 = calculate(presetState("ashkenaz", [event("flow", N(1, 1)), event("flow", N(6, 2)), event("flow", N(27, 2))]), NOW);
+    const kr = calculate(presetState("ashkenaz-kreiti", [event("flow", N(1, 1)), event("flow", N(6, 2)), event("flow", N(27, 2))]), NOW).plans.filter(p => /36/.test(p.title) && p.kind === "interval");
+    const v2 = rv(r2, "ask-uprooted-haflagah"); askOk(v2);
+    for (const p of kr) a.ok(v2.detail.includes(M.hebrew(p.date).split(" ").slice(0, -1).join(" ")), `התאריך ${M.hebrew(p.date)} בפירוט`);
+  });
+  test("יש לשאול רב", "נמצא בהתעוררות: שתי העונות של אותו יום, ההמתנה מהיום המאוחר, ו-ask-waking", () => {
+    const d = N(10), plain = event("flow", d, "07:30"), wake = event("flow", d, "07:30", { foundOnWaking: true });
+    a.equal(stamp(wake).onah, "day");
+    const r0 = run([plain]), r = run([wake]);
+    a.deepEqual([...new Set(r0.plans.filter(p => p.kind === "average").map(p => p.onah))], ["day"], "בלי הסימון — עונה אחת");
+    const av = r.plans.filter(p => p.kind === "average");
+    a.deepEqual(av.map(p => p.onah).sort(), ["day", "night"], "עם הסימון — לילה ויום");
+    a.deepEqual([...new Set(av.map(p => p.onah === "day" ? p.date : addDays(p.date, 1)))], [N(9, 2)], "שתיהן ביום 30, אותו יום עברי");
+    a.deepEqual(r.plans.filter(p => p.kind === "monthly").map(p => p.onah).sort(), ["day", "night"], "עונת החודש בשתי העונות");
+    a.equal(r.earliestHefsek, N(14), "ההמתנה מהיום המאוחר");
+    const v = rv(r, `ask-waking-${wake.id}`); askOk(v, ["sa184_4", "secWaking"]); a.match(v.title, /^נמצא דם בהתעוררות — יש לשאול רב$/); a.deepEqual(v.eventIds, [wake.id]);
+    a.ok(!r0.reviews.some(x => /^ask-waking/.test(x.id)), "בלי הסימון אין שאלה");
+    const early = event("flow", d, "04:30", { foundOnWaking: true }), re = run([early]);
+    a.equal(stamp(early).onah, "night"); a.deepEqual(re.plans.filter(p => p.kind === "average").map(p => p.onah).sort(), ["day", "night"]); a.equal(re.earliestHefsek, N(14));
+    a.deepEqual(run([wake], { beinHashmashot: "flag" }).plans.filter(p => p.kind === "average").map(p => p.onah).sort(), ["day", "night"], "גם במצב ״השעיה״ של בין השמשות");
+    const iv = run([event("flow", N(2)), event("flow", N(30), "07:30", { foundOnWaking: true })]).plans.filter(p => p.kind === "interval");
+    a.deepEqual(iv.map(p => p.onah).sort(), ["day", "night"], "הפלגה בשתי העונות");
+  });
+  test("יש לשאול רב", "foundOnWaking נשמר ביומן: ברירת מחדל false, ערך לא בוליאני נדחה", () => {
+    const s = emptyState(); s.events = [event("flow", N(10)), event("flow", N(12), "07:00", { foundOnWaking: true }), event("hefsek", N(15), "16:00", { foundOnWaking: true })];
+    const p = M.parseState(JSON.parse(JSON.stringify(s)));
+    a.equal(p.events[0].foundOnWaking, false, "יומן ישן: false"); a.equal(p.events[1].foundOnWaking, true); a.equal(p.events[2].foundOnWaking, undefined, "רק לראייה");
+    a.deepEqual(M.parseState(JSON.parse(JSON.stringify(p))), p, "שמירה וטעינה חוזרת יציבות");
+    s.events = [event("flow", N(10), "07:00", { foundOnWaking: "yes" })]; a.throws(() => M.parseState(s), /התעוררות/);
+  });
+  test("יש לשאול רב", "כרתי ופלתי, ראייה ביום: אור זרוע ביום 29 לפני מעת לעת — ask-oz-24h פעם אחת לראייה", () => {
+    const f = event("flow", N(2), "10:00", { cityId: "jerusalem" }), r = calculate(presetState("ashkenaz-kreiti", [f]), NOW);
+    const v = rv(r, `ask-oz-24h-${f.id}`); askOk(v, ["shach184_7", "sahr189_1f"]); a.deepEqual(v.eventIds, [f.id]);
+    a.equal(r.reviews.filter(x => /^ask-oz-24h/.test(x.id)).length, 1, "פעם אחת");
+    a.ok(r.plans.some(p => p.kind === "or-zarua" && p.id === `oz-average-${f.id}-30-night` && p.onah === "day"), "החישוב לא השתנה: אור זרוע ביום 29");
+    a.match(v.detail, new RegExp(M.hebrew(N(30)).split(" ").slice(0, -1).join(" ")));
+    const n = event("flow", N(2), "22:00", { cityId: "jerusalem" });
+    a.ok(!calculate(presetState("ashkenaz-kreiti", [n]), NOW).reviews.some(x => /^ask-oz-24h/.test(x.id)), "ראייה בלילה — אין סימון");
+    for (const pk of ["ashkenaz", "sefard-bic", "sefard", "chabad"]) a.ok(!calculate(presetState(pk, [f]), NOW).reviews.some(x => /^ask-oz-24h/.test(x.id)), `${pk}: אין סימון`);
+  });
+  test("יש לשאול רב", "אור זרוע ביום 31 בשיטות אשכנז אינו מסומן (בחירת שיטה מתועדת)", () => {
+    for (const pk of ["ashkenaz", "ashkenaz-kreiti"]) {
+      const r = calculate(presetState(pk, [event("flow", N(2), "10:00", { cityId: "jerusalem" })]), NOW);
+      a.ok(!r.reviews.some(x => /31|זרוע/.test(x.id) && x.id !== `ask-oz-24h-${r.latestFlow.id}`), pk);
+      a.ok(!r.reviews.some(x => /יום 31/.test(x.title)), pk);
+    }
+  });
+
   return {
     tests: T,
     run() {

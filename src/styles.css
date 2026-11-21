@@ -338,6 +338,12 @@ details.past { box-shadow: 0 -1px 0 var(--line); }
 .reviews details p { color: var(--muted); font-size: 14.5px; padding-bottom: 6px; }
 .reviews details .link { font-size: 14px; margin-inline-end: 10px; }
 .reviews .card-h > .ic { background: var(--warn-bg); color: var(--warn-ink); }
+.reviews details > summary .rv-t { flex: 1; min-width: 0; }
+.reviews details.ask > summary { color: var(--warn-ink); font-weight: 600; }
+.ask-ic { display: inline-grid; place-items: center; flex: none; width: 28px; height: 28px; border-radius: 9px; background: var(--warn-bg); color: var(--warn-ink); }
+.reviews details .cites a { display: inline-block; padding: 4px 0; }
+.rv .cites { margin: 2px 0 6px; }
+.toggle.wake { border: 1px solid var(--line); border-radius: var(--r-m, 14px); padding: 8px 12px; }
 
 /* ---------- טפסים ---------- */
 .field { display: grid; gap: 7px; font-weight: 500; font-size: 14px; min-width: 0; color: var(--ink); }
