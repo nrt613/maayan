@@ -281,7 +281,8 @@ const MaayanTests = (M) => {
   test("הפלגה", "שימור הפלגות ארוכות: הפלגה קצרה אינה עוקרת ארוכה", () => {
     const f = [0, 35, 60].map(n => event("flow", addDays(N(1), n)));
     const kept = run(f, { carryLongIntervals: true }).plans.filter(p => p.kind === "interval").map(p => p.title).sort();
-    a.deepEqual(kept, ["הפלגה · 26 ימים", "הפלגה · 36 ימים"].sort());
+    // גם ההפלגה של הראייה הקודמת (36 מהראייה השנייה) עוד לא הגיעה ונשמרת — מקרה הרמ״א קפט, יג
+    a.deepEqual(kept, ["הפלגה · 26 ימים", "הפלגה · 36 ימים", "הפלגה נוספת · 36 ימים"].sort());
     a.equal(run(f).plans.filter(p => p.kind === "interval").length, 1);
     const longer = [0, 26, 62].map(n => event("flow", addDays(N(1), n)));
     a.deepEqual(run(longer, { carryLongIntervals: true }).plans.filter(p => p.kind === "interval").map(p => p.title), ["הפלגה · 37 ימים"]);
@@ -461,7 +462,19 @@ const MaayanTests = (M) => {
     const evs = () => [event("flow", N(1, 1)), event("flow", N(6, 2)), event("flow", N(27, 2))];
     const ints = pk => calculate(presetState(pk, evs()), NOW).plans.filter(p => p.kind === "interval").map(p => p.title).sort();
     a.deepEqual(ints("ashkenaz"), ["הפלגה · 22 ימים"]); a.deepEqual(ints("sefard"), ["הפלגה · 22 ימים"]);
-    a.deepEqual(ints("ashkenaz-kreiti"), ["הפלגה · 22 ימים", "הפלגה · 36 ימים"]);
+    a.deepEqual(ints("ashkenaz-kreiti"), ["הפלגה · 22 ימים", "הפלגה · 36 ימים", "הפלגה נוספת · 36 ימים"]);
+  });
+  test("שיטות", "מקרה הרמ״א (קפט, יג): א׳ ניסן, כ׳ ניסן, א׳ אייר — ט׳ אייר רק בכרתי ופלתי", () => {
+    const evs = [event("flow", N(1, 1)), event("flow", N(20, 1)), event("flow", N(1, 2))], t9 = N(9, 2);
+    const at = pk => calculate(presetState(pk, evs), NOW).plans.filter(p => p.kind === "interval" && p.date === t9 && p.onah === "day");
+    const kr = at("ashkenaz-kreiti"); a.equal(kr.length, 1, "כרתי ופלתי חוששת לט׳ אייר"); a.match(kr[0].title, /הפלגה נוספת · 20 ימים/);
+    a.deepEqual(kr[0].eventIds, [evs[0].id, evs[1].id], "המרווח שקדם לראיית כ׳ ניסן");
+    for (const pk of ["ashkenaz", "sefard", "sefard-bic"]) a.equal(at(pk).length, 0, `${pk}: אין חשש בט׳ אייר`);
+    const oz = calculate(presetState("ashkenaz-kreiti", evs), NOW).plans.some(p => p.kind === "or-zarua" && p.date === N(8, 2) && p.onah === "night");
+    a.ok(oz, "אור זרוע לפני ההפלגה הנוספת");
+    // הפלגה ארוכה או שווה אחריה עוקרת: א׳ ניסן, כ׳ ניסן (20), י׳ אייר (21) — אין ט׳ אייר (כבר עבר) ואין הפלגה נוספת
+    const r2 = calculate(presetState("ashkenaz-kreiti", [event("flow", N(1, 1)), event("flow", N(20, 1)), event("flow", N(10, 2))]), NOW);
+    a.ok(!r2.plans.some(p => /הפלגה נוספת/.test(p.title)), "מועד שעבר אינו נשמר");
   });
   test("שיטות", "יומן ישן בלי ההגדרות החדשות נטען עם ברירות המחדל", () => {
     const s = emptyState(); delete s.settings.beinHashmashot; delete s.settings.hefsekTwilight; delete s.settings.method;

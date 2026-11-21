@@ -707,6 +707,18 @@ const Maayan = (() => {
           // בין השמשות באחת הראיות: נשמרים גם המרווחים האפשריים האחרים (לחומרא)
           intervals.push({ value, alts: i === flows.length - 1 ? [...new Set(alts)].filter(v => v > 0 && v !== value) : [], ids: [a.e.id, b.e.id] });
         }
+        // שימור הפלגות (רמ״א קפט, יג; ט״ז): ההפלגה של ראייה קודמת, שנספרת מאותה ראייה, נשמרת אם מועדה עוד לא הגיע
+        // כשבאה הראייה האחרונה, ואם אחריה לא בא מרווח ארוך ממנה או שווה לה. כמו ״עונת חודש נוספת״. לשיטת הב״ח והש״ך — אין.
+        if (state.settings.haflagah === "days" && state.settings.carryLongIntervals) {
+          for (let i = 1; i < flows.length - 1; i++) {
+            const f = flows[i], v = f.s.abs - flows[i - 1].s.abs + 1, target = f.s.abs + v - 1;
+            if (target <= last.s.abs) continue;
+            let uprooted = false;
+            for (let j = i + 1; j < flows.length; j++) if (flows[j].s.abs - flows[j - 1].s.abs + 1 >= v) uprooted = true;
+            if (uprooted || intervals.some(x => last.s.abs + x.value - 1 === target)) continue;
+            addOnah(target, f.s.onah, "interval", `הפלגה נוספת · ${v} ימים`, "הפלגה של ראייה קודמת, שנספרת מאותה ראייה. הראייה שבאה לפני מועדה אינה עוקרת אותה (שימור הפלגות), ולכן שומרים גם אותה.", SOURCES.interval, [flows[i - 1].e.id, f.e.id], `interval-extra-${f.e.id}`);
+          }
+        }
         // בשיטת חב״ד המועד החדש נספר מההפסק שאחרי הראייה האחרונה — גם אחרי שכבר טבלה
         const chabadBase = state.settings.haflagah !== "chabad-onot" ? undefined : validHefsek || (latestMikvah && latestMikvah.s.instant > last.s.instant ? stamped.filter(x => x.e.type === "hefsek" && x.e.result === "clear" && !x.s.uncertain && !!x.s.sun.sunset && x.s.instant < x.s.sun.sunset && x.s.instant > last.s.instant && x.s.instant < latestMikvah.s.instant && (x.s.abs >= last.s.abs + 4 || !!x.e.authorityNote)).at(-1) : undefined);
         if (state.settings.haflagah === "chabad-onot" && intervals.length && !chabadBase) review("chabad-no-current-hefsek", "הפלגת חב״ד תחושב אחרי ההפסק", "בשיטה זו המועד נספר מההפסק שאחרי הראייה האחרונה. כשיירשם הפסק נקי יופיע המועד.", [last.e.id]);
@@ -889,7 +901,7 @@ const Maayan = (() => {
         note("beinonit", "עונה בינונית מעת לעת שלם, לילה ויום, מתחילת הלילה ועד סוף היום (כרתי ופלתי, מובא בשו״ע הרב קפט, א). בדי השלחן פוסק כך (מקור משני).", PS.beinonitKreiti),
         note("day31", "שומרים גם את יום 31, גם הוא יממה שלמה (חוות דעת קפט; ש״ך קפט, ס״ק ל). כך המנהג הרווח: לחוש גם ליום 30 וגם ליום 31 (שבט הלוי, מקור משני).", PS.day31Kreiti),
         note("orZarua", "עונת אור זרוע לפני יום 30, עונת החודש וההפלגה (ש״ך קפד, ס״ק ז; הט״ז, ס״ק ב, חולק). לפני יום 31 אין אור זרוע. כשהעונה הבינונית היא מעת לעת, אור זרוע מתווסף לפני עונת הלילה שלה, כלומר ביום 29 — לברר.", PS.ozKreiti, true),
-        note("carryLongIntervals", "הפלגה ארוכה שלא נעקרה נשמרת לצד ההפלגה הקצרה, כדעת הרמ״א (קפט, יג: ״חוששת לט׳ באייר״) והט״ז. הב״ח והש״ך חולקים.", PS.carryTaz, true)),
+        note("carryLongIntervals", "הפלגה ארוכה שלא נעקרה נשמרת לצד ההפלגה הקצרה, וגם ההפלגה של הראייה הקודמת, שנספרת ממנה, כל עוד מועדה לא הגיע — כדעת הרמ״א (קפט, יג: ״חוששת לט׳ באייר״) והט״ז. הב״ח והש״ך חולקים.", PS.carryTaz, true)),
     },
     chabad: {
       label: SETTING_LABELS.method.chabad, family: "chabad", name: "מנהג חב״ד",
