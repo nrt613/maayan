@@ -185,6 +185,9 @@ const SEC = "סיכום הלכות נידה לרבנות (משני)";
 const src = list => list.map(s => `«${esc(s)}»`).join("; ");
 
 /* ---------- השאלות ---------- */
+/** שאלה שהאפליקציה מסמנת ״יש לשאול רב״ כשהמצב נוצר ביומן: נבדק במנוע (מזהה הנקודה), ומוצג בשורה ״באפליקציה:״ */
+const APP = "באפליקציה: מסומן ׳יש לשאול רב׳";
+const asked = (r, re) => r.r.reviews.some(x => x.ask && re.test(x.id));
 const QS = [];
 const Qn = (o) => QS.push(o);
 const both = (a, s) => `<b>אשכנזי (שתי השיטות):</b> ${a} <span class="sep">|</span> <b>ספרדי (שתי השיטות):</b> ${s}`;
@@ -214,6 +217,7 @@ function qCarry() {
   const long = R["ashkenaz-kreiti"].marks.find(m => m.kind === "int" && /35/.test(m.title));
   expect(long && ["ashkenaz", "sefard", "sefard-bic"].every(pk => !R[pk].has("int", long.abs)) && R["ashkenaz-kreiti"].settings.carryLongIntervals === true, "שאלה ב: שימור ההפלגה אינו כצפוי");
   const kinds = ["see", "int"], MM = multi(R, { from: see, to: long.abs + 1, anchor: see, kinds, q: [long.abs] });
+  expect(["ashkenaz", "sefard", "sefard-bic"].every(pk => asked(R[pk], /^ask-uprooted-haflagah$/)) && !asked(R["ashkenaz-kreiti"], /^ask-uprooted/), "שאלה ב: סימון ״יש לשאול רב״ אינו כצפוי");
   Qn({
     title: "שימור הפלגה ארוכה — רק בכרתי ופלתי",
     ask: `ראתה בהפלגה ארוכה (35), ואחר כך בהפלגה קצרה ממנה (22). האם חוששת עדיין להפלגה הארוכה, כרמ״א (קפט, יג: ״חוששת לט׳ באייר״) והט״ז, או שנעקרה מיד, כב״ח והש״ך? האם נכון לשמור אותה <b>רק</b> בשיטת כרתי ופלתי, ובעיקר הדין לאשכנזים ובשיטות הספרדיות לעקור מיד? ואם שומרים — עד מתי?`,
@@ -221,6 +225,7 @@ function qCarry() {
     src: src(["רמ״א יו״ד קפט, יג; ט״ז — שומרים", "ב״ח; ש״ך קפט, ס״ק לא — נעקרת", "שו״ע יו״ד קפט, ב (״נעקר בפעם אחת״)", `${SEC}: ב״ח, ש״ך, סדרי טהרה, חוות דעת, רעק״א — נעקרת`]),
     fig: MM.html,
     legend: `ראיות: ${hs(A(3, CHESHVAN))}, ${hs(A(7, KISLEV))} (הפלגה 35), ${hs(see)} (הפלגה 22). ` + markLine(R["ashkenaz-kreiti"].marks, ["int"]),
+    app: `${APP} — בשיטות שבהן ההפלגה נעקרת, עם התאריך שהרמ״א והט״ז מוסיפים.`,
   });
 }
 /* ג. בן איש חי מעבר לאור זרוע: הפסק ביום השישי */
@@ -255,6 +260,7 @@ function q1() {
   const mon = ra.marks.find(m => m.kind === "mon" && !/נוספת/.test(m.title));
   expect(mon && mon.abs === A(1, SIVAN) && METHODS.every(pk => R[pk].has("mon", mon.abs, "day")), "שאלה 1: עונת החודש אינה בא׳ סיון");
   const avg = rs.marks.find(m => m.kind === "avg");
+  expect(METHODS.every(pk => asked(R[pk], /^ask-30-short$/)), "שאלה 1: אין סימון ״יש לשאול רב״");
   const kinds = ["see", "mon"];
   Qn({
     title: "ראתה ביום ל׳, והחודש הבא חסר",
@@ -263,6 +269,7 @@ function q1() {
     src: src(["ערוך השולחן קפט, יא–יב, כח", `${SEC}, בשם היכל שלמה בשם הב״ח`]),
     fig: multi(R, { from: see, to: mon.abs, anchor: see, kinds, q: [mon.abs] }).html,
     legend: markLine(rs.marks, kinds),
+    app: `${APP}, ובינתיים חוששת ל${hs(mon.abs)}.`,
   });
 }
 /* 2. ל׳ בחודש, החודש הבא מלא */
@@ -274,6 +281,7 @@ function q2() {
   expect(mon && mon.abs === A(30, ADAR_I) && METHODS.every(pk => R[pk].has("mon", mon.abs, "day")), "שאלה 2: עונת החודש אינה בל׳ אדר א׳");
   const extra = METHODS.some(pk => R[pk].has("mon", nextFirst));
   expect(!extra, "שאלה 2: המנוע חושש גם לא׳ אדר ב׳");
+  expect(METHODS.every(pk => asked(R[pk], /^ask-30-full$/)), "שאלה 2: אין סימון ״יש לשאול רב״");
   const kinds = ["see", "mon"];
   Qn({
     title: "ראתה ביום ל׳, והחודש הבא מלא (ראש חודש שני ימים)",
@@ -282,6 +290,7 @@ function q2() {
     src: src(["ערוך השולחן קפט, כח", "ט״ז קפט, ס״ק יד"]),
     fig: multi(R, { from: see, to: nextFirst, anchor: see, kinds, q: [nextFirst], ghosts: [{ abs: nextFirst, kind: "mon", onah: "day" }] }).html,
     legend: markLine(rs.marks, kinds),
+    app: `${APP}, ובינתיים חוששת רק ל${hs(mon.abs)}.`,
   });
 }
 /* 7. מקרה הרמ״א */
@@ -292,6 +301,7 @@ function q7() {
   const anchor = A(20, NISAN), t9 = A(9, IYYAR), to = A(21, IYYAR);
   const has9 = pk => R[pk].marks.some(m => m.abs === t9 && m.kind === "int");
   expect(has9("ashkenaz-kreiti") && ["ashkenaz", "sefard", "sefard-bic"].every(pk => !has9(pk)), "שאלה 7: ט׳ אייר אינו רק בכרתי ופלתי");
+  expect(["ashkenaz", "sefard", "sefard-bic"].every(pk => asked(R[pk], /^ask-uprooted-haflagah$/) && R[pk].r.reviews.find(x => x.id === "ask-uprooted-haflagah").detail.includes(hs(t9))), "שאלה 7: הסימון אינו מזכיר את ט׳ אייר");
   const kinds = ["see", "int", "mon"];
   const intList = pk => R[pk].marks.filter(m => m.kind === "int").map(m => `${m.title.replace("הפלגה · ", "").replace(" ימים", "")} → ${hs(m.abs)}`).join(", ");
   const M7 = multi(R, { from: anchor, to, anchor, kinds, q: [t9] }, Object.fromEntries(METHODS.map(pk => [pk, has9(pk) ? {} : { ghosts: [{ abs: t9, kind: "int", onah: "day" }] }])));
@@ -302,6 +312,7 @@ function q7() {
     src: src(["שו״ע יו״ד קפט, יג (רמ״א)", `${SEC}: רמ״א, ט״ז, באר היטב — חוששת; ב״י, ב״ח, ש״ך — אינה חוששת; שבט הלוי — תלוי במקרה`]),
     fig: M7.html,
     legend: `המספר הקטן: ימים מכ׳ ניסן. ` + markLine(ra.marks, ["int", "mon"], anchor, to),
+    app: `${APP} — בעיקר הדין ובשיטות הספרדיות, עם הפירוט ״אינה חוששת ל${hs(t9)}״.`,
   });
 }
 /* 8. נמצא דם בקימה */
@@ -311,6 +322,9 @@ function q8() {
   const before = hm(new Date(s.sunrise.valueOf() - 20 * 60000)), after = hm(new Date(s.sunrise.valueOf() + 40 * 60000));
   const a1 = run("ashkenaz", [ev("flow", date, before)], N(14, KISLEV)), a2 = run("ashkenaz", [ev("flow", date, after)], N(14, KISLEV));
   expect(a1.flows[0].onah === "night" && a2.flows[0].onah === "day", "שאלה 8: שיוך הקימה אינו כצפוי");
+  // עם הסימון ״נמצא בבדיקה/בהתעוררות״: שתי העונות של אותו יום, וההמתנה מהיום המאוחר
+  const aw = run("ashkenaz", [ev("flow", date, after, { foundOnWaking: true })], N(14, KISLEV)), see8 = M.isoAbs(date);
+  expect(aw.has("avg", see8 + 29, "night") && aw.has("avg", see8 + 29, "day") && aw.hef === see8 + 4 && asked(aw, /^ask-waking-/), "שאלה 8: הסימון ״נמצא בהתעוררות״ אינו כצפוי");
   const tb = timebar({ from: s.dawn.valueOf() - 30 * 60000, to: s.sunrise.valueOf() + 75 * 60000, points: [
     { t: s.dawn, label: "עלות השחר", up: true },
     { t: new Date(s.sunrise.valueOf() - 20 * 60000), label: `מצאה ← ליל ${hs(a1.flows[0].abs)}`, color: COL.see, up: false },
@@ -320,10 +334,11 @@ function q8() {
   Qn({
     title: "מצאה דם בקימה, ואין ידוע מתי התחיל",
     ask: `קמה בבוקר ומצאה דם, ואין ידוע אם התחיל בלילה או ביום. לאיזו עונה תחוש? (ספר האשכול ושבט הלוי: אם ברור שהתחיל בלילה — עונת לילה, ואם לאו — עונת יום.)`,
-    does: `אין אפשרות ״זמן לא ידוע״: שעה היא שדה חובה, והעונה נקבעת לפי השעה שנרשמה. מצאה לפני הזריחה (${before}) — <b>עונת לילה</b>; אחריה (${after}) — עונת יום. ראייה ״מסופקת״ מבטלת את כל העונות, אבל אינה זמינה ברישום ראייה. <b>הצעה:</b> אפשרות ״נמצא בקימה״ שנותנת עונת יום.`,
+    does: `בטופס הראייה יש סימון <b>״נמצא בבדיקה/בהתעוררות — לא ידוע מתי התחיל״</b>. כשמסמנים: <b>חוששת לשתי העונות</b> של אותו יום (ליל ${hs(see8)} ויום ${hs(see8)}) בכל חשש, וההמתנה נספרת מהיום המאוחר (הפסק מוקדם ב${hs(aw.hef)}). בלי הסימון העונה נקבעת לפי השעה שנרשמה: לפני הזריחה (${before}) — עונת לילה; אחריה (${after}) — עונת יום.`,
     src: src(["שו״ע יו״ד קפד, ד (״לא קים לן... אינה אסורה אלא ביום״)", `${SEC}, בשם ספר האשכול ושבט הלוי`]),
     fig: `<div class="tbw">${tb}<div class="cap">שעות ${esc(hs(M.isoAbs(date)))}, ירושלים</div></div>`,
     wide: true,
+    app: `${APP} (״נמצא דם בהתעוררות״) כשמסמנים את התיבה.`,
   });
 }
 /* 9. בין השמשות */
@@ -418,13 +433,17 @@ function q14() {
 const SHORT_QS = () => {
   const dflt = M.SETTING_DEFAULTS;
   expect(dflt.method === "custom" && dflt.day31 === false && dflt.orZarua === false && dflt.carryLongIntervals === false, "שאלה 15: ברירת המחדל השתנתה");
+  idCounter = 1500; const kr = run("ashkenaz-kreiti", [ev("flow", N(2, KISLEV), "10:00")], N(4, KISLEV));
+  expect(asked(kr, /^ask-oz-24h-/) && kr.has("oz", A(2, KISLEV) + 28, "day"), "שאלות קצרות: אור זרוע ביום 29 בכרתי ופלתי אינו מסומן");
   return [
     ["בדיקת הבוקר", "בדיקה נספרת מעלות השחר (16.1°), ואם אין עלות השחר — מהזריחה; בוקר וערב מוכרעים לפי חצות היום. האם השיעור והחלוקה נכונים?"],
     ["ראייה בשבעה נקיים", "״ראייה״ מחייבת המתנה מלאה ויוצרת עונות (כולל הפלגה קצרה); ״חידוש ספירה לפי הוראה״ אינו מחייב המתנה ואינו יוצר עונות. מה הדין בהמתנה ובעונות?"],
     ["יום טוב שני", "ארץ ישראל או חו״ל נקבע לפי אזור הזמן (ירושלים). האם די בכך, גם לבן ארץ ישראל בחו״ל ולבן חו״ל בארץ?"],
     ["ברירת המחדל למשתמשת חדשה", `מי שלא בחרה שיטה מקבלת ״מותאם״: חמישה ימים, בלי יום 31, בלי אור זרוע, בלי שימור הפלגות — אינו זהה לאף שיטה. לחייב בחירת מנהג ושיטה, או לקבוע אחת כברירת מחדל?`],
+    ["יום 31 — באיזו עונה", "בעיקר הדין מעיין שומרת את יום 31 בעונת הראייה (חוות דעת). ״הבית שלך״ שומרת תמיד את ליל יום 31. באיזו עונה?"],
+    ["שמירת הפלגה ארוכה — שיעורי טהרה", `בשיעורי טהרה (הגר״מ גרוס, שיעור לג — משני, לא אומת): ״חוששת להפלגה הארוכה״. מעיין, בעיקר הדין (ובשיטות הספרדיות), עוקרת אותה מיד, כב״ח והש״ך, ושומרת אותה רק בכרתי ופלתי. ${APP}.`],
     ["אור זרוע ליום 31", "מעיין אינו מוסיף אור זרוע לפני יום 31. בשיעורי טהרה (הגר״מ גרוס, שיעור כז, עמ׳ מט — משני, לא אומת): ״מן הדין אין צריכה... ולמעשה יש להחמיר״. להוסיף?"],
-    ["כרתי ופלתי ואור זרוע ביום 29", "בכרתי ופלתי העונה הבינונית היא יממה שלמה, והמנוע מוסיף אור זרוע לפני עונת הלילה שלה — ביום 29 ביום — גם כשהראייה הייתה ביום. האם כך, או שאור זרוע נקבע לפי עונת הראייה בלבד?"],
+    ["כרתי ופלתי ואור זרוע ביום 29", `בכרתי ופלתי העונה הבינונית היא יממה שלמה, והמנוע מוסיף אור זרוע לפני עונת הלילה שלה — ביום 29 ביום — גם כשהראייה הייתה ביום. האם כך, או שאור זרוע נקבע לפי עונת הראייה בלבד? (יש לוחות שאינם מוסיפים אותו.) ${APP}.`],
     ["הפסק בלילה", "הפסק שנעשה בלילה (גם אחרי חצות, לפני הזריחה) אינו מתקבל ומסומן לבירור. האם יש מקרה שבו מועיל ליום שאחריו?"],
   ];
 };
@@ -434,7 +453,7 @@ const box = `<div class="ans"><span class="cb"></span> כן <span class="cb"></s
 function questionHtml(q, n) {
   const stacked = q.wide || q.fig.includes('class="cals');
   const txt = `<p class="does"><b class="lbl">מה מעיין עושה:</b> ${q.does}</p>
-    <p class="src"><b class="lbl">מקורות:</b> ${q.src}</p>`;
+    <p class="src"><b class="lbl">מקורות:</b> ${q.src}</p>${q.app ? `\n    <p class="app">${esc(q.app)}</p>` : ""}`;
   const leg = q.legend ? `<p class="leg">${q.legend}</p>` : "";
   return `<section class="q"><h2><span class="n">${n}</span>${esc(q.title)}</h2>
   <p class="ask">${q.ask}</p>
@@ -492,6 +511,7 @@ h1{font-family:"Bellefair",serif;font-weight:400;color:var(--accent);font-size:3
 .foot .ans{flex:none}
 .lbl{color:var(--accent-strong);font-weight:600}
 .does,.src{margin:0 0 3px}
+.app{margin:0 0 3px;font-size:8.8pt;font-weight:600;color:#9a4d00;background:#fff4e0;border-radius:4px;padding:1px 6px;display:inline-block}
 .src{font-size:8.6pt;color:#3e353a}
 .sep{color:var(--faint);margin:0 3px}
 .leg{font-size:8pt;color:var(--muted);margin:0 0 3px;line-height:1.5}
@@ -544,7 +564,7 @@ function build() {
   const html = `<!doctype html><html lang="he" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>מעיין — שאלות לרב</title><style>${CSS}</style></head><body>
 <header><h1>מעיין — שאלות לרב (תמצית)</h1>
 <div class="meta">גרסת מנוע <b dir="ltr">${esc(M.ENGINE_VERSION)}</b> · git <b dir="ltr">${esc(commit)}</b> · <b>${esc(today)}</b> · שיטות: ${METHODS.map(pk => esc(PRESETS[pk])).join("; ")}</div>
-<div class="intro">כאן רק השאלות. הפירוט המלא (חישובים, הגדרות, ציטוטים ודוגמאות) נמצא במסמך הארוך, ״מעיין — מפרט הלכתי״. כל לוח חושב במנוע עצמו על תרחיש קטן בירושלים, לכל אחת מארבע השיטות; שיטות שהתוצאה שלהן זהה מוצגות בלוח אחד. שלוש השאלות הראשונות הן הנקודות הפתוחות של מבנה השיטות החדש. «${SEC}» הוא מקור משני.</div></header>
+<div class="intro"><b>השאלות שלהלן מסומנות באפליקציה כ׳יש לשאול רב׳ כשהמצב נוצר.</b> כאן רק השאלות. הפירוט המלא (חישובים, הגדרות, ציטוטים ודוגמאות) נמצא במסמך הארוך, ״מעיין — מפרט הלכתי״. כל לוח חושב במנוע עצמו על תרחיש קטן בירושלים, לכל אחת מארבע השיטות; שיטות שהתוצאה שלהן זהה מוצגות בלוח אחד. שלוש השאלות הראשונות הן הנקודות הפתוחות של מבנה השיטות החדש. «${SEC}» הוא מקור משני.</div></header>
 ${legend()}
 ${qhtml}
 ${shortHtml}
