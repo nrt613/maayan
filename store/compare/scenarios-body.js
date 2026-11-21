@@ -42,7 +42,7 @@ S.forEach((sc,i)=>{
     const on=r.plans.filter(p=>["average","monthly","interval","or-zarua"].includes(p.kind));
     if (on.length) { out.push(`- עונות פרישה:`); for (const p of on) { const hdte=p.onah==="day"?hebrew(p.date):hebrew(addDays(p.date,1)); out.push(`  - ${KIND[p.kind]}${p.title.includes("·")?" ("+p.title.split(" · ").slice(1).join(", ")+")":""}: ${p.onah==="day"?"עונת יום":"ליל"} ${hdte} — ${p.onah==="day"?p.date:p.date+" בערב"} ${timeInZone(new Date(p.start),c.tz)}–${timeInZone(new Date(p.end),c.tz)}`); } }
     else out.push(`- עונות פרישה: אין`);
-    const rv=r.reviews.filter(x=>!/^missing-day|^no-mikvah|^immersion-no/.test(x.id)).map(x=>x.title);
+    const rv=r.reviews.filter(x=>!/^missing-day|^no-mikvah|^immersion-no/.test(x.id)).map(x=>x.ask?`${x.topic} — ${x.title}`:x.title);
     if (rv.length) out.push(`- נקודות לבירור: ${[...new Set(rv)].join("; ")}`);
     out.push("");
   }

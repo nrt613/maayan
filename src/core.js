@@ -499,6 +499,8 @@ const Maayan = (() => {
   const citeUrl = id => { const c = cite(id); return c && c.ref ? `https://www.sefaria.org/${c.ref}?lang=he` : ""; };
   /** שורת מקורות בטקסט פשוט (לקובץ יומן) */
   const citeText = ids => (ids || []).map(cite).filter(Boolean).map(c => c.t + (c.ok ? "" : " (לא אומת מול לשון הספר)")).join("; ");
+  /** מקורות ראשוניים שנבדקו מול ספריא בלבד — לטקסט שהמשתמשת רואה (דוח, קובץ יומן). השאר נמצאים במסמכי הרב */
+  const citeTextPrimary = ids => [...new Set((ids || []).map(cite).filter(c => c && c.ok).map(c => c.t))].join("; ");
   const sorted = events => [...events].sort((a, b) => `${a.date}T${a.time}`.localeCompare(`${b.date}T${b.time}`) || a.createdAt.localeCompare(b.createdAt));
 
   /** חישוב מחדש מלא מכל הרישומים. כל מועד מצטט את הרישומים ואת הכלל שעליהם הוא נשען. */
@@ -510,16 +512,18 @@ const Maayan = (() => {
     // בין השמשות: "both" — לחומרא חוששים לשתי העונות; "flag" — משעים את החישוב ומסמנים לבירור
     const bhs = set.beinHashmashot !== "flag";
     const review = (id, title, detail, eventIds = [], source = []) => { if (!reviews.some(r => r.id === id)) reviews.push({ id, title, detail, eventIds, source }); };
-    /* ״יש לשאול רב״: שאלה פתוחה שהמצב שלה נוצר ביומן. המנוע אינו מכריע; החישוב נשאר לחומרא, והפירוט אומר מה נעשה בינתיים */
-    const ask = (id, title, detail, eventIds, source) => { if (!reviews.some(r => r.id === id)) reviews.push({ id, title: `${title} — יש לשאול רב`, detail, eventIds, source, ask: true }); };
+    /* ״יש לשאול רב״: שאלה פתוחה שהמצב שלה נוצר ביומן. המנוע אינו מכריע; החישוב נשאר לחומרא.
+     * לממשק: כותרת ״יש לשאול רב״, משפט אחד שמתאר את המצב (situation) ומשפט אחד על מה שמעיין עושה בינתיים (meanwhile).
+     * topic הוא שם השאלה למסמכי הרב, ו-source המקורות שלה — למסמכים ולדוח לרב, לא לתצוגה באפליקציה. */
+    const ask = (id, topic, situation, meanwhile, eventIds, source) => { if (!reviews.some(r => r.id === id)) reviews.push({ id, title: "יש לשאול רב", topic, situation, meanwhile, detail: `${situation} ${meanwhile}`, eventIds, source, ask: true }); };
     /** יום עברי קצר לפירוט: ״ט׳ אייר״ */
     const hs = abs => { const h = new HDate(abs); return `${LANG === "he" ? gematriya(h.getDate()) : h.getDate()} ${h.monthName()}`; };
     /* ליל טבילה בשבת, ביום טוב או בצום, ויום שביעי שחל בשבת או ביום טוב: מסומן לבירור, לא מוזז */
     const calendarReviews = (day7, c, id) => {
       const israel = c.tz === "Asia/Jerusalem", night = holyDayKinds(isoAbs(day7) + 1, israel), day = holyDayKinds(isoAbs(day7), israel);
-      if (night.includes("yomkippur") || night.includes("tishabav")) review("mikvah-night-fast", "ליל הטבילה חל ביום הכיפורים או בתשעה באב", "בלילות אלה אין טובלים, והטבילה נדחית. יש לברר עם רב את המועד ואת סדר ההכנות.", [id]);
-      if (night.includes("shabbat")) review("mikvah-night-shabbat", "ליל הטבילה חל בליל שבת", "ההכנות (רחצה, חפיפה, ציפורניים) נעשות לפני כניסת השבת, ויש הלכות מיוחדות לטבילה בשבת. יש לברר עם רב ועם המקווה.", [id]);
-      if (night.includes("yomtov")) review("mikvah-night-yomtov", `ליל הטבילה חל ביום טוב${israel ? "" : " (כולל יום טוב שני של גלויות)"}`, "ההכנות נעשות לפני כניסת החג, ויש הלכות מיוחדות לטבילה ביום טוב. יש לברר עם רב ועם המקווה.", [id]);
+      if (night.includes("yomkippur") || night.includes("tishabav")) review("mikvah-night-fast", "ליל הטבילה חל ביום הכיפורים או בתשעה באב", "בלילות אלה אין טובלים, והטבילה נדחית. על המועד ועל סדר ההכנות יש לשאול רב.", [id]);
+      if (night.includes("shabbat")) review("mikvah-night-shabbat", "ליל הטבילה חל בליל שבת", "ההכנות (רחצה, חפיפה, ציפורניים) נעשות לפני כניסת השבת. את הפרטים כדאי לתאם עם הרב ועם המקווה.", [id]);
+      if (night.includes("yomtov")) review("mikvah-night-yomtov", `ליל הטבילה חל ביום טוב${israel ? "" : " (כולל יום טוב שני של גלויות)"}`, "ההכנות נעשות לפני כניסת החג. את הפרטים כדאי לתאם עם הרב ועם המקווה.", [id]);
       if (day.includes("shabbat")) review("mikvah-day-shabbat", "היום השביעי חל בשבת", "הטבילה במוצאי שבת: את ההכנות שאינן מותרות בשבת עושים ביום שישי או במוצאי שבת. יש לברר את סדר ההכנות.", [id]);
       if (day.some(k => k !== "shabbat")) review("mikvah-day-yomtov", "היום השביעי חל ביום טוב או בצום", "ההכנות לטבילה במוצאי היום מוגבלות ביום עצמו. יש לברר את סדר ההכנות עם רב.", [id]);
     };
@@ -533,7 +537,7 @@ const Maayan = (() => {
         if (e.type === "flow" && e.foundOnWaking) { s.waking = true; if (!s.alt) s.alt = { abs: s.abs, onah: s.onah === "day" ? "night" : "day", ordinal: 2 * s.abs + (s.onah === "day" ? 0 : 1) }; }
         if (s.instant > now && e.type !== "manual" && e.type !== "note") { review(`future-${e.id}`, "רישום עתידי", "אירוע שטרם התרחש אינו משמש כחישוב בפועל.", [e.id]); continue; }
         stamped.push({ e, s });
-        if (s.uncertain && ["flow", "hefsek", "restart", "bedikah"].includes(e.type) && !(e.type === "bedikah" && bedikahInDay({ e, s }))) review(`boundary-${e.id}`, "רישום סמוך לגבול היום או העונה", bhs && e.type === "flow" ? "הראייה הייתה סמוך לשקיעה או לזריחה, או בין השקיעה לצאת הכוכבים. לחומרא חושבו מועדי הפרישה לשתי העונות, וההמתנה נספרת מהיום המאוחר. יש לברר." : "נשמרו השעה והמקום. שיוך האירוע דורש בירור, והוא לא משמש לבדו לחישוב ודאי.", [e.id]);
+        if (s.uncertain && ["flow", "hefsek", "restart", "bedikah"].includes(e.type) && !(e.type === "bedikah" && bedikahInDay({ e, s }))) review(`boundary-${e.id}`, "רישום סמוך לגבול היום או העונה", bhs && e.type === "flow" ? "הראייה הייתה סמוך לשקיעה או לזריחה, או בין השקיעה לצאת הכוכבים. מעיין חוששת לשתי העונות, וההמתנה נספרת מהיום המאוחר." : "נשמרו השעה והמקום. שיוך האירוע דורש בירור, והוא לא משמש לבדו לחישוב ודאי.", [e.id]);
         if (e.type === "question" || e.result === "uncertain") review(`question-${e.id}`, "רישום שממתין לבירור", e.note || "שאלה על דימום או מראה אינה הופכת אוטומטית לווסת או להפסק תקף.", [e.id]);
       } catch (err) {
         if (e.type === "flow" || e.type === "restart") {
@@ -553,7 +557,7 @@ const Maayan = (() => {
     const altWhy = x => x.s.waking && !x.s.uncertain ? "הראייה נמצאה בבדיקה או בהתעוררות, ולא ידוע מתי התחילה; לחומרא חוששים לשתי העונות." : "הראייה הייתה סמוך לגבול העונה או בין השמשות; לחומרא חוששים גם לעונה הסמוכה.";
     // נמצא בהתעוררות: שאלה לרב לכל ראייה כזו שמשמשת בחישוב הנוכחי (הראייה האחרונה וזו שלפניה)
     for (const x of natural.slice(-2)) if (x.s.waking) ask(`ask-waking-${x.e.id}`, "נמצא דם בהתעוררות",
-      `לפי ספר האשכול ושבט הלוי (מובא בסיכום משני) העונה היא עונת יום, אלא אם ברור שהתחיל בלילה. בינתיים מעיין חוששת לשתי העונות של ${hs(x.s.abs)}, לילה ויום, וההמתנה נספרת מהיום המאוחר.`, [x.e.id], ["sa184_4", "secWaking"]);
+      "הדם נמצא בהתעוררות, ולא ידוע מתי התחיל.", `בינתיים מעיין חוששת ללילה וליום של ${hs(x.s.abs)}.`, [x.e.id], ["sa184_4", "secWaking"]);
     const lateAbs = x => Math.max(...readings(x).map(r => r.abs));
     const latestFlow = natural.at(-1)?.e;
     const latestNiddah = stamped.filter(x => ["flow", "restart"].includes(x.e.type)).at(-1);
@@ -565,7 +569,7 @@ const Maayan = (() => {
     for (let i = 1; i < stamped.length; i++) {
       if (Math.abs(city(stamped[i].e.cityId).lon - city(stamped[i - 1].e.cityId).lon) > 180) { dateline = true; review("dateline", "נסיעה אפשרית מעבר לקו התאריך", "החישובים האוטומטיים לעונות הושעו. יש לרשום את ההנחיות האישיות כאירועים ידניים.", [stamped[i - 1].e.id, stamped[i].e.id]); }
     }
-    if (state.settings.haflagah === "chabad-onot" && state.settings.beinonit === "same") review("chabad-beinonit", "בשיטת חב״ד העונה הבינונית היא יממה שלמה", "לפי שולחן ערוך הרב (יו״ד קפט, ס״ק א) פורשים ביום 30 מתחילת הלילה ועד סוף היום. בהגדרות נבחרה עונה אחת בלבד; כדי ליישר עם השיטה יש לבחור ״שתי העונות״.");
+    if (state.settings.haflagah === "chabad-onot" && state.settings.beinonit === "same") review("chabad-beinonit", "בשיטת חב״ד העונה הבינונית היא יממה שלמה", "בשיטת חב״ד פורשים ביום 30 מתחילת הלילה ועד סוף היום. בהגדרות נבחרה עונה אחת בלבד; כדי להתאים לשיטה בוחרים ״שתי העונות״.");
     if (state.settings.special !== "regular") review("special", "נבחר מצב המחייב התאמה אישית", "היריון, אחרי לידה, הנקה וטיפול הורמונלי אינם מחושבים כאן אוטומטית לפי כללי מחזור רגיל. אפשר לרשום מועדים ידניים לפי הוראה.");
     let earliestHefsek;
     if (!unresolvedActive && latestNiddah && (!latestMikvah || latestMikvah.s.instant < latestNiddah.s.instant)) {
@@ -601,7 +605,7 @@ const Maayan = (() => {
       if (!beforeSunset) { review(`hefsek-late-${h.e.id}`, "זמן ההפסק דורש בירור", "אין להתחיל ספירה אוטומטית מהפסק שנרשם אחרי השקיעה או בזמן מסופק.", [h.e.id]); continue; }
       if (!latestNiddah) { review(`hefsek-no-flow-${h.e.id}`, "חסר רישום תחילת התקופה", "נשמר ההפסק, אך חסרים נתוני הבסיס להמתנה. אפשר לתעד הוראה אישית.", [h.e.id]); if (!h.e.authorityNote) continue; }
       if ((!earliestHefsek || fromAbs(h.s.abs) < earliestHefsek) && !h.e.authorityNote) { review(`hefsek-early-${h.e.id}`, "הפסק לפני מועד ההמתנה המחושב", "המערכת אינה משנה את ההמתנה ללא תיעוד הוראה אישית.", [h.e.id]); continue; }
-      if (bedieved) review(`hefsek-bedieved-${h.e.id}`, "הפסק סמוך לשקיעה או אחריה — תקף בדיעבד לפי השיטה שנבחרה", "לפי פסק הרב עובדיה יוסף הפסק שנעשה עד 13.5 דקות זמניות אחרי השקיעה תקף בדיעבד, ונספר ליום שהסתיים. לכתחילה עושים את ההפסק לפני השקיעה. יש לוודא עם רב, ובפרט לגבי המקום (יש שכתבו שבארץ ישראל השיעור קצר יותר).", [h.e.id]);
+      if (bedieved) review(`hefsek-bedieved-${h.e.id}`, "הפסק סמוך לשקיעה או אחריה — תקף בדיעבד לפי השיטה שנבחרה", "לפי הרב עובדיה יוסף הפסק עד 13.5 דקות זמניות אחרי השקיעה תקף בדיעבד, ונספר ליום שהסתיים. לכתחילה עושים את ההפסק לפני השקיעה. כדאי לוודא עם הרב.", [h.e.id]);
       validHefsek = h;
     }
     const checks = {};
@@ -624,7 +628,7 @@ const Maayan = (() => {
         const required = state.settings.bedikot !== "first-last" || n === 1 || n === 7;
         // היום הסתיים בשקיעתו (היום השביעי: בכניסת ליל הטבילה); כשאין שקיעה, כשהתאריך האזרחי עבר
         const ended = s.sunset ? now >= s.sunset : d < date;
-        if (required && ended && !checks[n].length) review(`missing-day-${n}`, `לא נרשמה בדיקה ביום ${["הראשון", "השני", "השלישי", "הרביעי", "החמישי", "השישי", "השביעי"][n - 1]}`, "חוסר רישום אינו מוכיח שלא בוצעה בדיקה. יש להשלים רישום או לברר; המערכת אינה פוסלת או מאשרת את הספירה בעצמה.", [h.e.id]);
+        if (required && ended && !checks[n].length) review(`missing-day-${n}`, `לא נרשמה בדיקה ביום ${["הראשון", "השני", "השלישי", "הרביעי", "החמישי", "השישי", "השביעי"][n - 1]}`, "אם הבדיקה נעשתה, אפשר לרשום אותה. אם לא, יש לשאול רב.", [h.e.id]);
         if (!required) continue;
         if (s.sunrise && s.sunset) {
           const base = { kind: "bedikah", date: d, onah: "day", source: SOURCES.clean, eventIds: [h.e.id], cityId: c.id, day: n };
@@ -682,15 +686,15 @@ const Maayan = (() => {
       const monthlyAbs = monthly(last);
       if (useAlt(last)) { const t = monthly(last.s.alt.abs); if (t) addOnah(t, last.s.alt.onah, "monthly", "עונת החודש · העונה הסמוכה", altWhy(last), SOURCES.monthly, [last.e.id], `monthly-${last.e.id}-alt`); }
       if (monthlyAbs) addOnah(monthlyAbs, last.s.onah, "monthly", "עונת החודש", "אותו יום בחודש העברי הבא ובאותה עונה. כלל יום ל׳ בחודש חסר נקבע בנפרד בהגדרות.", SOURCES.monthly, [last.e.id], `monthly-${last.e.id}`);
-      else review("missing-month-day", "בחודש הבא אין יום מקביל", "נבחר לדלג על עונת החודש בחודש חסר. זו בחירת שיטה, ולא החלטה שמתאימה לכל מנהג.", [last.e.id]);
+      else review("missing-month-day", "בחודש הבא אין יום מקביל", "לפי הבחירה בהגדרות, בחודש הזה אין עונת חודש.", [last.e.id]);
       // ראתה בל׳ בחודש (א׳ דראש חודש): מה דין עונת החודש כשהחודש הבא חסר, וכשהוא מלא (ראש חודש שני ימים)
       if (new HDate(last.s.abs).getDate() === 30) {
         const h = new HDate(last.s.abs), nextFirst = new HDate(1, h.getMonth(), h.getFullYear()).add(1, "M"), afterFirst = nextFirst.add(1, "M").abs();
-        if (afterFirst - nextFirst.abs() === 29) ask("ask-30-short", "ראתה בל׳ והחודש הבא חסר",
-          (monthlyAbs ? `בינתיים מעיין חוששת ל־${hs(monthlyAbs)} (א׳ בחודש שאחרי החודש החסר), כערוך השולחן קפט, יב, כח.` : `בינתיים מעיין אינה חוששת לעונת החודש (נבחר דילוג בהגדרות); לפי ערוך השולחן קפט, יב, כח חוששת ל־${hs(afterFirst)}.`) + " ההיכל שלמה בדעת הב״ח (מקור משני) הסתפק בדבר.",
+        if (afterFirst - nextFirst.abs() === 29) ask("ask-30-short", "ראתה בל׳ והחודש הבא חסר", "ראית בל׳ בחודש, ובחודש הבא אין ל׳.",
+          monthlyAbs ? `בינתיים מעיין חוששת ל־${hs(monthlyAbs)}.` : "בינתיים מעיין אינה מוסיפה עונת חודש, לפי הבחירה בהגדרות.",
           [last.e.id], ["aruch189_12", "missing30", "secHeichal"]);
-        else ask("ask-30-full", "ראתה בל׳ והחודש הבא מלא",
-          `בינתיים מעיין חוששת רק ל־${hs(monthlyAbs)}. לפי ערוך השולחן קפט, כח והט״ז קפט, ס״ק יד (״בשני ימים דר״ח״) ייתכן שחוששת גם ל־${hs(afterFirst)}, היום השני של ראש החודש.`,
+        else ask("ask-30-full", "ראתה בל׳ והחודש הבא מלא", `ראית בל׳ בחודש, ובחודש הבא ראש החודש יומיים: ${hs(monthlyAbs)} ו־${hs(afterFirst)}.`,
+          `בינתיים מעיין חוששת ל־${hs(monthlyAbs)}.`,
           [last.e.id], ["missing30", "taz189_14"]);
       }
       const monthlyTargets = new Set([monthlyAbs]);
@@ -770,7 +774,7 @@ const Maayan = (() => {
             const dates = [...new Set([...extra.map(x => x.target), ...long.map(x => last.s.abs + x.v - 1)])].sort((p, q) => p - q).map(hs);
             const values = [...new Set([...extra, ...long].map(x => x.v))].sort((p, q) => q - p);
             ask("ask-uprooted-haflagah", "הפלגה ארוכה שנעקרה בהפלגה קצרה ממנה",
-              `בינתיים מעיין, כב״ח והש״ך, אינה חוששת ל־${dates.join(", ")} (הפלגה של ${values.join(", ")} ימים, שנעקרה בהפלגה של ${lastV} ימים). לפי רמ״א קפט, יג והט״ז חוששת.`,
+              `אחרי הפלגה של ${values.join(", ")} ימים באה הפלגה קצרה יותר, של ${lastV} ימים.`, `בינתיים מעיין אינה חוששת ל־${dates.join(", ")}.`,
               [...new Set([...extra.flatMap(x => x.ids), ...long.flatMap(x => x.ids), last.e.id])], ["rema189_13", "shach189_31", "secCarryTaz", "secCarryMajority"]);
           }
         }
@@ -795,14 +799,14 @@ const Maayan = (() => {
     if (flows.length >= 3) {
       const recent = flows.slice(-3), months = recent.map(x => new HDate(x.s.abs));
       if (recent.every(x => x.s.onah === recent[0].s.onah) && months.every(h => h.getDate() === months[0].getDate()) && months[0].add(1, "M").abs() === months[1].abs() && months[1].add(1, "M").abs() === months[2].abs())
-        review("possible-fixed-month", "דפוס חודשי אפשרי שחוזר שלוש פעמים", "נדרש בירור של קביעות ועקירה. המערכת אינה מחליפה את מועדי החשש אוטומטית על בסיס זיהוי דפוס.", recent.map(x => x.e.id));
+        review("possible-fixed-month", "דפוס חודשי אפשרי שחוזר שלוש פעמים", "ייתכן שזו וסת קבועה. יש לשאול רב; בינתיים מעיין ממשיכה לחשב כרגיל.", recent.map(x => x.e.id));
     }
     if (flows.length >= 4) {
       const f = flows.slice(-4), g = [1, 2, 3].map(i => f[i].s.abs - f[i - 1].s.abs);
-      if (g.every(n => n === g[0]) && f.slice(1).every(x => x.s.onah === f[1].s.onah)) review("possible-fixed-interval", "שלוש הפלגות שוות בארבע ראיות", "זהו חשד לדפוס קבוע, ולא קביעה של וסת קבוע. יש לברר אילו חששות לשמור.", f.map(x => x.e.id));
+      if (g.every(n => n === g[0]) && f.slice(1).every(x => x.s.onah === f[1].s.onah)) review("possible-fixed-interval", "שלוש הפלגות שוות בארבע ראיות", "ייתכן שזו וסת קבועה. יש לשאול רב; בינתיים מעיין ממשיכה לחשב כרגיל.", f.map(x => x.e.id));
     }
     for (const { e } of stamped) if (e.type === "manual" && e.onah) addOnah(isoAbs(e.date), e.onah, "manual", "עונת פרישה לפי הוראה", e.authorityNote || e.note || "מועד שנרשם ידנית; אינו נוצר מהחישוב האוטומטי.", "", [e.id], `manual-${e.id}`);
-    for (const x of stamped.filter(x => x.e.type === "bedikah" && x.e.result === "bleeding")) review(`bleeding-check-${x.e.id}`, "בדיקה שנרשמה כלא נקייה", "אין איפוס אוטומטי על סמך תיאור מראה. יש לברר ולתעד חידוש ספירה אם כך הונחית.", [x.e.id]);
+    for (const x of stamped.filter(x => x.e.type === "bedikah" && x.e.result === "bleeding")) review(`bleeding-check-${x.e.id}`, "בדיקה שנרשמה כלא נקייה", "מעיין אינה משנה את הספירה בעצמה. יש לשאול רב, ואם הורה לחדש את הספירה — לרשום ״חידוש ספירה לפי הוראה״.", [x.e.id]);
     if (latestNiddah && !validHefsek && (!latestMikvah || latestMikvah.s.instant < latestNiddah.s.instant) && currentAbs - latestNiddah.s.abs > 14)
       review("no-mikvah-after-flow", "לא נרשמו הפסק וטבילה אחרי הראייה האחרונה", "אם הוזנו מחזורים קודמים ללא הפסק וטבילה, המערכת מניחה שעדיין לא נעשו. כדי שהמצב יוצג נכון יש לרשום אותם.", [latestNiddah.e.id]);
     const immersed = !unresolvedActive && latestMikvah && (!latestNiddah || latestMikvah.s.instant > latestNiddah.s.instant);
@@ -824,7 +828,7 @@ const Maayan = (() => {
     if (last && last.s.onah === "day" && set.beinonit === "both" && set.orZarua) {
       const oz = deduped.find(p => p.id === `oz-average-${last.e.id}-30-night`);
       if (oz) ask(`ask-oz-24h-${last.e.id}`, "אור זרוע לפני עונה בינונית של מעת לעת",
-        `בינתיים מעיין מוסיפה אור זרוע ביום ${hs(isoAbs(oz.date))} (יום 29), לפני ליל יום 30, אף שהעונה הבינונית היא כבר מעת לעת שלם. יש לוחות שאינם מוסיפים אותו.`,
+        "העונה הבינונית בשיטה שלך היא יממה שלמה, מתחילת הלילה.", `בינתיים מעיין מוסיפה עונת אור זרוע ב־${hs(isoAbs(oz.date))}, ביום שלפניה.`,
         [last.e.id], ["shach184_7", "sahr189_1f", "secBadei"]);
     }
     return { plans: deduped, reviews, latestFlow, hefsek: validHefsek?.e, earliestHefsek, cleanDay, phase, immersionDate, checks, version: ENGINE_VERSION };
@@ -869,7 +873,7 @@ const Maayan = (() => {
       const summary = escapeICS(neutral ? personal : p.title);
       rows.push("BEGIN:VEVENT", `UID:${p.id}@maayan.local`, `DTSTAMP:${utc(now.toISOString())}`, `DTSTART:${utc(p.start)}`,
         `DTEND:${utc(p.end ?? new Date(new Date(p.start).valueOf() + 30 * 60000).toISOString())}`, `SUMMARY:${summary}`,
-        `DESCRIPTION:${escapeICS(neutral ? details : `${p.reason}${p.source && p.source.length ? `\nמקור: ${citeText(p.source)}` : ""}`)}`,
+        `DESCRIPTION:${escapeICS(neutral ? details : `${p.reason}${citeTextPrimary(p.source) ? `\nמקור: ${citeTextPrimary(p.source)}` : ""}`)}`,
         "CLASS:PRIVATE", "TRANSP:TRANSPARENT", "BEGIN:VALARM", "TRIGGER:PT0M", "ACTION:DISPLAY", `DESCRIPTION:${summary}`, "END:VALARM", "END:VEVENT");
     }
     rows.push("END:VCALENDAR");
@@ -1021,7 +1025,7 @@ const Maayan = (() => {
       "הגדרות:", ...settingsSummary(state.settings).map(x => "  " + x), "",
       `רישומים (${state.events.length}):`, ...sorted(state.events).map(e => "• " + eventLine(e)), "",
       `מועדים מחושבים (${result.plans.length}):`, ...result.plans.map(p => "• " + planLine(p)), "",
-      `נקודות לבירור (${result.reviews.length}):`, ...result.reviews.map(r => `• ${r.title} — ${r.detail}${r.source && r.source.length ? `\n   מקורות: ${citeText(r.source)}` : ""}`),
+      `נקודות לבירור (${result.reviews.length}):`, ...result.reviews.map(r => (r.ask ? `• ${r.topic} — ${r.title}\n   ${r.situation}\n   ${r.meanwhile}` : `• ${r.title} — ${r.detail}`) + (citeTextPrimary(r.source) ? `\n   מקורות: ${citeTextPrimary(r.source)}` : "")),
     ].join("\n");
   }
 

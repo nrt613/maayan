@@ -541,8 +541,10 @@ const MaayanTests = (M) => {
   /* ---------- ״יש לשאול רב״: שאלות פתוחות מסומנות כשהמצב נוצר, והחישוב נשאר לחומרא ---------- */
   const rv = (r, id) => r.reviews.find(x => x.id === id);
   const askOk = (v, ids) => {
-    a.ok(v, "הסימון קיים"); a.ok(v.ask, "מסומן כשאלה לרב"); a.match(v.title, /— יש לשאול רב$/);
-    a.ok(v.detail && /מעיין/.test(v.detail), "הפירוט אומר מה מעיין עושה בינתיים");
+    a.ok(v, "הסימון קיים"); a.ok(v.ask, "מסומן כשאלה לרב"); a.equal(v.title, "יש לשאול רב"); a.ok(v.topic, "שם השאלה למסמכי הרב");
+    a.ok(v.situation && v.meanwhile, "משפט על המצב ומשפט על מה שנעשה בינתיים"); a.match(v.meanwhile, /^בינתיים מעיין /, "הפירוט אומר מה מעיין עושה בינתיים");
+    a.equal(v.detail, `${v.situation} ${v.meanwhile}`);
+    a.ok(!/משני|רמ״א|ט״ז|ב״ח|ש״ך|ערוך השולחן|לא אומת|⚠/.test(v.detail), "בלי מקורות ושמות דעות בטקסט לאפליקציה");
     a.ok(Array.isArray(v.source) && v.source.length && v.source.every(id => M.cite(id)), "מקורות מתוך CITES");
     for (const id of ids || []) a.ok(v.source.includes(id), `המקור ${id}`);
   };
@@ -593,7 +595,7 @@ const MaayanTests = (M) => {
     a.deepEqual([...new Set(av.map(p => p.onah === "day" ? p.date : addDays(p.date, 1)))], [N(9, 2)], "שתיהן ביום 30, אותו יום עברי");
     a.deepEqual(r.plans.filter(p => p.kind === "monthly").map(p => p.onah).sort(), ["day", "night"], "עונת החודש בשתי העונות");
     a.equal(r.earliestHefsek, N(14), "ההמתנה מהיום המאוחר");
-    const v = rv(r, `ask-waking-${wake.id}`); askOk(v, ["sa184_4", "secWaking"]); a.match(v.title, /^נמצא דם בהתעוררות — יש לשאול רב$/); a.deepEqual(v.eventIds, [wake.id]);
+    const v = rv(r, `ask-waking-${wake.id}`); askOk(v, ["sa184_4", "secWaking"]); a.equal(v.topic, "נמצא דם בהתעוררות"); a.deepEqual(v.eventIds, [wake.id]);
     a.ok(!r0.reviews.some(x => /^ask-waking/.test(x.id)), "בלי הסימון אין שאלה");
     const early = event("flow", d, "04:30", { foundOnWaking: true }), re = run([early]);
     a.equal(stamp(early).onah, "night"); a.deepEqual(re.plans.filter(p => p.kind === "average").map(p => p.onah).sort(), ["day", "night"]); a.equal(re.earliestHefsek, N(14));
@@ -622,7 +624,7 @@ const MaayanTests = (M) => {
     for (const pk of ["ashkenaz", "ashkenaz-kreiti"]) {
       const r = calculate(presetState(pk, [event("flow", N(2), "10:00", { cityId: "jerusalem" })]), NOW);
       a.ok(!r.reviews.some(x => /31|זרוע/.test(x.id) && x.id !== `ask-oz-24h-${r.latestFlow.id}`), pk);
-      a.ok(!r.reviews.some(x => /יום 31/.test(x.title)), pk);
+      a.ok(!r.reviews.some(x => /יום 31/.test(`${x.title} ${x.topic || ""}`)), pk);
     }
   });
 

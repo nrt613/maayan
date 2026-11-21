@@ -13,12 +13,16 @@
   const $ = sel => document.querySelector(sel);
   const placeOptions = (st, selected) => [...CITIES, ...(st.places || [])].map(c => `<option value="${c.id}"${selected === c.id ? " selected" : ""}>${esc(c.name)}</option>`).join("");
   const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
-  /** רשימת מקורות: כל מקור הוא מקום בטקסט הראשוני; מקור שנבדק מול ספריא מקושר לטקסט שם, ואחר מסומן לבדיקה */
+  /** קישורי מקור למסך הכללים בלבד: רק מקורות ראשוניים שנבדקו מול ספריא, מקושרים לטקסט שם.
+   *  מקורות שלא אומתו ומקורות משניים נמצאים במסמכי הרב (docs/halacha), לא באפליקציה. */
   const citeList = (ids, label = "מקורות") => {
-    const list = (ids || []).map(id => [id, M.cite(id)]).filter(([, c]) => c);
+    const seen = new Set(), list = (ids || []).map(id => [id, M.cite(id)]).filter(([, c]) => c && c.ok && !seen.has(c.t) && seen.add(c.t));
     if (!list.length) return "";
-    return `<div class="cites"><span class="cites-h">${label}:</span><ul>${list.map(([id, c]) => `<li>${c.ref ? `<a href="${esc(M.citeUrl(id))}" target="_blank" rel="noopener">${esc(c.t)}</a>` : `<span>${esc(c.t)}</span> <small class="nv">⚠ לא אומת מול לשון הספר — לבדיקת הרב</small>`}</li>`).join("")}</ul></div>`;
+    return `<div class="cites"><span class="cites-h">${label}:</span><ul>${list.map(([id, c]) => `<li><a href="${esc(M.citeUrl(id))}" target="_blank" rel="noopener">${esc(c.t)}</a></li>`).join("")}</ul></div>`;
   };
+  /** נקודה לבירור באפליקציה: ב״יש לשאול רב״ — משפט על המצב ומשפט על מה שמעיין עושה בינתיים, בלי מקורות */
+  const reviewBody = v => v.ask ? `<p>${esc(v.situation)}</p><p class="ask-now">${esc(v.meanwhile)}</p>` : `<p>${esc(v.detail)}</p>`;
+  const reviewHead = v => v.ask ? v.situation : v.title;
 
   /** נקודות לבירור: שאלות ״יש לשאול רב״ קודם, ואחריהן השאר בסדרן */
   const askFirst = list => [...list.filter(v => v.ask), ...list.filter(v => !v.ask)];
@@ -152,8 +156,7 @@
       <div class="plan-more"><p>${esc(p.reason)}</p>
         <small>${onahLabel(p.onah)} · ${p.end ? `מ-${start} עד ${timeInZone(new Date(p.end), c.tz)}` : `מ-${start}`} · ${esc(c.name)}</small>
         ${p.done ? '<small class="ok-text">בדיקה נרשמה</small>' : ""}
-        ${p.kind === "mikvah" && prep ? prepButton(state()) : ""}
-        ${citeList(p.source, "מקור הכלל")}</div></details>`;
+        ${p.kind === "mikvah" && prep ? prepButton(state()) : ""}</div></details>`;
   }
 
   /* ---------- תזכורת לגיבוי ---------- */
@@ -359,7 +362,7 @@
         ${methodChooser(st.settings, "first")}
         <ul class="method-sum">${M.settingsSummary(st.settings).filter(x => /^(שיטה|המתנה|הפלגה|עונה בינונית|יום 31|אור זרוע)/.test(x)).map(x => `<li>${esc(x)}</li>`).join("")}</ul>
         <button class="btn ghost full" data-go="prefs">${I("sliders", 17)}התאמה אישית לפי הוראת הרב</button></section>` : ""}
-      ${r.reviews.length ? `<button class="notice" data-go="journal"><span class="notice-ic">${I("help", 20)}</span><span><strong>${r.reviews.length} ${r.reviews.length === 1 ? "נקודה לבירור" : "נקודות לבירור"}</strong><small>${esc(askFirst(r.reviews).slice(0, 2).map(v => v.title).join(" · "))}</small></span>${I("left", 16)}</button>` : ""}
+      ${r.reviews.length ? `<button class="notice${askFirst(r.reviews)[0].ask ? " ask" : ""}" data-go="journal"><span class="notice-ic">${I("help", 20)}</span><span><strong>${r.reviews.length} ${r.reviews.length === 1 ? "נקודה לבירור" : "נקודות לבירור"}</strong><small>${esc(askFirst(r.reviews).slice(0, 2).map(reviewHead).join(" · "))}</small></span>${I("left", 16)}</button>` : ""}
       <section class="card upcoming"><div class="card-h"><h3>מועדים קרובים</h3><button class="link" data-go="dates">הכול ${I("left", 14)}</button></div>
         ${upcoming.length > 1 ? `<div class="plans">${upcoming.slice(1).map(p => planLine(p, { compact: true })).join("")}</div>` : `<p class="empty">${upcoming.length ? "אין מועדים נוספים בקרוב." : first ? "המועדים יופיעו כאן אחרי הרישום הראשון." : "אין מועדים קרובים."}</p>`}
       </section>
@@ -434,7 +437,7 @@
       .filter(e => (app.filter === "all" || e.type === app.filter) && (!q || `${EVENT_NAMES[e.type]} ${e.date} ${e.note} ${hebrew(e.date)}`.toLowerCase().includes(q)));
     return `${r.reviews.length ? `<section class="card reviews"><div class="card-h">${I("help")}<h3>נקודות לבירור <span class="count">${r.reviews.length}</span></h3></div>
       <p class="fine">המערכת אינה מכריעה בנקודות אלה. כל נקודה מפנה לרישומים הנוגעים בה.</p>
-      ${askFirst(r.reviews).map(v => `<details${v.ask ? ` class="ask" data-review="${esc(v.id)}"` : ` data-review="${esc(v.id)}"`}><summary>${v.ask ? `<span class="ask-ic">${I("scale", 16)}</span>` : ""}<span class="rv-t">${esc(v.title)}</span>${I("left", 15)}</summary><p>${esc(v.detail)}</p>${citeList(v.source)}${v.eventIds.map(id => { const e = st.events.find(x => x.id === id); return e ? `<button class="link" data-edit="${id}">${esc(EVENT_NAMES[e.type])} · ${esc(civilLabel(e.date, true))} ${I("pencil", 13)}</button>` : ""; }).join("")}</details>`).join("")}</section>` : ""}
+      ${askFirst(r.reviews).map(v => `<details${v.ask ? ` class="ask" data-review="${esc(v.id)}"` : ` data-review="${esc(v.id)}"`}><summary>${v.ask ? `<span class="ask-ic">${I("scale", 16)}</span>` : ""}<span class="rv-t">${esc(v.title)}</span>${I("left", 15)}</summary>${reviewBody(v)}${v.eventIds.map(id => { const e = st.events.find(x => x.id === id); return e ? `<button class="link" data-edit="${id}">${esc(EVENT_NAMES[e.type])} · ${esc(civilLabel(e.date, true))} ${I("pencil", 13)}</button>` : ""; }).join("")}</details>`).join("")}</section>` : ""}
     <section class="card"><div class="card-h">${I("book")}<h3>רישומים <span class="count">${st.events.length}</span></h3><button class="link" data-act="report">${I("file", 15)}דוח לבירור</button></div>
       <div class="filters"><label class="search">${I("search", 17)}<input id="q" type="search" placeholder="חיפוש לפי תאריך או הערה" value="${esc(app.query)}" aria-label="חיפוש"></label>
       <select id="filter" aria-label="סינון לפי סוג"><option value="all">כל הסוגים</option>${Object.entries(EVENT_NAMES).map(([v, n]) => `<option value="${v}"${app.filter === v ? " selected" : ""}>${n}</option>`).join("")}</select></div>
@@ -448,7 +451,7 @@
     return `<div class="two"><section class="card"><div class="card-h">${I("bell")}<h3>מועדים עתידיים <span class="count">${up.length}</span></h3></div>
       ${up.length ? `<div class="plans">${up.map(p => planLine(p)).join("")}</div>` : `<div class="empty-state">${I("bell", 30)}<strong>אין מועדים עתידיים כרגע</strong><p>${st.events.length ? "מועדים חדשים יחושבו מהרישומים הבאים." : "אחרי רישום תחילת וסת יופיעו כאן עונות הפרישה, ההפסק והבדיקות."}</p></div>`}
       ${past.length ? `<details class="past"><summary>מועדים שעברו או שהושלמו (${past.length})${I("left", 15)}</summary><div class="plans">${past.map(p => planLine(p)).join("")}</div></details>` : ""}
-      <p class="fine">כל מועד הוא תכנון לפי השיטה שנבחרה בהגדרות. לחיצה על מועד מציגה את הכלל ואת המקור.</p></section>
+      <p class="fine">כל מועד הוא תכנון לפי השיטה שנבחרה בהגדרות. לחיצה על מועד מציגה את הכלל.</p></section>
     <aside class="stack"><section class="card"><div class="card-h">${I("calendar")}<h3>ייצוא ליומן הטלפון</h3></div>
       <p>קובץ מועדים עם התראות, לייבוא ליומן Google או לכל יומן אחר. ${st.settings.neutralReminders ? "הנוסח דיסקרטי: ״תזכורת אישית״ בלבד." : "הנוסח המלא מופיע בקובץ."}</p>
       <button class="btn full" data-act="ics" ${up.length ? "" : "disabled"}>${I("download", 17)}קובץ מועדים</button>
@@ -469,8 +472,8 @@
       ${methodChooser(s, "prefs")}
       <p class="mc-sum">${esc(M.settingsSummary(s)[0])}</p>
       ${methodNotes(s)}
-      <details class="custom-set" data-keep="custom"${app.keep.has("custom") ? " open" : ""}><summary><span>התאמה אישית לפי הוראת הרב</span>${M.presetDiff(s).length ? `<span class="count">שונו מהשיטה: ${M.presetDiff(s).length}</span>` : ""}${I("left", 15)}</summary>
-      <p class="fine">כל ערך כאן נקבע לפי השיטה שנבחרה. אפשר לשנות כל הגדרה לפי הוראת הרב; השינוי נשמר כשינוי מהשיטה.</p>
+      <details class="custom-set" data-keep="custom"${app.keep.has("custom") ? " open" : ""}><summary><span>התאמה אישית לפי הוראת הרב</span>${M.presetDiff(s).length ? `<span class="count">הותאם אישית</span>` : ""}${I("left", 15)}</summary>
+      <p class="fine">הערכים נקבעים לפי השיטה שנבחרה. אפשר לשנות כל הגדרה לפי הוראת הרב.</p>
       ${sel("wait", "המתנה לפני שבעה נקיים", s, [["five", "חמישה ימים מתחילת הנידה"], ["four", "ארבעה ימים מתחילת הנידה — הרב עובדיה יוסף"], ["four-from-relations", "ארבעה ימים ממועד היחסים — לפי הוראה"]])}
       ${sel("haflagah", "שיטת חישוב ההפלגה", s, [["days", "ימים בין תחילות הווסתות"], ["chabad-onot", "עונות מהפסק טהרה — חב״ד"]])}
       ${sel("beinonit", "עונה בינונית ביום 30", s, [["same", "אותה עונה שבה התחילה הווסת"], ["both", "שתי העונות — לילה ויום"]])}
@@ -496,11 +499,19 @@
       ${tog("widgetEnabled", "הצגת מצב בווידג׳ט", "אחרי ההפעלה: לחיצה ארוכה על מסך הבית ← ווידג׳טים ← מעיין", s)}
       ${sel("widgetStyle", "נוסח הווידג׳ט", s, [["discreet", "דיסקרטי: ״תזכורת אישית״ וספירת ימים"], ["full", "מלא: שם המועד והשעה"]])}
       <p class="fine">כשנעילת האפליקציה פעילה, הווידג׳ט תמיד דיסקרטי. לחיצה על הווידג׳ט פותחת את היומן.</p></section>`;
+  /** שורה קצרה לכל שיטה בבחירה. הפירוט והמקורות של כל ערך נמצאים במסמכי הרב (docs/halacha), לא כאן */
+  const METHOD_LINES = {
+    sefard: "לפי פסקי טהרת הבית.",
+    "sefard-bic": "כמו הרב עובדיה, ובנוסף אור זרוע.",
+    ashkenaz: "יום 30 ו־31, ואור זרוע.",
+    "ashkenaz-kreiti": "כמו עיקר הדין, והעונה הבינונית יממה שלמה.",
+    chabad: "לפי שולחן ערוך הרב.",
+  };
   /** בחירת שיטה בשני שלבים: מה המנהג (ספרדי / אשכנזי / חב״ד), ואז לפי מי. בחב״ד אין שלב שני. */
   function methodChooser(s, where) {
     const P = M.METHOD_PRESETS, fam = app.methodFamily || M.methodFamily(s.method), F = M.METHOD_FAMILIES.find(f => f.id === fam);
-    const card = m => `<button type="button" class="mc-card" role="radio" aria-checked="${s.method === m}" data-method="${m}"><span class="mc-dot" aria-hidden="true"></span><span class="mc-body"><strong>${esc(P[m].name)}</strong><small>${esc(P[m].line)}</small><small class="mc-src">מקור: ${esc(P[m].source)}</small></span></button>`;
-    const one = m => `<div class="mc-card on mc-only"><span class="mc-body"><strong>${esc(P[m].name)}</strong><small>${esc(P[m].line)}</small><small class="mc-src">מקור: ${esc(P[m].source)}</small></span></div>`;
+    const card = m => `<button type="button" class="mc-card" role="radio" aria-checked="${s.method === m}" data-method="${m}"><span class="mc-dot" aria-hidden="true"></span><span class="mc-body"><strong>${esc(P[m].name)}</strong><small>${esc(METHOD_LINES[m])}</small></span></button>`;
+    const one = m => `<div class="mc-card on mc-only"><span class="mc-body"><strong>${esc(P[m].name)}</strong><small>${esc(METHOD_LINES[m])}</small></span></div>`;
     return `<div class="mchoose">
       <div class="mc-step"><p class="mc-q" id="mc1-${where}"><span class="mc-n">1</span>מה המנהג שלך?</p>
         <div class="seg" role="radiogroup" aria-labelledby="mc1-${where}">${M.METHOD_FAMILIES.map(f => `<button type="button" class="seg-b" role="radio" aria-checked="${f.id === fam}" data-family="${f.id}">${esc(f.label)}</button>`).join("")}</div></div>
@@ -518,13 +529,10 @@
     if (F.methods.length === 1) return chooseMethod(F.methods[0]);
     app.methodFamily = M.methodFamily(state().settings.method) === id ? null : id; render();
   }
-  /** הערות השיטה שנבחרה: מקור לכל ערך, סימון "לברר עם רב", ואילו הגדרות שונו ממנה */
+  /** מתחת לבחירה: רק כשלא נבחרה שיטה, או כשההגדרות הותאמו אישית */
   function methodNotes(s) {
-    const p = M.METHOD_PRESETS[s.method];
-    if (!p) return `<p class="fine">לא נבחרה שיטה: כל ההגדרות נקבעות ידנית, תחת ״התאמה אישית לפי הוראת הרב״. בחירת מנהג ושיטה קובעת את כולן בבת אחת.</p>`;
-    const changed = M.presetDiff(s);
-    return `<details class="rules"><summary>מה קובעת השיטה ומקורותיה${I("left", 15)}</summary>${p.notes.map(n => `<p>${n.ask ? "<strong>לברר עם רב:</strong> " : ""}${esc(n.t)}</p>${citeList(n.src)}`).join("")}</details>
-      ${changed.length ? `<p class="fine">שונו מהשיטה: ${changed.length} הגדרות. בחירה מחדש של השיטה מחזירה אותן.</p>` : ""}`;
+    if (!M.METHOD_PRESETS[s.method]) return `<p class="fine">לא נבחרה שיטה: כל ההגדרות נקבעות ידנית, תחת ״התאמה אישית לפי הוראת הרב״.</p>`;
+    return M.presetDiff(s).length ? `<p class="fine">הותאם אישית. בחירה מחדש של השיטה מחזירה את ערכיה.</p>` : "";
   }
   const sel = (name, label, s, opts) => `<label class="field" for="s-${name}">${label}<select id="s-${name}" name="${name}">${opts.map(([v, t]) => `<option value="${v}"${s[name] === v ? " selected" : ""}>${t}</option>`).join("")}</select></label>`;
   const tog = (name, label, detail, s) => `<label class="toggle" for="s-${name}"><span><strong>${label}</strong><small>${detail}</small></span><input id="s-${name}" name="${name}" type="checkbox" role="switch"${s[name] ? " checked" : ""}></label>`;
@@ -600,7 +608,7 @@
         <h4>מה חושב</h4><p class="phase">מצב: <strong>${esc(PHASE_NAMES[r.phase])}</strong>${r.earliestHefsek && r.phase === "waiting" ? ` · הפסק מוקדם: <span class="hebdate">${esc(hebrew(r.earliestHefsek))}</span>` : ""}${r.phase === "clean" ? ` · יום ${r.cleanDay} מתוך 7` : ""}</p>
         <div class="plans">${plans.map(p => planLine(p, { prep: false })).join("") || '<p class="empty">אין מועדים מחושבים.</p>'}</div>
         ${bed.length ? `<p class="fine">ועוד ${bed.length} תזכורות לבדיקות בשבעה נקיים (מופיעות ביומן המלא).</p>` : ""}
-        ${r.reviews.length ? `<h4>נקודות לבירור</h4><ul class="rv">${askFirst(r.reviews).map(v => `<li><strong>${esc(v.title)}</strong> — ${esc(v.detail)}${citeList(v.source)}</li>`).join("")}</ul>` : ""}
+        ${r.reviews.length ? `<h4>נקודות לבירור</h4><ul class="rv">${askFirst(r.reviews).map(v => `<li><strong>${esc(v.title)}</strong>${reviewBody(v)}</li>`).join("")}</ul>` : ""}
         <button class="btn full" data-scenario-load="${sc.id}">${I("play", 16)}פתיחה ביומן המלא</button></div>`;
     }
     return `<article class="scen${open ? " open" : ""}"><button class="scen-h" data-scenario="${sc.id}" aria-expanded="${open}"><span class="tag">${esc(sc.tag)}</span><strong>${esc(sc.title)}</strong>${I("left", 16)}</button>${body}</article>`;
@@ -628,13 +636,13 @@
       "ארבעה ימים ממועד היחסים: נספרים ממועד היחסים שנרשם כבסיס, ולא מהראייה. בלי בסיס רשום אין חישוב, ומופיעה נקודה לבירור.",
       "ראייה סמוך לשקיעה או בין השמשות: ההמתנה נספרת מהיום העברי המאוחר, לחומרא.", "חידוש ספירה בתוך תקופת הנידה נשען על תחילת הנידה הקודמת ולא מוסיף חמישה ימים חדשים."], src: [...S.wait, "thbWait"] },
     { t: "ראייה בין השמשות", p: ["ראייה בין השקיעה לצאת הכוכבים, או בשלוש הדקות שסביב השקיעה והזריחה: לפי ברירת המחדל חוששים לשתי העונות — העונה שהסתיימה והעונה שהתחילה — בעונה הבינונית, בעונת החודש ובהפלגה (ש״ך יו״ד קפד, ס״ק יג–יד, בשם הב״ח; כך נוהגים למעשה). הרישום מסומן גם לבירור.", "אפשר לבחור בהגדרות להשעות את החישוב עד בירור, כמו בגרסאות קודמות.", "סוף בין השמשות נקבע לפי הגדרת צאת הכוכבים. לפי 13.5 דקות זמניות (הגאונים, הרב עובדיה יוסף) ראייה מאוחרת יותר היא לילה ודאי."], src: S.bhs },
-    { t: "שיטות מוכנות", p: ["בוחרים בשני שלבים: מה המנהג (ספרדי, אשכנזי או חב״ד), ואז לפי מי — לספרדים הרב עובדיה יוסף או בן איש חי, לאשכנזים עיקר הדין או כרתי ופלתי. השיטה קובעת את כל הגדרות החישוב בבת אחת, ואפשר לשנות כל הגדרה אחר כך תחת ״התאמה אישית לפי הוראת הרב״.", "לכל ערך בשיטה מופיע מקור בהגדרות. ערכים שהמקורות חלוקים בהם מסומנים ״לברר עם רב״. השיטות אינן תחליף להוראת רב."], src: [] },
+    { t: "שיטות מוכנות", p: ["בוחרים בשני שלבים: מה המנהג (ספרדי, אשכנזי או חב״ד), ואז לפי מי — לספרדים הרב עובדיה יוסף או בן איש חי, לאשכנזים עיקר הדין או כרתי ופלתי. השיטה קובעת את כל הגדרות החישוב בבת אחת, ואפשר לשנות כל הגדרה אחר כך תחת ״התאמה אישית לפי הוראת הרב״.", "השיטות אינן תחליף להוראת רב."], src: [] },
     { t: "הפסק טהרה ושבעה נקיים", p: ["הספירה מתחילה רק מהפסק שנרשם כנקי, לפני השקיעה ולא בזמן מסופק, ולא לפני סוף ההמתנה. הפסק מוקדם מתקבל רק עם הוראה אישית מתועדת.", "בבחירת שיטת הרב עובדיה יוסף: הפסק עד 13.5 דקות זמניות אחרי השקיעה מתקבל בדיעבד ונספר ליום שהסתיים, ומסומן לבירור. לכתחילה עושים הפסק לפני השקיעה.", "יום א׳ הוא היום העברי שאחרי ההפסק. ליל הטבילה המתוכנן הוא במוצאי היום השביעי, וזה נשאר תכנון בלבד.", "חוסר רישום בדיקה באחד מימי הספירה (לפי הגדרת הבדיקות) מסומן לבירור כשהיום מסתיים בשקיעה, ואינו פוסל או מאשר. בוקר וערב נקבעים לפי חצות היום. בדיקה שנרשמה כלא נקייה אינה מאפסת אוטומטית."], src: [...S.hefsek, ...S.clean, "thbHefsek", ...S.mikvah] },
-    { t: "עונת החודש", p: ["אותו יום בחודש העברי הבא, באותה עונה.", "ראייה בל׳ כשבחודש הבא אין ל׳: ברירת המחדל היא א׳ בחודש שאחרי החודש החסר, לחומרא. מקור ראשוני לדין זה לא אותר. אפשר לבחור דילוג.", "ראתה פעמיים באותו חודש: כל החישובים נעשים מהראייה האחרונה, ובנוסף נשמרת עונת החודש של הראייה הקודמת אם עוד לא הגיעה (רמ״א יו״ד קפט, יג; שו״ע הרב שם, ס״ק מד).", "בשנה מעוברת אדר א׳ עובר לאדר ב׳.", "שימור עונת חודש שחלה בזמן דימום הוא אפשרות נפרדת שדורשת תיעוד מלא."], src: [...S.monthly, "missing30"] },
-    { t: "עונה בינונית", p: ["יום 30 בספירה כוללנית: יום הראייה הוא יום 1, כלומר 29 ימים אחריו, באותה עונה.", "שתי העונות, יום 31 ואור זרוע הם שלוש הגדרות נפרדות. השיטות המוכנות קובעות אותן לפי המנהג, ואפשר לשנות.", "מי ששומרת ימים 30 ו-31 שומרת את עונת אור זרוע ליום 30 בלבד. מקור ראשוני לכך לא אותר."], src: [...S.average, "orZarua31"] },
+    { t: "עונת החודש", p: ["אותו יום בחודש העברי הבא, באותה עונה.", "ראייה בל׳ כשבחודש הבא אין ל׳: ברירת המחדל היא א׳ בחודש שאחרי החודש החסר, לחומרא, ומופיע ״יש לשאול רב״. אפשר לבחור דילוג.", "ראתה פעמיים באותו חודש: כל החישובים נעשים מהראייה האחרונה, ובנוסף נשמרת עונת החודש של הראייה הקודמת אם עוד לא הגיעה (רמ״א יו״ד קפט, יג; שו״ע הרב שם, ס״ק מד).", "בשנה מעוברת אדר א׳ עובר לאדר ב׳.", "שימור עונת חודש שחלה בזמן דימום הוא אפשרות נפרדת שדורשת תיעוד מלא."], src: [...S.monthly, "missing30"] },
+    { t: "עונה בינונית", p: ["יום 30 בספירה כוללנית: יום הראייה הוא יום 1, כלומר 29 ימים אחריו, באותה עונה.", "שתי העונות, יום 31 ואור זרוע הם שלוש הגדרות נפרדות. השיטות המוכנות קובעות אותן לפי המנהג, ואפשר לשנות.", "מי ששומרת ימים 30 ו-31 שומרת את עונת אור זרוע ליום 30 בלבד."], src: [...S.average, "orZarua31"] },
     { t: "הפלגה", p: ["בשיטת הימים: ההפרש בין התאריכים העבריים של שתי הראיות ועוד 1. אותו מרווח נספר מהראייה האחרונה, באותה עונה.", "בשיטת חב״ד: מספר העונות מההפסק הקודם ועד הראייה הבאה. המועד החדש נספר מההפסק הנוכחי. מספר זוגי נופל ביום ואי-זוגי בלילה. הפלגה ארוכה נשמרת כשמגיעה קצרה ממנה.", "ראייה מסופקת באמצע אינה נמחקת כדי לייצר מרווח ארוך."], src: [...S.interval, ...S.chabad] },
     { t: "וסת קבוע", p: ["שלוש ראיות רצופות באותו יום בחודש ובאותה עונה, או שלוש הפלגות שוות בארבע ראיות, מסומנות כדפוס אפשרי.", "המערכת אינה קובעת, עוקרת או משעה וסת קבוע בעצמה."], src: S.fixed },
-    { t: "במה המערכת לא מכריעה", p: ["היריון, אחרי לידה, הנקה, טיפול הורמונלי, וסתות לא רגילים (דילוג, סירוג), מראות וכתמים, בדיקות שהוחסרו ומעבר קו התאריך.", "במצבים האלה החישוב הרגיל מושעה ואפשר לרשום עונות ידניות לפי הוראה. אין במערכת זיהוי מראות ואין ״שאלת רב״ אוטומטית."], src: [] },
+    { t: "במה המערכת לא מכריעה", p: ["היריון, אחרי לידה, הנקה, טיפול הורמונלי, וסתות לא רגילים (דילוג, סירוג), מראות וכתמים, בדיקות שהוחסרו ומעבר קו התאריך.", "במצבים האלה החישוב הרגיל מושעה ואפשר לרשום עונות ידניות לפי הוראה. אין במערכת זיהוי מראות.", "בכמה מצבים שיש בהם שאלה פתוחה מופיע ״יש לשאול רב״, עם מה שמעיין עושה בינתיים."], src: [] },
   ];
 
   /* ---------- מסגרת ---------- */
@@ -811,7 +819,7 @@
     if (m.kind === "welcome") return `<div class="welcome">${langSwitch()}<div class="mark big"><img src="${LOGO_IMG}" alt=""></div><h2 id="m-title" tabindex="-1" autofocus>ברוכה הבאה למעיין</h2>
       <p>יומן אישי לטהרת המשפחה: רישום, חישוב עונות הפרישה, שבעה נקיים ותזכורות.</p>
       <ul class="promises"><li>${I("lock", 18)}<span><strong>פרטי לגמרי.</strong> הכול נשמר רק בטלפון הזה, בלי חשבון ובלי שרת.</span></li>
-      <li>${I("scale", 18)}<span><strong>שקוף.</strong> לכל מועד מוצגים הכלל והמקור, ואת שיטת החישוב בוחרים לפי ההנחיה שקיבלת.</span></li>
+      <li>${I("scale", 18)}<span><strong>שקוף.</strong> לכל מועד מוצג הכלל, ואת שיטת החישוב בוחרים לפי ההנחיה שקיבלת.</span></li>
       <li>${I("help", 18)}<span><strong>לא פוסק.</strong> זו גרסת בדיקה שטרם קיבלה אישור הלכתי. במקום של ספק המערכת מסמנת לבירור.</span></li></ul>
       <div class="stack-s"><button class="btn full" data-act="start-personal">${I("plus", 18)}התחלת יומן אישי</button>
       <button class="btn ghost full" data-act="start-demo">${I("flask", 18)}צפייה ביומן לדוגמה</button>
