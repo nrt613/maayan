@@ -1110,7 +1110,7 @@ const Maayan = (() => {
     secCarryMajority: C("סיכום הלכות נידה לרבנות (משני) — ב״ח, ש״ך, סדרי טהרה, חוות דעת, רעק״א: ההפלגה הארוכה נעקרת מיד"),
     shach189_31: C("ש״ך יורה דעה קפט, ס״ק לא", "Siftei_Kohen_on_Shulchan_Arukh,_Yoreh_De'ah.189.31", "אבל באמת נראה עיקר דאם ראתה בא' באייר א\"צ לחוש לט' בו"),
     secBadei: C("סיכום הלכות נידה לרבנות (משני) — בדי השלחן: עונה בינונית מעת לעת, כדעת כרתי ופלתי"),
-    secShevet3031: C("סיכום הלכות נידה לרבנות (משני) — שבט הלוי: לחוש גם ליום 30 וגם ליום 31"),
+    secShevet3031: C("סיכום הלכות נידה לרבנות (משני) — שבט הלוי: לחומרא גם יום 30 וגם יום 31"),
     orZarua31: C("אור זרוע ליום 30 בלבד למי ששומרת 30 ו-31 — מקור ראשוני לא אותר"),
   };
   const SOURCES = {
@@ -1462,7 +1462,7 @@ const Maayan = (() => {
   const note = (k, t, src, ask = false) => ({ k, t, src, ask });
   /* ההגדרות המשותפות לכל שיטה ספרדית ולכל שיטה אשכנזית. כל שיטה משנה מהן רק את מה שמבדיל אותה. */
   const SEFARD_BASE = { wait: "four", haflagah: "days", beinonit: "same", day31: false, orZarua: false, carryLongIntervals: false, carryMonthly: false, missingMonthly: "first-next-month", bedikot: "twice", nightfall: "20m", beinHashmashot: "both", hefsekTwilight: "ovadia" };
-  const ASHKENAZ_BASE = { wait: "five", haflagah: "days", beinonit: "same", day31: false, orZarua: true, carryLongIntervals: false, carryMonthly: false, missingMonthly: "first-next-month", bedikot: "twice", nightfall: "8.5", beinHashmashot: "both", hefsekTwilight: "before-sunset" };
+  const ASHKENAZ_BASE = { wait: "five", haflagah: "days", beinonit: "same", day31: true, orZarua: true, carryLongIntervals: false, carryMonthly: false, missingMonthly: "first-next-month", bedikot: "twice", nightfall: "8.5", beinHashmashot: "both", hefsekTwilight: "before-sunset" };
   const SEFARD_NOTES = [
     note("wait", "ארבעה ימים: יום הראייה הוא יום 1 וההפסק ביום הרביעי (ראתה בליל שני — הפסק ביום חמישי). לפי הרב עובדיה יסוד הדין הוא 72 שעות מהתשמיש; אם לא היו יחסים בארבעת הימים שלפני הראייה, יש שמתירים הפסק מיד כשפסק הדם. רבים מהפוסקים הספרדים ממתינים חמישה ימים.", PS.ovadiaWait, true),
     note("beinonit", "עונה בינונית ביום 30 בלבד, בעונת הראייה (שו״ע יו״ד קפט, א).", PS.average),
@@ -1479,7 +1479,7 @@ const Maayan = (() => {
   const ASHKENAZ_NOTES = [
     note("wait", "חמישה ימים מתחילת הווסת: יום הראייה הוא יום 1, וההפסק ביום החמישי לפני השקיעה (רמ״א יו״ד קצו, יא; כך נוהגים כל קהילות אשכנז).", PS.wait),
     note("beinonit", "עונה בינונית ביום 30, בעונה שבה התחילה הראייה בלבד (שו״ע יו״ד קפט, א). מעת לעת שלם — בשיטת ״כרתי ופלתי״.", PS.average),
-    note("day31", "עונה בינונית ביום 30 בספירה כוללנית (שו״ע; שו״ע הרב בשם ב״י, ב״ח, ט״ז). הש״ך סובר שהיא ביום 31; את שני הימים שומרים בשיטת ״כרתי ופלתי״.", PS.day30, true),
+    note("day31", "שומרים גם את יום 31, בעונת הראייה (חוות דעת קפט; ש״ך קפט, ס״ק ל). כך המנהג הרווח: לחוש גם ליום 30 וגם ליום 31 (שבט הלוי, מקור משני).", PS.day31Kreiti),
     note("orZarua", "עונת אור זרוע — העונה שלפני כל וסת (ש״ך קפד, ס״ק ז, בשם האור זרוע, ובשם הב״ח: ״הירא דבר ה׳ נוהג כהא״ז״). הט״ז (קפד, ס״ק ב) חולק. האם לכלול אותה בעיקר הדין — לברר.", PS.ozAshkenazBasic, true),
     note("haflagah", "הפלגה בימים מתחילת וסת לתחילת וסת, בספירה כוללנית.", PS.haflagah),
     note("carryLongIntervals", "הפלגה ארוכה נעקרת מיד כשבאה ראייה לפניה (״נעקר בפעם אחת״), כדעת הב״ח והש״ך (ובסיכום המשני גם סדרי טהרה, חוות דעת, רעק״א) — דלא כרמ״א (קפט, יג) והט״ז.", PS.uproot),
@@ -1508,17 +1508,17 @@ const Maayan = (() => {
     },
     ashkenaz: {
       label: SETTING_LABELS.method.ashkenaz, family: "ashkenaz", name: "עיקר הדין",
-      line: "עונה בינונית ביום 30 בעונת הראייה, ועונת אור זרוע לפני כל וסת.", source: "שו״ע ורמ״א; ש״ך קפד, ס״ק ז",
+      line: "עונה בינונית ביום 30 ו-31, עונה אחת (עונת הראייה), ועונת אור זרוע לפני כל וסת.", source: "שו״ע ורמ״א; חוות דעת קפט; ש״ך קפד, ס״ק ז",
       settings: { ...ASHKENAZ_BASE },
       notes: ASHKENAZ_NOTES,
     },
     "ashkenaz-kreiti": {
       label: SETTING_LABELS.method["ashkenaz-kreiti"], family: "ashkenaz", name: "כרתי ופלתי",
-      line: "עונה בינונית מעת לעת, לילה ויום, בימים 30 ו-31. הפלגה ארוכה נשמרת עד שנעקרת (רמ״א, ט״ז).", source: "כרתי ופלתי, מובא בשו״ע הרב קפט, א",
-      settings: { ...ASHKENAZ_BASE, beinonit: "both", day31: true, carryLongIntervals: true },
+      line: "עונה בינונית יממה שלמה, לילה ויום, בימים 30 ו-31. הפלגה ארוכה נשמרת עד שנעקרת (רמ״א, ט״ז).", source: "כרתי ופלתי, מובא בשו״ע הרב קפט, א",
+      settings: { ...ASHKENAZ_BASE, beinonit: "both", carryLongIntervals: true },
       notes: withNotes(ASHKENAZ_NOTES,
         note("beinonit", "עונה בינונית מעת לעת שלם, לילה ויום, מתחילת הלילה ועד סוף היום (כרתי ופלתי, מובא בשו״ע הרב קפט, א). בדי השלחן פוסק כך (מקור משני).", PS.beinonitKreiti),
-        note("day31", "שומרים גם את יום 31, גם הוא מעת לעת שלם (חוות דעת; ש״ך קפט, ס״ק ל). שבט הלוי: לחוש לשני הימים (מקור משני).", PS.day31Kreiti, true),
+        note("day31", "שומרים גם את יום 31, גם הוא יממה שלמה (חוות דעת קפט; ש״ך קפט, ס״ק ל). כך המנהג הרווח: לחוש גם ליום 30 וגם ליום 31 (שבט הלוי, מקור משני).", PS.day31Kreiti),
         note("orZarua", "עונת אור זרוע לפני יום 30, עונת החודש וההפלגה (ש״ך קפד, ס״ק ז; הט״ז, ס״ק ב, חולק). לפני יום 31 אין אור זרוע. כשהעונה הבינונית היא מעת לעת, אור זרוע מתווסף לפני עונת הלילה שלה, כלומר ביום 29 — לברר.", PS.ozKreiti, true),
         note("carryLongIntervals", "הפלגה ארוכה שלא נעקרה נשמרת לצד ההפלגה הקצרה, כדעת הרמ״א (קפט, יג: ״חוששת לט׳ באייר״) והט״ז. הב״ח והש״ך חולקים.", PS.carryTaz, true)),
     },
@@ -2741,13 +2741,13 @@ const MaayanDict = (() => {
     ["אשכנזי – כרתי ופלתי", "Ashkenazi – Kreti uPleti", "Ashkénaze – Kréti ouPléti", "Asquenazí – Kreti uPleti"],
     ["בלי עונת אור זרוע. ארבעה ימים לפני ההפסק, והפסק בדיעבד עד 13.5 דקות אחרי השקיעה.", "No Or Zarua onah. Four days before the hefsek, and after the fact a hefsek up to 13.5 minutes after sunset.", "Sans onah d'Or Zaroua. Quatre jours avant le hefsek, et a posteriori un hefsek jusqu'à 13,5 minutes après le coucher du soleil.", "Sin onah de Or Zarúa. Cuatro días antes del hefsek y, a posteriori, un hefsek hasta 13,5 minutos después de la puesta del sol."],
     ["כמו שיטת הרב עובדיה, ובנוסף חוששים לעונת אור זרוע, העונה שלפני כל וסת.", "Like Rav Ovadia's method, and also observing the Or Zarua onah, the onah before each period.", "Comme la méthode du Rav Ovadia, en observant aussi l'onah d'Or Zaroua, l'onah qui précède chaque période.", "Como el método del Rav Ovadia, y además se observa la onah de Or Zarúa, la onah anterior a cada período."],
-    ["עונה בינונית ביום 30 בעונת הראייה, ועונת אור זרוע לפני כל וסת.", "Onah beinonit on day 30 in the onah of the sighting, and the Or Zarua onah before each period.", "Onah beinonit au jour 30 dans l'onah de l'écoulement, et l'onah d'Or Zaroua avant chaque période.", "Onah beinonit el día 30 en la onah del sangrado, y la onah de Or Zarúa antes de cada período."],
-    ["עונה בינונית מעת לעת, לילה ויום, בימים 30 ו-31. הפלגה ארוכה נשמרת עד שנעקרת (רמ״א, ט״ז).", "Onah beinonit for a full 24 hours, night and day, on days 30 and 31. A long interval is kept until it is uprooted (Rema, Taz).", "Onah beinonit pendant 24 heures, nuit et jour, aux jours 30 et 31. Un long intervalle est conservé jusqu'à ce qu'il soit déraciné (Rema, Taz).", "Onah beinonit durante 24 horas, noche y día, los días 30 y 31. Un intervalo largo se conserva hasta que se anula (Remá, Taz)."],
+    ["עונה בינונית ביום 30 ו-31, עונה אחת (עונת הראייה), ועונת אור זרוע לפני כל וסת.", "Onah beinonit on days 30 and 31, one onah (that of the sighting), and the Or Zarua onah before each period.", "Onah beinonit aux jours 30 et 31, une seule onah (celle de l'écoulement), et l'onah d'Or Zaroua avant chaque période.", "Onah beinonit los días 30 y 31, una sola onah (la del sangrado), y la onah de Or Zarúa antes de cada período."],
+    ["עונה בינונית יממה שלמה, לילה ויום, בימים 30 ו-31. הפלגה ארוכה נשמרת עד שנעקרת (רמ״א, ט״ז).", "Onah beinonit as a full 24 hours, night and day, on days 30 and 31. A long interval is kept until it is uprooted (Rema, Taz).", "Onah beinonit d'une journée entière, nuit et jour, aux jours 30 et 31. Un long intervalle est conservé jusqu'à ce qu'il soit déraciné (Rema, Taz).", "Onah beinonit de un día completo, noche y día, los días 30 y 31. Un intervalo largo se conserva hasta que se anula (Remá, Taz)."],
     ["הפלגה בעונות מההפסק, ועונה בינונית מעת לעת ביום 30.", "Interval in onot from the hefsek, and onah beinonit for a full 24 hours on day 30.", "Intervalle en onot depuis le hefsek, et onah beinonit pendant 24 heures au jour 30.", "Intervalo en onot desde el hefsek, y onah beinonit durante 24 horas el día 30."],
     ["מקור: {x}", "Source: {x}", "Source : {x}", "Fuente: {x}"],
     ["טהרת הבית", "Taharat HaBayit", "Taharat HaBayit", "Taharat HaBayit"],
     ["בן איש חי, שנה ב, צו, א", "Ben Ish Chai, Year 2, Tzav 1", "Ben Ish 'Haï, 2e année, Tsav 1", "Ben Ish Jai, año 2, Tzav 1"],
-    ["שו״ע ורמ״א; ש״ך קפד, ס״ק ז", "Shulchan Aruch and Rema; Shach 184:7", "Choulhan Aroukh et Rema ; Chakh 184:7", "Shulján Aruj y Remá; Shaj 184:7"],
+    ["שו״ע ורמ״א; חוות דעת קפט; ש״ך קפד, ס״ק ז", "Shulchan Aruch and Rema; Chavot Da'at 189; Shach 184:7", "Choulhan Aroukh et Rema ; 'Havot Daat 189 ; Chakh 184:7", "Shulján Aruj y Remá; Javot Daat 189; Shaj 184:7"],
     ["כרתי ופלתי, מובא בשו״ע הרב קפט, א", "Kreti uPleti, cited in Shulchan Aruch HaRav 189:1", "Kréti ouPléti, cité dans le Choulhan Aroukh HaRav 189:1", "Kreti uPleti, citado en el Shulján Aruj HaRav 189:1"],
     ["שולחן ערוך הרב", "Shulchan Aruch HaRav", "Choulhan Aroukh HaRav", "Shulján Aruj HaRav"],
     ["התאמה אישית לפי הוראת הרב", "Personal adjustment per your rabbi's ruling", "Ajustement personnel selon la décision de votre rav", "Ajuste personal según la indicación de su rabino"],
@@ -2764,17 +2764,17 @@ const MaayanDict = (() => {
     ["ארבעה ימים מתחילת הראייה, כמו בשיטת הרב עובדיה. הבן איש חי (שנה ב, צו, ז; י) כותב שההפסק ביום השישי לראייה — כאן לא הוחל; לברר עם רב.", "Four days from the sighting, as in Rav Ovadia's method. The Ben Ish Chai (Year 2, Tzav 7; 10) writes that the hefsek is on the sixth day of the sighting — not applied here; ask a rabbi.", "Quatre jours depuis l'écoulement, comme dans la méthode du Rav Ovadia. Le Ben Ish 'Haï (2e année, Tsav 7 ; 10) écrit que le hefsek se fait le sixième jour — non appliqué ici ; à vérifier avec un rav.", "Cuatro días desde el sangrado, como en el método del Rav Ovadia. El Ben Ish Jai (año 2, Tzav 7; 10) escribe que el hefsek es el sexto día — no se aplica aquí; consultar con un rabino."],
     ["חוששים לעונת אור זרוע — העונה שלפני כל וסת: ״ומרן ז״ל סבירא לה כדעה הראשונה, אך צריך לחוש לדעה זו השניה״ (בן איש חי, שנה ב, צו, א).", "The Or Zarua onah — the onah before each period — is observed: “our master holds like the first view, but one must be concerned for this second view” (Ben Ish Chai, Year 2, Tzav 1).", "On observe l'onah d'Or Zaroua — l'onah qui précède chaque période : « notre maître tient comme le premier avis, mais il faut tenir compte de ce second avis » (Ben Ish 'Haï, 2e année, Tsav 1).", "Se observa la onah de Or Zarúa — la onah anterior a cada período: «nuestro maestro sigue la primera opinión, pero hay que tener en cuenta esta segunda opinión» (Ben Ish Jai, año 2, Tzav 1)."],
     ["עונה בינונית ביום 30, בעונה שבה התחילה הראייה בלבד (שו״ע יו״ד קפט, א). מעת לעת שלם — בשיטת ״כרתי ופלתי״.", "Onah beinonit on day 30, only in the onah in which the sighting began (SA YD 189:1). A full 24 hours — in the “Kreti uPleti” method.", "Onah beinonit au jour 30, seulement dans l'onah où l'écoulement a commencé (CA YD 189:1). 24 heures complètes — dans la méthode « Kréti ouPléti ».", "Onah beinonit el día 30, solo en la onah en que empezó el sangrado (SA YD 189:1). 24 horas completas — en el método «Kreti uPleti»."],
-    ["עונה בינונית ביום 30 בספירה כוללנית (שו״ע; שו״ע הרב בשם ב״י, ב״ח, ט״ז). הש״ך סובר שהיא ביום 31; את שני הימים שומרים בשיטת ״כרתי ופלתי״.", "Onah beinonit on day 30, counted inclusively (SA; Shulchan Aruch HaRav citing the Beit Yosef, Bach, Taz). The Shach holds it is day 31; both days are kept in the “Kreti uPleti” method.", "Onah beinonit au jour 30, compté de façon inclusive (CA ; Choulhan Aroukh HaRav au nom du Beit Yossef, du Bah, du Taz). Le Chakh tient que c'est le jour 31 ; les deux jours sont observés dans la méthode « Kréti ouPléti ».", "Onah beinonit el día 30, contado de forma inclusiva (SA; Shulján Aruj HaRav en nombre del Beit Yosef, el Baj, el Taz). El Shaj sostiene que es el día 31; ambos días se observan en el método «Kreti uPleti»."],
+    ["שומרים גם את יום 31, בעונת הראייה (חוות דעת קפט; ש״ך קפט, ס״ק ל). כך המנהג הרווח: לחוש גם ליום 30 וגם ליום 31 (שבט הלוי, מקור משני).", "Day 31 is kept too, in the onah of the sighting (Chavot Da'at 189; Shach 189:30). This is the widespread practice: to be concerned for both day 30 and day 31 (Shevet HaLevi, secondary source).", "Le jour 31 est aussi observé, dans l'onah de l'écoulement ('Havot Daat 189 ; Chakh 189:30). C'est l'usage répandu : tenir compte du jour 30 et du jour 31 (Chevet HaLévi, source secondaire).", "También se observa el día 31, en la onah del sangrado (Javot Daat 189; Shaj 189:30). Es la práctica extendida: tener en cuenta el día 30 y el día 31 (Shevet HaLeví, fuente secundaria)."],
     ["עונת אור זרוע — העונה שלפני כל וסת (ש״ך קפד, ס״ק ז, בשם האור זרוע, ובשם הב״ח: ״הירא דבר ה׳ נוהג כהא״ז״). הט״ז (קפד, ס״ק ב) חולק. האם לכלול אותה בעיקר הדין — לברר.", "The Or Zarua onah — the onah before each period (Shach 184:7, citing the Or Zarua, and the Bach: “one who fears the word of God follows the Or Zarua”). The Taz (184:2) disagrees. Whether to include it in the basic law — ask a rabbi.", "L'onah d'Or Zaroua — l'onah qui précède chaque période (Chakh 184:7, au nom de l'Or Zaroua, et du Bah : « celui qui craint la parole de Dieu suit l'Or Zaroua »). Le Taz (184:2) conteste. Faut-il l'inclure dans le din de base — à vérifier.", "La onah de Or Zarúa — la onah anterior a cada período (Shaj 184:7, en nombre del Or Zarúa, y del Baj: «quien teme la palabra de Dios sigue al Or Zarúa»). El Taz (184:2) discrepa. Si incluirla en la ley básica — consultar."],
     ["עונה בינונית מעת לעת שלם, לילה ויום, מתחילת הלילה ועד סוף היום (כרתי ופלתי, מובא בשו״ע הרב קפט, א). בדי השלחן פוסק כך (מקור משני).", "Onah beinonit for a full 24 hours, night and day, from the start of the night to the end of the day (Kreti uPleti, cited in Shulchan Aruch HaRav 189:1). The Badei HaShulchan rules so (secondary source).", "Onah beinonit pendant 24 heures complètes, nuit et jour, du début de la nuit à la fin du jour (Kréti ouPléti, cité dans le Choulhan Aroukh HaRav 189:1). Le Badei HaChoulhan tranche ainsi (source secondaire).", "Onah beinonit durante 24 horas completas, noche y día, desde el inicio de la noche hasta el final del día (Kreti uPleti, citado en el Shulján Aruj HaRav 189:1). El Badé HaShulján dictamina así (fuente secundaria)."],
-    ["שומרים גם את יום 31, גם הוא מעת לעת שלם (חוות דעת; ש״ך קפט, ס״ק ל). שבט הלוי: לחוש לשני הימים (מקור משני).", "Day 31 is kept too, also for a full 24 hours (Chavot Da'at; Shach 189:30). Shevet HaLevi: be concerned for both days (secondary source).", "Le jour 31 est aussi observé, lui aussi pendant 24 heures (‘Havot Daat ; Chakh 189:30). Chevet HaLévi : tenir compte des deux jours (source secondaire).", "También se observa el día 31, también durante 24 horas (Javot Daat; Shaj 189:30). Shevet HaLeví: tener en cuenta ambos días (fuente secundaria)."],
+    ["שומרים גם את יום 31, גם הוא יממה שלמה (חוות דעת קפט; ש״ך קפט, ס״ק ל). כך המנהג הרווח: לחוש גם ליום 30 וגם ליום 31 (שבט הלוי, מקור משני).", "Day 31 is kept too, also as a full 24 hours (Chavot Da'at 189; Shach 189:30). This is the widespread practice: to be concerned for both day 30 and day 31 (Shevet HaLevi, secondary source).", "Le jour 31 est aussi observé, lui aussi pendant 24 heures ('Havot Daat 189 ; Chakh 189:30). C'est l'usage répandu : tenir compte du jour 30 et du jour 31 (Chevet HaLévi, source secondaire).", "También se observa el día 31, también durante 24 horas (Javot Daat 189; Shaj 189:30). Es la práctica extendida: tener en cuenta el día 30 y el día 31 (Shevet HaLeví, fuente secundaria)."],
     ["עונת אור זרוע לפני יום 30, עונת החודש וההפלגה (ש״ך קפד, ס״ק ז; הט״ז, ס״ק ב, חולק). לפני יום 31 אין אור זרוע. כשהעונה הבינונית היא מעת לעת, אור זרוע מתווסף לפני עונת הלילה שלה, כלומר ביום 29 — לברר.", "Or Zarua onah before day 30, the monthly onah and the interval (Shach 184:7; the Taz, 184:2, disagrees). No Or Zarua before day 31. When the onah beinonit is a full 24 hours, Or Zarua is added before its night onah, that is on day 29 — ask a rabbi.", "Onah d'Or Zaroua avant le jour 30, l'onah du mois et l'intervalle (Chakh 184:7 ; le Taz, 184:2, conteste). Pas d'Or Zaroua avant le jour 31. Quand l'onah beinonit dure 24 heures, l'Or Zaroua est ajouté avant son onah de nuit, soit au jour 29 — à vérifier.", "Onah de Or Zarúa antes del día 30, la onah mensual y el intervalo (Shaj 184:7; el Taz, 184:2, discrepa). No hay Or Zarúa antes del día 31. Cuando la onah beinonit dura 24 horas, el Or Zarúa se añade antes de su onah nocturna, es decir el día 29 — consultar."],
     ["הפלגה ארוכה שלא נעקרה נשמרת לצד ההפלגה הקצרה, כדעת הרמ״א (קפט, יג: ״חוששת לט׳ באייר״) והט״ז. הב״ח והש״ך חולקים.", "A long interval that was not uprooted is kept alongside the short one, as the Rema (189:13: “she is concerned for the 9th of Iyar”) and the Taz hold. The Bach and the Shach disagree.", "Un long intervalle non déraciné est conservé à côté du court, selon le Rema (189:13 : « elle tient compte du 9 Iyar ») et le Taz. Le Bah et le Chakh contestent.", "Un intervalo largo que no se anuló se conserva junto al corto, según el Remá (189:13: «se preocupa por el 9 de Iyar») y el Taz. El Baj y el Shaj discrepan."],
     ["סיכום הלכות נידה לרבנות (משני) — רמ״א וט״ז: חוששת להפלגה הארוכה שלא נעקרה", "Summary of Hilchot Niddah for the Rabbinate (secondary) — Rema and Taz: observes the long interval that was not uprooted", "Résumé des lois de nidda pour le rabbinat (secondaire) — Rema et Taz : on observe le long intervalle non déraciné", "Resumen de las leyes de nidá para el rabinato (secundario) — Remá y Taz: se observa el intervalo largo no anulado"],
     ["ש״ך יורה דעה קפט, ס״ק לא", "Shach YD 189:31", "Chakh YD 189:31", "Shaj YD 189:31"],
     ["סיכום הלכות נידה לרבנות (משני) — ב״ח, ש״ך, סדרי טהרה, חוות דעת, רעק״א: ההפלגה הארוכה נעקרת מיד", "Summary of Hilchot Niddah for the Rabbinate (secondary) — Bach, Shach, Sidrei Taharah, Chavot Da'at, Rabbi Akiva Eiger: the long interval is uprooted at once", "Résumé des lois de nidda pour le rabbinat (secondaire) — Bah, Chakh, Sidrei Tahara, 'Havot Daat, Rabbi Akiva Eiger : le long intervalle est déraciné aussitôt", "Resumen de las leyes de nidá para el rabinato (secundario) — Baj, Shaj, Sidré Taharah, Javot Daat, Rabí Akiva Eiger: el intervalo largo se anula de inmediato"],
     ["סיכום הלכות נידה לרבנות (משני) — בדי השלחן: עונה בינונית מעת לעת, כדעת כרתי ופלתי", "Summary of Hilchot Niddah for the Rabbinate (secondary) — Badei HaShulchan: onah beinonit for 24 hours, like Kreti uPleti", "Résumé des lois de nidda pour le rabbinat (secondaire) — Badei HaChoulhan : onah beinonit de 24 heures, comme le Kréti ouPléti", "Resumen de las leyes de nidá para el rabinato (secundario) — Badé HaShulján: onah beinonit de 24 horas, como Kreti uPleti"],
-    ["סיכום הלכות נידה לרבנות (משני) — שבט הלוי: לחוש גם ליום 30 וגם ליום 31", "Summary of Hilchot Niddah for the Rabbinate (secondary) — Shevet HaLevi: be concerned for both day 30 and day 31", "Résumé des lois de nidda pour le rabbinat (secondaire) — Chevet HaLévi : tenir compte du jour 30 et du jour 31", "Resumen de las leyes de nidá para el rabinato (secundario) — Shevet HaLeví: tener en cuenta el día 30 y el día 31"],
+    ["סיכום הלכות נידה לרבנות (משני) — שבט הלוי: לחומרא גם יום 30 וגם יום 31", "Summary of Hilchot Niddah for the Rabbinate (secondary) — Shevet HaLevi: stringently, both day 30 and day 31", "Résumé des lois de nidda pour le rabbinat (secondaire) — Chevet HaLévi : par rigueur, le jour 30 et le jour 31", "Resumen de las leyes de nidá para el rabinato (secundario) — Shevet HaLeví: por rigor, el día 30 y el día 31"],
 
   ];
   const d = {};
@@ -3175,15 +3175,15 @@ const MaayanTests = (M) => {
     a.deepEqual(diff, ["orZarua"]); a.equal(s.orZarua, true); a.equal(P["sefard-bic"].family, "sefard");
     a.ok(P["sefard-bic"].notes.find(n => n.k === "orZarua").src.includes("bic_tzav1b")); a.ok(M.cite("bic_tzav1b").ok, "הציטוט אומת בספריא");
   });
-  test("שיטות", "אשכנזי – עיקר הדין: חמישה ימים, עונה אחת ביום 30, אור זרוע, בלי שימור הפלגות", () => {
+  test("שיטות", "אשכנזי – עיקר הדין: חמישה ימים, עונה אחת בימים 30 ו-31, אור זרוע, בלי שימור הפלגות", () => {
     const s = P.ashkenaz.settings;
-    a.deepEqual([s.wait, s.haflagah, s.beinonit, s.day31, s.orZarua, s.carryLongIntervals, s.nightfall, s.hefsekTwilight, s.beinHashmashot, s.missingMonthly, s.bedikot, s.carryMonthly], ["five", "days", "same", false, true, false, "8.5", "before-sunset", "both", "first-next-month", "twice", false]);
+    a.deepEqual([s.wait, s.haflagah, s.beinonit, s.day31, s.orZarua, s.carryLongIntervals, s.nightfall, s.hefsekTwilight, s.beinHashmashot, s.missingMonthly, s.bedikot, s.carryMonthly], ["five", "days", "same", true, true, false, "8.5", "before-sunset", "both", "first-next-month", "twice", false]);
     a.equal(P.ashkenaz.label, "אשכנזי – עיקר הדין"); a.ok(P.ashkenaz.notes.find(n => n.k === "orZarua").ask, "אור זרוע מסומן לבירור");
     a.ok(P.ashkenaz.notes.find(n => n.k === "orZarua").src.includes("taz184_2"), "הט״ז החולק מובא");
   });
-  test("שיטות", "אשכנזי – כרתי ופלתי: מעת לעת בימים 30 ו-31, ושימור הפלגה ארוכה", () => {
+  test("שיטות", "אשכנזי – כרתי ופלתי: נבדלת מעיקר הדין רק ביממה שלמה ובשימור הפלגה ארוכה", () => {
     const s = P["ashkenaz-kreiti"].settings, diff = Object.keys(s).filter(k => s[k] !== P.ashkenaz.settings[k]).sort();
-    a.deepEqual(diff, ["beinonit", "carryLongIntervals", "day31"]); a.equal(s.beinonit, "both"); a.equal(s.day31, true); a.equal(s.carryLongIntervals, true);
+    a.deepEqual(diff, ["beinonit", "carryLongIntervals"]); a.equal(s.beinonit, "both"); a.equal(s.day31, true); a.equal(s.carryLongIntervals, true);
     a.ok(P["ashkenaz-kreiti"].notes.find(n => n.k === "beinonit").src.includes("sahr189_1f"), "כרתי ופלתי דרך שו״ע הרב");
   });
   test("שיטות", "חב״ד נשארה כפי שהייתה", () => {
@@ -3211,7 +3211,7 @@ const MaayanTests = (M) => {
     const s = emptyState(); s.settings = { ...s.settings, ...old, method: "ashkenaz" };
     const p = M.parseState(JSON.parse(JSON.stringify(s)));
     for (const [k, v] of Object.entries(old)) a.equal(p.settings[k], v, `${k} נשמר`);
-    a.equal(p.settings.method, "ashkenaz"); a.deepEqual(M.presetDiff(p.settings).sort(), ["carryLongIntervals", "day31"]);
+    a.equal(p.settings.method, "ashkenaz"); a.deepEqual(M.presetDiff(p.settings), ["carryLongIntervals"]);
     a.match(M.settingsSummary(p.settings)[0], /^שיטה: אשכנזי – עיקר הדין \(עם שינויים\)$/);
     const old2 = M.parseState({ ...s, settings: { ...s.settings, method: "sefard", wait: "four", nightfall: "20m", hefsekTwilight: "ovadia", orZarua: false, day31: false, carryLongIntervals: true } });
     a.deepEqual(M.presetDiff(old2.settings), ["carryLongIntervals"], "יומן ספרדי ישן: רק השימור שונה");
@@ -3231,7 +3231,7 @@ const MaayanTests = (M) => {
       }
     }
     const one = calculate(presetState("ashkenaz", [event("flow", N(2), "10:00", { cityId: "jerusalem" })]), NOW).plans.filter(p => p.kind === "average");
-    a.deepEqual(one.map(p => p.onah), ["day"], "בעיקר הדין: עונה אחת ביום 30 בלבד");
+    a.deepEqual(one.map(p => `${p.id.match(/-(3[01])-/)[1]}:${p.onah}`), ["30:day", "31:day"], "בעיקר הדין: עונה אחת (עונת הראייה) בימים 30 ו-31");
   });
   test("שיטות", "אור זרוע: יש בבן איש חי, אין בשיטת הרב עובדיה", () => {
     const flow = event("flow", N(2), "10:00", { cityId: "jerusalem" }), evs = () => [flow];

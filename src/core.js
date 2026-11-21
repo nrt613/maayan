@@ -479,7 +479,7 @@ const Maayan = (() => {
     secCarryMajority: C("סיכום הלכות נידה לרבנות (משני) — ב״ח, ש״ך, סדרי טהרה, חוות דעת, רעק״א: ההפלגה הארוכה נעקרת מיד"),
     shach189_31: C("ש״ך יורה דעה קפט, ס״ק לא", "Siftei_Kohen_on_Shulchan_Arukh,_Yoreh_De'ah.189.31", "אבל באמת נראה עיקר דאם ראתה בא' באייר א\"צ לחוש לט' בו"),
     secBadei: C("סיכום הלכות נידה לרבנות (משני) — בדי השלחן: עונה בינונית מעת לעת, כדעת כרתי ופלתי"),
-    secShevet3031: C("סיכום הלכות נידה לרבנות (משני) — שבט הלוי: לחוש גם ליום 30 וגם ליום 31"),
+    secShevet3031: C("סיכום הלכות נידה לרבנות (משני) — שבט הלוי: לחומרא גם יום 30 וגם יום 31"),
     orZarua31: C("אור זרוע ליום 30 בלבד למי ששומרת 30 ו-31 — מקור ראשוני לא אותר"),
   };
   const SOURCES = {
@@ -831,7 +831,7 @@ const Maayan = (() => {
   const note = (k, t, src, ask = false) => ({ k, t, src, ask });
   /* ההגדרות המשותפות לכל שיטה ספרדית ולכל שיטה אשכנזית. כל שיטה משנה מהן רק את מה שמבדיל אותה. */
   const SEFARD_BASE = { wait: "four", haflagah: "days", beinonit: "same", day31: false, orZarua: false, carryLongIntervals: false, carryMonthly: false, missingMonthly: "first-next-month", bedikot: "twice", nightfall: "20m", beinHashmashot: "both", hefsekTwilight: "ovadia" };
-  const ASHKENAZ_BASE = { wait: "five", haflagah: "days", beinonit: "same", day31: false, orZarua: true, carryLongIntervals: false, carryMonthly: false, missingMonthly: "first-next-month", bedikot: "twice", nightfall: "8.5", beinHashmashot: "both", hefsekTwilight: "before-sunset" };
+  const ASHKENAZ_BASE = { wait: "five", haflagah: "days", beinonit: "same", day31: true, orZarua: true, carryLongIntervals: false, carryMonthly: false, missingMonthly: "first-next-month", bedikot: "twice", nightfall: "8.5", beinHashmashot: "both", hefsekTwilight: "before-sunset" };
   const SEFARD_NOTES = [
     note("wait", "ארבעה ימים: יום הראייה הוא יום 1 וההפסק ביום הרביעי (ראתה בליל שני — הפסק ביום חמישי). לפי הרב עובדיה יסוד הדין הוא 72 שעות מהתשמיש; אם לא היו יחסים בארבעת הימים שלפני הראייה, יש שמתירים הפסק מיד כשפסק הדם. רבים מהפוסקים הספרדים ממתינים חמישה ימים.", PS.ovadiaWait, true),
     note("beinonit", "עונה בינונית ביום 30 בלבד, בעונת הראייה (שו״ע יו״ד קפט, א).", PS.average),
@@ -848,7 +848,7 @@ const Maayan = (() => {
   const ASHKENAZ_NOTES = [
     note("wait", "חמישה ימים מתחילת הווסת: יום הראייה הוא יום 1, וההפסק ביום החמישי לפני השקיעה (רמ״א יו״ד קצו, יא; כך נוהגים כל קהילות אשכנז).", PS.wait),
     note("beinonit", "עונה בינונית ביום 30, בעונה שבה התחילה הראייה בלבד (שו״ע יו״ד קפט, א). מעת לעת שלם — בשיטת ״כרתי ופלתי״.", PS.average),
-    note("day31", "עונה בינונית ביום 30 בספירה כוללנית (שו״ע; שו״ע הרב בשם ב״י, ב״ח, ט״ז). הש״ך סובר שהיא ביום 31; את שני הימים שומרים בשיטת ״כרתי ופלתי״.", PS.day30, true),
+    note("day31", "שומרים גם את יום 31, בעונת הראייה (חוות דעת קפט; ש״ך קפט, ס״ק ל). כך המנהג הרווח: לחוש גם ליום 30 וגם ליום 31 (שבט הלוי, מקור משני).", PS.day31Kreiti),
     note("orZarua", "עונת אור זרוע — העונה שלפני כל וסת (ש״ך קפד, ס״ק ז, בשם האור זרוע, ובשם הב״ח: ״הירא דבר ה׳ נוהג כהא״ז״). הט״ז (קפד, ס״ק ב) חולק. האם לכלול אותה בעיקר הדין — לברר.", PS.ozAshkenazBasic, true),
     note("haflagah", "הפלגה בימים מתחילת וסת לתחילת וסת, בספירה כוללנית.", PS.haflagah),
     note("carryLongIntervals", "הפלגה ארוכה נעקרת מיד כשבאה ראייה לפניה (״נעקר בפעם אחת״), כדעת הב״ח והש״ך (ובסיכום המשני גם סדרי טהרה, חוות דעת, רעק״א) — דלא כרמ״א (קפט, יג) והט״ז.", PS.uproot),
@@ -877,17 +877,17 @@ const Maayan = (() => {
     },
     ashkenaz: {
       label: SETTING_LABELS.method.ashkenaz, family: "ashkenaz", name: "עיקר הדין",
-      line: "עונה בינונית ביום 30 בעונת הראייה, ועונת אור זרוע לפני כל וסת.", source: "שו״ע ורמ״א; ש״ך קפד, ס״ק ז",
+      line: "עונה בינונית ביום 30 ו-31, עונה אחת (עונת הראייה), ועונת אור זרוע לפני כל וסת.", source: "שו״ע ורמ״א; חוות דעת קפט; ש״ך קפד, ס״ק ז",
       settings: { ...ASHKENAZ_BASE },
       notes: ASHKENAZ_NOTES,
     },
     "ashkenaz-kreiti": {
       label: SETTING_LABELS.method["ashkenaz-kreiti"], family: "ashkenaz", name: "כרתי ופלתי",
-      line: "עונה בינונית מעת לעת, לילה ויום, בימים 30 ו-31. הפלגה ארוכה נשמרת עד שנעקרת (רמ״א, ט״ז).", source: "כרתי ופלתי, מובא בשו״ע הרב קפט, א",
-      settings: { ...ASHKENAZ_BASE, beinonit: "both", day31: true, carryLongIntervals: true },
+      line: "עונה בינונית יממה שלמה, לילה ויום, בימים 30 ו-31. הפלגה ארוכה נשמרת עד שנעקרת (רמ״א, ט״ז).", source: "כרתי ופלתי, מובא בשו״ע הרב קפט, א",
+      settings: { ...ASHKENAZ_BASE, beinonit: "both", carryLongIntervals: true },
       notes: withNotes(ASHKENAZ_NOTES,
         note("beinonit", "עונה בינונית מעת לעת שלם, לילה ויום, מתחילת הלילה ועד סוף היום (כרתי ופלתי, מובא בשו״ע הרב קפט, א). בדי השלחן פוסק כך (מקור משני).", PS.beinonitKreiti),
-        note("day31", "שומרים גם את יום 31, גם הוא מעת לעת שלם (חוות דעת; ש״ך קפט, ס״ק ל). שבט הלוי: לחוש לשני הימים (מקור משני).", PS.day31Kreiti, true),
+        note("day31", "שומרים גם את יום 31, גם הוא יממה שלמה (חוות דעת קפט; ש״ך קפט, ס״ק ל). כך המנהג הרווח: לחוש גם ליום 30 וגם ליום 31 (שבט הלוי, מקור משני).", PS.day31Kreiti),
         note("orZarua", "עונת אור זרוע לפני יום 30, עונת החודש וההפלגה (ש״ך קפד, ס״ק ז; הט״ז, ס״ק ב, חולק). לפני יום 31 אין אור זרוע. כשהעונה הבינונית היא מעת לעת, אור זרוע מתווסף לפני עונת הלילה שלה, כלומר ביום 29 — לברר.", PS.ozKreiti, true),
         note("carryLongIntervals", "הפלגה ארוכה שלא נעקרה נשמרת לצד ההפלגה הקצרה, כדעת הרמ״א (קפט, יג: ״חוששת לט׳ באייר״) והט״ז. הב״ח והש״ך חולקים.", PS.carryTaz, true)),
     },
