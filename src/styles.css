@@ -225,7 +225,6 @@ main { padding-block: 12px 120px; padding-left: max(16px, env(safe-area-inset-le
 .mc-body { display: grid; gap: 2px; min-width: 0; }
 .mc-body strong { font-size: 16px; font-weight: 600; }
 .mc-body small { color: var(--muted); font-size: 13.5px; line-height: 1.45; }
-.mc-body .mc-src { color: var(--accent-strong); font-size: 12.5px; }
 .mc-sum { font-weight: 600; color: var(--accent-strong); font-size: 14.5px; }
 details.custom-set { border-radius: var(--r-m); background: var(--bg); padding: 0 14px; display: grid; }
 details.custom-set[open] { padding-bottom: 12px; }
@@ -233,7 +232,7 @@ details.custom-set > summary { display: flex; align-items: center; gap: 10px; mi
 details.custom-set > summary::-webkit-details-marker { display: none; }
 details.custom-set > summary > span:first-child { flex: 1; }
 details.custom-set[open] > :not(summary) + :not(summary) { margin-top: 14px; }
-details.custom-set .count { background: var(--warn-bg); color: var(--warn-ink); }
+details.custom-set .count { background: var(--surface); color: var(--muted); font-weight: 500; }
 .mc-none { margin-top: 6px; }
 .nudge { background: linear-gradient(180deg, var(--accent-soft), var(--surface) 70%); }
 .nudge > p { color: var(--muted); font-size: 14.5px; }
@@ -339,10 +338,13 @@ details.past { box-shadow: 0 -1px 0 var(--line); }
 .reviews details .link { font-size: 14px; margin-inline-end: 10px; }
 .reviews .card-h > .ic { background: var(--warn-bg); color: var(--warn-ink); }
 .reviews details > summary .rv-t { flex: 1; min-width: 0; }
-.reviews details.ask > summary { color: var(--warn-ink); font-weight: 600; }
-.ask-ic { display: inline-grid; place-items: center; flex: none; width: 28px; height: 28px; border-radius: 9px; background: var(--warn-bg); color: var(--warn-ink); }
-.reviews details .cites a { display: inline-block; padding: 4px 0; }
-.rv .cites { margin: 2px 0 6px; }
+/* ״יש לשאול רב״: סגנון רך בצבע המבטא של האפליקציה, לא אזהרה */
+.reviews details.ask > summary { color: var(--accent-strong); font-weight: 600; }
+.ask-ic { display: inline-grid; place-items: center; flex: none; width: 28px; height: 28px; border-radius: 9px; background: var(--accent-soft); color: var(--accent-strong); }
+.reviews details.ask p, .rv p { margin: 0 0 6px; }
+.ask-now { color: var(--muted); }
+.notice.ask { background: var(--accent-soft); color: var(--accent-strong); }
+.notice.ask small { color: color-mix(in srgb, var(--accent-strong) 80%, transparent); }
 .toggle.wake { border: 1px solid var(--line); border-radius: var(--r-m, 14px); padding: 8px 12px; }
 
 /* ---------- טפסים ---------- */
@@ -441,8 +443,7 @@ details.rules { border-radius: 14px; }
 .cites-h { font-weight: 600; }
 .cites ul { list-style: none; margin: 2px 0 0; padding: 0; display: grid; gap: 0; }
 .cites li { overflow-wrap: anywhere; line-height: 1.45; }
-.plan-more .cites a, .rules details .cites a, details.rules .cites a { display: inline-block; min-height: 0; margin: 0; padding: 7px 0; font-weight: 600; }
-.cites .nv { color: var(--warn-ink); font-size: 12px; }
+.rules details .cites a { display: inline-block; min-height: 0; margin: 0; padding: 7px 0; font-weight: 600; }
 
 /* ---------- תחתית ---------- */
 .foot { display: grid; gap: 6px; padding-top: 4px; }

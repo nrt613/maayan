@@ -108,8 +108,10 @@ function sepList(r) {
   if (!on.length) return `<span class="muted">אין</span>`;
   return `<ul class="onot">${on.map(p => `<li><b>${esc(p.title)}</b>: ${planText(p)}</li>`).join("")}</ul>`;
 }
+/** כותרת נקודה לבירור במסמך: בשאלה לרב — שם השאלה (באפליקציה הכותרת היא רק ״יש לשאול רב״) */
+const rvTitle = x => x.ask ? `${x.topic} — ${x.title}` : x.title;
 const reviewList = (r, skip = /^$/) => {
-  const t = [...new Set(r.reviews.filter(x => !skip.test(x.id)).map(x => x.title))];
+  const t = [...new Set(r.reviews.filter(x => !skip.test(x.id)).map(rvTitle))];
   return t.length ? `<ul class="rv">${t.map(x => `<li>${esc(x)}</li>`).join("")}</ul>` : `<span class="muted">אין</span>`;
 };
 function cell(col, r, c) {
@@ -957,7 +959,7 @@ function appendixB() {
       const { state, now } = s.build(), r = M.calculate(M.parseState(state), now);
       return `<div class="scen"><h4>${esc(s.title)} <span class="tag">${esc(s.tag)}</span></h4><p><b>מה לבדוק (מתוך הקוד):</b> ${esc(s.check)}</p>
         <p class="fine">הגדרות: ${Object.keys(s.settings).length ? Object.entries(s.settings).map(([k, v]) => `${esc(SETTING_NAMES[k] || k)} = ${esc(optLabel(k, v))}`).join("; ") : "ברירת המחדל (מותאם)"}. רישומים: ${state.events.map(e => `${esc(M.EVENT_NAMES[e.type])} ${esc(e.date)} ${esc(e.time)}${e.result !== "clear" ? " (" + esc(M.RESULT_NAMES[e.result]) + ")" : ""}`).join("; ")}. זמן: ${esc(M.timeInZone(now, "Asia/Jerusalem"))} ${esc(M.dateInZone(now, "Asia/Jerusalem"))}.</p>
-        <p><b>תוצאת המנוע:</b> ${r.earliestHefsek && r.phase === "waiting" ? `הפסק מוקדם ${heb(r.earliestHefsek)}. ` : ""}${r.immersionDate ? `ליל טבילה מוצאי ${heb(r.immersionDate)}. ` : ""}</p>${sepList(r)}${r.reviews.length ? `<p class="fine">לבירור: ${[...new Set(r.reviews.map(x => x.title))].map(esc).join("; ")}</p>` : ""}</div>`;
+        <p><b>תוצאת המנוע:</b> ${r.earliestHefsek && r.phase === "waiting" ? `הפסק מוקדם ${heb(r.earliestHefsek)}. ` : ""}${r.immersionDate ? `ליל טבילה מוצאי ${heb(r.immersionDate)}. ` : ""}</p>${sepList(r)}${r.reviews.length ? `<p class="fine">לבירור: ${[...new Set(r.reviews.map(rvTitle))].map(esc).join("; ")}</p>` : ""}</div>`;
     }).join("");
   } catch (e) { warnings.push("src/scenarios.js: " + e.message); items = `<p class="bad">לא ניתן היה להריץ את תרחישי הבודקים.</p>`; }
   return `<section class="chapter appendix" id="appB"><h2><span class="cn">נספח ב</span>תרחישי הבודקים שבאפליקציה</h2>

@@ -90,7 +90,7 @@ table.flags td:nth-child(2){white-space:nowrap}
     <div class="brand">מעיין</div>
     <div class="subtitle">מפרט הלכתי לבדיקת רב</div>
     <div class="desc">יומן טהרת המשפחה: מה בדיוק מחשבת האפליקציה, לפי הקוד</div>
-    <table class="meta"><tr><th>גרסת מנוע החישוב</th><td dir="ltr">0.5.0-review</td></tr><tr><th>גרסת הקוד (commit)</th><td><span dir="ltr" class="code">3de6c14</span> · 2026-11-21</td></tr><tr><th>תאריך המסמך</th><td>י״א כסלו תשפ״ז · 21 בנובמבר 2026</td></tr></table>
+    <table class="meta"><tr><th>גרסת מנוע החישוב</th><td dir="ltr">0.5.0-review</td></tr><tr><th>גרסת הקוד (commit)</th><td><span dir="ltr" class="code">09b0648</span> · 2026-11-21</td></tr><tr><th>תאריך המסמך</th><td>י״א כסלו תשפ״ז · 21 בנובמבר 2026</td></tr></table>
     <div class="statement"><p><b>האפליקציה אינה פוסקת הלכה.</b> היא יומן שמחשב תאריכים לפי כללים שנכתבו בקוד. התוצאות אינן מחייבות ואינן תחליף להוראת רב. עד לאישור רב, כל חישוב בה הוא הצעה בלבד.</p>
       <p>המסמך מתאר את מה שהקוד מחשב בפועל, גם במקומות שבהם הוא שונה ממה שכתוב במקורות או נראה כטעות. מקומות כאלה מסומנים ״הערה״. כל הדוגמאות חושבו בזמן יצירת המסמך במנוע עצמו.</p></div>
     <div class="ask-rav"><b>מה מתבקש מהרב:</b><ol>
@@ -1113,7 +1113,7 @@ table.flags td:nth-child(2){white-space:nowrap}
         <p><b>תוצאת המנוע:</b> הפסק מוקדם ו׳ ניסן תשפ״ו. </p><ul class="onot"><li><b>עונה בינונית · יום 30</b>: עונת יום א׳ אייר תשפ״ו <span class="civ">(18 באפריל 2026)</span> · <span dir="ltr" class="tm">06:55–20:46</span> (פריז)</li><li><b>עונת החודש</b>: עונת יום ב׳ אייר תשפ״ו <span class="civ">(19 באפריל 2026)</span> · <span dir="ltr" class="tm">06:53–20:48</span> (פריז)</li></ul></div></section>
 <section class="chapter appendix" id="appC"><h2><span class="cn">נספח ג</span>איך לשחזר את המסמך ואת התוצאות</h2>
     <ol>
-      <li>להוריד את קוד המקור של האפליקציה בגרסה 3de6c14 (מנוע 0.5.0-review).</li>
+      <li>להוריד את קוד המקור של האפליקציה בגרסה 09b0648 (מנוע 0.5.0-review).</li>
       <li>להריץ <span class="code" dir="ltr">node docs/halacha/build.js</span>. הסקריפט טוען את <span class="code">src/core.js</span>, מריץ את כל הדוגמאות ויוצר מחדש את <span class="code">docs/halacha/halacha.html</span> ואת <span class="code">halacha.pdf</span>.</li>
       <li>13 תרחישי ההשוואה בלבד: <span class="code" dir="ltr">node store/compare/scenarios-body.js</span>.</li>
       <li>בדיקות המנוע: <span class="code" dir="ltr">node -e 'const M=require("./src/core.js");console.log(require("./src/tests.js")(M).run().filter(t=>!t.ok))'</span>. בזמן יצירת המסמך עברו <b>138 מתוך 138</b> בדיקות.</li>
