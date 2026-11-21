@@ -175,7 +175,7 @@ const Maayan = (() => {
     neutralReminders: true, reminderMinutes: 30, morningTime: "08:00", remindersEnabled: true, checklist: [],
   };
   const SETTING_ENUMS = {
-    wait: ["five", "four", "four-from-relations"], method: ["custom", "ashkenaz", "sefard", "chabad"], beinHashmashot: ["both", "flag"], hefsekTwilight: ["before-sunset", "ovadia"], haflagah: ["days", "chabad-onot"], beinonit: ["same", "both"], missingMonthly: ["skip", "first-next-month"],
+    wait: ["five", "four", "four-from-relations"], method: ["custom", "ashkenaz", "ashkenaz-kreiti", "sefard", "sefard-bic", "chabad"], beinHashmashot: ["both", "flag"], hefsekTwilight: ["before-sunset", "ovadia"], haflagah: ["days", "chabad-onot"], beinonit: ["same", "both"], missingMonthly: ["skip", "first-next-month"],
     bedikot: ["twice", "first-last"], nightfall: ["8.5", "7.083", "13.5z", "18m", "20m"], special: ["regular", "pregnancy", "postpartum", "nursing", "hormonal"],
   };
   const uuid = () => {
@@ -414,7 +414,7 @@ const Maayan = (() => {
   }
 
   /* ---------- מנוע ---------- */
-  const ENGINE_VERSION = "0.3.0-review";
+  const ENGINE_VERSION = "0.4.0-review";
   /* ---------- מקורות ----------
    * כל מקור הוא מקום בטקסט הראשוני, לא אתר. ref הוא מקום הטקסט בספריא: הציטוט q נבדק מול הטקסט שם.
    * מקור בלי ref לא נבדק מול לשון הספר (הספר אינו בספריא, או שהמקום המדויק לא אומת) — לבדיקת הרב. */
@@ -453,6 +453,7 @@ const Maayan = (() => {
     oc554_8: C("שולחן ערוך אורח חיים תקנד, ח", "Shulchan_Arukh,_Orach_Chayim.554.8", "בזמן הזה אין טבילה בזמנה הילכך לא תטבול בו"),
     oc613_12: C("שולחן ערוך אורח חיים תריג, יב", "Shulchan_Arukh,_Orach_Chayim.613.12", "בזמן הזה אסור לאשה לטבול ביום הכפורים"),
     bic_tzav1: C("בן איש חי, שנה שנייה, פרשת צו, אות א", "Ben_Ish_Hai,_Halachot_2nd_Year,_Tzav.1", "ויש אומרים דעונה זו היא לפני העונה שהוסת בה, דהיינו, אם וסתה ביום, צריך לפרוש ממנה כל הלילה שלפניו"),
+    bic_tzav1b: C("בן איש חי, שנה שנייה, פרשת צו, אות א", "Ben_Ish_Hai,_Halachot_2nd_Year,_Tzav.1", "ומרן ז\"ל סבירא לה כדעה הראשונה, אך צריך לחוש לדעה זו השניה"),
     bic_tzav7: C("בן איש חי, שנה שנייה, פרשת צו, אות ז", "Ben_Ish_Hai,_Halachot_2nd_Year,_Tzav.7", "ואינה יכולה למנות ז' נקיים ולטבול אלא דווקא אם עברו עליה ששה ימים מיום שראתה בו"),
     sa184_2o: C("שולחן ערוך יורה דעה קפד, ב", "Shulchan_Arukh,_Yoreh_De'ah.184.2", "בשעת וסתה צריך לפרוש ממנה עונה אחת"),
     shach184_7b: C("ש״ך יורה דעה קפד, ס״ק ז", "Siftei_Kohen_on_Shulchan_Arukh,_Yoreh_De'ah.184.7", "גם הב\"ח כתב שמשמע שהירא דבר ה' נוהג כהא\"ז"),
@@ -473,6 +474,12 @@ const Maayan = (() => {
     chavot189: C("חוות דעת יורה דעה קפט, ס״ק יב — יום 31"),
     thkChabad: C("טהרה כהלכה (הרב יוסף ישעיה ברוין) — הפלגה בעונות מההפסק, מקום מדויק לא אומת"),
     missing30: C("ל׳ בחודש כשבחודש הבא אין ל׳ — מקור ראשוני לא אותר"),
+    // מקור משני: סיכום הלכות נידה לרבנות. הדעות מובאות כפי שהן בסיכום, ולא נבדקו מול הספרים עצמם
+    secCarryTaz: C("סיכום הלכות נידה לרבנות (משני) — רמ״א וט״ז: חוששת להפלגה הארוכה שלא נעקרה"),
+    secCarryMajority: C("סיכום הלכות נידה לרבנות (משני) — ב״ח, ש״ך, סדרי טהרה, חוות דעת, רעק״א: ההפלגה הארוכה נעקרת מיד"),
+    shach189_31: C("ש״ך יורה דעה קפט, ס״ק לא", "Siftei_Kohen_on_Shulchan_Arukh,_Yoreh_De'ah.189.31", "אבל באמת נראה עיקר דאם ראתה בא' באייר א\"צ לחוש לט' בו"),
+    secBadei: C("סיכום הלכות נידה לרבנות (משני) — בדי השלחן: עונה בינונית מעת לעת, כדעת כרתי ופלתי"),
+    secShevet3031: C("סיכום הלכות נידה לרבנות (משני) — שבט הלוי: לחוש גם ליום 30 וגם ליום 31"),
     orZarua31: C("אור זרוע ליום 30 בלבד למי ששומרת 30 ו-31 — מקור ראשוני לא אותר"),
   };
   const SOURCES = {
@@ -796,7 +803,7 @@ const Maayan = (() => {
   }
   const SETTING_LABELS = {
     wait: { five: "חמישה ימים מתחילת הנידה", four: "ארבעה ימים מתחילת הנידה (הרב עובדיה יוסף)", "four-from-relations": "ארבעה ימים ממועד היחסים" },
-    method: { custom: "התאמה אישית", ashkenaz: "מנהג אשכנז הרווח", sefard: "שיטת הרב עובדיה יוסף (ספרדי)", chabad: "מנהג חב״ד" },
+    method: { custom: "התאמה אישית", ashkenaz: "אשכנזי – עיקר הדין", "ashkenaz-kreiti": "אשכנזי – כרתי ופלתי", sefard: "הרב עובדיה יוסף (ספרדי)", "sefard-bic": "בן איש חי (ספרדי)", chabad: "מנהג חב״ד" },
     beinHashmashot: { both: "לחומרא שתי העונות", flag: "השעיית החישוב ובירור" },
     hefsekTwilight: { "before-sunset": "רק לפני השקיעה", ovadia: "בדיעבד עד 13.5 דקות זמניות אחרי השקיעה (הרב עובדיה יוסף)" },
     haflagah: { days: "ימים בין תחילות הווסתות", "chabad-onot": "עונות מהפסק טהרה (חב״ד)" },
@@ -815,45 +822,78 @@ const Maayan = (() => {
     beinonitAshkenaz: ["sa189_1", "sahr189_1f"], beinonitChabad: ["sahr189_1f", "sahr189_1"],
     haflagah: ["sa189_2h", "rema189_13", "sahr189_44"], missing30: ["missing30"], bedikot: ["sa196_4", "sa196_4f"],
     bhs: SOURCES.bhs, bhsSefard: ["shach184_13", "shach184_14", "thbHefsek"], bhsChabad: ["sahr184_19"],
+    ozBic: ["bic_tzav1", "bic_tzav1b"], ozAshkenazBasic: ["shach184_7", "shach184_7b", "taz184_2"], ozKreiti: ["shach184_7", "taz184_2", "orZarua31"],
+    day30: ["sa189_1", "sahr189_1", "shach189_30"], day31Kreiti: ["chavot189", "shach189_30", "sahr189_1d", "secShevet3031"], beinonitKreiti: ["sahr189_1f", "secBadei"],
+    uproot: ["sa189_2u", "shach189_31", "secCarryMajority", "rema189_13"], carryTaz: ["rema189_13", "secCarryTaz", "secCarryMajority"], bicWait: ["sa196_11", "thbWait", "bic_tzav7", "bic_tzav10"],
     hefsekLate: ["sa196_1"], hefsekOvadia: ["sa196_1", "thbHefsek"], nightfallOvadia: ["thbNightfall"], none: [],
   };
 
   const note = (k, t, src, ask = false) => ({ k, t, src, ask });
+  /* ההגדרות המשותפות לכל שיטה ספרדית ולכל שיטה אשכנזית. כל שיטה משנה מהן רק את מה שמבדיל אותה. */
+  const SEFARD_BASE = { wait: "four", haflagah: "days", beinonit: "same", day31: false, orZarua: false, carryLongIntervals: false, carryMonthly: false, missingMonthly: "first-next-month", bedikot: "twice", nightfall: "20m", beinHashmashot: "both", hefsekTwilight: "ovadia" };
+  const ASHKENAZ_BASE = { wait: "five", haflagah: "days", beinonit: "same", day31: false, orZarua: true, carryLongIntervals: false, carryMonthly: false, missingMonthly: "first-next-month", bedikot: "twice", nightfall: "8.5", beinHashmashot: "both", hefsekTwilight: "before-sunset" };
+  const SEFARD_NOTES = [
+    note("wait", "ארבעה ימים: יום הראייה הוא יום 1 וההפסק ביום הרביעי (ראתה בליל שני — הפסק ביום חמישי). לפי הרב עובדיה יסוד הדין הוא 72 שעות מהתשמיש; אם לא היו יחסים בארבעת הימים שלפני הראייה, יש שמתירים הפסק מיד כשפסק הדם. רבים מהפוסקים הספרדים ממתינים חמישה ימים.", PS.ovadiaWait, true),
+    note("beinonit", "עונה בינונית ביום 30 בלבד, בעונת הראייה (שו״ע יו״ד קפט, א).", PS.average),
+    note("day31", "יום 31 אינו נדרש לפי השו״ע ולפי טהרת הבית.", PS.day31Sefard, true),
+    note("orZarua", "לפי טהרת הבית אין חוששים לעונת אור זרוע. מי שנוהגת כבן איש חי, שחשש לה — שיטת ״בן איש חי (ספרדי)״.", PS.ozSefard, true),
+    note("haflagah", "הפלגה בימים מתחילת וסת לתחילת וסת, בספירה כוללנית.", PS.haflagah),
+    note("carryLongIntervals", "הפלגה ארוכה נעקרת מיד כשבאה ראייה לפניה (״נעקר בפעם אחת״), כדעת הב״ח והש״ך (ובסיכום המשני גם סדרי טהרה, חוות דעת, רעק״א) — דלא כרמ״א (קפט, יג) והט״ז.", PS.uproot),
+    note("missingMonthly", "ל׳ בחודש כשבחודש הבא אין ל׳: א׳ בחודש שאחריו (לחומרא).", PS.missing30, true),
+    note("bedikot", "בדיקה בבוקר ולפני השקיעה בכל אחד משבעת הימים לכתחילה (שו״ע יו״ד קצו, ד).", PS.bedikot),
+    note("nightfall", "ליל הטבילה: 20 דקות אחרי השקיעה, לחומרא. לשיטת הגאונים שהרב עובדיה נוקט צאת הכוכבים כ-13.5 דקות זמניות; לברר עם רב מתי לטבול.", PS.nightfallOvadia, true),
+    note("beinHashmashot", "ראייה סמוך לשקיעה או בין השמשות: חוששים לשתי העונות. אחרי 13.5 דקות זמניות הזמן נחשב לילה ודאי.", PS.bhsSefard, true),
+    note("hefsekTwilight", "הפסק לכתחילה לפני השקיעה. בדיעבד, לפי טהרת הבית, הפסק עד 13.5 דקות זמניות אחרי השקיעה תקף ונספר ליום שהסתיים (יש שכתבו שבארץ ישראל השיעור קצר יותר).", PS.hefsekOvadia, true),
+  ];
+  const ASHKENAZ_NOTES = [
+    note("wait", "חמישה ימים מתחילת הווסת: יום הראייה הוא יום 1, וההפסק ביום החמישי לפני השקיעה (רמ״א יו״ד קצו, יא; כך נוהגים כל קהילות אשכנז).", PS.wait),
+    note("beinonit", "עונה בינונית ביום 30, בעונה שבה התחילה הראייה בלבד (שו״ע יו״ד קפט, א). מעת לעת שלם — בשיטת ״כרתי ופלתי״.", PS.average),
+    note("day31", "עונה בינונית ביום 30 בספירה כוללנית (שו״ע; שו״ע הרב בשם ב״י, ב״ח, ט״ז). הש״ך סובר שהיא ביום 31; את שני הימים שומרים בשיטת ״כרתי ופלתי״.", PS.day30, true),
+    note("orZarua", "עונת אור זרוע — העונה שלפני כל וסת (ש״ך קפד, ס״ק ז, בשם האור זרוע, ובשם הב״ח: ״הירא דבר ה׳ נוהג כהא״ז״). הט״ז (קפד, ס״ק ב) חולק. האם לכלול אותה בעיקר הדין — לברר.", PS.ozAshkenazBasic, true),
+    note("haflagah", "הפלגה בימים מתחילת וסת לתחילת וסת, בספירה כוללנית.", PS.haflagah),
+    note("carryLongIntervals", "הפלגה ארוכה נעקרת מיד כשבאה ראייה לפניה (״נעקר בפעם אחת״), כדעת הב״ח והש״ך (ובסיכום המשני גם סדרי טהרה, חוות דעת, רעק״א) — דלא כרמ״א (קפט, יג) והט״ז.", PS.uproot),
+    note("missingMonthly", "ל׳ בחודש כשבחודש הבא אין ל׳: א׳ בחודש שאחריו, לחומרא (העונה הבינונית חלה ממילא בכ״ט).", PS.missing30),
+    note("bedikot", "בדיקה בבוקר ולפני השקיעה בכל אחד משבעת הימים לכתחילה (שו״ע יו״ד קצו, ד).", PS.bedikot),
+    note("nightfall", "צאת הכוכבים 8.5° מתחת לאופק, לחומרא, לליל הטבילה ולסוף בין השמשות. יש שנוהגים בשיעור אחר.", PS.none, true),
+    note("beinHashmashot", "ראייה בין השקיעה לצאת הכוכבים: מעיקר הדין כלילה, ונוהגים להחמיר ולחשוש לשתי העונות (ש״ך יו״ד קפד, ס״ק יג–יד, בשם הב״ח).", PS.bhs),
+    note("hefsekTwilight", "הפסק טהרה רק לפני השקיעה. לרוב פוסקי אשכנז הפסק אחרי השקיעה אינו תקף אף בדיעבד.", PS.hefsekLate),
+  ];
+  /** מחליף הערות לפי מפתח ומשאיר את השאר בסדרן */
+  const withNotes = (base, ...repl) => base.map(n => repl.find(r => r.k === n.k) || n);
   const METHOD_PRESETS = {
-    ashkenaz: {
-      label: SETTING_LABELS.method.ashkenaz,
-      settings: { wait: "five", haflagah: "days", beinonit: "same", day31: true, orZarua: true, carryLongIntervals: true, carryMonthly: false, missingMonthly: "first-next-month", bedikot: "twice", nightfall: "8.5", beinHashmashot: "both", hefsekTwilight: "before-sunset" },
-      notes: [
-        note("wait", "חמישה ימים מתחילת הווסת: יום הראייה הוא יום 1, וההפסק ביום החמישי לפני השקיעה (רמ״א יו״ד קצו, יא; כך נוהגים כל קהילות אשכנז).", PS.wait),
-        note("beinonit", "עונה בינונית ביום 30, בעונה שבה התחילה הראייה (שו״ע יו״ד קפט, א). יש שנוהגים לפרוש את כל היממה (כרתי ופלתי) — זו הגדרה נפרדת.", PS.beinonitAshkenaz),
-        note("day31", "רבים מהאשכנזים נוהגים להחמיר גם ביום 31 (חוות דעת). אינו חובה מן הדין.", PS.day31, true),
-        note("orZarua", "עונת אור זרוע — העונה שלפני כל וסת. נתקבלה ברוב קהילות אשכנז; מי ששומרת ימים 30 ו-31 שומרת אותה ליום 30 בלבד.", PS.ozAshkenaz, true),
-        note("haflagah", "הפלגה בימים מתחילת וסת לתחילת וסת, בספירה כוללנית. הפלגה ארוכה שלא נעקרה (כי הראייה הבאה באה לפניה) נשמרת.", PS.haflagah, true),
-        note("missingMonthly", "ל׳ בחודש כשבחודש הבא אין ל׳: א׳ בחודש שאחריו, לחומרא (העונה הבינונית חלה ממילא בכ״ט).", PS.missing30),
-        note("bedikot", "בדיקה בבוקר ולפני השקיעה בכל אחד משבעת הימים לכתחילה (שו״ע יו״ד קצו, ד).", PS.bedikot),
-        note("nightfall", "צאת הכוכבים 8.5° מתחת לאופק, לחומרא, לליל הטבילה ולסוף בין השמשות. יש שנוהגים בשיעור אחר.", PS.none, true),
-        note("beinHashmashot", "ראייה בין השקיעה לצאת הכוכבים: מעיקר הדין כלילה, ונוהגים להחמיר ולחשוש לשתי העונות (ש״ך יו״ד קפד, ס״ק יג–יד, בשם הב״ח).", PS.bhs),
-        note("hefsekTwilight", "הפסק טהרה רק לפני השקיעה. לרוב פוסקי אשכנז הפסק אחרי השקיעה אינו תקף אף בדיעבד.", PS.hefsekLate),
-      ],
-    },
     sefard: {
-      label: SETTING_LABELS.method.sefard,
-      settings: { wait: "four", haflagah: "days", beinonit: "same", day31: false, orZarua: false, carryLongIntervals: true, carryMonthly: false, missingMonthly: "first-next-month", bedikot: "twice", nightfall: "20m", beinHashmashot: "both", hefsekTwilight: "ovadia" },
-      notes: [
-        note("wait", "ארבעה ימים: יום הראייה הוא יום 1 וההפסק ביום הרביעי (ראתה בליל שני — הפסק ביום חמישי). לפי הרב עובדיה יסוד הדין הוא 72 שעות מהתשמיש; אם לא היו יחסים בארבעת הימים שלפני הראייה, יש שמתירים הפסק מיד כשפסק הדם. רבים מהפוסקים הספרדים ממתינים חמישה ימים.", PS.ovadiaWait, true),
-        note("beinonit", "עונה בינונית ביום 30 בלבד, בעונת הראייה (שו״ע יו״ד קפט, א).", PS.average),
-        note("day31", "יום 31 אינו נדרש לפי השו״ע. יש מספרדים שמחמירים.", PS.day31Sefard, true),
-        note("orZarua", "לפי טהרת הבית ספרדים אינם חוששים לעונת אור זרוע. הבן איש חי חשש לה.", PS.ozSefard, true),
-        note("haflagah", "הפלגה בימים מתחילת וסת לתחילת וסת. שימור הפלגה ארוכה הופעל לחומרא — לברר.", PS.haflagah, true),
-        note("missingMonthly", "ל׳ בחודש כשבחודש הבא אין ל׳: א׳ בחודש שאחריו (לחומרא).", PS.missing30, true),
-        note("bedikot", "בדיקה בבוקר ולפני השקיעה בכל אחד משבעת הימים לכתחילה (שו״ע יו״ד קצו, ד).", PS.bedikot),
-        note("nightfall", "ליל הטבילה: 20 דקות אחרי השקיעה, לחומרא. לשיטת הגאונים שהרב עובדיה נוקט צאת הכוכבים כ-13.5 דקות זמניות; לברר עם רב מתי לטבול.", PS.nightfallOvadia, true),
-        note("beinHashmashot", "ראייה סמוך לשקיעה או בין השמשות: חוששים לשתי העונות. אחרי 13.5 דקות זמניות הזמן נחשב לילה ודאי.", PS.bhsSefard, true),
-        note("hefsekTwilight", "הפסק לכתחילה לפני השקיעה. בדיעבד, לפי טהרת הבית, הפסק עד 13.5 דקות זמניות אחרי השקיעה תקף ונספר ליום שהסתיים (יש שכתבו שבארץ ישראל השיעור קצר יותר).", PS.hefsekOvadia, true),
-      ],
+      label: SETTING_LABELS.method.sefard, family: "sefard", name: "הרב עובדיה יוסף",
+      line: "בלי עונת אור זרוע. ארבעה ימים לפני ההפסק, והפסק בדיעבד עד 13.5 דקות אחרי השקיעה.", source: "טהרת הבית",
+      settings: { ...SEFARD_BASE },
+      notes: SEFARD_NOTES,
+    },
+    "sefard-bic": {
+      label: SETTING_LABELS.method["sefard-bic"], family: "sefard", name: "בן איש חי",
+      line: "כמו שיטת הרב עובדיה, ובנוסף חוששים לעונת אור זרוע, העונה שלפני כל וסת.", source: "בן איש חי, שנה ב, צו, א",
+      settings: { ...SEFARD_BASE, orZarua: true },
+      notes: withNotes(SEFARD_NOTES,
+        note("wait", "ארבעה ימים מתחילת הראייה, כמו בשיטת הרב עובדיה. הבן איש חי (שנה ב, צו, ז; י) כותב שההפסק ביום השישי לראייה — כאן לא הוחל; לברר עם רב.", PS.bicWait, true),
+        note("orZarua", "חוששים לעונת אור זרוע — העונה שלפני כל וסת: ״ומרן ז״ל סבירא לה כדעה הראשונה, אך צריך לחוש לדעה זו השניה״ (בן איש חי, שנה ב, צו, א).", PS.ozBic)),
+    },
+    ashkenaz: {
+      label: SETTING_LABELS.method.ashkenaz, family: "ashkenaz", name: "עיקר הדין",
+      line: "עונה בינונית ביום 30 בעונת הראייה, ועונת אור זרוע לפני כל וסת.", source: "שו״ע ורמ״א; ש״ך קפד, ס״ק ז",
+      settings: { ...ASHKENAZ_BASE },
+      notes: ASHKENAZ_NOTES,
+    },
+    "ashkenaz-kreiti": {
+      label: SETTING_LABELS.method["ashkenaz-kreiti"], family: "ashkenaz", name: "כרתי ופלתי",
+      line: "עונה בינונית מעת לעת, לילה ויום, בימים 30 ו-31. הפלגה ארוכה נשמרת עד שנעקרת (רמ״א, ט״ז).", source: "כרתי ופלתי, מובא בשו״ע הרב קפט, א",
+      settings: { ...ASHKENAZ_BASE, beinonit: "both", day31: true, carryLongIntervals: true },
+      notes: withNotes(ASHKENAZ_NOTES,
+        note("beinonit", "עונה בינונית מעת לעת שלם, לילה ויום, מתחילת הלילה ועד סוף היום (כרתי ופלתי, מובא בשו״ע הרב קפט, א). בדי השלחן פוסק כך (מקור משני).", PS.beinonitKreiti),
+        note("day31", "שומרים גם את יום 31, גם הוא מעת לעת שלם (חוות דעת; ש״ך קפט, ס״ק ל). שבט הלוי: לחוש לשני הימים (מקור משני).", PS.day31Kreiti, true),
+        note("orZarua", "עונת אור זרוע לפני יום 30, עונת החודש וההפלגה (ש״ך קפד, ס״ק ז; הט״ז, ס״ק ב, חולק). לפני יום 31 אין אור זרוע. כשהעונה הבינונית היא מעת לעת, אור זרוע מתווסף לפני עונת הלילה שלה, כלומר ביום 29 — לברר.", PS.ozKreiti, true),
+        note("carryLongIntervals", "הפלגה ארוכה שלא נעקרה נשמרת לצד ההפלגה הקצרה, כדעת הרמ״א (קפט, יג: ״חוששת לט׳ באייר״) והט״ז. הב״ח והש״ך חולקים.", PS.carryTaz, true)),
     },
     chabad: {
-      label: SETTING_LABELS.method.chabad,
+      label: SETTING_LABELS.method.chabad, family: "chabad", name: "מנהג חב״ד",
+      line: "הפלגה בעונות מההפסק, ועונה בינונית מעת לעת ביום 30.", source: "שולחן ערוך הרב",
       settings: { wait: "five", haflagah: "chabad-onot", beinonit: "both", day31: false, orZarua: false, carryLongIntervals: true, carryMonthly: false, missingMonthly: "first-next-month", bedikot: "twice", nightfall: "8.5", beinHashmashot: "both", hefsekTwilight: "before-sunset" },
       notes: [
         note("wait", "חמישה ימים מתחילת הווסת, ההפסק ביום החמישי.", PS.wait),
@@ -869,6 +909,13 @@ const Maayan = (() => {
       ],
     },
   };
+  /* בחירת שיטה בשני שלבים: מה המנהג, ואחר כך לפי מי (בחב״ד אין שלב שני) */
+  const METHOD_FAMILIES = [
+    { id: "sefard", label: "ספרדי", ask: "לפי מי?", methods: ["sefard", "sefard-bic"] },
+    { id: "ashkenaz", label: "אשכנזי", ask: "לפי איזו שיטה?", methods: ["ashkenaz", "ashkenaz-kreiti"] },
+    { id: "chabad", label: "חב״ד", ask: "", methods: ["chabad"] },
+  ];
+  const methodFamily = method => (METHOD_PRESETS[method] || {}).family || "";
   /** אילו הגדרות שונו אחרי בחירת שיטה */
   const presetDiff = s => { const p = METHOD_PRESETS[s && s.method]; return p ? Object.keys(p.settings).filter(k => s[k] !== p.settings[k]) : []; };
   const applyPreset = (settings, method) => { const p = METHOD_PRESETS[method]; return p ? { ...settings, ...p.settings, method } : { ...settings, method: "custom" }; };
@@ -918,7 +965,7 @@ const Maayan = (() => {
     setLang, getLang, LOCALES, HDate, isLeapYear, daysInMonth, monthsInYear, gematriya, hebrew2abs, abs2hebrew,
     CITIES, city, setPlaces, EVENT_TYPES, EVENT_NAMES, CHECKLIST, SETTING_DEFAULTS, SETTING_LABELS, RESULT_NAMES, uuid, validISO, parseState, safeParse, emptyState, ValidationError,
     fromISO, toISO, addDays, hd, fromAbs, hebrew, dayNumber, isoAbs, civilLabel, dateInZone, timeInZone, localInstant, sun, atLocation, stamp, onahWindow, today, currentContext,
-    ENGINE_VERSION, SOURCES, CITES, cite, citeUrl, citeText, calculate, sorted, METHOD_PRESETS, presetDiff, applyPreset, nightfallLabel,
+    ENGINE_VERSION, SOURCES, CITES, cite, citeUrl, citeText, calculate, sorted, METHOD_PRESETS, METHOD_FAMILIES, methodFamily, presetDiff, applyPreset, nightfallLabel,
     encryptBackup, decryptBackup, calendarExport, reportExport, settingsSummary, eventLine, planLine, demoState,
   };
 })();

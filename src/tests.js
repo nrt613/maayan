@@ -379,6 +379,90 @@ const MaayanTests = (M) => {
     a.deepEqual(M.presetDiff({ ...emptyState().settings, ...ash, method: "ashkenaz", day31: !ash.day31 }), ["day31"]);
     a.deepEqual(M.presetDiff({ ...emptyState().settings, method: "custom" }), []);
   });
+  const P = M.METHOD_PRESETS, presetState = (pk, events) => { const s = emptyState(); s.settings = M.applyPreset({ ...s.settings, cityId: "jerusalem" }, pk); s.events = events; return M.parseState(s); };
+  test("שיטות", "הרב עובדיה יוסף (ספרדי): ארבעה ימים, בלי אור זרוע, הפלגה ארוכה נעקרת מיד", () => {
+    const s = P.sefard.settings;
+    a.deepEqual([s.wait, s.beinonit, s.day31, s.orZarua, s.carryLongIntervals, s.nightfall, s.hefsekTwilight, s.beinHashmashot], ["four", "same", false, false, false, "20m", "ovadia", "both"]);
+    a.equal(P.sefard.label, "הרב עובדיה יוסף (ספרדי)"); a.equal(P.sefard.family, "sefard");
+  });
+  test("שיטות", "בן איש חי (ספרדי): כמו הרב עובדיה, ועם אור זרוע", () => {
+    const s = P["sefard-bic"].settings, diff = Object.keys(s).filter(k => s[k] !== P.sefard.settings[k]);
+    a.deepEqual(diff, ["orZarua"]); a.equal(s.orZarua, true); a.equal(P["sefard-bic"].family, "sefard");
+    a.ok(P["sefard-bic"].notes.find(n => n.k === "orZarua").src.includes("bic_tzav1b")); a.ok(M.cite("bic_tzav1b").ok, "הציטוט אומת בספריא");
+  });
+  test("שיטות", "אשכנזי – עיקר הדין: חמישה ימים, עונה אחת ביום 30, אור זרוע, בלי שימור הפלגות", () => {
+    const s = P.ashkenaz.settings;
+    a.deepEqual([s.wait, s.haflagah, s.beinonit, s.day31, s.orZarua, s.carryLongIntervals, s.nightfall, s.hefsekTwilight, s.beinHashmashot, s.missingMonthly, s.bedikot, s.carryMonthly], ["five", "days", "same", false, true, false, "8.5", "before-sunset", "both", "first-next-month", "twice", false]);
+    a.equal(P.ashkenaz.label, "אשכנזי – עיקר הדין"); a.ok(P.ashkenaz.notes.find(n => n.k === "orZarua").ask, "אור זרוע מסומן לבירור");
+    a.ok(P.ashkenaz.notes.find(n => n.k === "orZarua").src.includes("taz184_2"), "הט״ז החולק מובא");
+  });
+  test("שיטות", "אשכנזי – כרתי ופלתי: מעת לעת בימים 30 ו-31, ושימור הפלגה ארוכה", () => {
+    const s = P["ashkenaz-kreiti"].settings, diff = Object.keys(s).filter(k => s[k] !== P.ashkenaz.settings[k]).sort();
+    a.deepEqual(diff, ["beinonit", "carryLongIntervals", "day31"]); a.equal(s.beinonit, "both"); a.equal(s.day31, true); a.equal(s.carryLongIntervals, true);
+    a.ok(P["ashkenaz-kreiti"].notes.find(n => n.k === "beinonit").src.includes("sahr189_1f"), "כרתי ופלתי דרך שו״ע הרב");
+  });
+  test("שיטות", "חב״ד נשארה כפי שהייתה", () => {
+    a.deepEqual(P.chabad.settings, { wait: "five", haflagah: "chabad-onot", beinonit: "both", day31: false, orZarua: false, carryLongIntervals: true, carryMonthly: false, missingMonthly: "first-next-month", bedikot: "twice", nightfall: "8.5", beinHashmashot: "both", hefsekTwilight: "before-sunset" });
+  });
+  test("שיטות", "בחירה בשני שלבים: כל שיטה שייכת למנהג אחד", () => {
+    a.deepEqual(M.METHOD_FAMILIES.map(f => f.id), ["sefard", "ashkenaz", "chabad"]);
+    a.deepEqual(M.METHOD_FAMILIES.flatMap(f => f.methods).sort(), Object.keys(P).sort());
+    for (const f of M.METHOD_FAMILIES) for (const m of f.methods) a.equal(M.methodFamily(m), f.id);
+    a.equal(M.methodFamily("custom"), "");
+  });
+  test("שיטות", "applyPreset קובע את כל ערכי השיטה ושומר הגדרות אחרות", () => {
+    const base = { ...emptyState().settings, cityId: "haifa", methodNote: "הרב פלוני", reminderMinutes: 45, wait: "four-from-relations", orZarua: false };
+    for (const pk of Object.keys(P)) {
+      const s = M.applyPreset(base, pk);
+      a.equal(s.method, pk); a.deepEqual(M.presetDiff(s), [], pk); a.equal(s.cityId, "haifa"); a.equal(s.methodNote, "הרב פלוני"); a.equal(s.reminderMinutes, 45);
+      a.equal(M.parseState({ ...emptyState(), settings: s }).settings.method, pk, "parseState מקבל את המזהה");
+    }
+    a.equal(M.applyPreset(base, "no-such").method, "custom");
+    a.equal(M.applyPreset(M.applyPreset(base, "ashkenaz-kreiti"), "ashkenaz").beinonit, "same", "מעבר בין שיטות מחזיר את הערכים");
+  });
+  test("שיטות", "יומן ישן עם ״ashkenaz״ שומר את ערכיו, והשם מתחלף ל״אשכנזי – עיקר הדין״", () => {
+    // ערכי ״מנהג אשכנז הרווח״ כפי שנשמרו בגרסת מנוע 0.3.0
+    const old = { wait: "five", haflagah: "days", beinonit: "same", day31: true, orZarua: true, carryLongIntervals: true, carryMonthly: false, missingMonthly: "first-next-month", bedikot: "twice", nightfall: "8.5", beinHashmashot: "both", hefsekTwilight: "before-sunset" };
+    const s = emptyState(); s.settings = { ...s.settings, ...old, method: "ashkenaz" };
+    const p = M.parseState(JSON.parse(JSON.stringify(s)));
+    for (const [k, v] of Object.entries(old)) a.equal(p.settings[k], v, `${k} נשמר`);
+    a.equal(p.settings.method, "ashkenaz"); a.deepEqual(M.presetDiff(p.settings).sort(), ["carryLongIntervals", "day31"]);
+    a.match(M.settingsSummary(p.settings)[0], /^שיטה: אשכנזי – עיקר הדין \(עם שינויים\)$/);
+    const old2 = M.parseState({ ...s, settings: { ...s.settings, method: "sefard", wait: "four", nightfall: "20m", hefsekTwilight: "ovadia", orZarua: false, day31: false, carryLongIntervals: true } });
+    a.deepEqual(M.presetDiff(old2.settings), ["carryLongIntervals"], "יומן ספרדי ישן: רק השימור שונה");
+  });
+  test("שיטות", "כרתי ופלתי: מעת לעת שלם ביום 30 וביום 31 (מהשקיעה עד השקיעה)", () => {
+    for (const time of ["10:00", "22:00"]) {
+      const flow = event("flow", N(2), time, { cityId: "jerusalem" }), st = presetState("ashkenaz-kreiti", [flow]);
+      const r = calculate(st, NOW), see = M.stamp(flow, st.settings.nightfall).abs, J = city("jerusalem");
+      for (const day of [30, 31]) {
+        const abs = see + day - 1, av = r.plans.filter(p => p.kind === "average" && p.id.includes(`-${day}-`));
+        a.deepEqual(av.map(p => p.onah).sort(), ["day", "night"], `יום ${day}: לילה ויום`);
+        const civil = fromAbs(abs), prev = sun(addDays(civil, -1), J), cur = sun(civil, J);
+        const night = av.find(p => p.onah === "night"), dayP = av.find(p => p.onah === "day");
+        a.equal(night.start, prev.sunset.toISOString(), `יום ${day} מתחיל בשקיעה שלפניו`); a.equal(night.end, dayP.start, "הלילה והיום רצופים");
+        a.equal(dayP.end, cur.sunset.toISOString(), `יום ${day} מסתיים בשקיעה`);
+        const hours = (new Date(dayP.end) - new Date(night.start)) / 3600000; a.ok(hours > 23.9 && hours < 24.1, `${hours} שעות`);
+      }
+    }
+    const one = calculate(presetState("ashkenaz", [event("flow", N(2), "10:00", { cityId: "jerusalem" })]), NOW).plans.filter(p => p.kind === "average");
+    a.deepEqual(one.map(p => p.onah), ["day"], "בעיקר הדין: עונה אחת ביום 30 בלבד");
+  });
+  test("שיטות", "אור זרוע: יש בבן איש חי, אין בשיטת הרב עובדיה", () => {
+    const flow = event("flow", N(2), "10:00", { cityId: "jerusalem" }), evs = () => [flow];
+    const bic = calculate(presetState("sefard-bic", evs()), NOW).plans, ov = calculate(presetState("sefard", evs()), NOW).plans;
+    a.ok(bic.some(p => p.kind === "or-zarua" && p.id.startsWith("oz-average")), "בן איש חי: אור זרוע לפני העונה הבינונית");
+    a.ok(bic.some(p => p.kind === "or-zarua" && p.id.startsWith("oz-monthly")), "בן איש חי: אור זרוע לפני עונת החודש");
+    a.equal(ov.filter(p => p.kind === "or-zarua").length, 0, "הרב עובדיה: אין אור זרוע");
+    const strip = ps => ps.filter(p => p.kind !== "or-zarua").map(p => p.id).sort().join();
+    a.equal(strip(bic), strip(ov), "מלבד אור זרוע — אותם מועדים");
+  });
+  test("שיטות", "אשכנזי – עיקר הדין: הפלגה ארוכה נעקרת מיד; בכרתי ופלתי נשמרת", () => {
+    const evs = () => [event("flow", N(1, 1)), event("flow", N(6, 2)), event("flow", N(27, 2))];
+    const ints = pk => calculate(presetState(pk, evs()), NOW).plans.filter(p => p.kind === "interval").map(p => p.title).sort();
+    a.deepEqual(ints("ashkenaz"), ["הפלגה · 22 ימים"]); a.deepEqual(ints("sefard"), ["הפלגה · 22 ימים"]);
+    a.deepEqual(ints("ashkenaz-kreiti"), ["הפלגה · 22 ימים", "הפלגה · 36 ימים"]);
+  });
   test("שיטות", "יומן ישן בלי ההגדרות החדשות נטען עם ברירות המחדל", () => {
     const s = emptyState(); delete s.settings.beinHashmashot; delete s.settings.hefsekTwilight; delete s.settings.method;
     const p = M.parseState(s); a.equal(p.settings.method, "custom"); a.equal(p.settings.beinHashmashot, "both"); a.equal(p.settings.hefsekTwilight, "before-sunset");
