@@ -218,6 +218,34 @@ main { padding-block: 12px 120px; padding-left: max(16px, env(safe-area-inset-le
 .times .fine { font-size: 12px; }
 .method-sum { list-style: none; padding: 0; display: grid; gap: 4px; font-size: 14.5px; color: var(--muted); }
 .method-sum li::before { content: ""; display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: var(--accent); margin-inline-end: 10px; vertical-align: 2px; }
+/* בחירת שיטה בשני שלבים */
+.mchoose { display: grid; gap: 14px; }
+.mc-step { display: grid; gap: 8px; }
+.mc-q { display: flex; align-items: center; gap: 8px; font-weight: 600; font-size: 15px; color: var(--ink); }
+.mc-n { display: inline-grid; place-items: center; width: 22px; height: 22px; border-radius: 50%; background: var(--accent-soft); color: var(--accent-strong); font-size: 12.5px; font-weight: 700; flex: none; }
+.mchoose .seg { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); justify-self: stretch; }
+.mchoose .seg button { padding: 8px 6px; font-size: 15px; min-height: 44px; }
+.mchoose .seg button[aria-checked="true"] { background: var(--surface); color: var(--accent-strong); box-shadow: 0 1px 3px rgb(60 20 40 / .12); font-weight: 600; }
+.mc-opts { display: grid; gap: 8px; }
+.mc-card { display: flex; align-items: flex-start; gap: 12px; width: 100%; text-align: start; border: 1.5px solid var(--line); background: var(--surface); border-radius: var(--r-m); padding: 12px 14px; color: var(--ink); font: inherit; cursor: pointer; transition: border-color .15s, background .15s; }
+.mc-card:hover { border-color: var(--soft-2); background: var(--bg); }
+.mc-card[aria-checked="true"], .mc-card.on { border-color: var(--accent); background: var(--accent-soft); }
+.mc-only { cursor: default; }
+.mc-dot { flex: none; width: 20px; height: 20px; margin-top: 2px; border-radius: 50%; border: 2px solid var(--faint); background: var(--surface); }
+.mc-card[aria-checked="true"] .mc-dot { border-color: var(--accent); box-shadow: inset 0 0 0 4px var(--surface); background: var(--accent); }
+.mc-body { display: grid; gap: 2px; min-width: 0; }
+.mc-body strong { font-size: 16px; font-weight: 600; }
+.mc-body small { color: var(--muted); font-size: 13.5px; line-height: 1.45; }
+.mc-body .mc-src { color: var(--accent-strong); font-size: 12.5px; }
+.mc-sum { font-weight: 600; color: var(--accent-strong); font-size: 14.5px; }
+details.custom-set { border-radius: var(--r-m); background: var(--bg); padding: 0 14px; display: grid; }
+details.custom-set[open] { padding-bottom: 12px; }
+details.custom-set > summary { display: flex; align-items: center; gap: 10px; min-height: 52px; cursor: pointer; list-style: none; padding: 10px 0; font-weight: 600; }
+details.custom-set > summary::-webkit-details-marker { display: none; }
+details.custom-set > summary > span:first-child { flex: 1; }
+details.custom-set[open] > :not(summary) + :not(summary) { margin-top: 14px; }
+details.custom-set .count { background: var(--warn-bg); color: var(--warn-ink); }
+.mc-none { margin-top: 6px; }
 .nudge { background: linear-gradient(180deg, var(--accent-soft), var(--surface) 70%); }
 .nudge > p { color: var(--muted); font-size: 14.5px; }
 #backup-card .why { color: var(--muted); font-size: 14px; }
@@ -778,7 +806,7 @@ const Maayan = (() => {
     neutralReminders: true, reminderMinutes: 30, morningTime: "08:00", remindersEnabled: true, checklist: [],
   };
   const SETTING_ENUMS = {
-    wait: ["five", "four", "four-from-relations"], method: ["custom", "ashkenaz", "sefard", "chabad"], beinHashmashot: ["both", "flag"], hefsekTwilight: ["before-sunset", "ovadia"], haflagah: ["days", "chabad-onot"], beinonit: ["same", "both"], missingMonthly: ["skip", "first-next-month"],
+    wait: ["five", "four", "four-from-relations"], method: ["custom", "ashkenaz", "ashkenaz-kreiti", "sefard", "sefard-bic", "chabad"], beinHashmashot: ["both", "flag"], hefsekTwilight: ["before-sunset", "ovadia"], haflagah: ["days", "chabad-onot"], beinonit: ["same", "both"], missingMonthly: ["skip", "first-next-month"],
     bedikot: ["twice", "first-last"], nightfall: ["8.5", "7.083", "13.5z", "18m", "20m"], special: ["regular", "pregnancy", "postpartum", "nursing", "hormonal"],
   };
   const uuid = () => {
@@ -1017,7 +1045,7 @@ const Maayan = (() => {
   }
 
   /* ---------- מנוע ---------- */
-  const ENGINE_VERSION = "0.3.0-review";
+  const ENGINE_VERSION = "0.4.0-review";
   /* ---------- מקורות ----------
    * כל מקור הוא מקום בטקסט הראשוני, לא אתר. ref הוא מקום הטקסט בספריא: הציטוט q נבדק מול הטקסט שם.
    * מקור בלי ref לא נבדק מול לשון הספר (הספר אינו בספריא, או שהמקום המדויק לא אומת) — לבדיקת הרב. */
@@ -1056,6 +1084,7 @@ const Maayan = (() => {
     oc554_8: C("שולחן ערוך אורח חיים תקנד, ח", "Shulchan_Arukh,_Orach_Chayim.554.8", "בזמן הזה אין טבילה בזמנה הילכך לא תטבול בו"),
     oc613_12: C("שולחן ערוך אורח חיים תריג, יב", "Shulchan_Arukh,_Orach_Chayim.613.12", "בזמן הזה אסור לאשה לטבול ביום הכפורים"),
     bic_tzav1: C("בן איש חי, שנה שנייה, פרשת צו, אות א", "Ben_Ish_Hai,_Halachot_2nd_Year,_Tzav.1", "ויש אומרים דעונה זו היא לפני העונה שהוסת בה, דהיינו, אם וסתה ביום, צריך לפרוש ממנה כל הלילה שלפניו"),
+    bic_tzav1b: C("בן איש חי, שנה שנייה, פרשת צו, אות א", "Ben_Ish_Hai,_Halachot_2nd_Year,_Tzav.1", "ומרן ז\"ל סבירא לה כדעה הראשונה, אך צריך לחוש לדעה זו השניה"),
     bic_tzav7: C("בן איש חי, שנה שנייה, פרשת צו, אות ז", "Ben_Ish_Hai,_Halachot_2nd_Year,_Tzav.7", "ואינה יכולה למנות ז' נקיים ולטבול אלא דווקא אם עברו עליה ששה ימים מיום שראתה בו"),
     sa184_2o: C("שולחן ערוך יורה דעה קפד, ב", "Shulchan_Arukh,_Yoreh_De'ah.184.2", "בשעת וסתה צריך לפרוש ממנה עונה אחת"),
     shach184_7b: C("ש״ך יורה דעה קפד, ס״ק ז", "Siftei_Kohen_on_Shulchan_Arukh,_Yoreh_De'ah.184.7", "גם הב\"ח כתב שמשמע שהירא דבר ה' נוהג כהא\"ז"),
@@ -1076,6 +1105,12 @@ const Maayan = (() => {
     chavot189: C("חוות דעת יורה דעה קפט, ס״ק יב — יום 31"),
     thkChabad: C("טהרה כהלכה (הרב יוסף ישעיה ברוין) — הפלגה בעונות מההפסק, מקום מדויק לא אומת"),
     missing30: C("ל׳ בחודש כשבחודש הבא אין ל׳ — מקור ראשוני לא אותר"),
+    // מקור משני: סיכום הלכות נידה לרבנות. הדעות מובאות כפי שהן בסיכום, ולא נבדקו מול הספרים עצמם
+    secCarryTaz: C("סיכום הלכות נידה לרבנות (משני) — רמ״א וט״ז: חוששת להפלגה הארוכה שלא נעקרה"),
+    secCarryMajority: C("סיכום הלכות נידה לרבנות (משני) — ב״ח, ש״ך, סדרי טהרה, חוות דעת, רעק״א: ההפלגה הארוכה נעקרת מיד"),
+    shach189_31: C("ש״ך יורה דעה קפט, ס״ק לא", "Siftei_Kohen_on_Shulchan_Arukh,_Yoreh_De'ah.189.31", "אבל באמת נראה עיקר דאם ראתה בא' באייר א\"צ לחוש לט' בו"),
+    secBadei: C("סיכום הלכות נידה לרבנות (משני) — בדי השלחן: עונה בינונית מעת לעת, כדעת כרתי ופלתי"),
+    secShevet3031: C("סיכום הלכות נידה לרבנות (משני) — שבט הלוי: לחוש גם ליום 30 וגם ליום 31"),
     orZarua31: C("אור זרוע ליום 30 בלבד למי ששומרת 30 ו-31 — מקור ראשוני לא אותר"),
   };
   const SOURCES = {
@@ -1399,7 +1434,7 @@ const Maayan = (() => {
   }
   const SETTING_LABELS = {
     wait: { five: "חמישה ימים מתחילת הנידה", four: "ארבעה ימים מתחילת הנידה (הרב עובדיה יוסף)", "four-from-relations": "ארבעה ימים ממועד היחסים" },
-    method: { custom: "התאמה אישית", ashkenaz: "מנהג אשכנז הרווח", sefard: "שיטת הרב עובדיה יוסף (ספרדי)", chabad: "מנהג חב״ד" },
+    method: { custom: "התאמה אישית", ashkenaz: "אשכנזי – עיקר הדין", "ashkenaz-kreiti": "אשכנזי – כרתי ופלתי", sefard: "הרב עובדיה יוסף (ספרדי)", "sefard-bic": "בן איש חי (ספרדי)", chabad: "מנהג חב״ד" },
     beinHashmashot: { both: "לחומרא שתי העונות", flag: "השעיית החישוב ובירור" },
     hefsekTwilight: { "before-sunset": "רק לפני השקיעה", ovadia: "בדיעבד עד 13.5 דקות זמניות אחרי השקיעה (הרב עובדיה יוסף)" },
     haflagah: { days: "ימים בין תחילות הווסתות", "chabad-onot": "עונות מהפסק טהרה (חב״ד)" },
@@ -1418,45 +1453,78 @@ const Maayan = (() => {
     beinonitAshkenaz: ["sa189_1", "sahr189_1f"], beinonitChabad: ["sahr189_1f", "sahr189_1"],
     haflagah: ["sa189_2h", "rema189_13", "sahr189_44"], missing30: ["missing30"], bedikot: ["sa196_4", "sa196_4f"],
     bhs: SOURCES.bhs, bhsSefard: ["shach184_13", "shach184_14", "thbHefsek"], bhsChabad: ["sahr184_19"],
+    ozBic: ["bic_tzav1", "bic_tzav1b"], ozAshkenazBasic: ["shach184_7", "shach184_7b", "taz184_2"], ozKreiti: ["shach184_7", "taz184_2", "orZarua31"],
+    day30: ["sa189_1", "sahr189_1", "shach189_30"], day31Kreiti: ["chavot189", "shach189_30", "sahr189_1d", "secShevet3031"], beinonitKreiti: ["sahr189_1f", "secBadei"],
+    uproot: ["sa189_2u", "shach189_31", "secCarryMajority", "rema189_13"], carryTaz: ["rema189_13", "secCarryTaz", "secCarryMajority"], bicWait: ["sa196_11", "thbWait", "bic_tzav7", "bic_tzav10"],
     hefsekLate: ["sa196_1"], hefsekOvadia: ["sa196_1", "thbHefsek"], nightfallOvadia: ["thbNightfall"], none: [],
   };
 
   const note = (k, t, src, ask = false) => ({ k, t, src, ask });
+  /* ההגדרות המשותפות לכל שיטה ספרדית ולכל שיטה אשכנזית. כל שיטה משנה מהן רק את מה שמבדיל אותה. */
+  const SEFARD_BASE = { wait: "four", haflagah: "days", beinonit: "same", day31: false, orZarua: false, carryLongIntervals: false, carryMonthly: false, missingMonthly: "first-next-month", bedikot: "twice", nightfall: "20m", beinHashmashot: "both", hefsekTwilight: "ovadia" };
+  const ASHKENAZ_BASE = { wait: "five", haflagah: "days", beinonit: "same", day31: false, orZarua: true, carryLongIntervals: false, carryMonthly: false, missingMonthly: "first-next-month", bedikot: "twice", nightfall: "8.5", beinHashmashot: "both", hefsekTwilight: "before-sunset" };
+  const SEFARD_NOTES = [
+    note("wait", "ארבעה ימים: יום הראייה הוא יום 1 וההפסק ביום הרביעי (ראתה בליל שני — הפסק ביום חמישי). לפי הרב עובדיה יסוד הדין הוא 72 שעות מהתשמיש; אם לא היו יחסים בארבעת הימים שלפני הראייה, יש שמתירים הפסק מיד כשפסק הדם. רבים מהפוסקים הספרדים ממתינים חמישה ימים.", PS.ovadiaWait, true),
+    note("beinonit", "עונה בינונית ביום 30 בלבד, בעונת הראייה (שו״ע יו״ד קפט, א).", PS.average),
+    note("day31", "יום 31 אינו נדרש לפי השו״ע ולפי טהרת הבית.", PS.day31Sefard, true),
+    note("orZarua", "לפי טהרת הבית אין חוששים לעונת אור זרוע. מי שנוהגת כבן איש חי, שחשש לה — שיטת ״בן איש חי (ספרדי)״.", PS.ozSefard, true),
+    note("haflagah", "הפלגה בימים מתחילת וסת לתחילת וסת, בספירה כוללנית.", PS.haflagah),
+    note("carryLongIntervals", "הפלגה ארוכה נעקרת מיד כשבאה ראייה לפניה (״נעקר בפעם אחת״), כדעת הב״ח והש״ך (ובסיכום המשני גם סדרי טהרה, חוות דעת, רעק״א) — דלא כרמ״א (קפט, יג) והט״ז.", PS.uproot),
+    note("missingMonthly", "ל׳ בחודש כשבחודש הבא אין ל׳: א׳ בחודש שאחריו (לחומרא).", PS.missing30, true),
+    note("bedikot", "בדיקה בבוקר ולפני השקיעה בכל אחד משבעת הימים לכתחילה (שו״ע יו״ד קצו, ד).", PS.bedikot),
+    note("nightfall", "ליל הטבילה: 20 דקות אחרי השקיעה, לחומרא. לשיטת הגאונים שהרב עובדיה נוקט צאת הכוכבים כ-13.5 דקות זמניות; לברר עם רב מתי לטבול.", PS.nightfallOvadia, true),
+    note("beinHashmashot", "ראייה סמוך לשקיעה או בין השמשות: חוששים לשתי העונות. אחרי 13.5 דקות זמניות הזמן נחשב לילה ודאי.", PS.bhsSefard, true),
+    note("hefsekTwilight", "הפסק לכתחילה לפני השקיעה. בדיעבד, לפי טהרת הבית, הפסק עד 13.5 דקות זמניות אחרי השקיעה תקף ונספר ליום שהסתיים (יש שכתבו שבארץ ישראל השיעור קצר יותר).", PS.hefsekOvadia, true),
+  ];
+  const ASHKENAZ_NOTES = [
+    note("wait", "חמישה ימים מתחילת הווסת: יום הראייה הוא יום 1, וההפסק ביום החמישי לפני השקיעה (רמ״א יו״ד קצו, יא; כך נוהגים כל קהילות אשכנז).", PS.wait),
+    note("beinonit", "עונה בינונית ביום 30, בעונה שבה התחילה הראייה בלבד (שו״ע יו״ד קפט, א). מעת לעת שלם — בשיטת ״כרתי ופלתי״.", PS.average),
+    note("day31", "עונה בינונית ביום 30 בספירה כוללנית (שו״ע; שו״ע הרב בשם ב״י, ב״ח, ט״ז). הש״ך סובר שהיא ביום 31; את שני הימים שומרים בשיטת ״כרתי ופלתי״.", PS.day30, true),
+    note("orZarua", "עונת אור זרוע — העונה שלפני כל וסת (ש״ך קפד, ס״ק ז, בשם האור זרוע, ובשם הב״ח: ״הירא דבר ה׳ נוהג כהא״ז״). הט״ז (קפד, ס״ק ב) חולק. האם לכלול אותה בעיקר הדין — לברר.", PS.ozAshkenazBasic, true),
+    note("haflagah", "הפלגה בימים מתחילת וסת לתחילת וסת, בספירה כוללנית.", PS.haflagah),
+    note("carryLongIntervals", "הפלגה ארוכה נעקרת מיד כשבאה ראייה לפניה (״נעקר בפעם אחת״), כדעת הב״ח והש״ך (ובסיכום המשני גם סדרי טהרה, חוות דעת, רעק״א) — דלא כרמ״א (קפט, יג) והט״ז.", PS.uproot),
+    note("missingMonthly", "ל׳ בחודש כשבחודש הבא אין ל׳: א׳ בחודש שאחריו, לחומרא (העונה הבינונית חלה ממילא בכ״ט).", PS.missing30),
+    note("bedikot", "בדיקה בבוקר ולפני השקיעה בכל אחד משבעת הימים לכתחילה (שו״ע יו״ד קצו, ד).", PS.bedikot),
+    note("nightfall", "צאת הכוכבים 8.5° מתחת לאופק, לחומרא, לליל הטבילה ולסוף בין השמשות. יש שנוהגים בשיעור אחר.", PS.none, true),
+    note("beinHashmashot", "ראייה בין השקיעה לצאת הכוכבים: מעיקר הדין כלילה, ונוהגים להחמיר ולחשוש לשתי העונות (ש״ך יו״ד קפד, ס״ק יג–יד, בשם הב״ח).", PS.bhs),
+    note("hefsekTwilight", "הפסק טהרה רק לפני השקיעה. לרוב פוסקי אשכנז הפסק אחרי השקיעה אינו תקף אף בדיעבד.", PS.hefsekLate),
+  ];
+  /** מחליף הערות לפי מפתח ומשאיר את השאר בסדרן */
+  const withNotes = (base, ...repl) => base.map(n => repl.find(r => r.k === n.k) || n);
   const METHOD_PRESETS = {
-    ashkenaz: {
-      label: SETTING_LABELS.method.ashkenaz,
-      settings: { wait: "five", haflagah: "days", beinonit: "same", day31: true, orZarua: true, carryLongIntervals: true, carryMonthly: false, missingMonthly: "first-next-month", bedikot: "twice", nightfall: "8.5", beinHashmashot: "both", hefsekTwilight: "before-sunset" },
-      notes: [
-        note("wait", "חמישה ימים מתחילת הווסת: יום הראייה הוא יום 1, וההפסק ביום החמישי לפני השקיעה (רמ״א יו״ד קצו, יא; כך נוהגים כל קהילות אשכנז).", PS.wait),
-        note("beinonit", "עונה בינונית ביום 30, בעונה שבה התחילה הראייה (שו״ע יו״ד קפט, א). יש שנוהגים לפרוש את כל היממה (כרתי ופלתי) — זו הגדרה נפרדת.", PS.beinonitAshkenaz),
-        note("day31", "רבים מהאשכנזים נוהגים להחמיר גם ביום 31 (חוות דעת). אינו חובה מן הדין.", PS.day31, true),
-        note("orZarua", "עונת אור זרוע — העונה שלפני כל וסת. נתקבלה ברוב קהילות אשכנז; מי ששומרת ימים 30 ו-31 שומרת אותה ליום 30 בלבד.", PS.ozAshkenaz, true),
-        note("haflagah", "הפלגה בימים מתחילת וסת לתחילת וסת, בספירה כוללנית. הפלגה ארוכה שלא נעקרה (כי הראייה הבאה באה לפניה) נשמרת.", PS.haflagah, true),
-        note("missingMonthly", "ל׳ בחודש כשבחודש הבא אין ל׳: א׳ בחודש שאחריו, לחומרא (העונה הבינונית חלה ממילא בכ״ט).", PS.missing30),
-        note("bedikot", "בדיקה בבוקר ולפני השקיעה בכל אחד משבעת הימים לכתחילה (שו״ע יו״ד קצו, ד).", PS.bedikot),
-        note("nightfall", "צאת הכוכבים 8.5° מתחת לאופק, לחומרא, לליל הטבילה ולסוף בין השמשות. יש שנוהגים בשיעור אחר.", PS.none, true),
-        note("beinHashmashot", "ראייה בין השקיעה לצאת הכוכבים: מעיקר הדין כלילה, ונוהגים להחמיר ולחשוש לשתי העונות (ש״ך יו״ד קפד, ס״ק יג–יד, בשם הב״ח).", PS.bhs),
-        note("hefsekTwilight", "הפסק טהרה רק לפני השקיעה. לרוב פוסקי אשכנז הפסק אחרי השקיעה אינו תקף אף בדיעבד.", PS.hefsekLate),
-      ],
-    },
     sefard: {
-      label: SETTING_LABELS.method.sefard,
-      settings: { wait: "four", haflagah: "days", beinonit: "same", day31: false, orZarua: false, carryLongIntervals: true, carryMonthly: false, missingMonthly: "first-next-month", bedikot: "twice", nightfall: "20m", beinHashmashot: "both", hefsekTwilight: "ovadia" },
-      notes: [
-        note("wait", "ארבעה ימים: יום הראייה הוא יום 1 וההפסק ביום הרביעי (ראתה בליל שני — הפסק ביום חמישי). לפי הרב עובדיה יסוד הדין הוא 72 שעות מהתשמיש; אם לא היו יחסים בארבעת הימים שלפני הראייה, יש שמתירים הפסק מיד כשפסק הדם. רבים מהפוסקים הספרדים ממתינים חמישה ימים.", PS.ovadiaWait, true),
-        note("beinonit", "עונה בינונית ביום 30 בלבד, בעונת הראייה (שו״ע יו״ד קפט, א).", PS.average),
-        note("day31", "יום 31 אינו נדרש לפי השו״ע. יש מספרדים שמחמירים.", PS.day31Sefard, true),
-        note("orZarua", "לפי טהרת הבית ספרדים אינם חוששים לעונת אור זרוע. הבן איש חי חשש לה.", PS.ozSefard, true),
-        note("haflagah", "הפלגה בימים מתחילת וסת לתחילת וסת. שימור הפלגה ארוכה הופעל לחומרא — לברר.", PS.haflagah, true),
-        note("missingMonthly", "ל׳ בחודש כשבחודש הבא אין ל׳: א׳ בחודש שאחריו (לחומרא).", PS.missing30, true),
-        note("bedikot", "בדיקה בבוקר ולפני השקיעה בכל אחד משבעת הימים לכתחילה (שו״ע יו״ד קצו, ד).", PS.bedikot),
-        note("nightfall", "ליל הטבילה: 20 דקות אחרי השקיעה, לחומרא. לשיטת הגאונים שהרב עובדיה נוקט צאת הכוכבים כ-13.5 דקות זמניות; לברר עם רב מתי לטבול.", PS.nightfallOvadia, true),
-        note("beinHashmashot", "ראייה סמוך לשקיעה או בין השמשות: חוששים לשתי העונות. אחרי 13.5 דקות זמניות הזמן נחשב לילה ודאי.", PS.bhsSefard, true),
-        note("hefsekTwilight", "הפסק לכתחילה לפני השקיעה. בדיעבד, לפי טהרת הבית, הפסק עד 13.5 דקות זמניות אחרי השקיעה תקף ונספר ליום שהסתיים (יש שכתבו שבארץ ישראל השיעור קצר יותר).", PS.hefsekOvadia, true),
-      ],
+      label: SETTING_LABELS.method.sefard, family: "sefard", name: "הרב עובדיה יוסף",
+      line: "בלי עונת אור זרוע. ארבעה ימים לפני ההפסק, והפסק בדיעבד עד 13.5 דקות אחרי השקיעה.", source: "טהרת הבית",
+      settings: { ...SEFARD_BASE },
+      notes: SEFARD_NOTES,
+    },
+    "sefard-bic": {
+      label: SETTING_LABELS.method["sefard-bic"], family: "sefard", name: "בן איש חי",
+      line: "כמו שיטת הרב עובדיה, ובנוסף חוששים לעונת אור זרוע, העונה שלפני כל וסת.", source: "בן איש חי, שנה ב, צו, א",
+      settings: { ...SEFARD_BASE, orZarua: true },
+      notes: withNotes(SEFARD_NOTES,
+        note("wait", "ארבעה ימים מתחילת הראייה, כמו בשיטת הרב עובדיה. הבן איש חי (שנה ב, צו, ז; י) כותב שההפסק ביום השישי לראייה — כאן לא הוחל; לברר עם רב.", PS.bicWait, true),
+        note("orZarua", "חוששים לעונת אור זרוע — העונה שלפני כל וסת: ״ומרן ז״ל סבירא לה כדעה הראשונה, אך צריך לחוש לדעה זו השניה״ (בן איש חי, שנה ב, צו, א).", PS.ozBic)),
+    },
+    ashkenaz: {
+      label: SETTING_LABELS.method.ashkenaz, family: "ashkenaz", name: "עיקר הדין",
+      line: "עונה בינונית ביום 30 בעונת הראייה, ועונת אור זרוע לפני כל וסת.", source: "שו״ע ורמ״א; ש״ך קפד, ס״ק ז",
+      settings: { ...ASHKENAZ_BASE },
+      notes: ASHKENAZ_NOTES,
+    },
+    "ashkenaz-kreiti": {
+      label: SETTING_LABELS.method["ashkenaz-kreiti"], family: "ashkenaz", name: "כרתי ופלתי",
+      line: "עונה בינונית מעת לעת, לילה ויום, בימים 30 ו-31. הפלגה ארוכה נשמרת עד שנעקרת (רמ״א, ט״ז).", source: "כרתי ופלתי, מובא בשו״ע הרב קפט, א",
+      settings: { ...ASHKENAZ_BASE, beinonit: "both", day31: true, carryLongIntervals: true },
+      notes: withNotes(ASHKENAZ_NOTES,
+        note("beinonit", "עונה בינונית מעת לעת שלם, לילה ויום, מתחילת הלילה ועד סוף היום (כרתי ופלתי, מובא בשו״ע הרב קפט, א). בדי השלחן פוסק כך (מקור משני).", PS.beinonitKreiti),
+        note("day31", "שומרים גם את יום 31, גם הוא מעת לעת שלם (חוות דעת; ש״ך קפט, ס״ק ל). שבט הלוי: לחוש לשני הימים (מקור משני).", PS.day31Kreiti, true),
+        note("orZarua", "עונת אור זרוע לפני יום 30, עונת החודש וההפלגה (ש״ך קפד, ס״ק ז; הט״ז, ס״ק ב, חולק). לפני יום 31 אין אור זרוע. כשהעונה הבינונית היא מעת לעת, אור זרוע מתווסף לפני עונת הלילה שלה, כלומר ביום 29 — לברר.", PS.ozKreiti, true),
+        note("carryLongIntervals", "הפלגה ארוכה שלא נעקרה נשמרת לצד ההפלגה הקצרה, כדעת הרמ״א (קפט, יג: ״חוששת לט׳ באייר״) והט״ז. הב״ח והש״ך חולקים.", PS.carryTaz, true)),
     },
     chabad: {
-      label: SETTING_LABELS.method.chabad,
+      label: SETTING_LABELS.method.chabad, family: "chabad", name: "מנהג חב״ד",
+      line: "הפלגה בעונות מההפסק, ועונה בינונית מעת לעת ביום 30.", source: "שולחן ערוך הרב",
       settings: { wait: "five", haflagah: "chabad-onot", beinonit: "both", day31: false, orZarua: false, carryLongIntervals: true, carryMonthly: false, missingMonthly: "first-next-month", bedikot: "twice", nightfall: "8.5", beinHashmashot: "both", hefsekTwilight: "before-sunset" },
       notes: [
         note("wait", "חמישה ימים מתחילת הווסת, ההפסק ביום החמישי.", PS.wait),
@@ -1472,6 +1540,13 @@ const Maayan = (() => {
       ],
     },
   };
+  /* בחירת שיטה בשני שלבים: מה המנהג, ואחר כך לפי מי (בחב״ד אין שלב שני) */
+  const METHOD_FAMILIES = [
+    { id: "sefard", label: "ספרדי", ask: "לפי מי?", methods: ["sefard", "sefard-bic"] },
+    { id: "ashkenaz", label: "אשכנזי", ask: "לפי איזו שיטה?", methods: ["ashkenaz", "ashkenaz-kreiti"] },
+    { id: "chabad", label: "חב״ד", ask: "", methods: ["chabad"] },
+  ];
+  const methodFamily = method => (METHOD_PRESETS[method] || {}).family || "";
   /** אילו הגדרות שונו אחרי בחירת שיטה */
   const presetDiff = s => { const p = METHOD_PRESETS[s && s.method]; return p ? Object.keys(p.settings).filter(k => s[k] !== p.settings[k]) : []; };
   const applyPreset = (settings, method) => { const p = METHOD_PRESETS[method]; return p ? { ...settings, ...p.settings, method } : { ...settings, method: "custom" }; };
@@ -1521,7 +1596,7 @@ const Maayan = (() => {
     setLang, getLang, LOCALES, HDate, isLeapYear, daysInMonth, monthsInYear, gematriya, hebrew2abs, abs2hebrew,
     CITIES, city, setPlaces, EVENT_TYPES, EVENT_NAMES, CHECKLIST, SETTING_DEFAULTS, SETTING_LABELS, RESULT_NAMES, uuid, validISO, parseState, safeParse, emptyState, ValidationError,
     fromISO, toISO, addDays, hd, fromAbs, hebrew, dayNumber, isoAbs, civilLabel, dateInZone, timeInZone, localInstant, sun, atLocation, stamp, onahWindow, today, currentContext,
-    ENGINE_VERSION, SOURCES, CITES, cite, citeUrl, citeText, calculate, sorted, METHOD_PRESETS, presetDiff, applyPreset, nightfallLabel,
+    ENGINE_VERSION, SOURCES, CITES, cite, citeUrl, citeText, calculate, sorted, METHOD_PRESETS, METHOD_FAMILIES, methodFamily, presetDiff, applyPreset, nightfallLabel,
     encryptBackup, decryptBackup, calendarExport, reportExport, settingsSummary, eventLine, planLine, demoState,
   };
 })();
@@ -2448,8 +2523,6 @@ const MaayanDict = (() => {
     // שיטות מוכנות, בין השמשות והמתנת ארבעה ימים (מנוע 0.3.0)
     ["שיטה מוכנה", "Preset method", "Méthode prédéfinie", "Método predefinido"],
     ["התאמה אישית", "Custom", "Personnalisé", "Personalizado"],
-    ["מנהג אשכנז הרווח", "Common Ashkenazi practice", "Usage ashkénaze courant", "Costumbre asquenazí habitual"],
-    ["שיטת הרב עובדיה יוסף (ספרדי)", "Rav Ovadia Yosef / Sephardi practice", "Méthode du Rav Ovadia Yossef / usage séfarade", "Método del Rav Ovadia Yosef / costumbre sefardí"],
     ["מנהג חב״ד", "Chabad practice", "Usage Habad", "Costumbre de Jabad"],
     ["ארבעה ימים מתחילת הנידה — הרב עובדיה יוסף", "Four days from the onset of niddah — Rav Ovadia Yosef", "Quatre jours depuis le début de la nidda — Rav Ovadia Yossef", "Cuatro días desde el inicio de la nidá — Rav Ovadia Yosef"],
     ["ארבעה ימים מתחילת הנידה (הרב עובדיה יוסף)", "Four days from the onset of niddah (Rav Ovadia Yosef)", "Quatre jours depuis le début de la nidda (Rav Ovadia Yossef)", "Cuatro días desde el inicio de la nidá (Rav Ovadia Yosef)"],
@@ -2468,7 +2541,6 @@ const MaayanDict = (() => {
     ["בדיעבד עד 13.5 דקות זמניות אחרי השקיעה (הרב עובדיה יוסף)", "After the fact, up to 13.5 proportional minutes after sunset (Rav Ovadia Yosef)", "A posteriori, jusqu'à 13,5 minutes proportionnelles après le coucher du soleil (Rav Ovadia Yossef)", "A posteriori, hasta 13,5 minutos proporcionales después de la puesta del sol (Rav Ovadia Yosef)"],
     ["לברר עם רב", "Ask a rabbi", "À vérifier avec un rav", "Consultar con un rabino"],
     ["לברר עם רב:", "Ask a rabbi:", "À vérifier avec un rav :", "Consultar con un rabino:"],
-    ["בחירת שיטה מוכנה קובעת את כל ההגדרות שלמטה בבת אחת. אחר כך אפשר לשנות כל הגדרה.", "Choosing a preset method sets all the settings below at once. You can then change any setting.", "Choisir une méthode prédéfinie fixe tous les réglages ci-dessous d'un coup. Vous pouvez ensuite modifier chaque réglage.", "Elegir un método predefinido fija de una vez todos los ajustes de abajo. Después puede cambiar cualquier ajuste."],
     ["מה קובעת השיטה ומקורותיה", "What the method sets, and its sources", "Ce que fixe la méthode, et ses sources", "Qué fija el método y sus fuentes"],
     ["שונו מהשיטה: {n} הגדרות. בחירה מחדש של השיטה מחזירה אותן.", "Changed from the method: {n} settings. Choosing the method again restores them.", "Modifiés par rapport à la méthode : {n} réglages. Choisir à nouveau la méthode les rétablit.", "Cambiados respecto al método: {n} ajustes. Elegir de nuevo el método los restablece."],
     ["שיטה: {x} (עם שינויים)", "Method: {x} (with changes)", "Méthode : {x} (avec modifications)", "Método: {x} (con cambios)"],
@@ -2493,16 +2565,11 @@ const MaayanDict = (() => {
     ["אפשר לבחור בהגדרות להשעות את החישוב עד בירור, כמו בגרסאות קודמות.", "In the settings you can choose to suspend the calculation until clarified, as in earlier versions.", "Dans les réglages, on peut choisir de suspendre le calcul jusqu'à clarification, comme dans les versions précédentes.", "En los ajustes se puede elegir suspender el cálculo hasta aclararlo, como en versiones anteriores."],
     ["סוף בין השמשות נקבע לפי הגדרת צאת הכוכבים. לפי 13.5 דקות זמניות (הגאונים, הרב עובדיה יוסף) ראייה מאוחרת יותר היא לילה ודאי.", "The end of bein hashmashot follows the nightfall setting. With 13.5 proportional minutes (Geonim, Rav Ovadia Yosef), a later sighting is certainly night.", "La fin de bein hachmachot suit le réglage de la tombée de la nuit. Avec 13,5 minutes proportionnelles (Guéonim, Rav Ovadia Yossef), un écoulement plus tardif est certainement la nuit.", "El fin de bein hashmashot sigue el ajuste de salida de las estrellas. Con 13,5 minutos proporcionales (Gueonim, Rav Ovadia Yosef), un sangrado posterior es noche con certeza."],
     ["שיטות מוכנות", "Preset methods", "Méthodes prédéfinies", "Métodos predefinidos"],
-    ["שיטה מוכנה (מנהג אשכנז הרווח, שיטת הרב עובדיה יוסף (ספרדי), מנהג חב״ד) קובעת את כל הגדרות החישוב בבת אחת, ואפשר לשנות כל הגדרה אחר כך.", "A preset method (common Ashkenazi practice, Rav Ovadia Yosef / Sephardi practice, Chabad practice) sets all calculation settings at once, and any setting can be changed afterwards.", "Une méthode prédéfinie (usage ashkénaze courant, Rav Ovadia Yossef / usage séfarade, usage Habad) fixe tous les réglages de calcul d'un coup, et chaque réglage peut être modifié ensuite.", "Un método predefinido (costumbre asquenazí habitual, Rav Ovadia Yosef / costumbre sefardí, costumbre de Jabad) fija todos los ajustes de cálculo de una vez, y cualquier ajuste se puede cambiar después."],
     ["לכל ערך בשיטה מופיע מקור בהגדרות. ערכים שהמקורות חלוקים בהם מסומנים ״לברר עם רב״. השיטות אינן תחליף להוראת רב.", "Each value in a method shows its source in the settings. Values on which sources disagree are marked “ask a rabbi”. The methods are not a substitute for a rabbi's ruling.", "Chaque valeur d'une méthode indique sa source dans les réglages. Les valeurs sur lesquelles les sources divergent sont marquées « à vérifier avec un rav ». Les méthodes ne remplacent pas la décision d'un rav.", "Cada valor de un método muestra su fuente en los ajustes. Los valores en que las fuentes discrepan se marcan «consultar con un rabino». Los métodos no sustituyen la instrucción de un rabino."],
     ["בבחירת שיטת הרב עובדיה יוסף: הפסק עד 13.5 דקות זמניות אחרי השקיעה מתקבל בדיעבד ונספר ליום שהסתיים, ומסומן לבירור. לכתחילה עושים הפסק לפני השקיעה.", "With the Rav Ovadia Yosef method: a hefsek up to 13.5 proportional minutes after sunset is accepted after the fact, counted for the day that ended, and flagged for clarification. Ideally the hefsek is done before sunset.", "Avec la méthode du Rav Ovadia Yossef : un hefsek jusqu'à 13,5 minutes proportionnelles après le coucher du soleil est accepté a posteriori, compté pour le jour écoulé et signalé pour clarification. Idéalement, le hefsek se fait avant le coucher du soleil.", "Con el método del Rav Ovadia Yosef: un hefsek hasta 13,5 minutos proporcionales después de la puesta del sol se acepta a posteriori, cuenta para el día que terminó y se marca para aclarar. Lo ideal es hacer el hefsek antes de la puesta del sol."],
     ["שתי העונות, יום 31 ואור זרוע הם שלוש הגדרות נפרדות. השיטות המוכנות קובעות אותן לפי המנהג, ואפשר לשנות.", "Both onot, day 31 and Or Zarua are three separate settings. The preset methods set them according to the custom, and they can be changed.", "Les deux onot, le jour 31 et Or Zaroua sont trois réglages distincts. Les méthodes prédéfinies les fixent selon l'usage, et on peut les modifier.", "Ambas onot, el día 31 y Or Zarúa son tres ajustes separados. Los métodos predefinidos los fijan según la costumbre, y se pueden cambiar."],
     ["מי ששומרת ימים 30 ו-31 שומרת את עונת אור זרוע ליום 30 בלבד. מקור ראשוני לכך לא אותר.", "Those who keep days 30 and 31 keep the Or Zarua onah for day 30 only. No primary source for this was found.", "Celles qui gardent les jours 30 et 31 gardent l'onah d'Or Zaroua pour le jour 30 seulement. Aucune source primaire n'a été trouvée pour cela.", "Quien guarda los días 30 y 31 guarda la onah de Or Zarúa solo para el día 30. No se encontró una fuente primaria para ello."],
     ["חמישה ימים מתחילת הווסת: יום הראייה הוא יום 1, וההפסק ביום החמישי לפני השקיעה (רמ״א יו״ד קצו, יא; כך נוהגים כל קהילות אשכנז).", "Five days from the onset: the day of the sighting is day 1, and the hefsek is on the fifth day before sunset (Rema YD 196:11; the practice of all Ashkenazi communities).", "Cinq jours depuis le début : le jour de l'écoulement est le jour 1, et le hefsek a lieu le cinquième jour avant le coucher du soleil (Rema YD 196:11 ; usage de toutes les communautés ashkénazes).", "Cinco días desde el inicio: el día del sangrado es el día 1, y el hefsek es el quinto día antes de la puesta del sol (Remá YD 196:11; costumbre de todas las comunidades asquenazíes)."],
-    ["עונה בינונית ביום 30, בעונה שבה התחילה הראייה (שו״ע יו״ד קפט, א). יש שנוהגים לפרוש את כל היממה (כרתי ופלתי) — זו הגדרה נפרדת.", "Onah beinonit on day 30, in the onah in which the sighting began (SA YD 189:1). Some keep the whole 24 hours (Kreti uPleti) — that is a separate setting.", "Onah beinonit le jour 30, dans l'onah où l'écoulement a commencé (Choul'han Aroukh YD 189:1). Certains gardent les 24 heures (Kreti ouPleti) — c'est un réglage distinct.", "Onah beinonit el día 30, en la onah en que empezó el sangrado (SA YD 189:1). Algunos guardan las 24 horas (Kreti uPleti); es un ajuste aparte."],
-    ["רבים מהאשכנזים נוהגים להחמיר גם ביום 31 (חוות דעת). אינו חובה מן הדין.", "Many Ashkenazim are also stringent on day 31 (Chavot Da'at). It is not required by the letter of the law.", "Beaucoup d'Ashkénazes sont aussi rigoureux le jour 31 (Havot Daat). Ce n'est pas obligatoire selon la stricte loi.", "Muchos asquenazíes son estrictos también el día 31 (Javot Daat). No es obligatorio por ley estricta."],
-    ["עונת אור זרוע — העונה שלפני כל וסת. נתקבלה ברוב קהילות אשכנז; מי ששומרת ימים 30 ו-31 שומרת אותה ליום 30 בלבד.", "Or Zarua onah — the onah before each veset. Accepted in most Ashkenazi communities; those who keep days 30 and 31 keep it for day 30 only.", "Onah d'Or Zaroua — l'onah qui précède chaque vesset. Acceptée dans la plupart des communautés ashkénazes ; celles qui gardent les jours 30 et 31 la gardent pour le jour 30 seulement.", "Onah de Or Zarúa: la onah anterior a cada vést. Aceptada en la mayoría de las comunidades asquenazíes; quien guarda los días 30 y 31 la guarda solo para el día 30."],
-    ["הפלגה בימים מתחילת וסת לתחילת וסת, בספירה כוללנית. הפלגה ארוכה שלא נעקרה (כי הראייה הבאה באה לפניה) נשמרת.", "Haflagah in days from the start of one period to the start of the next, counted inclusively. A longer haflagah that was not uprooted (because the next sighting came before it) is kept.", "Haflaga en jours du début d'une période au début de la suivante, comptage inclusif. Une haflaga plus longue non déracinée (car l'écoulement suivant est venu avant) est conservée.", "Haflagá en días desde el inicio de un período hasta el inicio del siguiente, contando de forma inclusiva. Una haflagá más larga que no fue anulada (porque el sangrado siguiente llegó antes) se mantiene."],
     ["ל׳ בחודש כשבחודש הבא אין ל׳: א׳ בחודש שאחריו, לחומרא (העונה הבינונית חלה ממילא בכ״ט).", "The 30th when the next month has no 30th: the 1st of the following month, as a stringency (the onah beinonit falls on the 29th anyway).", "Le 30 quand le mois suivant n'a pas de 30 : le 1er du mois d'après, par rigueur (l'onah beinonit tombe de toute façon le 29).", "El día 30 cuando el mes siguiente no tiene 30: el día 1 del mes posterior, por rigor (la onah beinonit cae de todos modos el 29)."],
     ["בדיקה בבוקר ולפני השקיעה בכל אחד משבעת הימים לכתחילה (שו״ע יו״ד קצו, ד).", "A bedikah in the morning and before sunset on each of the seven days, ideally (SA YD 196:4).", "Une bedika le matin et avant le coucher du soleil chacun des sept jours, idéalement (Choul'han Aroukh YD 196:4).", "Una bedicá por la mañana y antes de la puesta del sol en cada uno de los siete días, idealmente (SA YD 196:4)."],
     ["צאת הכוכבים 8.5° מתחת לאופק, לחומרא, לליל הטבילה ולסוף בין השמשות. יש שנוהגים בשיעור אחר.", "Nightfall at 8.5° below the horizon, stringently, for the immersion night and the end of bein hashmashot. Some follow a different measure.", "Tombée de la nuit à 8,5° sous l'horizon, par rigueur, pour la nuit de tevila et la fin de bein hachmachot. Certains suivent une autre mesure.", "Salida de las estrellas a 8,5° bajo el horizonte, por rigor, para la noche de tevilá y el fin de bein hashmashot. Algunos siguen otra medida."],
@@ -2510,9 +2577,6 @@ const MaayanDict = (() => {
     ["הפסק טהרה רק לפני השקיעה. לרוב פוסקי אשכנז הפסק אחרי השקיעה אינו תקף אף בדיעבד.", "Hefsek tahara only before sunset. For most Ashkenazi poskim a hefsek after sunset is not valid even after the fact.", "Hefsek tahara seulement avant le coucher du soleil. Pour la plupart des décisionnaires ashkénazes, un hefsek après le coucher du soleil n'est pas valable même a posteriori.", "Hefsek tahará solo antes de la puesta del sol. Para la mayoría de los poskim asquenazíes, un hefsek después de la puesta del sol no es válido ni a posteriori."],
     ["ארבעה ימים: יום הראייה הוא יום 1 וההפסק ביום הרביעי (ראתה בליל שני — הפסק ביום חמישי). לפי הרב עובדיה יסוד הדין הוא 72 שעות מהתשמיש; אם לא היו יחסים בארבעת הימים שלפני הראייה, יש שמתירים הפסק מיד כשפסק הדם. רבים מהפוסקים הספרדים ממתינים חמישה ימים.", "Four days: the day of the sighting is day 1 and the hefsek is on the fourth day (saw on Monday's night — hefsek on Thursday). According to Rav Ovadia the basis is 72 hours from relations; if there were no relations in the four days before the sighting, some permit a hefsek as soon as the bleeding stops. Many Sephardi poskim wait five days.", "Quatre jours : le jour de l'écoulement est le jour 1 et le hefsek est le quatrième jour (écoulement la nuit de lundi — hefsek le jeudi). Selon le Rav Ovadia, la base est de 72 heures depuis les relations ; s'il n'y a pas eu de relations dans les quatre jours précédant l'écoulement, certains permettent un hefsek dès l'arrêt du saignement. Beaucoup de décisionnaires séfarades attendent cinq jours.", "Cuatro días: el día del sangrado es el día 1 y el hefsek es el cuarto día (sangrado la noche del lunes — hefsek el jueves). Según el Rav Ovadia, la base son 72 horas desde las relaciones; si no hubo relaciones en los cuatro días anteriores al sangrado, algunos permiten el hefsek en cuanto cesa el sangrado. Muchos poskim sefardíes esperan cinco días."],
     ["עונה בינונית ביום 30 בלבד, בעונת הראייה (שו״ע יו״ד קפט, א).", "Onah beinonit on day 30 only, in the onah of the sighting (SA YD 189:1).", "Onah beinonit le jour 30 seulement, dans l'onah de l'écoulement (Choul'han Aroukh YD 189:1).", "Onah beinonit solo el día 30, en la onah del sangrado (SA YD 189:1)."],
-    ["יום 31 אינו נדרש לפי השו״ע. יש מספרדים שמחמירים.", "Day 31 is not required by the Shulchan Aruch. Some Sephardim are stringent.", "Le jour 31 n'est pas requis selon le Choul'han Aroukh. Certains Séfarades sont rigoureux.", "El día 31 no es obligatorio según el Shulján Aruj. Algunos sefardíes son estrictos."],
-    ["לפי טהרת הבית ספרדים אינם חוששים לעונת אור זרוע. הבן איש חי חשש לה.", "According to Taharat HaBayit, Sephardim do not observe the Or Zarua onah. The Ben Ish Chai was concerned for it.", "Selon Taharat HaBayit, les Séfarades n'observent pas l'onah d'Or Zaroua. Le Ben Ich 'Haï en tenait compte.", "Según Taharat HaBayit, los sefardíes no observan la onah de Or Zarúa. El Ben Ish Jai sí la tenía en cuenta."],
-    ["הפלגה בימים מתחילת וסת לתחילת וסת. שימור הפלגה ארוכה הופעל לחומרא — לברר.", "Haflagah in days from the start of one period to the start of the next. Keeping a longer haflagah is on, stringently — ask.", "Haflaga en jours du début d'une période au début de la suivante. La conservation d'une haflaga plus longue est activée par rigueur — à vérifier.", "Haflagá en días desde el inicio de un período al inicio del siguiente. Mantener una haflagá más larga está activado por rigor; hay que consultarlo."],
     ["ל׳ בחודש כשבחודש הבא אין ל׳: א׳ בחודש שאחריו (לחומרא).", "The 30th when the next month has no 30th: the 1st of the following month (stringently).", "Le 30 quand le mois suivant n'a pas de 30 : le 1er du mois d'après (par rigueur).", "El día 30 cuando el mes siguiente no tiene 30: el día 1 del mes posterior (por rigor)."],
     ["ליל הטבילה: 20 דקות אחרי השקיעה, לחומרא. לשיטת הגאונים שהרב עובדיה נוקט צאת הכוכבים כ-13.5 דקות זמניות; לברר עם רב מתי לטבול.", "Immersion night: 20 minutes after sunset, stringently. Under the Geonim, whom Rav Ovadia follows, nightfall is about 13.5 proportional minutes; ask a rabbi when to immerse.", "Nuit de tevila : 20 minutes après le coucher du soleil, par rigueur. Selon les Guéonim, que suit le Rav Ovadia, la tombée de la nuit est d'environ 13,5 minutes proportionnelles ; demander à un rav quand s'immerger.", "Noche de tevilá: 20 minutos después de la puesta del sol, por rigor. Según los Gueonim, que sigue el Rav Ovadia, la salida de las estrellas es a unos 13,5 minutos proporcionales; consultar a un rabino cuándo sumergirse."],
     ["ראייה סמוך לשקיעה או בין השמשות: חוששים לשתי העונות. אחרי 13.5 דקות זמניות הזמן נחשב לילה ודאי.", "A sighting near sunset or during bein hashmashot: both onot are observed. After 13.5 proportional minutes it is certainly night.", "Écoulement près du coucher du soleil ou pendant bein hachmachot : on observe les deux onot. Après 13,5 minutes proportionnelles, c'est certainement la nuit.", "Sangrado cerca de la puesta del sol o en bein hashmashot: se observan ambas onot. Después de 13,5 minutos proporcionales es noche con certeza."],
@@ -2660,6 +2724,58 @@ const MaayanDict = (() => {
     ["שולחן ערוך יורה דעה קצו, א (רמ״א)", "Shulchan Aruch YD 196:1 (Rema)", "Shulchan Aruch YD 196:1 (Rema)", "Shulchan Aruch YD 196:1 (Rema)"],
     ["בן איש חי, שנה שנייה, פרשת צו, אות י", "Ben Ish Chai, Year 2, Tzav 10", "Ben Ish Chai, 2e année, Tzav 10", "Ben Ish Chai, año 2, Tzav 10"],
     ["בן איש חי, שנה שנייה, פרשת צו, אות יא", "Ben Ish Chai, Year 2, Tzav 11", "Ben Ish Chai, 2e année, Tzav 11", "Ben Ish Chai, año 2, Tzav 11"],
+    // בחירת שיטה בשני שלבים (מנוע 0.4.0)
+    ["מה המנהג שלך?", "What is your custom?", "Quelle est votre coutume ?", "¿Cuál es su costumbre?"],
+    ["ספרדי", "Sephardi", "Séfarade", "Sefardí"],
+    ["אשכנזי", "Ashkenazi", "Ashkénaze", "Asquenazí"],
+    ["חב״ד", "Chabad", "Habad", "Jabad"],
+    ["לפי מי?", "Following whom?", "Selon qui ?", "¿Según quién?"],
+    ["לפי איזו שיטה?", "Which method?", "Quelle méthode ?", "¿Qué método?"],
+    ["הרב עובדיה יוסף", "Rav Ovadia Yosef", "Rav Ovadia Yossef", "Rav Ovadia Yosef"],
+    ["בן איש חי", "Ben Ish Chai", "Ben Ish 'Haï", "Ben Ish Jai"],
+    ["עיקר הדין", "The basic law", "Le din de base", "La ley básica"],
+    ["כרתי ופלתי", "Kreti uPleti", "Kréti ouPléti", "Kreti uPleti"],
+    ["הרב עובדיה יוסף (ספרדי)", "Rav Ovadia Yosef (Sephardi)", "Rav Ovadia Yossef (séfarade)", "Rav Ovadia Yosef (sefardí)"],
+    ["בן איש חי (ספרדי)", "Ben Ish Chai (Sephardi)", "Ben Ish 'Haï (séfarade)", "Ben Ish Jai (sefardí)"],
+    ["אשכנזי – עיקר הדין", "Ashkenazi – the basic law", "Ashkénaze – le din de base", "Asquenazí – la ley básica"],
+    ["אשכנזי – כרתי ופלתי", "Ashkenazi – Kreti uPleti", "Ashkénaze – Kréti ouPléti", "Asquenazí – Kreti uPleti"],
+    ["בלי עונת אור זרוע. ארבעה ימים לפני ההפסק, והפסק בדיעבד עד 13.5 דקות אחרי השקיעה.", "No Or Zarua onah. Four days before the hefsek, and after the fact a hefsek up to 13.5 minutes after sunset.", "Sans onah d'Or Zaroua. Quatre jours avant le hefsek, et a posteriori un hefsek jusqu'à 13,5 minutes après le coucher du soleil.", "Sin onah de Or Zarúa. Cuatro días antes del hefsek y, a posteriori, un hefsek hasta 13,5 minutos después de la puesta del sol."],
+    ["כמו שיטת הרב עובדיה, ובנוסף חוששים לעונת אור זרוע, העונה שלפני כל וסת.", "Like Rav Ovadia's method, and also observing the Or Zarua onah, the onah before each period.", "Comme la méthode du Rav Ovadia, en observant aussi l'onah d'Or Zaroua, l'onah qui précède chaque période.", "Como el método del Rav Ovadia, y además se observa la onah de Or Zarúa, la onah anterior a cada período."],
+    ["עונה בינונית ביום 30 בעונת הראייה, ועונת אור זרוע לפני כל וסת.", "Onah beinonit on day 30 in the onah of the sighting, and the Or Zarua onah before each period.", "Onah beinonit au jour 30 dans l'onah de l'écoulement, et l'onah d'Or Zaroua avant chaque période.", "Onah beinonit el día 30 en la onah del sangrado, y la onah de Or Zarúa antes de cada período."],
+    ["עונה בינונית מעת לעת, לילה ויום, בימים 30 ו-31. הפלגה ארוכה נשמרת עד שנעקרת (רמ״א, ט״ז).", "Onah beinonit for a full 24 hours, night and day, on days 30 and 31. A long interval is kept until it is uprooted (Rema, Taz).", "Onah beinonit pendant 24 heures, nuit et jour, aux jours 30 et 31. Un long intervalle est conservé jusqu'à ce qu'il soit déraciné (Rema, Taz).", "Onah beinonit durante 24 horas, noche y día, los días 30 y 31. Un intervalo largo se conserva hasta que se anula (Remá, Taz)."],
+    ["הפלגה בעונות מההפסק, ועונה בינונית מעת לעת ביום 30.", "Interval in onot from the hefsek, and onah beinonit for a full 24 hours on day 30.", "Intervalle en onot depuis le hefsek, et onah beinonit pendant 24 heures au jour 30.", "Intervalo en onot desde el hefsek, y onah beinonit durante 24 horas el día 30."],
+    ["מקור: {x}", "Source: {x}", "Source : {x}", "Fuente: {x}"],
+    ["טהרת הבית", "Taharat HaBayit", "Taharat HaBayit", "Taharat HaBayit"],
+    ["בן איש חי, שנה ב, צו, א", "Ben Ish Chai, Year 2, Tzav 1", "Ben Ish 'Haï, 2e année, Tsav 1", "Ben Ish Jai, año 2, Tzav 1"],
+    ["שו״ע ורמ״א; ש״ך קפד, ס״ק ז", "Shulchan Aruch and Rema; Shach 184:7", "Choulhan Aroukh et Rema ; Chakh 184:7", "Shulján Aruj y Remá; Shaj 184:7"],
+    ["כרתי ופלתי, מובא בשו״ע הרב קפט, א", "Kreti uPleti, cited in Shulchan Aruch HaRav 189:1", "Kréti ouPléti, cité dans le Choulhan Aroukh HaRav 189:1", "Kreti uPleti, citado en el Shulján Aruj HaRav 189:1"],
+    ["שולחן ערוך הרב", "Shulchan Aruch HaRav", "Choulhan Aroukh HaRav", "Shulján Aruj HaRav"],
+    ["התאמה אישית לפי הוראת הרב", "Personal adjustment per your rabbi's ruling", "Ajustement personnel selon la décision de votre rav", "Ajuste personal según la indicación de su rabino"],
+    ["שונו מהשיטה: {n}", "Changed from the method: {n}", "Modifiés par rapport à la méthode : {n}", "Cambiados respecto al método: {n}"],
+    ["כל ערך כאן נקבע לפי השיטה שנבחרה. אפשר לשנות כל הגדרה לפי הוראת הרב; השינוי נשמר כשינוי מהשיטה.", "Every value here follows the chosen method. You can change any setting per your rabbi's ruling; the change is saved as a change from the method.", "Chaque valeur ici suit la méthode choisie. Vous pouvez modifier chaque réglage selon la décision de votre rav ; la modification est enregistrée comme un écart par rapport à la méthode.", "Cada valor aquí sigue el método elegido. Puede cambiar cualquier ajuste según la indicación de su rabino; el cambio se guarda como un cambio respecto al método."],
+    ["בלי שיטה מוכנה: כל ההגדרות ידנית", "No preset method: all settings manual", "Sans méthode prédéfinie : tous les réglages manuels", "Sin método predefinido: todos los ajustes manuales"],
+    ["לא נבחרה שיטה: כל ההגדרות נקבעות ידנית, תחת ״התאמה אישית לפי הוראת הרב״. בחירת מנהג ושיטה קובעת את כולן בבת אחת.", "No method chosen: all settings are set manually, under “Personal adjustment per your rabbi's ruling”. Choosing a custom and a method sets them all at once.", "Aucune méthode choisie : tous les réglages se font manuellement, sous « Ajustement personnel selon la décision de votre rav ». Choisir une coutume et une méthode les fixe tous d'un coup.", "No se eligió método: todos los ajustes se fijan manualmente, en «Ajuste personal según la indicación de su rabino». Elegir una costumbre y un método los fija todos de una vez."],
+    ["בוחרים בשני שלבים: מה המנהג (ספרדי, אשכנזי או חב״ד), ואז לפי מי — לספרדים הרב עובדיה יוסף או בן איש חי, לאשכנזים עיקר הדין או כרתי ופלתי. השיטה קובעת את כל הגדרות החישוב בבת אחת, ואפשר לשנות כל הגדרה אחר כך תחת ״התאמה אישית לפי הוראת הרב״.", "You choose in two steps: your custom (Sephardi, Ashkenazi or Chabad), then whom you follow — for Sephardim Rav Ovadia Yosef or the Ben Ish Chai, for Ashkenazim the basic law or Kreti uPleti. The method sets all calculation settings at once, and any setting can be changed afterwards under “Personal adjustment per your rabbi's ruling”.", "Le choix se fait en deux étapes : votre coutume (séfarade, ashkénaze ou Habad), puis qui vous suivez — pour les Séfarades le Rav Ovadia Yossef ou le Ben Ish 'Haï, pour les Ashkénazes le din de base ou le Kréti ouPléti. La méthode fixe tous les réglages de calcul d'un coup, et chaque réglage peut être modifié ensuite sous « Ajustement personnel selon la décision de votre rav ».", "Se elige en dos pasos: su costumbre (sefardí, asquenazí o Jabad) y luego a quién sigue — para sefardíes el Rav Ovadia Yosef o el Ben Ish Jai, para asquenazíes la ley básica o Kreti uPleti. El método fija todos los ajustes de cálculo de una vez, y cualquier ajuste se puede cambiar después en «Ajuste personal según la indicación de su rabino»."],
+    // הערות השיטות (מנוע 0.4.0)
+    ["יום 31 אינו נדרש לפי השו״ע ולפי טהרת הבית.", "Day 31 is not required according to the Shulchan Aruch and Taharat HaBayit.", "Le jour 31 n'est pas requis selon le Choulhan Aroukh et Taharat HaBayit.", "El día 31 no es necesario según el Shulján Aruj y Taharat HaBayit."],
+    ["לפי טהרת הבית אין חוששים לעונת אור זרוע. מי שנוהגת כבן איש חי, שחשש לה — שיטת ״בן איש חי (ספרדי)״.", "According to Taharat HaBayit the Or Zarua onah is not observed. Those who follow the Ben Ish Chai, who observed it, choose “Ben Ish Chai (Sephardi)”.", "Selon Taharat HaBayit, on n'observe pas l'onah d'Or Zaroua. Celles qui suivent le Ben Ish 'Haï, qui l'observait, choisissent « Ben Ish 'Haï (séfarade) ».", "Según Taharat HaBayit no se observa la onah de Or Zarúa. Quien sigue al Ben Ish Jai, que la observaba, elige «Ben Ish Jai (sefardí)»."],
+    ["הפלגה בימים מתחילת וסת לתחילת וסת, בספירה כוללנית.", "Interval in days from the start of one period to the start of the next, counted inclusively.", "Intervalle en jours du début d'une période au début de la suivante, compté de façon inclusive.", "Intervalo en días desde el inicio de un período hasta el inicio del siguiente, contado de forma inclusiva."],
+    ["הפלגה ארוכה נעקרת מיד כשבאה ראייה לפניה (״נעקר בפעם אחת״), כדעת הב״ח והש״ך (ובסיכום המשני גם סדרי טהרה, חוות דעת, רעק״א) — דלא כרמ״א (קפט, יג) והט״ז.", "A long interval is uprooted at once when a sighting comes before it (“uprooted in a single time”), as the Bach and the Shach hold (and, in the secondary summary, also Sidrei Taharah, Chavot Da'at, Rabbi Akiva Eiger) — not like the Rema (189:13) and the Taz.", "Un long intervalle est déraciné aussitôt qu'un écoulement survient avant lui (« déraciné en une fois »), selon le Bah et le Chakh (et, dans le résumé secondaire, aussi Sidrei Tahara, 'Havot Daat, Rabbi Akiva Eiger) — contrairement au Rema (189:13) et au Taz.", "Un intervalo largo se anula de inmediato cuando un sangrado llega antes (“se anula en una vez”), según el Baj y el Shaj (y, en el resumen secundario, también Sidré Taharah, Javot Daat, Rabí Akiva Eiger) — a diferencia del Remá (189:13) y el Taz."],
+    ["ארבעה ימים מתחילת הראייה, כמו בשיטת הרב עובדיה. הבן איש חי (שנה ב, צו, ז; י) כותב שההפסק ביום השישי לראייה — כאן לא הוחל; לברר עם רב.", "Four days from the sighting, as in Rav Ovadia's method. The Ben Ish Chai (Year 2, Tzav 7; 10) writes that the hefsek is on the sixth day of the sighting — not applied here; ask a rabbi.", "Quatre jours depuis l'écoulement, comme dans la méthode du Rav Ovadia. Le Ben Ish 'Haï (2e année, Tsav 7 ; 10) écrit que le hefsek se fait le sixième jour — non appliqué ici ; à vérifier avec un rav.", "Cuatro días desde el sangrado, como en el método del Rav Ovadia. El Ben Ish Jai (año 2, Tzav 7; 10) escribe que el hefsek es el sexto día — no se aplica aquí; consultar con un rabino."],
+    ["חוששים לעונת אור זרוע — העונה שלפני כל וסת: ״ומרן ז״ל סבירא לה כדעה הראשונה, אך צריך לחוש לדעה זו השניה״ (בן איש חי, שנה ב, צו, א).", "The Or Zarua onah — the onah before each period — is observed: “our master holds like the first view, but one must be concerned for this second view” (Ben Ish Chai, Year 2, Tzav 1).", "On observe l'onah d'Or Zaroua — l'onah qui précède chaque période : « notre maître tient comme le premier avis, mais il faut tenir compte de ce second avis » (Ben Ish 'Haï, 2e année, Tsav 1).", "Se observa la onah de Or Zarúa — la onah anterior a cada período: «nuestro maestro sigue la primera opinión, pero hay que tener en cuenta esta segunda opinión» (Ben Ish Jai, año 2, Tzav 1)."],
+    ["עונה בינונית ביום 30, בעונה שבה התחילה הראייה בלבד (שו״ע יו״ד קפט, א). מעת לעת שלם — בשיטת ״כרתי ופלתי״.", "Onah beinonit on day 30, only in the onah in which the sighting began (SA YD 189:1). A full 24 hours — in the “Kreti uPleti” method.", "Onah beinonit au jour 30, seulement dans l'onah où l'écoulement a commencé (CA YD 189:1). 24 heures complètes — dans la méthode « Kréti ouPléti ».", "Onah beinonit el día 30, solo en la onah en que empezó el sangrado (SA YD 189:1). 24 horas completas — en el método «Kreti uPleti»."],
+    ["עונה בינונית ביום 30 בספירה כוללנית (שו״ע; שו״ע הרב בשם ב״י, ב״ח, ט״ז). הש״ך סובר שהיא ביום 31; את שני הימים שומרים בשיטת ״כרתי ופלתי״.", "Onah beinonit on day 30, counted inclusively (SA; Shulchan Aruch HaRav citing the Beit Yosef, Bach, Taz). The Shach holds it is day 31; both days are kept in the “Kreti uPleti” method.", "Onah beinonit au jour 30, compté de façon inclusive (CA ; Choulhan Aroukh HaRav au nom du Beit Yossef, du Bah, du Taz). Le Chakh tient que c'est le jour 31 ; les deux jours sont observés dans la méthode « Kréti ouPléti ».", "Onah beinonit el día 30, contado de forma inclusiva (SA; Shulján Aruj HaRav en nombre del Beit Yosef, el Baj, el Taz). El Shaj sostiene que es el día 31; ambos días se observan en el método «Kreti uPleti»."],
+    ["עונת אור זרוע — העונה שלפני כל וסת (ש״ך קפד, ס״ק ז, בשם האור זרוע, ובשם הב״ח: ״הירא דבר ה׳ נוהג כהא״ז״). הט״ז (קפד, ס״ק ב) חולק. האם לכלול אותה בעיקר הדין — לברר.", "The Or Zarua onah — the onah before each period (Shach 184:7, citing the Or Zarua, and the Bach: “one who fears the word of God follows the Or Zarua”). The Taz (184:2) disagrees. Whether to include it in the basic law — ask a rabbi.", "L'onah d'Or Zaroua — l'onah qui précède chaque période (Chakh 184:7, au nom de l'Or Zaroua, et du Bah : « celui qui craint la parole de Dieu suit l'Or Zaroua »). Le Taz (184:2) conteste. Faut-il l'inclure dans le din de base — à vérifier.", "La onah de Or Zarúa — la onah anterior a cada período (Shaj 184:7, en nombre del Or Zarúa, y del Baj: «quien teme la palabra de Dios sigue al Or Zarúa»). El Taz (184:2) discrepa. Si incluirla en la ley básica — consultar."],
+    ["עונה בינונית מעת לעת שלם, לילה ויום, מתחילת הלילה ועד סוף היום (כרתי ופלתי, מובא בשו״ע הרב קפט, א). בדי השלחן פוסק כך (מקור משני).", "Onah beinonit for a full 24 hours, night and day, from the start of the night to the end of the day (Kreti uPleti, cited in Shulchan Aruch HaRav 189:1). The Badei HaShulchan rules so (secondary source).", "Onah beinonit pendant 24 heures complètes, nuit et jour, du début de la nuit à la fin du jour (Kréti ouPléti, cité dans le Choulhan Aroukh HaRav 189:1). Le Badei HaChoulhan tranche ainsi (source secondaire).", "Onah beinonit durante 24 horas completas, noche y día, desde el inicio de la noche hasta el final del día (Kreti uPleti, citado en el Shulján Aruj HaRav 189:1). El Badé HaShulján dictamina así (fuente secundaria)."],
+    ["שומרים גם את יום 31, גם הוא מעת לעת שלם (חוות דעת; ש״ך קפט, ס״ק ל). שבט הלוי: לחוש לשני הימים (מקור משני).", "Day 31 is kept too, also for a full 24 hours (Chavot Da'at; Shach 189:30). Shevet HaLevi: be concerned for both days (secondary source).", "Le jour 31 est aussi observé, lui aussi pendant 24 heures (‘Havot Daat ; Chakh 189:30). Chevet HaLévi : tenir compte des deux jours (source secondaire).", "También se observa el día 31, también durante 24 horas (Javot Daat; Shaj 189:30). Shevet HaLeví: tener en cuenta ambos días (fuente secundaria)."],
+    ["עונת אור זרוע לפני יום 30, עונת החודש וההפלגה (ש״ך קפד, ס״ק ז; הט״ז, ס״ק ב, חולק). לפני יום 31 אין אור זרוע. כשהעונה הבינונית היא מעת לעת, אור זרוע מתווסף לפני עונת הלילה שלה, כלומר ביום 29 — לברר.", "Or Zarua onah before day 30, the monthly onah and the interval (Shach 184:7; the Taz, 184:2, disagrees). No Or Zarua before day 31. When the onah beinonit is a full 24 hours, Or Zarua is added before its night onah, that is on day 29 — ask a rabbi.", "Onah d'Or Zaroua avant le jour 30, l'onah du mois et l'intervalle (Chakh 184:7 ; le Taz, 184:2, conteste). Pas d'Or Zaroua avant le jour 31. Quand l'onah beinonit dure 24 heures, l'Or Zaroua est ajouté avant son onah de nuit, soit au jour 29 — à vérifier.", "Onah de Or Zarúa antes del día 30, la onah mensual y el intervalo (Shaj 184:7; el Taz, 184:2, discrepa). No hay Or Zarúa antes del día 31. Cuando la onah beinonit dura 24 horas, el Or Zarúa se añade antes de su onah nocturna, es decir el día 29 — consultar."],
+    ["הפלגה ארוכה שלא נעקרה נשמרת לצד ההפלגה הקצרה, כדעת הרמ״א (קפט, יג: ״חוששת לט׳ באייר״) והט״ז. הב״ח והש״ך חולקים.", "A long interval that was not uprooted is kept alongside the short one, as the Rema (189:13: “she is concerned for the 9th of Iyar”) and the Taz hold. The Bach and the Shach disagree.", "Un long intervalle non déraciné est conservé à côté du court, selon le Rema (189:13 : « elle tient compte du 9 Iyar ») et le Taz. Le Bah et le Chakh contestent.", "Un intervalo largo que no se anuló se conserva junto al corto, según el Remá (189:13: «se preocupa por el 9 de Iyar») y el Taz. El Baj y el Shaj discrepan."],
+    ["סיכום הלכות נידה לרבנות (משני) — רמ״א וט״ז: חוששת להפלגה הארוכה שלא נעקרה", "Summary of Hilchot Niddah for the Rabbinate (secondary) — Rema and Taz: observes the long interval that was not uprooted", "Résumé des lois de nidda pour le rabbinat (secondaire) — Rema et Taz : on observe le long intervalle non déraciné", "Resumen de las leyes de nidá para el rabinato (secundario) — Remá y Taz: se observa el intervalo largo no anulado"],
+    ["ש״ך יורה דעה קפט, ס״ק לא", "Shach YD 189:31", "Chakh YD 189:31", "Shaj YD 189:31"],
+    ["סיכום הלכות נידה לרבנות (משני) — ב״ח, ש״ך, סדרי טהרה, חוות דעת, רעק״א: ההפלגה הארוכה נעקרת מיד", "Summary of Hilchot Niddah for the Rabbinate (secondary) — Bach, Shach, Sidrei Taharah, Chavot Da'at, Rabbi Akiva Eiger: the long interval is uprooted at once", "Résumé des lois de nidda pour le rabbinat (secondaire) — Bah, Chakh, Sidrei Tahara, 'Havot Daat, Rabbi Akiva Eiger : le long intervalle est déraciné aussitôt", "Resumen de las leyes de nidá para el rabinato (secundario) — Baj, Shaj, Sidré Taharah, Javot Daat, Rabí Akiva Eiger: el intervalo largo se anula de inmediato"],
+    ["סיכום הלכות נידה לרבנות (משני) — בדי השלחן: עונה בינונית מעת לעת, כדעת כרתי ופלתי", "Summary of Hilchot Niddah for the Rabbinate (secondary) — Badei HaShulchan: onah beinonit for 24 hours, like Kreti uPleti", "Résumé des lois de nidda pour le rabbinat (secondaire) — Badei HaChoulhan : onah beinonit de 24 heures, comme le Kréti ouPléti", "Resumen de las leyes de nidá para el rabinato (secundario) — Badé HaShulján: onah beinonit de 24 horas, como Kreti uPleti"],
+    ["סיכום הלכות נידה לרבנות (משני) — שבט הלוי: לחוש גם ליום 30 וגם ליום 31", "Summary of Hilchot Niddah for the Rabbinate (secondary) — Shevet HaLevi: be concerned for both day 30 and day 31", "Résumé des lois de nidda pour le rabbinat (secondaire) — Chevet HaLévi : tenir compte du jour 30 et du jour 31", "Resumen de las leyes de nidá para el rabinato (secundario) — Shevet HaLeví: tener en cuenta el día 30 y el día 31"],
+
   ];
   const d = {};
   for (const [he, en, fr, es] of R) d[he] = { en, fr, es };
@@ -3047,6 +3163,90 @@ const MaayanTests = (M) => {
     a.equal(M.METHOD_PRESETS.chabad.settings.haflagah, "chabad-onot"); a.equal(M.METHOD_PRESETS.chabad.settings.beinonit, "both");
     a.deepEqual(M.presetDiff({ ...emptyState().settings, ...ash, method: "ashkenaz", day31: !ash.day31 }), ["day31"]);
     a.deepEqual(M.presetDiff({ ...emptyState().settings, method: "custom" }), []);
+  });
+  const P = M.METHOD_PRESETS, presetState = (pk, events) => { const s = emptyState(); s.settings = M.applyPreset({ ...s.settings, cityId: "jerusalem" }, pk); s.events = events; return M.parseState(s); };
+  test("שיטות", "הרב עובדיה יוסף (ספרדי): ארבעה ימים, בלי אור זרוע, הפלגה ארוכה נעקרת מיד", () => {
+    const s = P.sefard.settings;
+    a.deepEqual([s.wait, s.beinonit, s.day31, s.orZarua, s.carryLongIntervals, s.nightfall, s.hefsekTwilight, s.beinHashmashot], ["four", "same", false, false, false, "20m", "ovadia", "both"]);
+    a.equal(P.sefard.label, "הרב עובדיה יוסף (ספרדי)"); a.equal(P.sefard.family, "sefard");
+  });
+  test("שיטות", "בן איש חי (ספרדי): כמו הרב עובדיה, ועם אור זרוע", () => {
+    const s = P["sefard-bic"].settings, diff = Object.keys(s).filter(k => s[k] !== P.sefard.settings[k]);
+    a.deepEqual(diff, ["orZarua"]); a.equal(s.orZarua, true); a.equal(P["sefard-bic"].family, "sefard");
+    a.ok(P["sefard-bic"].notes.find(n => n.k === "orZarua").src.includes("bic_tzav1b")); a.ok(M.cite("bic_tzav1b").ok, "הציטוט אומת בספריא");
+  });
+  test("שיטות", "אשכנזי – עיקר הדין: חמישה ימים, עונה אחת ביום 30, אור זרוע, בלי שימור הפלגות", () => {
+    const s = P.ashkenaz.settings;
+    a.deepEqual([s.wait, s.haflagah, s.beinonit, s.day31, s.orZarua, s.carryLongIntervals, s.nightfall, s.hefsekTwilight, s.beinHashmashot, s.missingMonthly, s.bedikot, s.carryMonthly], ["five", "days", "same", false, true, false, "8.5", "before-sunset", "both", "first-next-month", "twice", false]);
+    a.equal(P.ashkenaz.label, "אשכנזי – עיקר הדין"); a.ok(P.ashkenaz.notes.find(n => n.k === "orZarua").ask, "אור זרוע מסומן לבירור");
+    a.ok(P.ashkenaz.notes.find(n => n.k === "orZarua").src.includes("taz184_2"), "הט״ז החולק מובא");
+  });
+  test("שיטות", "אשכנזי – כרתי ופלתי: מעת לעת בימים 30 ו-31, ושימור הפלגה ארוכה", () => {
+    const s = P["ashkenaz-kreiti"].settings, diff = Object.keys(s).filter(k => s[k] !== P.ashkenaz.settings[k]).sort();
+    a.deepEqual(diff, ["beinonit", "carryLongIntervals", "day31"]); a.equal(s.beinonit, "both"); a.equal(s.day31, true); a.equal(s.carryLongIntervals, true);
+    a.ok(P["ashkenaz-kreiti"].notes.find(n => n.k === "beinonit").src.includes("sahr189_1f"), "כרתי ופלתי דרך שו״ע הרב");
+  });
+  test("שיטות", "חב״ד נשארה כפי שהייתה", () => {
+    a.deepEqual(P.chabad.settings, { wait: "five", haflagah: "chabad-onot", beinonit: "both", day31: false, orZarua: false, carryLongIntervals: true, carryMonthly: false, missingMonthly: "first-next-month", bedikot: "twice", nightfall: "8.5", beinHashmashot: "both", hefsekTwilight: "before-sunset" });
+  });
+  test("שיטות", "בחירה בשני שלבים: כל שיטה שייכת למנהג אחד", () => {
+    a.deepEqual(M.METHOD_FAMILIES.map(f => f.id), ["sefard", "ashkenaz", "chabad"]);
+    a.deepEqual(M.METHOD_FAMILIES.flatMap(f => f.methods).sort(), Object.keys(P).sort());
+    for (const f of M.METHOD_FAMILIES) for (const m of f.methods) a.equal(M.methodFamily(m), f.id);
+    a.equal(M.methodFamily("custom"), "");
+  });
+  test("שיטות", "applyPreset קובע את כל ערכי השיטה ושומר הגדרות אחרות", () => {
+    const base = { ...emptyState().settings, cityId: "haifa", methodNote: "הרב פלוני", reminderMinutes: 45, wait: "four-from-relations", orZarua: false };
+    for (const pk of Object.keys(P)) {
+      const s = M.applyPreset(base, pk);
+      a.equal(s.method, pk); a.deepEqual(M.presetDiff(s), [], pk); a.equal(s.cityId, "haifa"); a.equal(s.methodNote, "הרב פלוני"); a.equal(s.reminderMinutes, 45);
+      a.equal(M.parseState({ ...emptyState(), settings: s }).settings.method, pk, "parseState מקבל את המזהה");
+    }
+    a.equal(M.applyPreset(base, "no-such").method, "custom");
+    a.equal(M.applyPreset(M.applyPreset(base, "ashkenaz-kreiti"), "ashkenaz").beinonit, "same", "מעבר בין שיטות מחזיר את הערכים");
+  });
+  test("שיטות", "יומן ישן עם ״ashkenaz״ שומר את ערכיו, והשם מתחלף ל״אשכנזי – עיקר הדין״", () => {
+    // ערכי ״מנהג אשכנז הרווח״ כפי שנשמרו בגרסת מנוע 0.3.0
+    const old = { wait: "five", haflagah: "days", beinonit: "same", day31: true, orZarua: true, carryLongIntervals: true, carryMonthly: false, missingMonthly: "first-next-month", bedikot: "twice", nightfall: "8.5", beinHashmashot: "both", hefsekTwilight: "before-sunset" };
+    const s = emptyState(); s.settings = { ...s.settings, ...old, method: "ashkenaz" };
+    const p = M.parseState(JSON.parse(JSON.stringify(s)));
+    for (const [k, v] of Object.entries(old)) a.equal(p.settings[k], v, `${k} נשמר`);
+    a.equal(p.settings.method, "ashkenaz"); a.deepEqual(M.presetDiff(p.settings).sort(), ["carryLongIntervals", "day31"]);
+    a.match(M.settingsSummary(p.settings)[0], /^שיטה: אשכנזי – עיקר הדין \(עם שינויים\)$/);
+    const old2 = M.parseState({ ...s, settings: { ...s.settings, method: "sefard", wait: "four", nightfall: "20m", hefsekTwilight: "ovadia", orZarua: false, day31: false, carryLongIntervals: true } });
+    a.deepEqual(M.presetDiff(old2.settings), ["carryLongIntervals"], "יומן ספרדי ישן: רק השימור שונה");
+  });
+  test("שיטות", "כרתי ופלתי: מעת לעת שלם ביום 30 וביום 31 (מהשקיעה עד השקיעה)", () => {
+    for (const time of ["10:00", "22:00"]) {
+      const flow = event("flow", N(2), time, { cityId: "jerusalem" }), st = presetState("ashkenaz-kreiti", [flow]);
+      const r = calculate(st, NOW), see = M.stamp(flow, st.settings.nightfall).abs, J = city("jerusalem");
+      for (const day of [30, 31]) {
+        const abs = see + day - 1, av = r.plans.filter(p => p.kind === "average" && p.id.includes(`-${day}-`));
+        a.deepEqual(av.map(p => p.onah).sort(), ["day", "night"], `יום ${day}: לילה ויום`);
+        const civil = fromAbs(abs), prev = sun(addDays(civil, -1), J), cur = sun(civil, J);
+        const night = av.find(p => p.onah === "night"), dayP = av.find(p => p.onah === "day");
+        a.equal(night.start, prev.sunset.toISOString(), `יום ${day} מתחיל בשקיעה שלפניו`); a.equal(night.end, dayP.start, "הלילה והיום רצופים");
+        a.equal(dayP.end, cur.sunset.toISOString(), `יום ${day} מסתיים בשקיעה`);
+        const hours = (new Date(dayP.end) - new Date(night.start)) / 3600000; a.ok(hours > 23.9 && hours < 24.1, `${hours} שעות`);
+      }
+    }
+    const one = calculate(presetState("ashkenaz", [event("flow", N(2), "10:00", { cityId: "jerusalem" })]), NOW).plans.filter(p => p.kind === "average");
+    a.deepEqual(one.map(p => p.onah), ["day"], "בעיקר הדין: עונה אחת ביום 30 בלבד");
+  });
+  test("שיטות", "אור זרוע: יש בבן איש חי, אין בשיטת הרב עובדיה", () => {
+    const flow = event("flow", N(2), "10:00", { cityId: "jerusalem" }), evs = () => [flow];
+    const bic = calculate(presetState("sefard-bic", evs()), NOW).plans, ov = calculate(presetState("sefard", evs()), NOW).plans;
+    a.ok(bic.some(p => p.kind === "or-zarua" && p.id.startsWith("oz-average")), "בן איש חי: אור זרוע לפני העונה הבינונית");
+    a.ok(bic.some(p => p.kind === "or-zarua" && p.id.startsWith("oz-monthly")), "בן איש חי: אור זרוע לפני עונת החודש");
+    a.equal(ov.filter(p => p.kind === "or-zarua").length, 0, "הרב עובדיה: אין אור זרוע");
+    const strip = ps => ps.filter(p => p.kind !== "or-zarua").map(p => p.id).sort().join();
+    a.equal(strip(bic), strip(ov), "מלבד אור זרוע — אותם מועדים");
+  });
+  test("שיטות", "אשכנזי – עיקר הדין: הפלגה ארוכה נעקרת מיד; בכרתי ופלתי נשמרת", () => {
+    const evs = () => [event("flow", N(1, 1)), event("flow", N(6, 2)), event("flow", N(27, 2))];
+    const ints = pk => calculate(presetState(pk, evs()), NOW).plans.filter(p => p.kind === "interval").map(p => p.title).sort();
+    a.deepEqual(ints("ashkenaz"), ["הפלגה · 22 ימים"]); a.deepEqual(ints("sefard"), ["הפלגה · 22 ימים"]);
+    a.deepEqual(ints("ashkenaz-kreiti"), ["הפלגה · 22 ימים", "הפלגה · 36 ימים"]);
   });
   test("שיטות", "יומן ישן בלי ההגדרות החדשות נטען עם ברירות המחדל", () => {
     const s = emptyState(); delete s.settings.beinHashmashot; delete s.settings.hefsekTwilight; delete s.settings.method;
@@ -3443,6 +3643,7 @@ if (typeof module !== "undefined") module.exports = MaayanWidget;
     cal: { cursor: null, mode: "civil", selected: null }, filter: "all", query: "", jLimit: 150,
     testResults: null, openScenario: null, permission: "default", scheduled: 0, exact: null, notified: new Set(), loadWarning: "", blockSave: false, lastDayKey: "",
     locked: false, lock: null, lockedModal: null, bio: null, widgetDay: null,
+    methodFamily: null, keep: new Set(),
   };
   const realNow = () => new Date();
   const now = () => app.mode === "scenario" ? app.simNow : realNow();
@@ -3701,9 +3902,9 @@ if (typeof module !== "undefined") module.exports = MaayanWidget;
       </section>
       ${backupNudge(st)}
       ${first ? `<section class="card method"><div class="card-h">${I("scale")}<div><h3>שיטת החישוב שלך</h3><p>לבחור לפי ההנחיה שקיבלת. אפשר לשנות בכל עת</p></div></div>
-        <ul class="method-sum">${M.settingsSummary(st.settings).filter(x => /^(שיטה|המתנה|הפלגה|עונה בינונית)/.test(x)).map(x => `<li>${esc(x)}</li>`).join("")}</ul>
-        <label class="toggle" for="q-orZarua"><span><strong>עונת אור זרוע</strong><small>העונה שלפני כל עונת פרישה — לפי הוראת הרב</small></span><input id="q-orZarua" type="checkbox" role="switch" data-quickset="orZarua"${st.settings.orZarua ? " checked" : ""}></label>
-        <button class="btn ghost full" data-go="prefs">${I("sliders", 17)}כל אפשרויות החישוב</button></section>` : ""}
+        ${methodChooser(st.settings, "first")}
+        <ul class="method-sum">${M.settingsSummary(st.settings).filter(x => /^(שיטה|המתנה|הפלגה|עונה בינונית|יום 31|אור זרוע)/.test(x)).map(x => `<li>${esc(x)}</li>`).join("")}</ul>
+        <button class="btn ghost full" data-go="prefs">${I("sliders", 17)}התאמה אישית לפי הוראת הרב</button></section>` : ""}
       ${r.reviews.length ? `<button class="notice" data-go="journal"><span class="notice-ic">${I("help", 20)}</span><span><strong>${r.reviews.length} ${r.reviews.length === 1 ? "נקודה לבירור" : "נקודות לבירור"}</strong><small>${esc(r.reviews[0].title)}</small></span>${I("left", 16)}</button>` : ""}
       <section class="card upcoming"><div class="card-h"><h3>מועדים קרובים</h3><button class="link" data-go="dates">הכול ${I("left", 14)}</button></div>
         ${upcoming.length > 1 ? `<div class="plans">${upcoming.slice(1).map(p => planLine(p, { compact: true })).join("")}</div>` : `<p class="empty">${upcoming.length ? "אין מועדים נוספים בקרוב." : first ? "המועדים יופיעו כאן אחרי הרישום הראשון." : "אין מועדים קרובים."}</p>`}
@@ -3811,8 +4012,11 @@ if (typeof module !== "undefined") module.exports = MaayanWidget;
       ${(state().places || []).map(pl => `<div class="trip"><span><strong>${esc(pl.name)}</strong><small dir="ltr">${pl.lat.toFixed(3)}, ${pl.lon.toFixed(3)} · ${esc(pl.tz)}</small></span><button class="icon-btn" type="button" data-delplace="${pl.id}" aria-label="מחיקת מקום">${I("trash", 17)}</button></div>`).join("")}
       <p class="fine">זיהוי המיקום נעשה רק בלחיצה, והמיקום נשמר במכשיר בלבד. לכל רישום נשמר המקום שלו, ושינוי העיר אינו משנה רישומים קודמים.</p></section>
     <section class="card"><div class="card-h">${I("scale")}<div><h3>שיטת החישוב</h3><p>לבחור לפי ההנחיה שקיבלת</p></div></div>
-      ${sel("method", "שיטה מוכנה", s, [["custom", "התאמה אישית"], ["ashkenaz", "מנהג אשכנז הרווח"], ["sefard", "שיטת הרב עובדיה יוסף (ספרדי)"], ["chabad", "מנהג חב״ד"]])}
+      ${methodChooser(s, "prefs")}
+      <p class="mc-sum">${esc(M.settingsSummary(s)[0])}</p>
       ${methodNotes(s)}
+      <details class="custom-set" data-keep="custom"${app.keep.has("custom") ? " open" : ""}><summary><span>התאמה אישית לפי הוראת הרב</span>${M.presetDiff(s).length ? `<span class="count">שונו מהשיטה: ${M.presetDiff(s).length}</span>` : ""}${I("left", 15)}</summary>
+      <p class="fine">כל ערך כאן נקבע לפי השיטה שנבחרה. אפשר לשנות כל הגדרה לפי הוראת הרב; השינוי נשמר כשינוי מהשיטה.</p>
       ${sel("wait", "המתנה לפני שבעה נקיים", s, [["five", "חמישה ימים מתחילת הנידה"], ["four", "ארבעה ימים מתחילת הנידה — הרב עובדיה יוסף"], ["four-from-relations", "ארבעה ימים ממועד היחסים — לפי הוראה"]])}
       ${sel("haflagah", "שיטת חישוב ההפלגה", s, [["days", "ימים בין תחילות הווסתות"], ["chabad-onot", "עונות מהפסק טהרה — חב״ד"]])}
       ${sel("beinonit", "עונה בינונית ביום 30", s, [["same", "אותה עונה שבה התחילה הווסת"], ["both", "שתי העונות — לילה ויום"]])}
@@ -3824,6 +4028,7 @@ if (typeof module !== "undefined") module.exports = MaayanWidget;
       ${sel("nightfall", "צאת הכוכבים", s, [["8.5", "8.5° מתחת לאופק"], ["7.083", "7.083° מתחת לאופק"], ["13.5z", "13.5 דקות זמניות אחרי השקיעה (הגאונים)"], ["18m", "18 דקות אחרי השקיעה"], ["20m", "20 דקות אחרי השקיעה"]])}
       ${sel("beinHashmashot", "ראייה סמוך לשקיעה או בין השמשות", s, [["both", "לחומרא: מועדים לשתי העונות"], ["flag", "השעיית החישוב עד בירור"]])}
       ${sel("hefsekTwilight", "הפסק טהרה אחרי השקיעה", s, [["before-sunset", "רק הפסק לפני השקיעה"], ["ovadia", "בדיעבד עד 13.5 דקות זמניות — הרב עובדיה יוסף"]])}
+      ${s.method !== "custom" ? `<button type="button" class="link mc-none" data-method="custom">${I("sliders", 15)}בלי שיטה מוכנה: כל ההגדרות ידנית</button>` : ""}</details>
       ${sel("special", "מצב מיוחד", s, [["regular", "מחזור רגיל"], ["pregnancy", "היריון"], ["postpartum", "אחרי לידה"], ["nursing", "הנקה"], ["hormonal", "טיפול הורמונלי / אמצעי מניעה"]])}
       <p class="fine">במצב מיוחד החישובים הרגילים מושעים, ואפשר לרשום עונות לפי הוראה.</p>
       <label class="field" for="s-methodNote">ממי ההנחיות<textarea id="s-methodNote" name="methodNote" rows="2" maxlength="1000" placeholder="שם מורה ההוראה או המנהג">${esc(s.methodNote)}</textarea></label></section>
@@ -3837,10 +4042,32 @@ if (typeof module !== "undefined") module.exports = MaayanWidget;
       ${tog("widgetEnabled", "הצגת מצב בווידג׳ט", "אחרי ההפעלה: לחיצה ארוכה על מסך הבית ← ווידג׳טים ← מעיין", s)}
       ${sel("widgetStyle", "נוסח הווידג׳ט", s, [["discreet", "דיסקרטי: ״תזכורת אישית״ וספירת ימים"], ["full", "מלא: שם המועד והשעה"]])}
       <p class="fine">כשנעילת האפליקציה פעילה, הווידג׳ט תמיד דיסקרטי. לחיצה על הווידג׳ט פותחת את היומן.</p></section>`;
+  /** בחירת שיטה בשני שלבים: מה המנהג (ספרדי / אשכנזי / חב״ד), ואז לפי מי. בחב״ד אין שלב שני. */
+  function methodChooser(s, where) {
+    const P = M.METHOD_PRESETS, fam = app.methodFamily || M.methodFamily(s.method), F = M.METHOD_FAMILIES.find(f => f.id === fam);
+    const card = m => `<button type="button" class="mc-card" role="radio" aria-checked="${s.method === m}" data-method="${m}"><span class="mc-dot" aria-hidden="true"></span><span class="mc-body"><strong>${esc(P[m].name)}</strong><small>${esc(P[m].line)}</small><small class="mc-src">מקור: ${esc(P[m].source)}</small></span></button>`;
+    const one = m => `<div class="mc-card on mc-only"><span class="mc-body"><strong>${esc(P[m].name)}</strong><small>${esc(P[m].line)}</small><small class="mc-src">מקור: ${esc(P[m].source)}</small></span></div>`;
+    return `<div class="mchoose">
+      <div class="mc-step"><p class="mc-q" id="mc1-${where}"><span class="mc-n">1</span>מה המנהג שלך?</p>
+        <div class="seg" role="radiogroup" aria-labelledby="mc1-${where}">${M.METHOD_FAMILIES.map(f => `<button type="button" class="seg-b" role="radio" aria-checked="${f.id === fam}" data-family="${f.id}">${esc(f.label)}</button>`).join("")}</div></div>
+      ${!F ? "" : F.methods.length > 1 ? `<div class="mc-step"><p class="mc-q" id="mc2-${where}"><span class="mc-n">2</span>${esc(F.ask)}</p>
+        <div class="mc-opts" role="radiogroup" aria-labelledby="mc2-${where}">${F.methods.map(card).join("")}</div></div>` : `<div class="mc-step">${one(F.methods[0])}</div>`}
+    </div>`;
+  }
+  function chooseMethod(m) {
+    const st = state(); app.methodFamily = null;
+    if (st.settings.method === m && !M.presetDiff(st.settings).length) return render();
+    try { commit({ ...st, settings: M.applyPreset(st.settings, m) }); } catch (err) { toast(err.message); render(); }
+  }
+  function chooseFamily(id) {
+    const F = M.METHOD_FAMILIES.find(f => f.id === id); if (!F) return;
+    if (F.methods.length === 1) return chooseMethod(F.methods[0]);
+    app.methodFamily = M.methodFamily(state().settings.method) === id ? null : id; render();
+  }
   /** הערות השיטה שנבחרה: מקור לכל ערך, סימון "לברר עם רב", ואילו הגדרות שונו ממנה */
   function methodNotes(s) {
     const p = M.METHOD_PRESETS[s.method];
-    if (!p) return `<p class="fine">בחירת שיטה מוכנה קובעת את כל ההגדרות שלמטה בבת אחת. אחר כך אפשר לשנות כל הגדרה.</p>`;
+    if (!p) return `<p class="fine">לא נבחרה שיטה: כל ההגדרות נקבעות ידנית, תחת ״התאמה אישית לפי הוראת הרב״. בחירת מנהג ושיטה קובעת את כולן בבת אחת.</p>`;
     const changed = M.presetDiff(s);
     return `<details class="rules"><summary>מה קובעת השיטה ומקורותיה${I("left", 15)}</summary>${p.notes.map(n => `<p>${n.ask ? "<strong>לברר עם רב:</strong> " : ""}${esc(n.t)}</p>${citeList(n.src)}`).join("")}</details>
       ${changed.length ? `<p class="fine">שונו מהשיטה: ${changed.length} הגדרות. בחירה מחדש של השיטה מחזירה אותן.</p>` : ""}`;
@@ -3947,7 +4174,7 @@ if (typeof module !== "undefined") module.exports = MaayanWidget;
       "ארבעה ימים ממועד היחסים: נספרים ממועד היחסים שנרשם כבסיס, ולא מהראייה. בלי בסיס רשום אין חישוב, ומופיעה נקודה לבירור.",
       "ראייה סמוך לשקיעה או בין השמשות: ההמתנה נספרת מהיום העברי המאוחר, לחומרא.", "חידוש ספירה בתוך תקופת הנידה נשען על תחילת הנידה הקודמת ולא מוסיף חמישה ימים חדשים."], src: [...S.wait, "thbWait"] },
     { t: "ראייה בין השמשות", p: ["ראייה בין השקיעה לצאת הכוכבים, או בשלוש הדקות שסביב השקיעה והזריחה: לפי ברירת המחדל חוששים לשתי העונות — העונה שהסתיימה והעונה שהתחילה — בעונה הבינונית, בעונת החודש ובהפלגה (ש״ך יו״ד קפד, ס״ק יג–יד, בשם הב״ח; כך נוהגים למעשה). הרישום מסומן גם לבירור.", "אפשר לבחור בהגדרות להשעות את החישוב עד בירור, כמו בגרסאות קודמות.", "סוף בין השמשות נקבע לפי הגדרת צאת הכוכבים. לפי 13.5 דקות זמניות (הגאונים, הרב עובדיה יוסף) ראייה מאוחרת יותר היא לילה ודאי."], src: S.bhs },
-    { t: "שיטות מוכנות", p: ["שיטה מוכנה (מנהג אשכנז הרווח, שיטת הרב עובדיה יוסף (ספרדי), מנהג חב״ד) קובעת את כל הגדרות החישוב בבת אחת, ואפשר לשנות כל הגדרה אחר כך.", "לכל ערך בשיטה מופיע מקור בהגדרות. ערכים שהמקורות חלוקים בהם מסומנים ״לברר עם רב״. השיטות אינן תחליף להוראת רב."], src: [] },
+    { t: "שיטות מוכנות", p: ["בוחרים בשני שלבים: מה המנהג (ספרדי, אשכנזי או חב״ד), ואז לפי מי — לספרדים הרב עובדיה יוסף או בן איש חי, לאשכנזים עיקר הדין או כרתי ופלתי. השיטה קובעת את כל הגדרות החישוב בבת אחת, ואפשר לשנות כל הגדרה אחר כך תחת ״התאמה אישית לפי הוראת הרב״.", "לכל ערך בשיטה מופיע מקור בהגדרות. ערכים שהמקורות חלוקים בהם מסומנים ״לברר עם רב״. השיטות אינן תחליף להוראת רב."], src: [] },
     { t: "הפסק טהרה ושבעה נקיים", p: ["הספירה מתחילה רק מהפסק שנרשם כנקי, לפני השקיעה ולא בזמן מסופק, ולא לפני סוף ההמתנה. הפסק מוקדם מתקבל רק עם הוראה אישית מתועדת.", "בבחירת שיטת הרב עובדיה יוסף: הפסק עד 13.5 דקות זמניות אחרי השקיעה מתקבל בדיעבד ונספר ליום שהסתיים, ומסומן לבירור. לכתחילה עושים הפסק לפני השקיעה.", "יום א׳ הוא היום העברי שאחרי ההפסק. ליל הטבילה המתוכנן הוא במוצאי היום השביעי, וזה נשאר תכנון בלבד.", "חוסר רישום בדיקה באחד מימי הספירה (לפי הגדרת הבדיקות) מסומן לבירור כשהיום מסתיים בשקיעה, ואינו פוסל או מאשר. בוקר וערב נקבעים לפי חצות היום. בדיקה שנרשמה כלא נקייה אינה מאפסת אוטומטית."], src: [...S.hefsek, ...S.clean, "thbHefsek", ...S.mikvah] },
     { t: "עונת החודש", p: ["אותו יום בחודש העברי הבא, באותה עונה.", "ראייה בל׳ כשבחודש הבא אין ל׳: ברירת המחדל היא א׳ בחודש שאחרי החודש החסר, לחומרא. מקור ראשוני לדין זה לא אותר. אפשר לבחור דילוג.", "ראתה פעמיים באותו חודש: כל החישובים נעשים מהראייה האחרונה, ובנוסף נשמרת עונת החודש של הראייה הקודמת אם עוד לא הגיעה (רמ״א יו״ד קפט, יג; שו״ע הרב שם, ס״ק מד).", "בשנה מעוברת אדר א׳ עובר לאדר ב׳.", "שימור עונת חודש שחלה בזמן דימום הוא אפשרות נפרדת שדורשת תיעוד מלא."], src: [...S.monthly, "missing30"] },
     { t: "עונה בינונית", p: ["יום 30 בספירה כוללנית: יום הראייה הוא יום 1, כלומר 29 ימים אחריו, באותה עונה.", "שתי העונות, יום 31 ואור זרוע הם שלוש הגדרות נפרדות. השיטות המוכנות קובעות אותן לפי המנהג, ואפשר לשנות.", "מי ששומרת ימים 30 ו-31 שומרת את עונת אור זרוע ליום 30 בלבד. מקור ראשוני לכך לא אותר."], src: [...S.average, "orZarua31"] },
@@ -4192,6 +4419,8 @@ if (typeof module !== "undefined") module.exports = MaayanWidget;
       }
       return;
     }
+    const mf = e.target.closest("[data-family],[data-method]");
+    if (mf) { e.preventDefault(); return mf.dataset.family ? chooseFamily(mf.dataset.family) : chooseMethod(mf.dataset.method); }
     const lb = e.target.closest("[data-lang]");
     if (lb) { applyLang(lb.dataset.lang, true); render(); syncNotifications(); return; }
     const qb = e.target.closest("[data-qtype]");
@@ -4318,6 +4547,8 @@ if (typeof module !== "undefined") module.exports = MaayanWidget;
     for (const ev of ["pointerup", "pointercancel", "scroll"]) document.addEventListener(ev, cancel, { passive: true, capture: true });
     document.addEventListener("contextmenu", e => { const day = e.target.closest?.("[data-day]"); if (!day) return; e.preventDefault(); cancel(); app.suppressClick = false; if (app.modal?.kind !== "quick") openQuick(day.dataset.day); });
   }
+  // פתיחה וסגירה של אזור שנשמר פתוח גם אחרי ציור מחדש (data-keep)
+  document.addEventListener("toggle", e => { const k = e.target.dataset?.keep; if (k) { if (e.target.open) app.keep.add(k); else app.keep.delete(k); } }, true);
   document.addEventListener("input", e => { if (e.target.id === "q") { app.query = e.target.value; render(); } });
   document.addEventListener("submit", async e => {
     e.preventDefault();
