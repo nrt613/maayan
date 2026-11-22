@@ -49,7 +49,7 @@ python3 build.py && cp dist/maayan.html index.html && rm -rf dist
 מריצים את שלושתן לפני כל דחיפה:
 ```
 node -e 'const M=require("./src/core.js");console.log(require("./src/tests.js")(M).run().filter(t=>!t.ok))'   # → []
-node verify.js              # כ-168,000 השוואות → failures: 0
+node verify.js              # כ-182,000 השוואות → failures: 0
 node tests/widget.test.js   # דיסקרטיות, נעילה, שפות ותרחישים בסיכום הווידג׳ט
 ```
 - כל שינוי ב-`src/core.js` מתחיל בבדיקה נכשלת ב-`src/tests.js`, ורק אחר כך התיקון. לא משנים התנהגות הלכתית או ערכי שיטות בלי הוראה.
