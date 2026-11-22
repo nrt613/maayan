@@ -51,14 +51,16 @@ Kol touv,
 
 ---
 
-## Pour Chalom (diffusion aux 'hatanim)
+## Pour les testeurs (message général)
 
-Bonjour Chalom,
+Bonjour,
 
-J'ai appris que vous souhaitez proposer Maayan à vos 'hatanim : merci beaucoup !
-C'est un carnet de taharat hamishpacha gratuit et privé : tout reste sur le téléphone, avec des rappels discrets au bon moment.
+Je serais heureux que vous testiez Maayan, un carnet de taharat hamishpacha gratuit et privé : tout reste sur le téléphone, avec des rappels discrets au bon moment.
 Sur tout téléphone (iPhone compris), à ajouter à l'écran d'accueil : https://nrt613.github.io/maayan/
 Application Android : https://github.com/nrt613/maayan/releases/latest/download/maayan.apk
+Vous pouvez commencer par le « journal d'exemple » pour voir comment cela fonctionne, sans saisir de données personnelles.
+Toute remarque est précieuse : ce qui n'est pas clair, ce qui manque, ce qu'on peut améliorer — répondez simplement ici.
 Une précision : c'est encore une version en cours de relecture par des Rabbanim, et en cas de doute l'application renvoie toujours au Rav.
 
+Merci beaucoup,
 [prénom nom]
