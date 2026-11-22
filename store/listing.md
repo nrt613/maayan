@@ -85,7 +85,7 @@ Privacy policy: https://nrt613.github.io/maayan/privacy.html
 
 **קטגוריה מומלצת:** Health & Fitness (בריאות וכושר). חלופה: Lifestyle (סגנון חיים).
 **תגיות (Tags) ב-Play Console:** Women's health / Period tracker, Calendar, Religion (אם מוצעות).
-**פרטי קשר:** אימייל חובה ב-Play ([כתובת אימייל לפניות]); אתר: https://nrt613.github.io/maayan/
+**פרטי קשר:** אימייל חובה ב-Play (natan.taieb@gmail.com); אתר: https://nrt613.github.io/maayan/
 
 ---
 
