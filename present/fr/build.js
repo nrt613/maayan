@@ -209,7 +209,7 @@ slide("ask", `
   <div class="split">
     <div class="main">
       <h2>Là où Maayan ne tranche pas</h2>
-      <p class="lead">L'application affiche « ${he("יש לשאול רב")} », et en attendant applique la 'houmra.</p>
+      <p class="lead">L'application affiche « ${he("יש לשאול רב")} », et indique ce qu'elle fait en attendant.</p>
       <ol class="asks">
         <li>Vue le 30 du mois, et le mois suivant est <b>incomplet</b> (pas de 30)</li>
         <li>Vue le 30 du mois, et le mois suivant est <b>plein</b> (Roch 'Hodech de deux jours)</li>

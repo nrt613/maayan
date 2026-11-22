@@ -11,7 +11,7 @@ Chalom Kvod HaRav,
 
 Je m'appelle [prénom nom] ; c'est [nom de la personne] qui m'a conseillé de m'adresser au Rav.
 J'ai développé Maayan, une application gratuite pour aider les couples à garder la taharat hamishpacha simplement et sans erreur.
-Elle calcule selon le minhag choisi, et ne tranche jamais seule : dans les cas discutés, elle affiche « il faut demander au Rav » et, en attendant, applique la 'houmra.
+Elle calcule selon le minhag choisi, et ne tranche jamais seule : dans les cas discutés, elle affiche « il faut demander au Rav » et précise ce qu'elle fait en attendant.
 Avant de la diffuser, je souhaite qu'elle soit relue par des Rabbanim qui connaissent le sujet à fond.
 Le Rav accepterait-il de la regarder, de me faire ses remarques pour l'améliorer et, s'il la trouve juste, de la valider ?
 Je joins une courte présentation. L'application : https://nrt613.github.io/maayan/
