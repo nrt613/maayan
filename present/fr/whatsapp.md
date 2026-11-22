@@ -1,7 +1,7 @@
 # Maayan — messages WhatsApp (FR)
 
 Un message par Rav, à envoyer séparément, avec le PDF `maayan-presentation.pdf` en pièce jointe.
-À remplacer avant l'envoi : « [prénom nom] » (l'expéditeur), « [nom de la personne] » (la personne qui a recommandé le Rav), et « [mention personnelle si pertinente] » (à supprimer si rien de personnel).
+À remplacer avant l'envoi : « [prénom nom] » (l'expéditeur).
 
 ---
 
@@ -9,7 +9,7 @@ Un message par Rav, à envoyer séparément, avec le PDF `maayan-presentation.pd
 
 Chalom Kvod HaRav,
 
-Je m'appelle [prénom nom] ; c'est [nom de la personne] qui m'a conseillé de m'adresser au Rav.
+Je m'appelle [prénom nom]. Je me permets de m'adresser au Rav.
 J'ai développé Maayan, une application gratuite pour aider les couples à garder la taharat hamishpacha simplement et sans erreur.
 Elle calcule selon le minhag choisi, et ne tranche jamais seule : dans les cas discutés, elle affiche « il faut demander au Rav » et précise ce qu'elle fait en attendant.
 Avant de la diffuser, je souhaite qu'elle soit relue par des Rabbanim qui connaissent le sujet à fond.
@@ -25,7 +25,7 @@ Avec tout mon respect,
 
 Kvod HaRav Bendriem, chalom outevarakh,
 
-[nom de la personne] m'a donné le nom du Rav comme une référence en hilkhot nidda. [mention personnelle si pertinente]
+Je m'adresse au Rav, qui fait référence en hilkhot nidda.
 Je travaille sur Maayan : un carnet de taharat hamishpacha gratuit et privé, qui accompagne le couple jour après jour, avec des rappels au bon moment.
 Le calcul suit la méthode de chacun ; là où la question reste ouverte, l'application ne décide pas et renvoie au Rav.
 Les remarques du Rav m'aideraient beaucoup à l'améliorer, et si le Rav l'estime fiable, sa validation compterait énormément.
@@ -40,7 +40,7 @@ Merci d'avance pour le temps du Rav,
 
 Chalom HaRav Kessous,
 
-Je me permets de vous écrire sur le conseil de [nom de la personne].
+Je me permets de vous écrire.
 Je m'appelle [prénom nom] et, beezrat Hachem, j'ai réalisé Maayan, une application qui aide les couples à respecter la taharat hamishpacha simplement et correctement.
 Elle calcule les onot, le hefsek, les 7 nekiim et la nuit du mikvé selon le minhag de chacun ; quand un cas est discuté, elle ne tranche pas et indique de demander au Rav.
 Elle n'est pas encore approuvée, et c'est justement pour cela que je viens vers vous : accepteriez-vous de la regarder, de me dire ce qu'il faut corriger et, si elle vous paraît juste, de la valider ?
@@ -55,7 +55,7 @@ Kol touv,
 
 Bonjour Chalom,
 
-[nom de la personne] m'a dit que vous souhaitez proposer Maayan à vos 'hatanim : merci beaucoup !
+J'ai appris que vous souhaitez proposer Maayan à vos 'hatanim : merci beaucoup !
 C'est un carnet de taharat hamishpacha gratuit et privé : tout reste sur le téléphone, avec des rappels discrets au bon moment.
 Sur tout téléphone (iPhone compris), à ajouter à l'écran d'accueil : https://nrt613.github.io/maayan/
 Application Android : https://github.com/nrt613/maayan/releases/latest/download/maayan.apk
