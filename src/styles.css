@@ -340,6 +340,8 @@ details.past { box-shadow: 0 -1px 0 var(--line); }
 .reviews details > summary .rv-t { flex: 1; min-width: 0; }
 /* ״יש לשאול רב״: סגנון רך בצבע המבטא של האפליקציה, לא אזהרה */
 .reviews details.ask > summary { color: var(--accent-strong); font-weight: 600; }
+.reviews details.ask > summary .rv-t { color: var(--ink); font-weight: 500; font-size: 15px; line-height: 1.45; }
+.ask-l { display: block; color: var(--accent-strong); font-weight: 600; font-size: 13px; margin-bottom: 2px; }
 .ask-ic { display: inline-grid; place-items: center; flex: none; width: 28px; height: 28px; border-radius: 9px; background: var(--accent-soft); color: var(--accent-strong); }
 .reviews details.ask p, .rv p { margin: 0 0 6px; }
 .ask-now { color: var(--muted); }
