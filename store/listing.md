@@ -23,17 +23,19 @@
 
 **תיאור מלא** (עד 4000 תווים):
 ```
-מעיין היא יומן אישי ודיסקרטי לטהרת המשפחה, בעברית, שעובד כולו במכשיר שלך: בלי חשבון, בלי שרת, בלי פרסומות ובלי איסוף נתונים.
+מעיין היא יומן אישי ודיסקרטי לטהרת המשפחה, בעברית (וגם באנגלית, בצרפתית ובספרדית), שעובד כולו במכשיר שלך: בלי חשבון, בלי שרת, בלי פרסומות ובלי איסוף נתונים.
 
 מה מעיין עושה
 • רישום ראייה, הפסק טהרה, בדיקות ומקווה, בתאריך עברי ולועזי
 • חישוב שבעה נקיים וליל הטבילה, עם תצוגה ברורה של היום הנוכחי
-• עונות פרישה: וסת החודש, הפלגה, עונה בינונית ועוד, לפי המנהג שתבחרי בכניסה הראשונה: ספרדי (הרב עובדיה יוסף או בן איש חי), אשכנזי (רגיל או יממה שלמה – כרתי ופלתי) או חב״ד. אפשר לשנות כל הגדרה לפי הוראת הרב
-• זמני שקיעה וצאת הכוכבים לפי המקום שלך (חישוב במכשיר), כולל נסיעות לעיר אחרת
+• עונות פרישה: עונת החודש, הפלגה, עונה בינונית ועוד, לפי ״המנהג שלי״ שבוחרים בכניסה הראשונה: ספרדי (הרב עובדיה יוסף או בן איש חי), אשכנזי (רגיל או יממה שלמה – כרתי ופלתי) או חב״ד. אפשר לשנות כל הגדרה לפי הוראת הרב
+• זמני שקיעה וצאת הכוכבים לפי המקום שלך (חישוב במכשיר) או לפי 67 ערים מוכנות, כולל נסיעות לעיר אחרת
 • תזכורות מקומיות לבדיקות, להפסק ולעונות, בנוסח דיסקרטי ("תזכורת אישית"), שעה לפני השקיעה או בזמן שתבחרי
 • נעילה בקוד, בטביעת אצבע או בזיהוי פנים
 • וידג׳ט דיסקרטי למסך הבית באנדרואיד (כבוי עד שמפעילים)
 • לוח שנה עברי ולועזי עם סימון המועדים
+• רשימת הכנות לטבילה
+• במקום של ספק: סימון רגוע ״יש לשאול רב״, בלי להכריע בשקט
 • גיבוי מוצפן בסיסמה והעברה למכשיר אחר
 • מחיקת כל הנתונים בלחיצה
 
@@ -67,12 +69,14 @@ Maayan is a private, discreet family-purity (taharat hamishpacha / niddah) diary
 What Maayan does
 • Log sightings, hefsek tahara, bedikot and mikveh, by Hebrew and civil date
 • Calculates the seven clean days and mikveh night, with a clear view of today
-• Onot perisha (veset hachodesh, haflagah, onah beinonit and more), following the custom you choose when you start: Sephardi (Rav Ovadia Yosef or Ben Ish Chai), Ashkenazi (standard or full day – Kreiti uPleiti) or Chabad. Any setting can be adjusted per your rabbi's ruling
-• Sunset and nightfall for your location, calculated on the device, including trips to other cities
+• Onot perisha (veset hachodesh, haflagah, onah beinonit and more), following "My custom", chosen when you start: Sephardi (Rav Ovadia Yosef or Ben Ish Chai), Ashkenazi (standard or full day – Kreiti uPleiti) or Chabad. Any setting can be adjusted per your rabbi's ruling
+• Sunset and nightfall for your location (calculated on the device) or for 67 built-in cities, including trips
 • Local reminders for bedikot, hefsek and onot, with discreet text ("Personal reminder"), an hour before sunset or when you choose
 • Lock with a PIN, fingerprint or face recognition
 • Discreet home-screen widget on Android (off until you turn it on)
 • Hebrew and civil calendar with all dates marked
+• Mikveh preparation checklist
+• Where there is doubt, a calm "Ask a rabbi" note instead of a silent decision
 • Password-encrypted backup and transfer to a new phone
 • Delete all your data with one tap
 
