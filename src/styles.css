@@ -33,6 +33,7 @@ body.locked { overflow: hidden; }
 body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 30; background: var(--bg); }
 h1, h2, h3, h4, p, ul, ol, dl, dd { margin: 0; }
 h1, h2, h3, h4 { line-height: 1.2; text-wrap: balance; }
+p, li, small, .fine { text-wrap: pretty; }
 h1 { font-size: 32px; font-weight: 700; letter-spacing: -.02em; }
 h2 { font-size: 24px; font-weight: 700; letter-spacing: -.015em; }
 h3 { font-size: 17px; font-weight: 600; letter-spacing: -.005em; }
