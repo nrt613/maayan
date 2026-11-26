@@ -351,6 +351,8 @@ details.past { box-shadow: 0 -1px 0 var(--line); }
 .reviews details > summary .rv-t { flex: 1; min-width: 0; }
 /* ״יש לשאול רב״: סגנון רך בצבע המבטא של האפליקציה, לא אזהרה */
 .reviews details.ask > summary { color: var(--accent-strong); font-weight: 600; }
+.reviews details.ask > summary .rv-t { color: var(--ink); font-weight: 500; font-size: 15px; line-height: 1.45; }
+.ask-l { display: block; color: var(--accent-strong); font-weight: 600; font-size: 13px; margin-bottom: 2px; }
 .ask-ic { display: inline-grid; place-items: center; flex: none; width: 28px; height: 28px; border-radius: 9px; background: var(--accent-soft); color: var(--accent-strong); }
 .reviews details.ask p, .rv p { margin: 0 0 6px; }
 .ask-now { color: var(--muted); }
@@ -1495,7 +1497,7 @@ const Maayan = (() => {
             const dates = [...new Set([...extra.map(x => x.target), ...long.map(x => last.s.abs + x.v - 1)])].sort((p, q) => p - q).map(hs);
             const values = [...new Set([...extra, ...long].map(x => x.v))].sort((p, q) => q - p);
             ask("ask-uprooted-haflagah", "הפלגה ארוכה שנעקרה בהפלגה קצרה ממנה",
-              `אחרי הפלגה של ${values.join(", ")} ימים באה הפלגה קצרה יותר, של ${lastV} ימים.`, `בינתיים מעיין אינה חוששת ל־${dates.join(", ")}.`,
+              `אחרי הפלגה של ${values.length > 1 ? `${values.slice(0, -1).join(", ")} ו־${values.at(-1)}` : values[0]} ימים באה הפלגה קצרה יותר, של ${lastV} ימים.`, `בינתיים מעיין אינה חוששת ל־${dates.join(", ")}.`,
               [...new Set([...extra.flatMap(x => x.ids), ...long.flatMap(x => x.ids), last.e.id])], ["rema189_13", "shach189_31", "secCarryTaz", "secCarryMajority"]);
           }
         }
@@ -2906,6 +2908,7 @@ const MaayanDict = (() => {
     ["ראית בל׳ בחודש, ובחודש הבא אין ל׳.", "You saw on the 30th of the month, and next month has no 30th.", "Vous avez vu le 30 du mois, et le mois suivant n'a pas de 30.", "Vio el día 30 del mes, y el mes siguiente no tiene día 30."],
     ["בינתיים מעיין חוששת ל־{x}.", "Meanwhile Maayan keeps {x}.", "En attendant, Maayan tient compte du {x}.", "Mientras tanto Maayan tiene en cuenta el {x}."],
     ["בינתיים מעיין אינה מוסיפה עונת חודש, לפי הבחירה בהגדרות.", "Meanwhile Maayan does not add a monthly onah, as chosen in Settings.", "En attendant, Maayan n'ajoute pas de onah du mois, selon le choix dans les réglages.", "Mientras tanto Maayan no añade oná del mes, según lo elegido en Ajustes."],
+    ["{x} ו־{n}", "{x} and {n}", "{x} et {n}", "{x} y {n}"],
     ["אחרי הפלגה של {x} ימים באה הפלגה קצרה יותר, של {n} ימים.", "After an interval of {x} days came a shorter one, of {n} days.", "Après une haflaga de {x} jours est venue une plus courte, de {n} jours.", "Después de una haflagá de {x} días vino una más corta, de {n} días."],
     ["בינתיים מעיין אינה חוששת ל־{x}.", "Meanwhile Maayan does not keep {x}.", "En attendant, Maayan ne tient pas compte du {x}.", "Mientras tanto Maayan no tiene en cuenta el {x}."],
     ["הדם נמצא בהתעוררות, ולא ידוע מתי התחיל.", "The blood was found on waking, and it is not known when it began.", "Le sang a été trouvé au réveil, et on ne sait pas quand il a commencé.", "La sangre se encontró al despertar, y no se sabe cuándo empezó."],
@@ -3511,6 +3514,12 @@ const MaayanTests = (M) => {
     const kr = calculate(presetState("ashkenaz-kreiti", [event("flow", N(1, 1)), event("flow", N(6, 2)), event("flow", N(27, 2))]), NOW).plans.filter(p => /36/.test(p.title) && p.kind === "interval");
     const v2 = rv(r2, "ask-uprooted-haflagah"); askOk(v2);
     for (const p of kr) a.ok(v2.detail.includes(M.hebrew(p.date).split(" ").slice(0, -1).join(" ")), `התאריך ${M.hebrew(p.date)} בפירוט`);
+  });
+  test("יש לשאול רב", "ניסוח: כמה הפלגות ארוכות נכתבות ״30 ו־29״ ולא ״30, 29״", () => {
+    const f0 = N(1, 1), r = calculate(presetState("ashkenaz", [0, 29, 57, 83].map(d => event("flow", M.addDays(f0, d)))), NOW);
+    const v = rv(r, "ask-uprooted-haflagah"); askOk(v);
+    a.equal(v.situation, "אחרי הפלגה של 30 ו־29 ימים באה הפלגה קצרה יותר, של 27 ימים.");
+    a.equal(rv(calculate(presetState("ashkenaz", [0, 29, 55].map(d => event("flow", M.addDays(f0, d)))), NOW), "ask-uprooted-haflagah").situation, "אחרי הפלגה של 30 ימים באה הפלגה קצרה יותר, של 27 ימים.");
   });
   test("יש לשאול רב", "נמצא בהתעוררות: שתי העונות של אותו יום, ההמתנה מהיום המאוחר, ו-ask-waking", () => {
     const d = N(10), plain = event("flow", d, "07:30"), wake = event("flow", d, "07:30", { foundOnWaking: true });
@@ -4302,7 +4311,7 @@ if (typeof module !== "undefined") module.exports = MaayanWidget;
       .filter(e => (app.filter === "all" || e.type === app.filter) && (!q || `${EVENT_NAMES[e.type]} ${e.date} ${e.note} ${hebrew(e.date)}`.toLowerCase().includes(q)));
     return `${r.reviews.length ? `<section class="card reviews"><div class="card-h">${I("help")}<h3>נקודות לבירור <span class="count">${r.reviews.length}</span></h3></div>
       <p class="fine">המערכת אינה מכריעה בנקודות אלה. כל נקודה מפנה לרישומים הנוגעים בה.</p>
-      ${askFirst(r.reviews).map(v => `<details${v.ask ? ` class="ask" data-review="${esc(v.id)}"` : ` data-review="${esc(v.id)}"`}><summary>${v.ask ? `<span class="ask-ic">${I("scale", 16)}</span>` : ""}<span class="rv-t">${esc(v.title)}</span>${I("left", 15)}</summary>${reviewBody(v)}${v.eventIds.map(id => { const e = st.events.find(x => x.id === id); return e ? `<button class="link" data-edit="${id}">${esc(EVENT_NAMES[e.type])} · ${esc(civilLabel(e.date, true))} ${I("pencil", 13)}</button>` : ""; }).join("")}</details>`).join("")}</section>` : ""}
+      ${askFirst(r.reviews).map(v => `<details${v.ask ? ` class="ask" data-review="${esc(v.id)}"` : ` data-review="${esc(v.id)}"`}><summary>${v.ask ? `<span class="ask-ic">${I("scale", 16)}</span>` : ""}${v.ask ? `<span class="rv-t"><small class="ask-l">${esc(v.title)}</small>${esc(v.situation)}</span>` : `<span class="rv-t">${esc(v.title)}</span>`}${I("left", 15)}</summary>${v.ask ? `<p class="ask-now">${esc(v.meanwhile)}</p>` : reviewBody(v)}${v.eventIds.map(id => { const e = st.events.find(x => x.id === id); return e ? `<button class="link" data-edit="${id}">${esc(EVENT_NAMES[e.type])} · ${esc(civilLabel(e.date, true))} ${I("pencil", 13)}</button>` : ""; }).join("")}</details>`).join("")}</section>` : ""}
     <section class="card"><div class="card-h">${I("book")}<h3>רישומים <span class="count">${st.events.length}</span></h3><button class="link" data-act="report">${I("file", 15)}דוח לבירור</button></div>
       <div class="filters"><label class="search">${I("search", 17)}<input id="q" type="search" placeholder="חיפוש לפי תאריך או הערה" value="${esc(app.query)}" aria-label="חיפוש"></label>
       <select id="filter" aria-label="סינון לפי סוג"><option value="all">כל הסוגים</option>${Object.entries(EVENT_NAMES).map(([v, n]) => `<option value="${v}"${app.filter === v ? " selected" : ""}>${n}</option>`).join("")}</select></div>
