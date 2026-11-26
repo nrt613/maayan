@@ -40,6 +40,9 @@ if stage == "www":
     faces = "".join('@font-face{font-family:"Rubik";src:url("%s") format("woff2");font-weight:300 900;font-style:normal;font-display:swap;unicode-range:%s}' % (f, ur) for f, ur in fonts)
     html = html.replace("<style>", "<style>" + faces, 1)
     assert "fonts.googleapis" not in html
+    # מספר הגרסה ב״על מעיין״ זהה למספר שבחנות (versionName / MARKETING_VERSION), ולא ״-review״ של גרסת האתר
+    html, nv = re.subn(r'const APP_VERSION = "[^"]+";', f'const APP_VERSION = "{version_name}";', html)
+    assert nv == 1
     (here / "www").mkdir(exist_ok=True)
     (here / "www" / "index.html").write_text(html, encoding="utf-8")
     print("www ready", len(html))
