@@ -25,6 +25,13 @@ if (contact && path.resolve(OUT).startsWith(ROOT + path.sep)) { console.error("�
 fs.mkdirSync(OUT, { recursive: true });
 const esc = s => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 const ltr = s => `<bdi dir="ltr">${esc(s)}</bdi>`;
+// מספר ההשוואות בשקופית נלקח מהרצה של verify.js, כדי שלא יתיישן
+const VERIFY = (() => {
+  const out = require("child_process").execFileSync(process.execPath, [path.join(ROOT, "verify.js")], { cwd: ROOT, encoding: "utf8" });
+  const m = out.match(/checks: (\d+), failures: (\d+)/);
+  if (!m || m[2] !== "0") throw new Error("verify.js: " + out.trim().split("\n").pop());
+  return Number(m[1]);
+})();
 
 const LINKS = {
   web: "https://nrt613.github.io/maayan/",
@@ -222,7 +229,7 @@ slide("record", `
         <li>${IC.check}<span><b>תפריט מהיר:</b> ראייה, הפסק, בדיקה, טבילה, אחר</span></li>
         <li>${IC.ring}<span><b>בלוח השנה:</b> לחיצה ארוכה על יום רושמת לאותו יום</span></li>
         <li>${IC.sun}<span><b>שעה ומקום</b> נשמרים בכל רישום; השעה קובעת את העונה</span></li>
-        <li>${IC.help}<span><b>״נמצא בבדיקה / בהתעוררות״:</b> חוששת לשתי העונות של היום, ומסמנת ״יש לשאול רב״</span></li>
+        <li>${IC.help}<span><b>״לא ידוע מתי התחיל (מצאתי בקימה או בבדיקה)״:</b> חוששת לשתי העונות של היום, ומסמנת ״יש לשאול רב״</span></li>
         <li>${IC.doc}<span><b>מחזורים קודמים:</b> אפשר להזין, כדי שהחישוב יתחיל מלא</span></li>
       </ul>
     </div>
@@ -411,7 +418,7 @@ slide("rigour vc", `
   <h2>בדיקות ודיוק</h2>
   <div class="nums">
     <div class="num"><strong>${require(path.join(ROOT, "src", "tests.js"))(M).tests.length}</strong><span>בדיקות אוטומטיות למנוע החישוב</span></div>
-    <div class="num"><strong>${ltr("168,451")}</strong><span>השוואות של הלוח העברי וזמני השמש מול מקורות חיצוניים — בלי כישלון</span></div>
+    <div class="num"><strong>${ltr(VERIFY.toLocaleString("en-US"))}</strong><span>השוואות של הלוח העברי וזמני השמש מול מקורות חיצוניים — בלי כישלון</span></div>
     <div class="num"><strong>99</strong><span>עמודי מפרט הלכתי מלא, שהוכן לבדיקת רב</span></div>
   </div>
   <div class="docs">
@@ -549,7 +556,7 @@ b{font-weight:600}
 .phone{position:relative;flex:none;margin:-14px 0 0;width:272px;padding:9px;border-radius:46px;background:#1f1a1e;box-shadow:0 30px 70px rgb(60 20 40 / .28),inset 0 0 0 2px #3b3438}
 .phone img{display:block;width:100%;border-radius:38px}
 .badge{position:absolute;transform:translate(-50%,-50%);width:34px;height:34px;border-radius:50%;background:var(--grad);color:#fff;font-weight:700;font-size:18px;display:flex;align-items:center;justify-content:center;box-shadow:0 0 0 3px #fff,0 6px 14px rgb(184 51 106 / .4)}
-.duo{flex:none;position:relative;width:440px;height:600px;margin-top:40px}
+.duo{flex:none;position:relative;width:440px;height:560px;margin-top:0}
 .duo .phone{position:absolute;margin:0;width:250px}
 .duo .back{right:4px;top:0;transform:rotate(3deg)}
 .duo .front{left:0;top:28px}

@@ -25,6 +25,13 @@ const OUT = process.env.MAAYAN_OUT ? path.resolve(process.env.MAAYAN_OUT) : HERE
 if (contact && path.resolve(OUT).startsWith(ROOT + path.sep)) { console.error("פרטי קשר אישיים: יש לכתוב אל MAAYAN_OUT מחוץ למאגר"); process.exit(1); }
 fs.mkdirSync(OUT, { recursive: true });
 const esc = s => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+// nombre de comparaisons lu dans la sortie de verify.js (pour ne pas vieillir)
+const VERIFY = (() => {
+  const out = require("child_process").execFileSync(process.execPath, [path.join(ROOT, "verify.js")], { cwd: ROOT, encoding: "utf8" });
+  const m = out.match(/checks: (\d+), failures: (\d+)/);
+  if (!m || m[2] !== "0") throw new Error("verify.js: " + out.trim().split("\n").pop());
+  return Number(m[1]);
+})();
 const he = s => `<bdi lang="he" dir="rtl">${esc(s)}</bdi>`;
 
 /* ---------- liens ---------- */
@@ -239,7 +246,7 @@ slide("rigour vc", `
   <h2>Rigueur</h2>
   <div class="nums">
     <div class="num"><strong>${require(path.join(ROOT, "src", "tests.js"))(M).tests.length}</strong><span>tests automatiques<br>du moteur de calcul</span></div>
-    <div class="num"><strong>168 000</strong><span>comparaisons du calendrier hébraïque et des heures solaires avec des références indépendantes · 0 échec</span></div>
+    <div class="num"><strong>${VERIFY.toLocaleString("fr-FR").replace(/\s/g, "\u202f")}</strong><span>comparaisons du calendrier hébraïque et des heures solaires avec des références indépendantes · 0 échec</span></div>
     <div class="num"><strong>99 p.</strong><span>spécification halakhique complète, préparée pour la relecture rabbinique</span></div>
   </div>
   <div class="docs">
