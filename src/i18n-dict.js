@@ -1076,6 +1076,7 @@ const MaayanDict = (() => {
     ["ראית בל׳ בחודש, ובחודש הבא אין ל׳.", "You saw on the 30th of the month, and next month has no 30th.", "Vous avez vu le 30 du mois, et le mois suivant n'a pas de 30.", "Vio el día 30 del mes, y el mes siguiente no tiene día 30."],
     ["בינתיים מעיין חוששת ל־{x}.", "Meanwhile Maayan keeps {x}.", "En attendant, Maayan tient compte du {x}.", "Mientras tanto Maayan tiene en cuenta el {x}."],
     ["בינתיים מעיין אינה מוסיפה עונת חודש, לפי הבחירה בהגדרות.", "Meanwhile Maayan does not add a monthly onah, as chosen in Settings.", "En attendant, Maayan n'ajoute pas de onah du mois, selon le choix dans les réglages.", "Mientras tanto Maayan no añade oná del mes, según lo elegido en Ajustes."],
+    ["{x} ו־{n}", "{x} and {n}", "{x} et {n}", "{x} y {n}"],
     ["אחרי הפלגה של {x} ימים באה הפלגה קצרה יותר, של {n} ימים.", "After an interval of {x} days came a shorter one, of {n} days.", "Après une haflaga de {x} jours est venue une plus courte, de {n} jours.", "Después de una haflagá de {x} días vino una más corta, de {n} días."],
     ["בינתיים מעיין אינה חוששת ל־{x}.", "Meanwhile Maayan does not keep {x}.", "En attendant, Maayan ne tient pas compte du {x}.", "Mientras tanto Maayan no tiene en cuenta el {x}."],
     ["הדם נמצא בהתעוררות, ולא ידוע מתי התחיל.", "The blood was found on waking, and it is not known when it began.", "Le sang a été trouvé au réveil, et on ne sait pas quand il a commencé.", "La sangre se encontró al despertar, y no se sabe cuándo empezó."],

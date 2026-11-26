@@ -583,6 +583,12 @@ const MaayanTests = (M) => {
     const v2 = rv(r2, "ask-uprooted-haflagah"); askOk(v2);
     for (const p of kr) a.ok(v2.detail.includes(M.hebrew(p.date).split(" ").slice(0, -1).join(" ")), `התאריך ${M.hebrew(p.date)} בפירוט`);
   });
+  test("יש לשאול רב", "ניסוח: כמה הפלגות ארוכות נכתבות ״30 ו־29״ ולא ״30, 29״", () => {
+    const f0 = N(1, 1), r = calculate(presetState("ashkenaz", [0, 29, 57, 83].map(d => event("flow", M.addDays(f0, d)))), NOW);
+    const v = rv(r, "ask-uprooted-haflagah"); askOk(v);
+    a.equal(v.situation, "אחרי הפלגה של 30 ו־29 ימים באה הפלגה קצרה יותר, של 27 ימים.");
+    a.equal(rv(calculate(presetState("ashkenaz", [0, 29, 55].map(d => event("flow", M.addDays(f0, d)))), NOW), "ask-uprooted-haflagah").situation, "אחרי הפלגה של 30 ימים באה הפלגה קצרה יותר, של 27 ימים.");
+  });
   test("יש לשאול רב", "נמצא בהתעוררות: שתי העונות של אותו יום, ההמתנה מהיום המאוחר, ו-ask-waking", () => {
     const d = N(10), plain = event("flow", d, "07:30"), wake = event("flow", d, "07:30", { foundOnWaking: true });
     a.equal(stamp(wake).onah, "day");

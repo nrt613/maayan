@@ -841,7 +841,7 @@ const Maayan = (() => {
             const dates = [...new Set([...extra.map(x => x.target), ...long.map(x => last.s.abs + x.v - 1)])].sort((p, q) => p - q).map(hs);
             const values = [...new Set([...extra, ...long].map(x => x.v))].sort((p, q) => q - p);
             ask("ask-uprooted-haflagah", "הפלגה ארוכה שנעקרה בהפלגה קצרה ממנה",
-              `אחרי הפלגה של ${values.join(", ")} ימים באה הפלגה קצרה יותר, של ${lastV} ימים.`, `בינתיים מעיין אינה חוששת ל־${dates.join(", ")}.`,
+              `אחרי הפלגה של ${values.length > 1 ? `${values.slice(0, -1).join(", ")} ו־${values.at(-1)}` : values[0]} ימים באה הפלגה קצרה יותר, של ${lastV} ימים.`, `בינתיים מעיין אינה חוששת ל־${dates.join(", ")}.`,
               [...new Set([...extra.flatMap(x => x.ids), ...long.flatMap(x => x.ids), last.e.id])], ["rema189_13", "shach189_31", "secCarryTaz", "secCarryMajority"]);
           }
         }
