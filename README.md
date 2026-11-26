@@ -50,7 +50,7 @@ python3 build.py && cp dist/maayan.html index.html && rm -rf dist
 מריצים את שלושתן לפני כל דחיפה:
 ```
 node -e 'const M=require("./src/core.js");console.log(require("./src/tests.js")(M).run().filter(t=>!t.ok))'   # → []
-node verify.js              # כ-182,000 השוואות → failures: 0
+node verify.js              # כ-181,000 השוואות → failures: 0
 node tests/widget.test.js   # דיסקרטיות, נעילה, שפות ותרחישים בסיכום הווידג׳ט
 ```
 - כל שינוי ב-`src/core.js` מתחיל בבדיקה נכשלת ב-`src/tests.js`, ורק אחר כך התיקון. לא משנים התנהגות הלכתית או ערכי שיטות בלי הוראה.
@@ -76,4 +76,9 @@ node docs/halacha/build.js --no-pdf   # HTML בלבד
 - הצעדים הידניים (חשבונות, טפסים, הצהרות) ב-`store/CHECKLIST.md`, והתשובות לטפסים ב-`store/declarations.md`.
 
 ## התקנה במחשב Windows בלי אינטרנט
-`download/Maayan-Setup.exe` — לחיצה כפולה מתקינה את מעיין עם אייקון בשולחן העבודה ובתפריט התחל. קוד המקור ב-`windows/` (נבנה ב-Go: `llvm-windres` למשאבים ואז `GOOS=windows go build -ldflags "-H windowsgui"`).
+`download/Maayan-Setup.exe` — לחיצה כפולה מתקינה את מעיין עם אייקון בשולחן העבודה ובתפריט התחל. קוד המקור ב-`windows/` (Go). אחרי כל שינוי באפליקציה מעדכנים את שני הקבצים:
+```
+python3 build.py && cp dist/maayan-offline.html download/maayan.html && cp dist/maayan-offline.html windows/maayan.html
+cd windows && GOOS=windows GOARCH=amd64 go build -ldflags "-H windowsgui" -o ../download/Maayan-Setup.exe . && rm maayan.html
+```
+המשאבים (סמל, מניפסט, פרטי גרסה) כבר ב-`rsrc_windows_amd64.syso`; רק אם הסמל או `app.rc` משתנים בונים אותו מחדש ב-`llvm-windres`. הבדיקה ב-Windows רצה ב-workflow ‏`windows-installer-test`.
