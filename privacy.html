@@ -7,24 +7,25 @@
 <meta name="description" content="מדיניות הפרטיות של מעיין: אין איסוף נתונים, הכול נשמר במכשיר בלבד. Maayan privacy policy: no data collected, everything stays on your device.">
 <link rel="icon" href="icons/icon-192.png">
 <style>
-@font-face{font-family:"Heebo";src:url("fonts/heebo.ttf") format("truetype");font-weight:100 900;font-display:swap}
-@font-face{font-family:"Bellefair";src:url("fonts/bellefair.ttf") format("truetype");font-weight:400;font-display:swap}
-:root{color-scheme:light;--bg:#f4f1f2;--surface:#fdfcfc;--line:#e3dbdf;--ink:#262125;--muted:#6f6168;--accent:#7f5370;--accent-soft:#efe4ec;--accent-strong:#6b4560;--detail:#7f9583}
+@font-face{font-family:"Rubik";src:url("fonts/rubik-hebrew.woff2") format("woff2");font-weight:300 900;font-display:swap;unicode-range:U+0307-0308,U+0590-05FF,U+200C-2010,U+20AA,U+25CC,U+FB1D-FB4F}
+@font-face{font-family:"Rubik";src:url("fonts/rubik-latin.woff2") format("woff2");font-weight:300 900;font-display:swap;unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+2000-206F,U+20AC,U+2122,U+2212,U+FEFF,U+FFFD}
+:root{color-scheme:light;--bg:#fbf8f9;--surface:#fff;--line:#ece4e8;--ink:#1f1a1e;--muted:#6b6270;--accent:#b8336a;--accent-soft:#fbe9f0;--accent-strong:#8e2452}
 *{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--ink);font-family:"Heebo","Segoe UI",Arial,sans-serif;font-size:16px;line-height:1.7;-webkit-font-smoothing:antialiased}
-.wrap{max-width:760px;margin:0 auto;padding:32px 16px 64px}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Rubik",system-ui,-apple-system,"Segoe UI",Arial,sans-serif;font-size:16px;line-height:1.65;-webkit-font-smoothing:antialiased}
+.wrap{max-width:760px;margin:0 auto;padding:28px 16px 64px}
 header{display:flex;align-items:center;gap:14px;margin-bottom:8px}
-header img{width:52px;height:52px;border-radius:14px;border:1px solid var(--line);background:#fff}
-h1{font-family:"Bellefair","Times New Roman",serif;font-weight:400;font-size:34px;margin:0;color:var(--accent-strong);line-height:1.2}
-.sub{color:var(--muted);margin:0}
-nav{margin:18px 0 24px;display:flex;gap:10px;flex-wrap:wrap}
-nav a{color:var(--accent);background:var(--accent-soft);padding:6px 14px;border-radius:99px;text-decoration:none;font-weight:500;font-size:14px}
-section{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:22px 22px 10px;margin-bottom:22px}
-h2{font-family:"Bellefair","Times New Roman",serif;font-weight:400;font-size:26px;margin:0 0 6px;color:var(--accent-strong)}
-h3{font-size:16.5px;margin:20px 0 4px;color:var(--accent)}
+header img{width:56px;height:56px;border-radius:14px;box-shadow:0 6px 18px rgb(184 51 106 / .22)}
+h1{font-weight:700;font-size:30px;margin:0;line-height:1.15;letter-spacing:-.02em}
+.sub{color:var(--muted);margin:2px 0 0}
+nav{margin:18px 0 22px;display:flex;gap:8px;flex-wrap:wrap}
+nav a{color:var(--accent-strong);background:var(--accent-soft);min-height:44px;display:inline-flex;align-items:center;padding:0 18px;border-radius:99px;text-decoration:none;font-weight:500;font-size:15px}
+section{background:var(--surface);border-radius:22px;padding:22px 20px 12px;margin-bottom:20px;box-shadow:0 1px 2px rgb(60 20 40 / .04),0 4px 14px rgb(60 20 40 / .05)}
+h2{font-weight:700;font-size:24px;margin:0 0 4px;letter-spacing:-.015em}
+h3{font-size:16.5px;font-weight:600;margin:22px 0 4px;color:var(--accent-strong)}
 p,li{margin:0 0 10px}
 ul{padding-inline-start:22px;margin:0 0 10px}
-.summary{background:var(--accent-soft);border-radius:12px;padding:12px 16px;margin:12px 0 4px;font-weight:500;color:var(--accent-strong)}
+.summary{background:var(--accent-soft);border-radius:14px;padding:12px 16px;margin:12px 0 4px;font-weight:500;color:var(--accent-strong)}
 .date{color:var(--muted);font-size:14px}
 [dir=ltr]{text-align:left}
 footer{color:var(--muted);font-size:14px;text-align:center}
@@ -41,7 +42,7 @@ a{color:var(--accent)}
 
 <section id="he">
   <h2>מדיניות פרטיות</h2>
-  <p class="date">בתוקף מ־19 בנובמבר 2026</p>
+  <p class="date">בתוקף מ־26 בנובמבר 2026</p>
   <p class="summary">בקצרה: מעיין לא אוספת שום מידע. היומן שלך נשמר רק במכשיר שלך, ואף אחד אחר, גם לא המפתח, לא יכול לראות אותו.</p>
 
   <h3>איזה מידע נאסף?</h3>
@@ -58,6 +59,9 @@ a{color:var(--accent)}
 
   <h3>נעילה בקוד וזיהוי ביומטרי</h3>
   <p>אפשר לנעול את האפליקציה בקוד. הקוד עצמו לא נשמר: במכשיר נשמר רק גיבוב מוצפן שלו (PBKDF2 עם מלח אקראי). אם מפעילים פתיחה בטביעת אצבע או ב-Face ID, הזיהוי נעשה כולו על ידי מערכת ההפעלה, והאפליקציה מקבלת רק תשובה של הצליח/לא הצליח. האפליקציה לא ניגשת למידע ביומטרי, לא שומרת אותו ולא שולחת אותו. מי ששכחה את הקוד יכולה רק למחוק את כל הנתונים מהמכשיר ולשחזר מגיבוי מוצפן.</p>
+
+  <h3>וידג׳ט במסך הבית (אנדרואיד)</h3>
+  <p>הווידג׳ט כבוי עד שמפעילים אותו בהגדרות. כשהוא פעיל, האפליקציה כותבת במכשיר סיכום קצר לשלושת הימים הקרובים כדי שהווידג׳ט יתעדכן גם כשהיא סגורה. הסיכום נשאר במכשיר. כברירת מחדל הנוסח דיסקרטי (״תזכורת אישית״), וכשהנעילה בקוד פעילה הוא תמיד דיסקרטי. הווידג׳ט גלוי לכל מי שרואה את מסך הבית.</p>
 
   <h3>שיתוף וגיבוי</h3>
   <p>אם בוחרים לייצא או לגבות את היומן, נוצר קובץ במכשיר, ואת/ה מחליט/ה לאן לשלוח או לשמור אותו (למשל בדוא״ל או בתיקייה). מרגע שהקובץ נשלח, הוא כפוף לפרטיות של השירות שבחרת. הגיבוי יכול להיות מוצפן בסיסמה שרק את/ה יודע/ת.</p>
@@ -84,7 +88,7 @@ a{color:var(--accent)}
 
 <section id="en" lang="en" dir="ltr">
   <h2>Privacy Policy</h2>
-  <p class="date">Effective November 19, 2026</p>
+  <p class="date">Effective November 26, 2026</p>
   <p class="summary">In short: Maayan collects no data. Your diary is stored only on your device, and no one else, including the developer, can see it.</p>
 
   <h3>What data is collected?</h3>
@@ -98,6 +102,12 @@ a{color:var(--accent)}
 
   <h3>Notifications</h3>
   <p>Reminders are local notifications scheduled by the app on your device. There is no push-notification server. Notification text is discreet ("Personal reminder") and reveals no details.</p>
+
+  <h3>PIN lock and biometrics</h3>
+  <p>You can lock the app with a PIN. The PIN itself is never stored: only a salted hash of it (PBKDF2) is kept on the device. If you turn on fingerprint or Face ID unlock, recognition is done entirely by the operating system, and the app only receives success or failure. The app never accesses, stores or sends biometric data. If you forget the PIN, the only option is to delete all data on the device and restore from an encrypted backup.</p>
+
+  <h3>Home-screen widget (Android)</h3>
+  <p>The widget is off until you turn it on in Settings. When it is on, the app writes a short summary for the next three days on the device so the widget can update while the app is closed. The summary stays on the device. Its wording is discreet by default ("Personal reminder"), and always discreet while the PIN lock is on. The widget is visible to anyone who sees your home screen.</p>
 
   <h3>Sharing and backup</h3>
   <p>If you choose to export or back up your diary, a file is created on your device and you decide where to send or save it (for example by email or to a folder). Once sent, that file is subject to the privacy practices of the service you chose. Backups can be encrypted with a password only you know.</p>

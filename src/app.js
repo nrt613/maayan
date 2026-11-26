@@ -8,6 +8,8 @@
   const STORE_KEY = "maayan.v1.diary", SEEN_KEY = "maayan.v1.seen", LANG_KEY = "maayan.v1.lang";
   // נעילה בקוד (רק גיבוב PBKDF2 עם מלח, אף פעם לא הקוד עצמו), מונה ניסיונות שגויים, ותזכורת לגיבוי
   const LOCK_KEY = "maayan.v1.lock", LOCKFAIL_KEY = "maayan.v1.lockfail", BACKUP_KEY = "maayan.v1.backup";
+  // כרטיס ״בחרי את המנהג שלך״ ליומן קיים עם ״התאמה אישית״: מוצג עד שסוגרים אותו, פעם אחת
+  const METHODCARD_KEY = "maayan.v1.methodcard";
   const CAP = window.Capacitor, NATIVE = !!(CAP && typeof CAP.isNativePlatform === "function" && CAP.isNativePlatform()), PL = NATIVE ? CAP.Plugins : {};
   const TERMS_VERSION = "2026-11";
   const $ = sel => document.querySelector(sel);
@@ -59,6 +61,7 @@
     upload: '<path d="M12 15V4M7.5 8.5 12 4l4.5 4.5M5 20h14"/>',
     lock: '<path class="f" d="M8 10.5h8a3 3 0 0 1 3 3v4a3 3 0 0 1-3 3H8a3 3 0 0 1-3-3v-4a3 3 0 0 1 3-3z"/><rect x="5" y="10.5" width="14" height="10" rx="3"/><path d="M8.5 10.5V8a3.5 3.5 0 0 1 7 0v2.5M12 14.5v2"/>',
     help: '<circle cx="12" cy="12" r="9"/><path d="M9.6 9.4a2.5 2.5 0 0 1 4.8.9c0 1.7-2.4 2.1-2.4 3.7"/><path class="dot" d="M12 17.2h.01"/>',
+    globe: '<circle class="f" cx="12" cy="12" r="8.6"/><circle cx="12" cy="12" r="8.6"/><path d="M3.6 12h16.8"/><path d="M12 3.4c2.3 2.4 3.4 5.3 3.4 8.6s-1.1 6.2-3.4 8.6c-2.3-2.4-3.4-5.3-3.4-8.6S9.7 5.8 12 3.4z"/>',
     info: '<circle cx="12" cy="12" r="9"/><path d="M12 11v5.5"/><path class="dot" d="M12 7.8h.01"/>',
     list: '<path d="M9.5 6.5H20M9.5 12H20M9.5 17.5H20"/><path class="dot" d="M4.8 6.5h.01M4.8 12h.01M4.8 17.5h.01"/>',
     flask: '<path d="M9.5 3.5h5M10.5 3.5v5.3L5.3 17.7a1.9 1.9 0 0 0 1.7 2.8h10a1.9 1.9 0 0 0 1.7-2.8L13.5 8.8V3.5M7.6 14.5h8.8"/>',
@@ -85,7 +88,7 @@
   };
   function loadPersonal() {
     const raw = storage.get(STORE_KEY);
-    if (!raw) return M.emptyState();
+    if (!raw) return M.newDiary();
     try { return M.parseState(JSON.parse(raw)); } catch { app.loadWarning = "היומן השמור במכשיר פגום ולא נטען. הנתונים לא נמחקו."; app.blockSave = true; return M.emptyState(); }
   }
   const NAV = [
@@ -151,7 +154,7 @@
     const prefix = p.onah === "day" ? "" : "ליל ";
     return `<details class="plan k-${p.kind} tone-${planTone(p.kind)}${p.done ? " done" : ""}"${open ? " open" : ""}>
       <summary><span class="plan-ic">${I(planIcon(p), 18)}</span>
-        <span class="plan-name"><strong>${esc(planTitle(p))}</strong><small><span class="hebdate">${prefix}${esc(planHebrew(p))}</span>${compact ? "" : ` · ${esc(civilLabel(p.date, true))} · ${esc(c.name)}`}</small></span>
+        <span class="plan-name"><strong>${esc(planTitle(p))}</strong><small><span class="hebdate">${prefix}${esc(planHebrew(p))}</span>${compact ? "" : ` · ${esc(civilLabel(p.date, true))}${p.cityId !== state().settings.cityId ? ` · ${esc(c.name)}` : ""}`}</small></span>
         <time dir="ltr">${start}</time>${I("left", 16)}</summary>
       <div class="plan-more"><p>${esc(p.reason)}</p>
         <small>${onahLabel(p.onah)} · ${p.end ? `מ-${start} עד ${timeInZone(new Date(p.end), c.tz)}` : `מ-${start}`} · ${esc(c.name)}</small>
@@ -234,7 +237,7 @@
     app.locked = false; app.lock = null; app.awayOk = 0;
     app.modal = app.lockedModal; app.lockedModal = null;
     render();
-    if (!app.modal && !storage.get(SEEN_KEY) && !app.personal.events.length) { app.modal = { kind: "welcome" }; renderModal(); }
+    firstRun();
   }
   async function bioAuth() {
     const B = BIO(); if (!B) return false;
@@ -351,16 +354,16 @@
       <section class="hero" data-phase="${heroPhase}">
         <div class="hero-row"><div class="hero-copy">
           <span class="chip-phase"><i class="phase-dot"></i>${first ? "היומן שלך ריק" : esc(phase === "planned" && mikvahNight ? "ליל הטבילה" : PHASE_NAMES[phase])}</span>
-          <h2>${esc(C[0])}</h2><p>${esc(first ? "כדאי להתחיל מהזנת המחזורים האחרונים (לפחות שניים), כדי שההפלגה ועונת החודש יחושבו נכון. אפשר גם להתאים קודם את שיטת החישוב." : C[1])}</p>
+          <h2>${esc(C[0])}</h2><p>${esc(first ? "כדאי להתחיל מהזנת המחזורים האחרונים (לפחות שניים), כדי שההפלגה ועונת החודש יחושבו נכון." : C[1])}</p>
         </div>${ring}</div>${days}
-        ${first ? `<div class="first-btns"><button class="btn" data-act="cycle">${I("calendar", 18)}הזנת מחזורים קודמים</button><div class="row-btns"><button class="btn ghost sm" data-go="prefs">${I("sliders", 16)}שיטת החישוב</button><button class="btn ghost sm" data-act="demo">${I("flask", 16)}יומן לדוגמה</button></div></div>` : ""}
+        ${first ? `<div class="first-btns"><button class="btn" data-act="cycle">${I("calendar", 18)}הזנת מחזורים קודמים</button><div class="row-btns"><button class="btn ghost sm" data-go="prefs">${I("sliders", 16)}המנהג שלי</button><button class="btn ghost sm" data-act="demo">${I("flask", 16)}יומן לדוגמה</button></div></div>` : ""}
         ${nextLine}
         ${prepNow ? prepButton(st, "prep-btn") : ""}
       </section>
       ${backupNudge(st)}
-      ${first ? `<section class="card method"><div class="card-h">${I("scale")}<div><h3>שיטת החישוב שלך</h3><p>לבחור לפי ההנחיה שקיבלת. אפשר לשנות בכל עת</p></div></div>
-        ${methodChooser(st.settings, "first")}
-        <ul class="method-sum">${M.settingsSummary(st.settings).filter(x => /^(שיטה|המתנה|הפלגה|עונה בינונית|יום 31|אור זרוע)/.test(x)).map(x => `<li>${esc(x)}</li>`).join("")}</ul>
+      ${methodCard(st)}
+      ${first && st.settings.methodChosen && !methodCardDue(st) ? `<section class="card method"><div class="card-h">${I("scale")}<div><h3>המנהג שלי</h3><p>${esc(M.SETTING_LABELS.method[st.settings.method] || M.SETTING_LABELS.method.custom)}${M.presetDiff(st.settings).length ? " · הותאם אישית" : ""}</p></div></div>
+        <ul class="method-sum">${M.settingsSummary(st.settings).filter(x => /^(המתנה|הפלגה|עונה בינונית|יום 31|אור זרוע)/.test(x)).map(x => `<li>${esc(x)}</li>`).join("")}</ul>
         <button class="btn ghost full" data-go="prefs">${I("sliders", 17)}התאמה אישית לפי הוראת הרב</button></section>` : ""}
       ${r.reviews.length ? `<button class="notice${askFirst(r.reviews)[0].ask ? " ask" : ""}" data-go="journal"><span class="notice-ic">${I("help", 20)}</span><span><strong>${r.reviews.length} ${r.reviews.length === 1 ? "נקודה לבירור" : "נקודות לבירור"}</strong><small>${esc(askFirst(r.reviews).slice(0, 2).map(reviewHead).join(" · "))}</small></span>${I("left", 16)}</button>` : ""}
       <section class="card upcoming"><div class="card-h"><h3>מועדים קרובים</h3><button class="link" data-go="dates">הכול ${I("left", 14)}</button></div>
@@ -437,7 +440,7 @@
       .filter(e => (app.filter === "all" || e.type === app.filter) && (!q || `${EVENT_NAMES[e.type]} ${e.date} ${e.note} ${hebrew(e.date)}`.toLowerCase().includes(q)));
     return `${r.reviews.length ? `<section class="card reviews"><div class="card-h">${I("help")}<h3>נקודות לבירור <span class="count">${r.reviews.length}</span></h3></div>
       <p class="fine">המערכת אינה מכריעה בנקודות אלה. כל נקודה מפנה לרישומים הנוגעים בה.</p>
-      ${askFirst(r.reviews).map(v => `<details${v.ask ? ` class="ask" data-review="${esc(v.id)}"` : ` data-review="${esc(v.id)}"`}><summary>${v.ask ? `<span class="ask-ic">${I("scale", 16)}</span>` : ""}<span class="rv-t">${esc(v.title)}</span>${I("left", 15)}</summary>${reviewBody(v)}${v.eventIds.map(id => { const e = st.events.find(x => x.id === id); return e ? `<button class="link" data-edit="${id}">${esc(EVENT_NAMES[e.type])} · ${esc(civilLabel(e.date, true))} ${I("pencil", 13)}</button>` : ""; }).join("")}</details>`).join("")}</section>` : ""}
+      ${askFirst(r.reviews).map(v => `<details${v.ask ? ` class="ask" data-review="${esc(v.id)}"` : ` data-review="${esc(v.id)}"`}><summary>${v.ask ? `<span class="ask-ic">${I("scale", 16)}</span>` : ""}${v.ask ? `<span class="rv-t"><small class="ask-l">${esc(v.title)}</small>${esc(v.situation)}</span>` : `<span class="rv-t">${esc(v.title)}</span>`}${I("left", 15)}</summary>${v.ask ? `<p class="ask-now">${esc(v.meanwhile)}</p>` : reviewBody(v)}${v.eventIds.map(id => { const e = st.events.find(x => x.id === id); return e ? `<button class="link" data-edit="${id}">${esc(EVENT_NAMES[e.type])} · ${esc(civilLabel(e.date, true))} ${I("pencil", 13)}</button>` : ""; }).join("")}</details>`).join("")}</section>` : ""}
     <section class="card"><div class="card-h">${I("book")}<h3>רישומים <span class="count">${st.events.length}</span></h3><button class="link" data-act="report">${I("file", 15)}דוח לבירור</button></div>
       <div class="filters"><label class="search">${I("search", 17)}<input id="q" type="search" placeholder="חיפוש לפי תאריך או הערה" value="${esc(app.query)}" aria-label="חיפוש"></label>
       <select id="filter" aria-label="סינון לפי סוג"><option value="all">כל הסוגים</option>${Object.entries(EVENT_NAMES).map(([v, n]) => `<option value="${v}"${app.filter === v ? " selected" : ""}>${n}</option>`).join("")}</select></div>
@@ -468,30 +471,30 @@
       <button class="btn ghost full" type="button" data-act="locate">${I("pin", 17)}זיהוי המיקום שלי</button>
       ${(state().places || []).map(pl => `<div class="trip"><span><strong>${esc(pl.name)}</strong><small dir="ltr">${pl.lat.toFixed(3)}, ${pl.lon.toFixed(3)} · ${esc(pl.tz)}</small></span><button class="icon-btn" type="button" data-delplace="${pl.id}" aria-label="מחיקת מקום">${I("trash", 17)}</button></div>`).join("")}
       <p class="fine">זיהוי המיקום נעשה רק בלחיצה, והמיקום נשמר במכשיר בלבד. לכל רישום נשמר המקום שלו, ושינוי העיר אינו משנה רישומים קודמים.</p></section>
-    <section class="card"><div class="card-h">${I("scale")}<div><h3>שיטת החישוב</h3><p>לבחור לפי ההנחיה שקיבלת</p></div></div>
+    <section class="card"><div class="card-h">${I("scale")}<div><h3>המנהג שלי</h3><p>לבחור לפי ההנחיה שקיבלת</p></div></div>
       ${methodChooser(s, "prefs")}
       <p class="mc-sum">${esc(M.settingsSummary(s)[0])}</p>
       ${methodNotes(s)}
       <details class="custom-set" data-keep="custom"${app.keep.has("custom") ? " open" : ""}><summary><span>התאמה אישית לפי הוראת הרב</span>${M.presetDiff(s).length ? `<span class="count">הותאם אישית</span>` : ""}${I("left", 15)}</summary>
-      <p class="fine">הערכים נקבעים לפי השיטה שנבחרה. אפשר לשנות כל הגדרה לפי הוראת הרב.</p>
-      ${sel("wait", "המתנה לפני שבעה נקיים", s, [["five", "חמישה ימים מתחילת הנידה"], ["four", "ארבעה ימים מתחילת הנידה — הרב עובדיה יוסף"], ["four-from-relations", "ארבעה ימים ממועד היחסים — לפי הוראה"]])}
-      ${sel("haflagah", "שיטת חישוב ההפלגה", s, [["days", "ימים בין תחילות הווסתות"], ["chabad-onot", "עונות מהפסק טהרה — חב״ד"]])}
-      ${sel("beinonit", "עונה בינונית ביום 30", s, [["same", "אותה עונה שבה התחילה הווסת"], ["both", "שתי העונות — לילה ויום"]])}
-      ${tog("day31", "הוספת יום 31", "לפי המנהג או ההנחיה", s)}<div class="oz-box">${tog("orZarua", "עונת אור זרוע", "העונה שלפני כל עונת פרישה — לפי הוראת הרב. כבויה כברירת מחדל.", s)}</div>
-      ${tog("carryLongIntervals", "שימור הפלגות ארוכות", "בחישוב ימים, כשווסת חדשה מקדימה את החשש הקודם", s)}
-      ${tog("carryMonthly", "שימור עונת חודש בזמן דימום", "דורש תיעוד מלא של הווסת וההפסק", s)}
-      ${sel("missingMonthly", "יום ל׳, כשבחודש הבא אין ל׳", s, [["first-next-month", "א׳ בחודש שאחרי החודש החסר (מומלץ)"], ["skip", "בלי עונת חודש באותו חודש"]])}
-      ${sel("bedikot", "תזכורות לבדיקות", s, [["twice", "בוקר וערב בכל אחד משבעת הימים"], ["first-last", "ראשון ושביעי בלבד — לפי הוראה"]])}
+      <p class="fine">הערכים נקבעים לפי המנהג שנבחר. אפשר לשנות כל הגדרה לפי הוראת הרב.</p>
+      ${sel("wait", "ימי המתנה לפני ההפסק", s, [["five", "חמישה ימים"], ["four", "ארבעה ימים"], ["four-from-relations", "ארבעה ימים מהיחסים האחרונים (לפי הוראה)"]])}
+      ${sel("haflagah", "ספירת ההפלגה", s, [["days", "בימים"], ["chabad-onot", "בעונות, מההפסק (חב״ד)"]])}
+      ${sel("beinonit", "יום 30", s, [["same", "רק העונה שבה התחילה הווסת"], ["both", "יממה שלמה (לילה ויום)"]])}
+      ${tog("day31", "לחשוש גם ליום 31", "לפי המנהג או ההנחיה", s)}<div class="oz-box">${tog("orZarua", "אור זרוע (גם העונה שלפני)", "העונה שלפני כל עונת פרישה, לפי הוראת הרב", s)}</div>
+      ${tog("carryLongIntervals", "הפלגה ארוכה נשארת גם אחרי הפלגה קצרה", "בספירה בימים, כשווסת חדשה מקדימה את החשש הקודם", s)}
+      ${tog("carryMonthly", "עונת חודש שחלה בימי הווסת", "נשמרת. דורש תיעוד מלא של הווסת וההפסק", s)}
+      ${sel("missingMonthly", "ראתה בל׳, ובחודש הבא אין ל׳", s, [["first-next-month", "א׳ בחודש שאחריו"], ["skip", "בלי עונת חודש"]])}
+      ${sel("bedikot", "תזכורות לבדיקות", s, [["twice", "בוקר וערב, כל יום"], ["first-last", "ביום הראשון וביום השביעי (לפי הוראה)"]])}
       ${sel("nightfall", "צאת הכוכבים", s, [["8.5", "8.5° מתחת לאופק"], ["7.083", "7.083° מתחת לאופק"], ["13.5z", "13.5 דקות זמניות אחרי השקיעה (הגאונים)"], ["18m", "18 דקות אחרי השקיעה"], ["20m", "20 דקות אחרי השקיעה"]])}
-      ${sel("beinHashmashot", "ראייה סמוך לשקיעה או בין השמשות", s, [["both", "לחומרא: מועדים לשתי העונות"], ["flag", "השעיית החישוב עד בירור"]])}
-      ${sel("hefsekTwilight", "הפסק טהרה אחרי השקיעה", s, [["before-sunset", "רק הפסק לפני השקיעה"], ["ovadia", "בדיעבד עד 13.5 דקות זמניות — הרב עובדיה יוסף"]])}
-      ${s.method !== "custom" ? `<button type="button" class="link mc-none" data-method="custom">${I("sliders", 15)}בלי שיטה מוכנה: כל ההגדרות ידנית</button>` : ""}</details>
+      ${sel("beinHashmashot", "ראייה סמוך לשקיעה או בין השמשות", s, [["both", "לחשוש לשתי העונות"], ["flag", "לסמן לבירור, בלי חישוב"]])}
+      ${sel("hefsekTwilight", "הפסק טהרה אחרי השקיעה", s, [["before-sunset", "רק לפני השקיעה"], ["ovadia", "בדיעבד, עד 13.5 דקות זמניות אחרי השקיעה"]])}
+      ${s.method !== "custom" ? `<button type="button" class="link mc-none" data-method="custom">${I("sliders", 15)}בלי מנהג מוכן: כל ההגדרות ידנית</button>` : ""}</details>
       ${sel("special", "מצב מיוחד", s, [["regular", "מחזור רגיל"], ["pregnancy", "היריון"], ["postpartum", "אחרי לידה"], ["nursing", "הנקה"], ["hormonal", "טיפול הורמונלי / אמצעי מניעה"]])}
       <p class="fine">במצב מיוחד החישובים הרגילים מושעים, ואפשר לרשום עונות לפי הוראה.</p>
-      <label class="field" for="s-methodNote">ממי ההנחיות<textarea id="s-methodNote" name="methodNote" rows="2" maxlength="1000" placeholder="שם מורה ההוראה או המנהג">${esc(s.methodNote)}</textarea></label></section>
+      <label class="field" for="s-methodNote"><span>שם הרב או המדריכה <span class="opt">לא חובה</span></span><textarea id="s-methodNote" name="methodNote" rows="2" maxlength="1000" placeholder="למשל: הרב של הקהילה, או מדריכת הכלות">${esc(s.methodNote)}</textarea></label></section>
     <section class="card"><div class="card-h">${I("bell")}<div><h3>תזכורות</h3></div></div>
       ${tog("remindersEnabled", "התראות כשהיומן פתוח", "דורש הרשאה מהדפדפן", s)}${tog("neutralReminders", "נוסח דיסקרטי", "״תזכורת אישית״ בלי פירוט", s)}
-      <div class="pair"><label class="field" for="s-reminderMinutes">דקות לפני השקיעה<input id="s-reminderMinutes" name="reminderMinutes" type="number" min="5" max="120" value="${s.reminderMinutes}" inputmode="numeric"></label>
+      <div class="pair end"><label class="field" for="s-reminderMinutes">תזכורת לפני השקיעה (דקות)<input id="s-reminderMinutes" name="reminderMinutes" type="number" min="5" max="120" value="${s.reminderMinutes}" inputmode="numeric"></label>
       <label class="field" for="s-morningTime">שעת בדיקת בוקר<input id="s-morningTime" name="morningTime" type="time" value="${s.morningTime}"></label></div></section>${WIDGET_FIELDS(s)}`;
   /* ---------- וידג׳ט למסך הבית (src/widget.js): רק באנדרואיד וביומן האישי; כבוי כברירת מחדל ---------- */
   const WIDGET_FIELDS = s => !(NATIVE && CAP.getPlatform && CAP.getPlatform() === "android" && app.mode === "personal") ? "" : `
@@ -504,12 +507,12 @@
     sefard: "לפי פסקי טהרת הבית.",
     "sefard-bic": "כמו הרב עובדיה, ובנוסף אור זרוע.",
     ashkenaz: "יום 30 ו־31, ואור זרוע.",
-    "ashkenaz-kreiti": "כמו עיקר הדין, והעונה הבינונית יממה שלמה.",
+    "ashkenaz-kreiti": "כמו הרגיל, והעונה הבינונית יממה שלמה.",
     chabad: "לפי שולחן ערוך הרב.",
   };
   /** בחירת שיטה בשני שלבים: מה המנהג (ספרדי / אשכנזי / חב״ד), ואז לפי מי. בחב״ד אין שלב שני. */
-  function methodChooser(s, where) {
-    const P = M.METHOD_PRESETS, fam = app.methodFamily || M.methodFamily(s.method), F = M.METHOD_FAMILIES.find(f => f.id === fam);
+  function methodChooser(s, where, family) {
+    const P = M.METHOD_PRESETS, fam = family !== undefined ? family : app.methodFamily || M.methodFamily(s.method), F = M.METHOD_FAMILIES.find(f => f.id === fam);
     const card = m => `<button type="button" class="mc-card" role="radio" aria-checked="${s.method === m}" data-method="${m}"><span class="mc-dot" aria-hidden="true"></span><span class="mc-body"><strong>${esc(P[m].name)}</strong><small>${esc(METHOD_LINES[m])}</small></span></button>`;
     const one = m => `<div class="mc-card on mc-only"><span class="mc-body"><strong>${esc(P[m].name)}</strong><small>${esc(METHOD_LINES[m])}</small></span></div>`;
     return `<div class="mchoose">
@@ -521,6 +524,7 @@
   }
   function chooseMethod(m) {
     const st = state(); app.methodFamily = null;
+    if (m === "custom") dismissMethodCard();
     if (st.settings.method === m && !M.presetDiff(st.settings).length) return render();
     try { commit({ ...st, settings: M.applyPreset(st.settings, m) }); } catch (err) { toast(err.message); render(); }
   }
@@ -529,9 +533,48 @@
     if (F.methods.length === 1) return chooseMethod(F.methods[0]);
     app.methodFamily = M.methodFamily(state().settings.method) === id ? null : id; render();
   }
+  /* ---------- בחירת מנהג בכניסה הראשונה ----------
+   * יומן אישי חדש (methodChosen: false) אינו מחושב ואינו שמיש עד שבוחרים מנהג: ברוכה הבאה ← התחלת יומן ← ״המנהג שלי״ ← המשך.
+   * יומן קיים (גם עם ״התאמה אישית״) אינו מחויב: לכל היותר כרטיס עדין ״בחרי את המנהג שלך״ במסך היום, שאפשר לסגור. */
+  const needsMethod = () => app.mode === "personal" && !app.locked && !app.covered && app.personal?.settings.methodChosen === false;
+  /** פותח את ברוכה הבאה או את בחירת המנהג, כשצריך. לא במסך הבודקים, כדי שבודק יוכל להגיע לתרחישים */
+  function firstRun() {
+    if (app.locked || app.covered || app.modal) return;
+    if (needsMethod() && app.tab !== "review") app.modal = storage.get(SEEN_KEY) ? onboardModal() : { kind: "welcome" };
+    else if (app.mode === "personal" && !storage.get(SEEN_KEY) && !app.personal.events.length) app.modal = { kind: "welcome" };
+    if (app.modal) renderModal();
+  }
+  const onboardModal = () => ({ kind: "onboard", family: null, method: null });
+  /** בחירה בתוך מסך הפתיחה: נשמרת רק בלחיצה על ״המשך״ */
+  function onboardPick(d) {
+    const m = app.modal;
+    if (d.family) { const F = M.METHOD_FAMILIES.find(f => f.id === d.family); if (!F) return; m.family = F.id; m.method = F.methods.length === 1 ? F.methods[0] : F.methods.includes(m.method) ? m.method : null; }
+    else if (d.method && M.METHOD_PRESETS[d.method]) { m.method = d.method; m.family = M.methodFamily(d.method); }
+    renderModal(); document.querySelector(`#modal [data-${d.family ? "family" : "method"}="${d.family || d.method}"]`)?.focus({ preventScroll: true });
+  }
+  function onboardDone() {
+    const m = app.modal; if (!m || !M.METHOD_PRESETS[m.method]) return;
+    const st = app.personal;
+    markSeen(); app.modal = null; app.methodFamily = null; app.tab = "today";
+    try { commit({ ...st, settings: M.applyPreset(st.settings, m.method) }); } catch (err) { app.modal = m; toast(err.message); render(); renderModal(); return; }
+    renderModal(); window.scrollTo(0, 0);
+  }
+  const onboardBody = m => `<div class="onboard">
+      <div class="ob-h"><span class="ob-ic">${I("scale", 22)}</span><h2 id="m-title" tabindex="-1" autofocus>המנהג שלי</h2>
+        <p>לבחור לפי ההנחיה שקיבלת. לפי המנהג מעיין קובעת את כל החישובים, ואפשר לשנות אותו בכל עת בהגדרות.</p></div>
+      ${methodChooser({ method: m.method || "" }, "onboard", m.family)}
+      <div class="stack-s"><button class="btn full" data-act="onboard-done"${M.METHOD_PRESETS[m.method] ? "" : " disabled"}>המשך${I("left", 18)}</button>
+      <button class="link ob-back" data-act="onboard-back">${I("right", 15)}חזרה</button></div>
+      <p class="fine">יש הוראה אחרת מהרב? בוחרים את הקרוב ביותר, ואחר כך משנים בהגדרות, תחת ״התאמה אישית לפי הוראת הרב״.</p></div>`;
+  /** יומן קיים עם ״התאמה אישית״ (מגרסה קודמת): הצעה עדינה לבחור מנהג, פעם אחת */
+  const methodCardDue = st => app.mode === "personal" && st.settings.methodChosen && st.settings.method === "custom" && !storage.get(METHODCARD_KEY);
+  const dismissMethodCard = () => storage.set(METHODCARD_KEY, "1");
+  const methodCard = st => !methodCardDue(st) ? "" : `<section class="card nudge" aria-labelledby="mcard-h"><div class="card-h">${I("scale")}<div><h3 id="mcard-h">בחרי את המנהג שלך</h3><p>היומן מחושב עכשיו לפי ״התאמה אישית״</p></div><button class="icon-btn" data-act="method-card-x" aria-label="סגירה">${I("x", 18)}</button></div>
+      <p>אפשר לבחור מנהג מוכן (ספרדי, אשכנזי או חב״ד), או להשאיר את ההגדרות שלך כמו שהן.</p>
+      <div class="row-btns"><button class="btn sm" data-act="method-card-go">${I("sliders", 16)}בחירת מנהג</button><button class="btn ghost sm" data-act="method-card-x">להשאיר כך</button></div></section>`;
   /** מתחת לבחירה: רק כשלא נבחרה שיטה, או כשההגדרות הותאמו אישית */
   function methodNotes(s) {
-    if (!M.METHOD_PRESETS[s.method]) return `<p class="fine">לא נבחרה שיטה: כל ההגדרות נקבעות ידנית, תחת ״התאמה אישית לפי הוראת הרב״.</p>`;
+    if (!M.METHOD_PRESETS[s.method]) return `<p class="fine">לא נבחר מנהג מוכן: כל ההגדרות נקבעות ידנית, תחת ״התאמה אישית לפי הוראת הרב״.</p>`;
     return M.presetDiff(s).length ? `<p class="fine">הותאם אישית. בחירה מחדש של השיטה מחזירה את ערכיה.</p>` : "";
   }
   const sel = (name, label, s, opts) => `<label class="field" for="s-${name}">${label}<select id="s-${name}" name="${name}">${opts.map(([v, t]) => `<option value="${v}"${s[name] === v ? " selected" : ""}>${t}</option>`).join("")}</select></label>`;
@@ -554,7 +597,7 @@
         <div class="pair"><label class="field" for="t-from">מתאריך<input id="t-from" name="from" type="date" required min="2000-01-01" max="2100-12-31"></label><label class="field" for="t-to">עד תאריך<input id="t-to" name="to" type="date" required min="2000-01-01" max="2100-12-31"></label></div>
         <button class="btn ghost full" type="submit">${I("plus", 17)}הוספת נסיעה</button></form>
         <p class="fine">נסיעה מעבר לקו התאריך מחייבת בירור אישי.</p></section>
-      <section class="card"><div class="card-h">${I("info")}<div><h3>שפה</h3></div></div>${langSwitch()}</section>
+      <section class="card"><div class="card-h">${I("globe")}<div><h3>שפה</h3></div></div>${langSwitch()}</section>
       <section class="card"><div class="card-h">${I("shield")}<div><h3>פרטיות ונתונים</h3><p>שום מידע לא יוצא מהמכשיר</p></div></div>
         ${lockSettings()}
         <a class="action" href="${PRIVACY_URL}" target="_blank" rel="noopener">${I("lock", 19)}<span><strong>מדיניות פרטיות</strong><small>מה נשמר, איפה, ומה לא נאסף</small></span>${I("out", 15)}</a>
@@ -563,7 +606,7 @@
         ${app.mode === "personal" ? `<button class="action danger" data-act="wipe">${I("x", 19)}<span><strong>מחיקת כל הנתונים שלי</strong><small>יומן, הגדרות, מקומות ותזכורות — מהמכשיר הזה, לצמיתות</small></span></button>` : ""}</section>
       <section class="card"><div class="card-h">${I("scale")}<div><h3>לבודקים הלכתיים</h3><p>תרחישים מוכנים, בדיקות אוטומטיות וכללי החישוב</p></div></div>
         <button class="btn ghost full" data-go="review">${I("flask", 17)}מסך הבודקים</button></section>
-      <section class="card about"><div class="card-h">${I("spring")}<div><h3>על מעיין</h3><p>גרסה ${APP_VERSION} · מנוע ${M.ENGINE_VERSION}</p></div></div>
+      <section class="card about"><div class="card-h">${I("spring")}<div><h3>על מעיין</h3><p>גרסה \u2066${APP_VERSION}\u2069 · מנוע \u2066${M.ENGINE_VERSION}\u2069</p></div></div>
         <p>האפליקציה חינמית ופועלת כולה בטלפון, בלי חשבון ובלי שרת. שום מידע לא נשלח לאף אחד.</p>
         ${NATIVE ? "" : `<p>להתקנה: בתפריט הדפדפן (⋮) בוחרים ״הוספה למסך הבית״.</p>${/Android/i.test(navigator.userAgent) ? `<a class="link" href="https://github.com/nrt613/maayan/releases/latest/download/maayan.apk" target="_blank" rel="noopener">${I("download", 15)}אפליקציית אנדרואיד עם התראות</a>` : ""}`}</section>
     </aside></div>`;
@@ -574,7 +617,7 @@
     const res = app.testResults, passed = res && res.filter(t => t.ok).length;
     const groups = res ? [...new Set(res.map(t => t.group))] : [];
     return `<section class="review-hero"><div>
-        <span class="chip-light">גרסת בדיקה ${APP_VERSION}</span><h2>הנחיות לבודקים</h2>
+        <span class="chip-light">גרסת בדיקה \u2066${APP_VERSION}\u2069</span><h2>הנחיות לבודקים</h2>
         <p>תודה על הבדיקה. המטרה היא לוודא שכל כלל מחושב כמו שצריך לפי השיטה שנבחרה, ושהמערכת לא מכריעה במקום שבו צריך לשאול.</p>
         <ol class="steps"><li>פותחים תרחיש מוכן, רואים מה הוזן ומה חושב, ומשווים להלכה.</li><li>אפשר לפתוח תרחיש ביומן המלא, לשנות רישומים והגדרות ולראות את החישוב משתנה.</li><li>מעתיקים דוח ושולחים למפתח עם ההערות.</li></ol>
       </div></section>
@@ -618,7 +661,7 @@
     const d = M.SETTING_DEFAULTS, keys = ["method", "wait", "haflagah", "beinonit", "day31", "orZarua", "carryMonthly", "carryLongIntervals", "missingMonthly", "beinHashmashot", "hefsekTwilight", "nightfall"];
     const changed = keys.filter(k => s[k] !== d[k]);
     if (!changed.length) return `<p class="fine">הגדרות ברירת המחדל: חמישה ימים, הפלגה בימים, עונה בינונית באותה עונה.</p>`;
-    return `<p class="fine">הגדרות התרחיש: ${changed.map(k => esc(M.settingsSummary(s).find(x => x.startsWith({ method: "שיטה", wait: "המתנה", haflagah: "הפלגה", beinonit: "עונה בינונית", day31: "יום 31", orZarua: "אור זרוע", carryMonthly: "שימור עונת", carryLongIntervals: "שימור הפלגות", missingMonthly: "יום ל׳", beinHashmashot: "ראייה בין השמשות", hefsekTwilight: "הפסק אחרי השקיעה", nightfall: "צאת הכוכבים" }[k])))).join(" · ")}</p>`;
+    return `<p class="fine">הגדרות התרחיש: ${changed.map(k => esc(M.settingsSummary(s).find(x => x.startsWith({ method: "המנהג שלי", wait: "המתנה", haflagah: "הפלגה", beinonit: "עונה בינונית", day31: "יום 31", orZarua: "אור זרוע", carryMonthly: "שימור עונת", carryLongIntervals: "שימור הפלגות", missingMonthly: "יום ל׳", beinHashmashot: "ראייה בין השמשות", hefsekTwilight: "הפסק אחרי השקיעה", nightfall: "צאת הכוכבים" }[k])))).join(" · ")}</p>`;
   }
   const TERMS = [
     { t: "מה זה מעיין", p: ["מעיין היא כלי עזר אישי לרישום ולתכנון בענייני טהרת המשפחה. היא אינה פוסקת הלכה, אינה מורה הוראה ואינה ייעוץ רפואי.", "האפליקציה ניתנת בחינם, לשימוש אישי."] },
@@ -636,10 +679,10 @@
       "ארבעה ימים ממועד היחסים: נספרים ממועד היחסים שנרשם כבסיס, ולא מהראייה. בלי בסיס רשום אין חישוב, ומופיעה נקודה לבירור.",
       "ראייה סמוך לשקיעה או בין השמשות: ההמתנה נספרת מהיום העברי המאוחר, לחומרא.", "חידוש ספירה בתוך תקופת הנידה נשען על תחילת הנידה הקודמת ולא מוסיף חמישה ימים חדשים."], src: [...S.wait, "thbWait"] },
     { t: "ראייה בין השמשות", p: ["ראייה בין השקיעה לצאת הכוכבים, או בשלוש הדקות שסביב השקיעה והזריחה: לפי ברירת המחדל חוששים לשתי העונות — העונה שהסתיימה והעונה שהתחילה — בעונה הבינונית, בעונת החודש ובהפלגה (ש״ך יו״ד קפד, ס״ק יג–יד, בשם הב״ח; כך נוהגים למעשה). הרישום מסומן גם לבירור.", "אפשר לבחור בהגדרות להשעות את החישוב עד בירור, כמו בגרסאות קודמות.", "סוף בין השמשות נקבע לפי הגדרת צאת הכוכבים. לפי 13.5 דקות זמניות (הגאונים, הרב עובדיה יוסף) ראייה מאוחרת יותר היא לילה ודאי."], src: S.bhs },
-    { t: "שיטות מוכנות", p: ["בוחרים בשני שלבים: מה המנהג (ספרדי, אשכנזי או חב״ד), ואז לפי מי — לספרדים הרב עובדיה יוסף או בן איש חי, לאשכנזים עיקר הדין או כרתי ופלתי. השיטה קובעת את כל הגדרות החישוב בבת אחת, ואפשר לשנות כל הגדרה אחר כך תחת ״התאמה אישית לפי הוראת הרב״.", "השיטות אינן תחליף להוראת רב."], src: [] },
+    { t: "המנהג שלי", p: ["ביומן חדש בוחרים מנהג בכניסה הראשונה, לפני שהיומן מחשב משהו. בוחרים בשני שלבים: מה המנהג (ספרדי, אשכנזי או חב״ד), ואז לפי מי — לספרדים הרב עובדיה יוסף או בן איש חי, לאשכנזים אשכנזי רגיל או יממה שלמה (כרתי ופלתי). המנהג קובע את כל הגדרות החישוב בבת אחת, ואפשר לשנות כל הגדרה אחר כך תחת ״התאמה אישית לפי הוראת הרב״.", "השיטות אינן תחליף להוראת רב."], src: [] },
     { t: "הפסק טהרה ושבעה נקיים", p: ["הספירה מתחילה רק מהפסק שנרשם כנקי, לפני השקיעה ולא בזמן מסופק, ולא לפני סוף ההמתנה. הפסק מוקדם מתקבל רק עם הוראה אישית מתועדת.", "בבחירת שיטת הרב עובדיה יוסף: הפסק עד 13.5 דקות זמניות אחרי השקיעה מתקבל בדיעבד ונספר ליום שהסתיים, ומסומן לבירור. לכתחילה עושים הפסק לפני השקיעה.", "יום א׳ הוא היום העברי שאחרי ההפסק. ליל הטבילה המתוכנן הוא במוצאי היום השביעי, וזה נשאר תכנון בלבד.", "חוסר רישום בדיקה באחד מימי הספירה (לפי הגדרת הבדיקות) מסומן לבירור כשהיום מסתיים בשקיעה, ואינו פוסל או מאשר. בוקר וערב נקבעים לפי חצות היום. בדיקה שנרשמה כלא נקייה אינה מאפסת אוטומטית."], src: [...S.hefsek, ...S.clean, "thbHefsek", ...S.mikvah] },
-    { t: "עונת החודש", p: ["אותו יום בחודש העברי הבא, באותה עונה.", "ראייה בל׳ כשבחודש הבא אין ל׳: ברירת המחדל היא א׳ בחודש שאחרי החודש החסר, לחומרא, ומופיע ״יש לשאול רב״. אפשר לבחור דילוג.", "ראתה פעמיים באותו חודש: כל החישובים נעשים מהראייה האחרונה, ובנוסף נשמרת עונת החודש של הראייה הקודמת אם עוד לא הגיעה (רמ״א יו״ד קפט, יג; שו״ע הרב שם, ס״ק מד).", "בשנה מעוברת אדר א׳ עובר לאדר ב׳.", "שימור עונת חודש שחלה בזמן דימום הוא אפשרות נפרדת שדורשת תיעוד מלא."], src: [...S.monthly, "missing30"] },
-    { t: "עונה בינונית", p: ["יום 30 בספירה כוללנית: יום הראייה הוא יום 1, כלומר 29 ימים אחריו, באותה עונה.", "שתי העונות, יום 31 ואור זרוע הם שלוש הגדרות נפרדות. השיטות המוכנות קובעות אותן לפי המנהג, ואפשר לשנות.", "מי ששומרת ימים 30 ו-31 שומרת את עונת אור זרוע ליום 30 בלבד."], src: [...S.average, "orZarua31"] },
+    { t: "עונת החודש", p: ["אותו יום בחודש העברי הבא, באותה עונה.", "ראייה בל׳ כשבחודש הבא אין ל׳: ברירת המחדל היא א׳ בחודש שאחרי החודש החסר, לחומרא, ומופיע ״יש לשאול רב״. אפשר לבחור דילוג.", "ראייה בל׳ כשהחודש הבא מלא: עונת החודש בל׳ שלו בלבד.", "ראתה פעמיים באותו חודש: כל החישובים נעשים מהראייה האחרונה, ובנוסף נשמרת עונת החודש של הראייה הקודמת אם עוד לא הגיעה (רמ״א יו״ד קפט, יג; שו״ע הרב שם, ס״ק מד).", "בשנה מעוברת אדר א׳ עובר לאדר ב׳.", "שימור עונת חודש שחלה בזמן דימום הוא אפשרות נפרדת שדורשת תיעוד מלא."], src: [...S.monthly, "missing30"] },
+    { t: "עונה בינונית", p: ["יום 30 בספירה כוללנית: יום הראייה הוא יום 1, כלומר 29 ימים אחריו, באותה עונה.", "שתי העונות, יום 31 ואור זרוע הם שלוש הגדרות נפרדות. השיטות המוכנות קובעות אותן לפי המנהג, ואפשר לשנות.", "מי ששומרת ימים 30 ו-31 שומרת את עונת אור זרוע ליום 30 בלבד.", "אור זרוע לעונה הבינונית הוא העונה שלפני עונת הראייה. כשהעונה הבינונית יממה שלמה והראייה ביום, העונה הזו (ליל יום 30) כבר בתוך היממה, ולכן אין אור זרוע ביום 29. אור זרוע לעונת החודש ולהפלגה לא משתנה."], src: [...S.average, "orZarua31"] },
     { t: "הפלגה", p: ["בשיטת הימים: ההפרש בין התאריכים העבריים של שתי הראיות ועוד 1. אותו מרווח נספר מהראייה האחרונה, באותה עונה.", "בשיטת חב״ד: מספר העונות מההפסק הקודם ועד הראייה הבאה. המועד החדש נספר מההפסק הנוכחי. מספר זוגי נופל ביום ואי-זוגי בלילה. הפלגה ארוכה נשמרת כשמגיעה קצרה ממנה.", "ראייה מסופקת באמצע אינה נמחקת כדי לייצר מרווח ארוך."], src: [...S.interval, ...S.chabad] },
     { t: "וסת קבוע", p: ["שלוש ראיות רצופות באותו יום בחודש ובאותה עונה, או שלוש הפלגות שוות בארבע ראיות, מסומנות כדפוס אפשרי.", "המערכת אינה קובעת, עוקרת או משעה וסת קבוע בעצמה."], src: S.fixed },
     { t: "במה המערכת לא מכריעה", p: ["היריון, אחרי לידה, הנקה, טיפול הורמונלי, וסתות לא רגילים (דילוג, סירוג), מראות וכתמים, בדיקות שהוחסרו ומעבר קו התאריך.", "במצבים האלה החישוב הרגיל מושעה ואפשר לרשום עונות ידניות לפי הוראה. אין במערכת זיהוי מראות.", "בכמה מצבים שיש בהם שאלה פתוחה מופיע ״יש לשאול רב״, עם מה שמעיין עושה בינתיים."], src: [] },
@@ -702,6 +745,8 @@
     root.innerHTML = shell(); app.enter = false; L.dom(root);
     if (focusId) { const el = document.getElementById(focusId); if (el) { el.focus(); try { if (selStart != null) el.setSelectionRange(selStart, selStart); } catch { /* */ } } }
     window.scrollTo(0, scroll);
+    // יומן חדש בלי מנהג: תמיד חוזרים לבחירת המנהג (גם אחרי ״ליומן שלי״ מהיומן לדוגמה, או אחרי מחיקת כל הנתונים)
+    if (!app.modal && needsMethod() && app.tab !== "review") app.modal = storage.get(SEEN_KEY) ? onboardModal() : { kind: "welcome" };
     renderModal(); renderToast();
   }
   function renderToast() {
@@ -747,8 +792,8 @@
         <label class="field" for="e-city">מקום<select id="e-city" name="cityId">${placeOptions(state(), f.cityId)}</select></label>
         ${f.type === "manual" ? `<label class="field" for="e-onah">עונה<select id="e-onah" name="onah" required><option value="" ${f.onah ? "" : "selected"} disabled>בחירה</option><option value="day"${f.onah === "day" ? " selected" : ""}>יום · מהזריחה עד השקיעה</option><option value="night"${f.onah === "night" ? " selected" : ""}>לילה · מהשקיעה הקודמת עד הזריחה</option></select></label>` : ""}
         ${needsResult ? `<label class="field" for="e-result">תוצאה<select id="e-result" name="result"><option value="clear"${f.result === "clear" ? " selected" : ""}>נקייה</option><option value="uncertain"${f.result === "uncertain" ? " selected" : ""}>ממתינה לבירור</option><option value="bleeding"${f.result === "bleeding" ? " selected" : ""}>לא נקייה</option></select></label>` : ""}
-        ${f.type === "flow" ? `<label class="toggle wake" for="e-wake"><span><strong>נמצא בבדיקה/בהתעוררות — לא ידוע מתי התחיל</strong><small>לא חובה. מעיין תחשוש לשתי העונות של היום ותסמן ״יש לשאול רב״.</small></span><input id="e-wake" name="foundOnWaking" type="checkbox"${f.foundOnWaking ? " checked" : ""}></label>` : ""}
-        <label class="field" for="e-note">הערה <span class="opt">לא חובה</span><textarea id="e-note" name="note" rows="2" maxlength="2000">${esc(f.note)}</textarea></label>
+        ${f.type === "flow" ? `<label class="toggle wake" for="e-wake"><span><strong>לא ידוע מתי התחיל (מצאתי בקימה או בבדיקה)</strong><small>לא חובה. מעיין תחשוש לשתי העונות של היום ותסמן ״יש לשאול רב״.</small></span><input id="e-wake" name="foundOnWaking" type="checkbox"${f.foundOnWaking ? " checked" : ""}></label>` : ""}
+        <label class="field" for="e-note"><span>הערה <span class="opt">לא חובה</span></span><textarea id="e-note" name="note" rows="2" maxlength="2000">${esc(f.note)}</textarea></label>
         <details class="adv"${f.authorityNote ? " open" : ""}><summary>הוראה אישית שקיבלת${I("left", 14)}</summary><label class="field" for="e-auth">תיעוד ההוראה<textarea id="e-auth" name="authorityNote" rows="2" maxlength="1000" placeholder="מי הורה, מתי ומה נאמר">${esc(f.authorityNote)}</textarea></label></details>
         ${HELP[f.type] ? `<p class="hint">${I("info", 16)}${HELP[f.type]}</p>` : ""}
         ${m.error ? `<p class="err" role="alert">${esc(m.error)}</p>` : ""}
@@ -770,16 +815,16 @@
         <div class="m-actions"><button class="btn" data-act="close-modal">${I("check", 17)}סיום</button></div>`;
     }
     if (m.kind === "text") return `<div class="m-h"><h2 id="m-title">${esc(m.title)}</h2>${close}</div><p>${esc(m.intro)}</p>
-      <textarea id="m-text" class="mono" rows="9" readonly>${esc(m.text)}</textarea>
+      <textarea id="m-text" class="${/[\u0590-\u05FF]/.test(String(m.text).slice(0, 400)) ? "plain-text" : "mono"}" dir="auto" rows="9" readonly>${esc(m.text)}</textarea>
       <div class="m-actions"><button class="btn" data-act="copy-text">${I("copy", 17)}העתקה</button>${m.file ? `<button class="btn ghost" data-act="dl-text">${I("download", 17)}שמירה כקובץ</button>` : ""}</div>
       ${m.file ? `<p class="fine">אם השמירה כקובץ לא עובדת בדפדפן הזה, מעתיקים ושומרים בפתקים או שולחים לעצמך.</p>` : ""}`;
     if (m.kind === "cycle") return `<div class="m-h"><h2 id="m-title">הזנת מחזור קודם</h2>${close}</div>
       <form id="cycle-form" class="stack-s"><p class="fine">מזינים כל מחזור בנפרד, בכל סדר. החישוב מסדר הכול לפי התאריכים.${m.saved ? ` נשמרו ${m.saved} מחזורים.` : ""}</p>
         <div class="pair"><label class="field" for="c-flow">תחילת הווסת<input id="c-flow" type="date" required min="2000-01-01" max="2100-12-31"></label>
         <label class="field" for="c-flow-t">שעה<input id="c-flow-t" type="time" required value="10:00"><small>אחרי השקיעה = היום העברי הבא</small></label></div>
-        <div class="pair"><label class="field" for="c-hef">הפסק טהרה <span class="opt">אם ידוע</span><input id="c-hef" type="date" min="2000-01-01" max="2100-12-31"></label>
+        <div class="pair"><label class="field" for="c-hef"><span>הפסק טהרה <span class="opt">אם ידוע</span></span><input id="c-hef" type="date" min="2000-01-01" max="2100-12-31"></label>
         <label class="field" for="c-hef-t">שעה<input id="c-hef-t" type="time" value="16:00"></label></div>
-        <label class="field" for="c-mik">טבילה <span class="opt">תאריך הערב, אם ידוע</span><input id="c-mik" type="date" min="2000-01-01" max="2100-12-31"></label>
+        <label class="field" for="c-mik"><span>טבילה <span class="opt">תאריך הערב, אם ידוע</span></span><input id="c-mik" type="date" min="2000-01-01" max="2100-12-31"></label>
         <label class="field" for="c-city">מקום<select id="c-city">${placeOptions(state(), state().settings.cityId)}</select></label>
         ${m.error ? `<p class="err" role="alert">${esc(m.error)}</p>` : ""}
         <div class="m-actions"><button class="btn" type="submit">${I("check", 17)}שמירת המחזור</button><button type="button" class="btn ghost" data-act="close-modal">${m.saved ? "סיום" : "ביטול"}</button></div></form>`;
@@ -788,7 +833,7 @@
       <label class="field" for="b-pass">סיסמת גיבוי<input id="b-pass" type="password" minlength="10" required autocomplete="new-password"><small>לפחות 10 תווים. לשמור אותה בנפרד.</small></label>
       ${m.error ? `<p class="err" role="alert">${esc(m.error)}</p>` : ""}<div class="m-actions"><button class="btn" type="submit">${I("lock", 17)}יצירת גיבוי</button></div></form>`;
     if (m.kind === "restore") return `<div class="m-h"><h2 id="m-title">שחזור מגיבוי</h2>${close}</div>
-      <form id="restore-form" class="stack-s"><label class="field" for="r-file">קובץ גיבוי<input id="r-file" type="file"${NATIVE && CAP.getPlatform?.() === "ios" ? "" : ' accept=".may,.json,.txt,application/json,text/plain"'}></label>
+      <form id="restore-form" class="stack-s"><div class="field"><span id="r-file-l">קובץ גיבוי</span><input id="r-file" class="file-in" type="file" aria-labelledby="r-file-l"${NATIVE && CAP.getPlatform?.() === "ios" ? "" : ' accept=".may,.json,.txt,application/json,text/plain"'}><label class="file-pick" for="r-file">${I("upload", 18)}<span id="r-file-name">בחירת קובץ</span></label></div>
       <label class="field" for="r-text">או הדבקת טקסט הגיבוי<textarea id="r-text" class="mono" rows="3" placeholder='{"format":"maayan-encrypted-v1",…}'>${esc(m.text || "")}</textarea></label>
       <label class="field" for="r-pass">סיסמת הגיבוי<input id="r-pass" type="password" required autocomplete="off"></label>
       ${m.error ? `<p class="err" role="alert">${esc(m.error)}</p>` : ""}<div class="m-actions"><button class="btn" type="submit">${I("upload", 17)}פתיחת הגיבוי</button></div></form>`;
@@ -816,10 +861,11 @@
         <label class="field" for="pin-cur">הקוד הנוכחי<input id="pin-cur" type="password" inputmode="numeric" pattern="[0-9]{4,6}" minlength="4" maxlength="6" required autocomplete="off" dir="ltr" class="pin-in" autofocus></label>
         ${m.error ? `<p class="err" role="alert">${esc(m.error)}</p>` : ""}
         <div class="m-actions"><button class="btn" type="submit">כיבוי הנעילה</button><button type="button" class="btn ghost" data-act="close-modal">ביטול</button></div></form>`;
+    if (m.kind === "onboard") return onboardBody(m);
     if (m.kind === "welcome") return `<div class="welcome">${langSwitch()}<div class="mark big"><img src="${LOGO_IMG}" alt=""></div><h2 id="m-title" tabindex="-1" autofocus>ברוכה הבאה למעיין</h2>
       <p>יומן אישי לטהרת המשפחה: רישום, חישוב עונות הפרישה, שבעה נקיים ותזכורות.</p>
       <ul class="promises"><li>${I("lock", 18)}<span><strong>פרטי לגמרי.</strong> הכול נשמר רק בטלפון הזה, בלי חשבון ובלי שרת.</span></li>
-      <li>${I("scale", 18)}<span><strong>שקוף.</strong> לכל מועד מוצג הכלל, ואת שיטת החישוב בוחרים לפי ההנחיה שקיבלת.</span></li>
+      <li>${I("scale", 18)}<span><strong>שקוף.</strong> לכל מועד מוצג הכלל, ואת המנהג בוחרים לפי ההנחיה שקיבלת.</span></li>
       <li>${I("help", 18)}<span><strong>לא פוסק.</strong> זו גרסת בדיקה שטרם קיבלה אישור הלכתי. במקום של ספק המערכת מסמנת לבירור.</span></li></ul>
       <div class="stack-s"><button class="btn full" data-act="start-personal">${I("plus", 18)}התחלת יומן אישי</button>
       <button class="btn ghost full" data-act="start-demo">${I("flask", 18)}צפייה ביומן לדוגמה</button>
@@ -884,6 +930,7 @@
       return;
     }
     const mf = e.target.closest("[data-family],[data-method]");
+    if (mf && app.modal?.kind === "onboard") { e.preventDefault(); return onboardPick(mf.dataset); }
     if (mf) { e.preventDefault(); return mf.dataset.family ? chooseFamily(mf.dataset.family) : chooseMethod(mf.dataset.method); }
     const lb = e.target.closest("[data-lang]");
     if (lb) { applyLang(lb.dataset.lang, true); render(); syncNotifications(); return; }
@@ -939,12 +986,19 @@
       case "lock-now": return lockNow();
       case "lock-change": app.modal = { kind: "pin-set", change: true, error: "" }; return renderModal();
       case "nudge-x": saveBackupInfo({ snooze: new Date().toISOString() }); toast("נזכיר שוב בהמשך. הגיבוי תמיד זמין בהגדרות."); return render();
-      case "close-modal": if (app.modal?.kind === "terms" && app.modal.back) { app.modal = { kind: "welcome" }; return renderModal(); } if (app.modal?.kind === "welcome") markSeen(); app.modal = null; return renderModal();
+      case "close-modal": if (app.modal?.kind === "terms" && app.modal.back) { app.modal = { kind: "welcome" }; return renderModal(); }
+        if (app.modal?.kind === "onboard") return; // בחירת המנהג אינה נסגרת בלחיצה בצד
+        if (app.modal?.kind === "welcome") { markSeen(); if (needsMethod()) { app.modal = onboardModal(); return renderModal(); } }
+        app.modal = null; return renderModal();
+      case "onboard-done": return onboardDone();
+      case "onboard-back": app.modal = { kind: "welcome" }; return renderModal();
+      case "method-card-x": dismissMethodCard(); return render();
+      case "method-card-go": dismissMethodCard(); app.keep.delete("custom"); return go("prefs");
       case "toast-x": app.toast = ""; app.toastAction = null; return renderToast();
       case "toast-undo": { const a = app.toastAction; app.toast = ""; app.toastAction = null; renderToast(); try { a?.run(); } catch (err) { toast(err.message); } return; }
       case "demo": Object.assign(app, { mode: "demo", sandbox: M.demoState(realNow()), cal: { cursor: null, mode: "civil", selected: null } }); return go("today");
       case "personal": Object.assign(app, { mode: "personal", sandbox: null, scenario: null, cal: { cursor: null, mode: "civil", selected: null } }); return go("today");
-      case "start-personal": markSeen(); app.modal = null; return go("today");
+      case "start-personal": markSeen(); app.modal = needsMethod() ? onboardModal() : null; renderModal(); return go("today");
       case "start-demo": markSeen(); app.modal = null; Object.assign(app, { mode: "demo", sandbox: M.demoState(realNow()) }); return go("today");
       case "start-review": markSeen(); app.modal = null; return go("review");
       case "delete": app.modal.form = readEventForm(); app.modal.confirmDelete = true; return renderModal();
@@ -994,7 +1048,7 @@
       bioAuth().then(ok => { if (ok) { saveLockCfg({ bio: true }); toast("הפתיחה בטביעת אצבע או בזיהוי פנים הופעלה"); } else toast("הזיהוי לא הצליח. הנעילה נשארת בקוד בלבד."); render(); });
     }
     else if (t.id === "bk-remind") { saveBackupInfo({ remind: t.value }); toast("נשמר במכשיר"); }
-    else if (t.id === "r-file") { const f = t.files?.[0]; if (f && f.size < 4e6) f.text().then(x => { $("#r-text").value = x; }); }
+    else if (t.id === "r-file") { const f = t.files?.[0], nm = $("#r-file-name"); if (nm && f) { nm.textContent = f.name; nm.dir = "auto"; } if (f && f.size < 4e6) f.text().then(x => { $("#r-text").value = x; }); }
   });
   /* לחיצה ארוכה על יום בלוח (או תפריט הקשר) פותחת את תפריט הרישום המהיר לאותו יום */
   {
@@ -1083,7 +1137,13 @@
       else if (f.length && !e.shiftKey && document.activeElement === f[f.length - 1]) { e.preventDefault(); f[0].focus(); }
     }
   });
-  document.addEventListener("keydown", e => { if (e.key === "Escape" && app.modal) { if (app.modal.kind === "welcome") markSeen(); app.modal = null; renderModal(); } });
+  document.addEventListener("keydown", e => { if (e.key === "Escape" && app.modal) closeTop(); });
+  /** Escape ובאנדרואיד ״חזרה״: מבחירת המנהג חוזרים לברוכה הבאה, ומברוכה הבאה ליומן רק אם המנהג כבר נבחר */
+  function closeTop() {
+    if (app.modal.kind === "onboard") { app.modal = { kind: "welcome" }; return renderModal(); }
+    if (app.modal.kind === "welcome") { markSeen(); if (needsMethod()) return false; }
+    app.modal = null; renderModal();
+  }
   /** ההגדרות נשמרות מיד בכל שינוי, בלי כפתור שמירה */
   function saveSettings(f) {
     const st = state(), fd = new FormData(f), s = { ...st.settings };
@@ -1099,9 +1159,9 @@
   function markSeen() { storage.set(SEEN_KEY, "1"); }
   /** מחיקת כל הנתונים מהמכשיר (דרישת חנויות האפליקציות): יומן, הגדרות, שפה, ותזכורות מתוזמנות */
   async function wipeAll() {
-    for (const k of [STORE_KEY, SEEN_KEY, LANG_KEY, LOCK_KEY, LOCKFAIL_KEY, BACKUP_KEY]) { try { localStorage.removeItem(k); } catch { /* */ } }
+    for (const k of [STORE_KEY, SEEN_KEY, LANG_KEY, LOCK_KEY, LOCKFAIL_KEY, BACKUP_KEY, METHODCARD_KEY]) { try { localStorage.removeItem(k); } catch { /* */ } }
     Object.assign(app, { locked: false, covered: false, lock: null, lockedModal: null });
-    Object.assign(app, { mode: "personal", personal: M.emptyState(), sandbox: null, scenario: null, blockSave: false, loadWarning: "", cal: { cursor: null, mode: "civil", selected: null }, modal: { kind: "welcome" } });
+    Object.assign(app, { mode: "personal", personal: M.newDiary(), sandbox: null, scenario: null, blockSave: false, loadWarning: "", cal: { cursor: null, mode: "civil", selected: null }, modal: { kind: "welcome" } });
     syncSecure();
     if (window.MaayanWidget) MaayanWidget.clear();
     toast("כל הנתונים נמחקו מהמכשיר");
@@ -1220,7 +1280,7 @@
   if (lockCfg()) { app.locked = true; app.lock = { entry: "", view: "pin", msg: "", bad: false, busy: false }; }
   render();
   syncSecure();
-  if (!app.locked && !storage.get(SEEN_KEY) && !app.personal.events.length) { app.modal = { kind: "welcome" }; renderModal(); }
+  firstRun();
   if (BIO()) BIO().checkBiometry().then(r => { app.bio = r; if (app.locked && lockCfg()?.bio && r.isAvailable) tryBio(); else if (!app.locked && app.tab === "prefs" && !app.modal) render(); }).catch(() => { app.bio = null; });
   setInterval(tick, 30000);
   /** יציאה לרקע: נעילה מיד, או כיסוי המסך (בלי נתונים) עד שיעבור זמן הנעילה שנבחר */
@@ -1254,7 +1314,7 @@
   });
   if (NATIVE && PL.App) PL.App.addListener("backButton", () => {
     if (app.locked || app.covered) { if (app.lock && app.lock.view !== "pin") { app.lock.view = "pin"; return renderLock(); } return PL.App.minimizeApp(); }
-    if (app.modal) { if (app.modal.kind === "welcome") markSeen(); app.modal = null; renderModal(); }
+    if (app.modal) { if (closeTop() === false) PL.App.minimizeApp(); }
     else if (app.tab === "review") go("prefs");
     else if (app.tab !== "today") go("today");
     else PL.App.minimizeApp();

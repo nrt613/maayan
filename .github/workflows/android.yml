@@ -28,7 +28,6 @@ jobs:
         run: |
           pip install --quiet pillow
           mkdir -p www
-          cp ../fonts/bellefair.ttf ../fonts/heebo.ttf www/
           python3 prepare.py www
           npm install --no-audit --no-fund
           npx cap add android
@@ -44,6 +43,9 @@ jobs:
           cp android/android/app/build/outputs/apk/debug/app-debug.apk out/maayan-debug.apk
           ls -la android/android/app/build/outputs/apk/release/ android/android/app/build/outputs/bundle/release/
           grep -E "targetSdkVersion|compileSdkVersion|minSdkVersion" android/android/variables.gradle
+          # ההרשאות בפועל בגרסה לחנות (אחרי מיזוג המניפסטים של כל הספריות): בלי INTERNET ובלי AD_ID
+          $BT/aapt2 dump badging android/android/app/build/outputs/apk/release/app-release-unsigned.apk | grep -E "^package:|targetSdkVersion|application-label:|uses-permission"
+          if $BT/aapt2 dump permissions android/android/app/build/outputs/apk/release/app-release-unsigned.apk | grep -E "android.permission.INTERNET|AD_ID|USE_EXACT_ALARM|BACKGROUND_LOCATION"; then echo "::error::unexpected permission"; exit 1; fi
           if [ -z "$SIGNING_PASSWORD" ]; then
             echo "::warning::The SIGNING_PASSWORD secret is missing, so the release APK/AAB was not signed or published."
             exit 0

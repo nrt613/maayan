@@ -26,7 +26,7 @@
   --mikvah: #14a39e; --mikvah-bg: #ddf3f1; --mikvah-ink: #0c6b68;
   --sep: #d9901f; --sep-bg: #fcf1dd; --sep-ink: #8a5500;
   --flow: var(--niddah);
-  --warn-bg: #fcf1dd; --warn-ink: #8a5500; --danger: #c42b45; --danger-soft: #fdecef; --good: #1f8a5b; --good-soft: #e3f5ec;
+  --warn-bg: #fcf1dd; --warn-ink: #8a5500; --danger: #c42b45; --danger-soft: #fdecef; --good: #18744c; --good-soft: #e3f5ec;
   /* צורה */
   --r-xl: 28px; --r-l: 22px; --r-m: 16px; --r-s: 12px;
   --sh-1: 0 1px 2px rgb(60 20 40 / .04), 0 4px 14px rgb(60 20 40 / .05);
@@ -44,6 +44,7 @@ body.locked { overflow: hidden; }
 body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 30; background: var(--bg); }
 h1, h2, h3, h4, p, ul, ol, dl, dd { margin: 0; }
 h1, h2, h3, h4 { line-height: 1.2; text-wrap: balance; }
+p, li, small, .fine { text-wrap: pretty; }
 h1 { font-size: 32px; font-weight: 700; letter-spacing: -.02em; }
 h2 { font-size: 24px; font-weight: 700; letter-spacing: -.015em; }
 h3 { font-size: 17px; font-weight: 600; letter-spacing: -.005em; }
@@ -60,7 +61,7 @@ a { color: var(--accent); text-decoration: none; }
 .ic .s { fill: currentColor; stroke: none; }
 .ic .dot { stroke-width: 2.6; }
 .hebdate { font-weight: inherit; }
-time, [dir="ltr"], dd, .count, input[type="time"], input[type="date"], .ring strong, .day b, .key { font-variant-numeric: tabular-nums; }
+time, [dir="ltr"]:not(html, #app, #modal, #toast, .welcome, .sheet), dd, .count, input[type="time"], input[type="date"], .ring strong, .day b, .key { font-variant-numeric: tabular-nums; }
 
 /* ---------- מסגרת ---------- */
 #app { display: grid; grid-template-columns: 252px minmax(0, 1fr); min-height: 100dvh; }
@@ -290,7 +291,7 @@ details.past { box-shadow: 0 -1px 0 var(--line); }
 .cal-nav .icon-btn { background: var(--soft); color: var(--ink); }
 .cal-nav .link { min-width: 44px; justify-content: center; padding-inline: 10px; }
 .seg { display: inline-grid; grid-auto-flow: column; grid-auto-columns: 1fr; padding: 4px; border-radius: 14px; background: var(--soft); justify-self: start; }
-.seg button { min-height: 38px; border: 0; background: transparent; padding: 6px 18px; border-radius: 10px; color: var(--muted); font-weight: 500; font-size: 14.5px; transition: background .2s, color .2s; }
+.seg button { min-height: 44px; border: 0; background: transparent; padding: 6px 18px; border-radius: 10px; color: var(--muted); font-weight: 500; font-size: 14.5px; transition: background .2s, color .2s; }
 .seg button[aria-pressed="true"] { background: var(--surface); color: var(--ink); box-shadow: 0 1px 3px rgb(60 20 40 / .1); font-weight: 600; }
 .wk, .days { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 4px; }
 .wk span { text-align: center; color: var(--muted); font-size: 12px; font-weight: 500; padding-bottom: 2px; }
@@ -351,6 +352,8 @@ details.past { box-shadow: 0 -1px 0 var(--line); }
 .reviews details > summary .rv-t { flex: 1; min-width: 0; }
 /* ״יש לשאול רב״: סגנון רך בצבע המבטא של האפליקציה, לא אזהרה */
 .reviews details.ask > summary { color: var(--accent-strong); font-weight: 600; }
+.reviews details.ask > summary .rv-t { color: var(--ink); font-weight: 500; font-size: 15px; line-height: 1.45; }
+.ask-l { display: block; color: var(--accent-strong); font-weight: 600; font-size: 13px; margin-bottom: 2px; }
 .ask-ic { display: inline-grid; place-items: center; flex: none; width: 28px; height: 28px; border-radius: 9px; background: var(--accent-soft); color: var(--accent-strong); }
 .reviews details.ask p, .rv p { margin: 0 0 6px; }
 .ask-now { color: var(--muted); }
@@ -359,7 +362,7 @@ details.past { box-shadow: 0 -1px 0 var(--line); }
 .toggle.wake { border: 1px solid var(--line); border-radius: var(--r-m, 14px); padding: 8px 12px; }
 
 /* ---------- טפסים ---------- */
-.field { display: grid; gap: 7px; font-weight: 500; font-size: 14px; min-width: 0; color: var(--ink); }
+.field { display: grid; align-content: start; gap: 7px; font-weight: 500; font-size: 14px; min-width: 0; color: var(--ink); }
 .field small { color: var(--muted); font-weight: 400; font-size: 12.5px; }
 .opt { color: var(--muted); font-weight: 400; font-size: 12.5px; }
 input:not([type="checkbox"]), select, textarea { width: 100%; min-width: 0; min-height: 50px; padding: 12px 14px; border: 1.5px solid transparent; border-radius: 14px; background: var(--soft); font-weight: 400; font-size: 16px; color: var(--ink); transition: border-color .15s, background .15s, box-shadow .15s; -webkit-appearance: none; appearance: none; }
@@ -371,6 +374,11 @@ input:not([type="checkbox"]):hover, select:hover, textarea:hover { background-co
 input:not([type="checkbox"]):focus, select:focus, textarea:focus { border-color: var(--accent); background-color: var(--surface); outline: none; box-shadow: 0 0 0 4px var(--accent-soft); }
 textarea { resize: vertical; line-height: 1.5; }
 ::placeholder { color: var(--faint); }
+.plain-text { font-size: 13.5px !important; line-height: 1.6 !important; white-space: pre-wrap; }
+.file-in { position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
+.file-pick { display: flex; align-items: center; gap: 10px; min-height: 50px; padding: 12px 14px; border-radius: 14px; border: 1.5px dashed var(--line-2, #d9cdd3); background: var(--soft); color: var(--accent); font-weight: 600; font-size: 15px; cursor: pointer; overflow: hidden; }
+.file-pick span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
+.file-in:focus-visible + .file-pick { border-color: var(--accent); box-shadow: 0 0 0 4px var(--accent-soft); }
 .mono { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 12px !important; direction: ltr; text-align: left; }
 /* מתג בסגנון iOS */
 .toggle { display: flex; align-items: center; justify-content: space-between; gap: 14px; min-height: 56px; padding: 6px 0; cursor: pointer; }
@@ -385,6 +393,7 @@ textarea { resize: vertical; line-height: 1.5; }
 .toggle input:focus-visible { outline: 2.5px solid var(--accent); outline-offset: 2px; }
 .toggle + .toggle, .field + .toggle, .toggle + .field, .oz-box + .toggle, .toggle + .oz-box { box-shadow: 0 -1px 0 var(--line); }
 .pair { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.pair.end { align-items: end; }
 .trip { display: flex; justify-content: space-between; align-items: center; gap: 10px; min-height: 56px; padding: 6px 6px 6px 14px; padding-inline-start: 14px; border-radius: var(--r-m); background: var(--soft); }
 .trip span { display: grid; } .trip small { color: var(--muted); }
 .action { display: flex; align-items: center; gap: 14px; width: 100%; min-height: 60px; padding: 10px 0; border: 0; background: transparent; text-align: start; color: var(--ink); }
@@ -632,6 +641,16 @@ main.enter > :nth-child(2) { animation-delay: .03s; } main.enter > :nth-child(3)
 
 /* יומן ארוך (שנים של רישומים): בלי פריסה וציור לרישומים שמחוץ למסך */
 .entries > .entry { content-visibility: auto; contain-intrinsic-size: auto 64px; }
+/* בחירת המנהג בכניסה הראשונה */
+.onboard { display: grid; gap: 18px; }
+.ob-h { display: grid; gap: 6px; justify-items: center; text-align: center; }
+.ob-ic { display: grid; place-items: center; width: 48px; height: 48px; border-radius: 50%; background: var(--accent-soft); color: var(--accent-strong); margin-bottom: 2px; }
+.ob-h h2 { font-size: 25px; }
+.ob-h p { color: var(--muted); font-size: 15px; max-width: 34ch; }
+.onboard .btn .ic { margin-inline-start: 2px; }
+.onboard .btn:disabled { opacity: .4; }
+.ob-back { justify-self: center; font-size: 14.5px; color: var(--muted); font-weight: 500; }
+.onboard > .fine { text-align: center; }
 </style><style id="sf">@font-face{font-family:"Rubik";src:url("fonts/rubik-hebrew.woff2") format("woff2"),url("rubik-hebrew.woff2") format("woff2");font-weight:300 900;font-style:normal;font-display:swap;unicode-range:U+0307-0308,U+0590-05FF,U+200C-2010,U+20AA,U+25CC,U+FB1D-FB4F}@font-face{font-family:"Rubik";src:url("fonts/rubik-latin.woff2") format("woff2"),url("rubik-latin.woff2") format("woff2");font-weight:300 900;font-style:normal;font-display:swap;unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}@font-face{font-family:"Rubik";src:url("fonts/rubik-latin-ext.woff2") format("woff2"),url("rubik-latin-ext.woff2") format("woff2");font-weight:300 900;font-style:normal;font-display:swap;unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF}</style>
 </head><body>
 <div id="app" dir="rtl" lang="he"></div><div id="modal" dir="rtl" lang="he"></div><div id="toast" dir="rtl" lang="he"></div>
@@ -865,7 +884,9 @@ const Maayan = (() => {
     cityId: "netanya", wait: "five", haflagah: "days", beinonit: "same", day31: false, orZarua: false, carryMonthly: false,
     carryLongIntervals: false, missingMonthly: "first-next-month", bedikot: "twice", nightfall: "8.5", special: "regular", methodNote: "",
     method: "custom", beinHashmashot: "both", hefsekTwilight: "before-sunset",
-    neutralReminders: true, reminderMinutes: 30, morningTime: "08:00", remindersEnabled: true, checklist: [],
+    // methodChosen: יומן חדש מתחיל ב-false עד שבוחרים מנהג (newDiary). יומן שנשמר לפני שהשדה נוסף — true, ולא משתנה
+    methodChosen: true,
+    neutralReminders: true, reminderMinutes: 60, morningTime: "08:00", remindersEnabled: true, checklist: [],
   };
   const SETTING_ENUMS = {
     wait: ["five", "four", "four-from-relations"], method: ["custom", "ashkenaz", "ashkenaz-kreiti", "sefard", "sefard-bic", "chabad"], beinHashmashot: ["both", "flag"], hefsekTwilight: ["before-sunset", "ovadia"], haflagah: ["days", "chabad-onot"], beinonit: ["same", "both"], missingMonthly: ["skip", "first-next-month"],
@@ -906,7 +927,7 @@ const Maayan = (() => {
     const known = id => CITIES.some(c => c.id === id) || places.some(c => c.id === id);
     if (!known(s.cityId)) fail("עיר לא מוכרת בהגדרות");
     for (const [k, vals] of Object.entries(SETTING_ENUMS)) if (!vals.includes(s[k])) fail(`ערך לא תקין בהגדרה ${k}`);
-    for (const k of ["day31", "orZarua", "carryMonthly", "carryLongIntervals", "neutralReminders", "remindersEnabled"]) if (typeof s[k] !== "boolean") fail(`ערך לא תקין בהגדרה ${k}`);
+    for (const k of ["day31", "orZarua", "carryMonthly", "carryLongIntervals", "neutralReminders", "remindersEnabled", "methodChosen"]) if (typeof s[k] !== "boolean") fail(`ערך לא תקין בהגדרה ${k}`);
     if (typeof s.methodNote !== "string" || s.methodNote.length > 1000) fail("הערת השיטה ארוכה מדי");
     if (!Number.isInteger(s.reminderMinutes) || s.reminderMinutes < 5 || s.reminderMinutes > 120) fail("דקות התזכורת צריכות להיות בין 5 ל-120");
     if (!TIME_RE.test(s.morningTime)) fail("שעת הבוקר אינה תקינה");
@@ -947,6 +968,8 @@ const Maayan = (() => {
   }
   const safeParse = input => { try { return { success: true, data: parseState(input) }; } catch (e) { return { success: false, error: e }; } };
   const emptyState = () => ({ schemaVersion: 1, settings: { ...SETTING_DEFAULTS, checklist: [] }, events: [], trips: [], places: [] });
+  /** יומן אישי חדש: המנהג עוד לא נבחר, ואין חישוב עד שבוחרים (בכניסה הראשונה) */
+  const newDiary = () => { const s = emptyState(); s.settings.methodChosen = false; return s; };
 
   /* ---------- תאריכים ---------- */
   const fromISO = d => { const [y, m, day] = d.split("-").map(Number); return new Date(y, m - 1, day, 12); };
@@ -1110,7 +1133,7 @@ const Maayan = (() => {
   }
 
   /* ---------- מנוע ---------- */
-  const ENGINE_VERSION = "0.5.0-review";
+  const ENGINE_VERSION = "0.6.0-review";
   /* ---------- מקורות ----------
    * כל מקור הוא מקום בטקסט הראשוני, לא אתר. ref הוא מקום הטקסט בספריא: הציטוט q נבדק מול הטקסט שם.
    * מקור בלי ref לא נבדק מול לשון הספר (הספר אינו בספריא, או שהמקום המדויק לא אומת) — לבדיקת הרב. */
@@ -1205,6 +1228,11 @@ const Maayan = (() => {
     // בין השמשות: "both" — לחומרא חוששים לשתי העונות; "flag" — משעים את החישוב ומסמנים לבירור
     const bhs = set.beinHashmashot !== "flag";
     const review = (id, title, detail, eventIds = [], source = []) => { if (!reviews.some(r => r.id === id)) reviews.push({ id, title, detail, eventIds, source }); };
+    // יומן חדש שעוד לא נבחר בו מנהג: אין חישוב בכלל, כדי שלא יחושב בשקט לפי ״התאמה אישית״
+    if (set.methodChosen === false) {
+      review("method-not-chosen", "עוד לא נבחר מנהג", "המועדים יחושבו אחרי שתבחרי את המנהג שלך.");
+      return { plans, reviews, latestFlow: undefined, hefsek: undefined, earliestHefsek: undefined, cleanDay: undefined, phase: "empty", immersionDate: undefined, checks: {}, version: ENGINE_VERSION };
+    }
     /* ״יש לשאול רב״: שאלה פתוחה שהמצב שלה נוצר ביומן. המנוע אינו מכריע; החישוב נשאר לחומרא.
      * לממשק: כותרת ״יש לשאול רב״, משפט אחד שמתאר את המצב (situation) ומשפט אחד על מה שמעיין עושה בינתיים (meanwhile).
      * topic הוא שם השאלה למסמכי הרב, ו-source המקורות שלה — למסמכים ולדוח לרב, לא לתצוגה באפליקציה. */
@@ -1360,15 +1388,20 @@ const Maayan = (() => {
     const latestHasUncertainty = unresolvedFlows.some(event => couldFollow(event, lastRecorded)) || (!!lastRecorded && ((lastRecorded.s.uncertain && !bhs) || lastRecorded.e.result === "uncertain"));
     if (last && !latestHasUncertainty && state.settings.special === "regular" && !dateline) {
       const lastReadings = readings(last), altOf = (r, i) => i ? `-alt` : "";
-      const seenAverage = new Set();
+      const averages = new Map();
       lastReadings.forEach((r, i) => {
         const onot = state.settings.beinonit === "both" ? ["night", "day"] : [r.onah];
         // אור זרוע ביום 31 אינו נוסף: מי ששומרת ימים 30 ו-31 שומרת את אור זרוע ליום 30 בלבד (מקור ראשוני לא אותר — CITES.orZarua31)
+        // אור זרוע לעונה הבינונית רק לפני עונת הראייה עצמה (לכל שיוך אפשרי שלה), לא לפני ההרחבה ליממה שלמה. ביממה שלמה וראייה ביום
+        // הוא ליל יום 30, שכבר בתוך היממה, ולכן אין אור זרוע ביום 29 (הוכרע: כך כל הלוחות). לעונת החודש ולהפלגה — ללא שינוי.
         for (const day of (state.settings.day31 ? [30, 31] : [30])) for (const onah of onot) {
-          const key = `${r.abs + day - 1}|${onah}`; if (seenAverage.has(key)) continue; seenAverage.add(key);
-          addOnah(r.abs + day - 1, onah, "average", `עונה בינונית · יום ${day}`, i ? altWhy(last) : `ספירה כוללנית: יום הראייה הוא יום 1. יום ${day} הוא ${day - 1} ימים לאחר התאריך העברי שנרשם.`, SOURCES.average, [last.e.id], `average-${last.e.id}-${day}-${onah}${altOf(r, i)}`, day === 30);
+          const key = `${r.abs + day - 1}|${onah}`, own = day === 30 && onah === r.onah, seen = averages.get(key);
+          if (seen) { seen.oz ||= own; continue; }
+          averages.set(key, { abs: r.abs + day - 1, onah, day, i, r, oz: own });
         }
       });
+      for (const { abs, onah, day, i, r, oz } of averages.values())
+        addOnah(abs, onah, "average", `עונה בינונית · יום ${day}`, i ? altWhy(last) : `ספירה כוללנית: יום הראייה הוא יום 1. יום ${day} הוא ${day - 1} ימים לאחר התאריך העברי שנרשם.`, SOURCES.average, [last.e.id], `average-${last.e.id}-${day}-${onah}${altOf(r, i)}`, oz);
       const monthly = f => {
         const h = new HDate(typeof f === "number" ? f : f.s.abs), nextFirst = new HDate(1, h.getMonth(), h.getFullYear()).add(1, "M");
         const monthLength = nextFirst.add(1, "M").abs() - nextFirst.abs();
@@ -1380,15 +1413,13 @@ const Maayan = (() => {
       if (useAlt(last)) { const t = monthly(last.s.alt.abs); if (t) addOnah(t, last.s.alt.onah, "monthly", "עונת החודש · העונה הסמוכה", altWhy(last), SOURCES.monthly, [last.e.id], `monthly-${last.e.id}-alt`); }
       if (monthlyAbs) addOnah(monthlyAbs, last.s.onah, "monthly", "עונת החודש", "אותו יום בחודש העברי הבא ובאותה עונה. כלל יום ל׳ בחודש חסר נקבע בנפרד בהגדרות.", SOURCES.monthly, [last.e.id], `monthly-${last.e.id}`);
       else review("missing-month-day", "בחודש הבא אין יום מקביל", "לפי הבחירה בהגדרות, בחודש הזה אין עונת חודש.", [last.e.id]);
-      // ראתה בל׳ בחודש (א׳ דראש חודש): מה דין עונת החודש כשהחודש הבא חסר, וכשהוא מלא (ראש חודש שני ימים)
+      // ראתה בל׳ בחודש (א׳ דראש חודש) והחודש הבא חסר: שאלה לרב
       if (new HDate(last.s.abs).getDate() === 30) {
         const h = new HDate(last.s.abs), nextFirst = new HDate(1, h.getMonth(), h.getFullYear()).add(1, "M"), afterFirst = nextFirst.add(1, "M").abs();
         if (afterFirst - nextFirst.abs() === 29) ask("ask-30-short", "ראתה בל׳ והחודש הבא חסר", "ראית בל׳ בחודש, ובחודש הבא אין ל׳.",
           monthlyAbs ? `בינתיים מעיין חוששת ל־${hs(monthlyAbs)}.` : "בינתיים מעיין אינה מוסיפה עונת חודש, לפי הבחירה בהגדרות.",
           [last.e.id], ["aruch189_12", "missing30", "secHeichal"]);
-        else ask("ask-30-full", "ראתה בל׳ והחודש הבא מלא", `ראית בל׳ בחודש, ובחודש הבא ראש החודש יומיים: ${hs(monthlyAbs)} ו־${hs(afterFirst)}.`,
-          `בינתיים מעיין חוששת ל־${hs(monthlyAbs)}.`,
-          [last.e.id], ["missing30", "taz189_14"]);
+        // כשהחודש הבא מלא: עונת החודש בל׳ בלבד, בלי א׳ שאחריו (הוכרע: כך כל הלוחות)
       }
       const monthlyTargets = new Set([monthlyAbs]);
       // ראייה קודמת שעונת החודש שלה עוד לא הגיעה כשבאה הראייה האחרונה — עונת החודש שלה נשארת (ראתה פעמיים בחודש)
@@ -1467,7 +1498,7 @@ const Maayan = (() => {
             const dates = [...new Set([...extra.map(x => x.target), ...long.map(x => last.s.abs + x.v - 1)])].sort((p, q) => p - q).map(hs);
             const values = [...new Set([...extra, ...long].map(x => x.v))].sort((p, q) => q - p);
             ask("ask-uprooted-haflagah", "הפלגה ארוכה שנעקרה בהפלגה קצרה ממנה",
-              `אחרי הפלגה של ${values.join(", ")} ימים באה הפלגה קצרה יותר, של ${lastV} ימים.`, `בינתיים מעיין אינה חוששת ל־${dates.join(", ")}.`,
+              `אחרי הפלגה של ${values.length > 1 ? `${values.slice(0, -1).join(", ")} ו־${values.at(-1)}` : values[0]} ימים באה הפלגה קצרה יותר, של ${lastV} ימים.`, `בינתיים מעיין אינה חוששת ל־${dates.join(", ")}.`,
               [...new Set([...extra.flatMap(x => x.ids), ...long.flatMap(x => x.ids), last.e.id])], ["rema189_13", "shach189_31", "secCarryTaz", "secCarryMajority"]);
           }
         }
@@ -1517,13 +1548,6 @@ const Maayan = (() => {
     // אור זרוע שחופף בדיוק לעונה שכבר נשמרת (למשל בעונה בינונית של יממה שלמה) אינו מוצג פעמיים
     const windows = new Set(plans.filter(p => p.kind !== "or-zarua").map(p => `${p.start}|${p.end}`));
     const deduped = [...new Map(plans.filter(p => p.kind !== "or-zarua" || !windows.has(`${p.start}|${p.end}`)).map(p => [p.id, p])).values()].sort((a, b) => a.start.localeCompare(b.start));
-    // כרתי ופלתי (עונה בינונית מעת לעת ואור זרוע), ראייה ביום: אור זרוע נוסף לפני עונת הלילה של יום 30, כלומר ביום 29 ביום — שאלה לרב
-    if (last && last.s.onah === "day" && set.beinonit === "both" && set.orZarua) {
-      const oz = deduped.find(p => p.id === `oz-average-${last.e.id}-30-night`);
-      if (oz) ask(`ask-oz-24h-${last.e.id}`, "אור זרוע לפני עונה בינונית של מעת לעת",
-        "העונה הבינונית בשיטה שלך היא יממה שלמה, מתחילת הלילה.", `בינתיים מעיין מוסיפה עונת אור זרוע ב־${hs(isoAbs(oz.date))}, ביום שלפניה.`,
-        [last.e.id], ["shach184_7", "sahr189_1f", "secBadei"]);
-    }
     return { plans: deduped, reviews, latestFlow, hefsek: validHefsek?.e, earliestHefsek, cleanDay, phase, immersionDate, checks, version: ENGINE_VERSION };
   }
 
@@ -1574,11 +1598,11 @@ const Maayan = (() => {
   }
   const SETTING_LABELS = {
     wait: { five: "חמישה ימים מתחילת הנידה", four: "ארבעה ימים מתחילת הנידה (הרב עובדיה יוסף)", "four-from-relations": "ארבעה ימים ממועד היחסים" },
-    method: { custom: "התאמה אישית", ashkenaz: "אשכנזי – עיקר הדין", "ashkenaz-kreiti": "אשכנזי – כרתי ופלתי", sefard: "הרב עובדיה יוסף (ספרדי)", "sefard-bic": "בן איש חי (ספרדי)", chabad: "מנהג חב״ד" },
+    method: { custom: "התאמה אישית", ashkenaz: "אשכנזי רגיל", "ashkenaz-kreiti": "אשכנזי – יממה שלמה (כרתי ופלתי)", sefard: "הרב עובדיה יוסף (ספרדי)", "sefard-bic": "בן איש חי (ספרדי)", chabad: "מנהג חב״ד" },
     beinHashmashot: { both: "לחומרא שתי העונות", flag: "השעיית החישוב ובירור" },
     hefsekTwilight: { "before-sunset": "רק לפני השקיעה", ovadia: "בדיעבד עד 13.5 דקות זמניות אחרי השקיעה (הרב עובדיה יוסף)" },
     haflagah: { days: "ימים בין תחילות הווסתות", "chabad-onot": "עונות מהפסק טהרה (חב״ד)" },
-    beinonit: { same: "אותה עונה", both: "שתי העונות" },
+    beinonit: { same: "רק העונה שבה התחילה הווסת", both: "יממה שלמה (לילה ויום)" },
     missingMonthly: { skip: "דילוג", "first-next-month": "א׳ בחודש שאחריו" },
     bedikot: { twice: "בוקר וערב בכל יום", "first-last": "ראשון ושביעי" },
     special: { regular: "מחזור רגיל", pregnancy: "היריון", postpartum: "אחרי לידה", nursing: "הנקה", hormonal: "טיפול הורמונלי" },
@@ -1618,9 +1642,9 @@ const Maayan = (() => {
   ];
   const ASHKENAZ_NOTES = [
     note("wait", "חמישה ימים מתחילת הווסת: יום הראייה הוא יום 1, וההפסק ביום החמישי לפני השקיעה (רמ״א יו״ד קצו, יא; כך נוהגים כל קהילות אשכנז).", PS.wait),
-    note("beinonit", "עונה בינונית ביום 30, בעונה שבה התחילה הראייה בלבד (שו״ע יו״ד קפט, א). מעת לעת שלם — בשיטת ״כרתי ופלתי״.", PS.average),
+    note("beinonit", "עונה בינונית ביום 30, בעונה שבה התחילה הראייה בלבד (שו״ע יו״ד קפט, א). מעת לעת שלם — בשיטת ״יממה שלמה (כרתי ופלתי)״.", PS.average),
     note("day31", "שומרים גם את יום 31, בעונת הראייה (חוות דעת קפט; ש״ך קפט, ס״ק ל). כך המנהג הרווח: לחוש גם ליום 30 וגם ליום 31 (שבט הלוי, מקור משני).", PS.day31Kreiti),
-    note("orZarua", "עונת אור זרוע — העונה שלפני כל וסת (ש״ך קפד, ס״ק ז, בשם האור זרוע, ובשם הב״ח: ״הירא דבר ה׳ נוהג כהא״ז״). הט״ז (קפד, ס״ק ב) חולק. האם לכלול אותה בעיקר הדין — לברר.", PS.ozAshkenazBasic, true),
+    note("orZarua", "עונת אור זרוע — העונה שלפני כל וסת (ש״ך קפד, ס״ק ז, בשם האור זרוע, ובשם הב״ח: ״הירא דבר ה׳ נוהג כהא״ז״). הט״ז (קפד, ס״ק ב) חולק. האם לכלול אותה בשיטה הרגילה — לברר.", PS.ozAshkenazBasic, true),
     note("haflagah", "הפלגה בימים מתחילת וסת לתחילת וסת, בספירה כוללנית.", PS.haflagah),
     note("carryLongIntervals", "הפלגה ארוכה נעקרת מיד כשבאה ראייה לפניה (״נעקר בפעם אחת״), כדעת הב״ח והש״ך (ובסיכום המשני גם סדרי טהרה, חוות דעת, רעק״א) — דלא כרמ״א (קפט, יג) והט״ז.", PS.uproot),
     note("missingMonthly", "ל׳ בחודש כשבחודש הבא אין ל׳: א׳ בחודש שאחריו, לחומרא (העונה הבינונית חלה ממילא בכ״ט).", PS.missing30),
@@ -1647,19 +1671,19 @@ const Maayan = (() => {
         note("orZarua", "חוששים לעונת אור זרוע — העונה שלפני כל וסת: ״ומרן ז״ל סבירא לה כדעה הראשונה, אך צריך לחוש לדעה זו השניה״ (בן איש חי, שנה ב, צו, א).", PS.ozBic)),
     },
     ashkenaz: {
-      label: SETTING_LABELS.method.ashkenaz, family: "ashkenaz", name: "עיקר הדין",
+      label: SETTING_LABELS.method.ashkenaz, family: "ashkenaz", name: "אשכנזי רגיל",
       line: "עונה בינונית ביום 30 ו-31, עונה אחת (עונת הראייה), ועונת אור זרוע לפני כל וסת.", source: "שו״ע ורמ״א; חוות דעת קפט; ש״ך קפד, ס״ק ז",
       settings: { ...ASHKENAZ_BASE },
       notes: ASHKENAZ_NOTES,
     },
     "ashkenaz-kreiti": {
-      label: SETTING_LABELS.method["ashkenaz-kreiti"], family: "ashkenaz", name: "כרתי ופלתי",
+      label: SETTING_LABELS.method["ashkenaz-kreiti"], family: "ashkenaz", name: "יממה שלמה (כרתי ופלתי)",
       line: "עונה בינונית יממה שלמה, לילה ויום, בימים 30 ו-31. הפלגה ארוכה נשמרת עד שנעקרת (רמ״א, ט״ז).", source: "כרתי ופלתי, מובא בשו״ע הרב קפט, א",
       settings: { ...ASHKENAZ_BASE, beinonit: "both", carryLongIntervals: true },
       notes: withNotes(ASHKENAZ_NOTES,
         note("beinonit", "עונה בינונית מעת לעת שלם, לילה ויום, מתחילת הלילה ועד סוף היום (כרתי ופלתי, מובא בשו״ע הרב קפט, א). בדי השלחן פוסק כך (מקור משני).", PS.beinonitKreiti),
         note("day31", "שומרים גם את יום 31, גם הוא יממה שלמה (חוות דעת קפט; ש״ך קפט, ס״ק ל). כך המנהג הרווח: לחוש גם ליום 30 וגם ליום 31 (שבט הלוי, מקור משני).", PS.day31Kreiti),
-        note("orZarua", "עונת אור זרוע לפני יום 30, עונת החודש וההפלגה (ש״ך קפד, ס״ק ז; הט״ז, ס״ק ב, חולק). לפני יום 31 אין אור זרוע. כשהעונה הבינונית היא מעת לעת, אור זרוע מתווסף לפני עונת הלילה שלה, כלומר ביום 29 — לברר.", PS.ozKreiti, true),
+        note("orZarua", "עונת אור זרוע לפני יום 30, עונת החודש וההפלגה (ש״ך קפד, ס״ק ז; הט״ז, ס״ק ב, חולק). לפני יום 31 אין אור זרוע. אור זרוע לעונה הבינונית רק לפני עונת הראייה: בראייה ביום הוא ליל יום 30, שכבר בתוך היממה, ולכן אין אור זרוע ביום 29; בראייה בלילה — ביום 29 ביום (כך כל הלוחות). האם לכלול את אור זרוע בשיטה — לברר, כמו באשכנזי רגיל.", PS.ozKreiti, true),
         note("carryLongIntervals", "הפלגה ארוכה שלא נעקרה נשמרת לצד ההפלגה הקצרה, וגם ההפלגה של הראייה הקודמת, שנספרת ממנה, כל עוד מועדה לא הגיע — כדעת הרמ״א (קפט, יג: ״חוששת לט׳ באייר״) והט״ז. הב״ח והש״ך חולקים.", PS.carryTaz, true)),
     },
     chabad: {
@@ -1682,17 +1706,18 @@ const Maayan = (() => {
   };
   /* בחירת שיטה בשני שלבים: מה המנהג, ואחר כך לפי מי (בחב״ד אין שלב שני) */
   const METHOD_FAMILIES = [
-    { id: "sefard", label: "ספרדי", ask: "לפי מי?", methods: ["sefard", "sefard-bic"] },
-    { id: "ashkenaz", label: "אשכנזי", ask: "לפי איזו שיטה?", methods: ["ashkenaz", "ashkenaz-kreiti"] },
+    { id: "sefard", label: "ספרדי", ask: "לפי פסקי מי?", methods: ["sefard", "sefard-bic"] },
+    { id: "ashkenaz", label: "אשכנזי", ask: "לפי פסקי מי?", methods: ["ashkenaz", "ashkenaz-kreiti"] },
     { id: "chabad", label: "חב״ד", ask: "", methods: ["chabad"] },
   ];
   const methodFamily = method => (METHOD_PRESETS[method] || {}).family || "";
   /** אילו הגדרות שונו אחרי בחירת שיטה */
   const presetDiff = s => { const p = METHOD_PRESETS[s && s.method]; return p ? Object.keys(p.settings).filter(k => s[k] !== p.settings[k]) : []; };
-  const applyPreset = (settings, method) => { const p = METHOD_PRESETS[method]; return p ? { ...settings, ...p.settings, method } : { ...settings, method: "custom" }; };
+  /** בחירת מנהג (גם ״התאמה אישית״ במפורש) מסמנת שהמנהג נבחר */
+  const applyPreset = (settings, method) => { const p = METHOD_PRESETS[method]; return p ? { ...settings, ...p.settings, method, methodChosen: true } : { ...settings, method: "custom", methodChosen: true }; };
   function settingsSummary(s) {
     return [
-      `שיטה: ${SETTING_LABELS.method[s.method] || SETTING_LABELS.method.custom}${presetDiff(s).length ? " (עם שינויים)" : ""}`,
+      `המנהג שלי: ${SETTING_LABELS.method[s.method] || SETTING_LABELS.method.custom}${presetDiff(s).length ? " (עם שינויים)" : ""}`,
       `מקום: ${city(s.cityId).name}`, `המתנה: ${SETTING_LABELS.wait[s.wait]}`, `הפלגה: ${SETTING_LABELS.haflagah[s.haflagah]}`,
       `עונה בינונית: ${SETTING_LABELS.beinonit[s.beinonit]}`, `יום 31: ${yesNo(s.day31)}`, `אור זרוע: ${yesNo(s.orZarua)}`,
       `שימור הפלגות ארוכות: ${yesNo(s.carryLongIntervals)}`, `שימור עונת חודש בזמן דימום: ${yesNo(s.carryMonthly)}`,
@@ -1736,7 +1761,7 @@ const Maayan = (() => {
     setLang, getLang, LOCALES, HDate, isLeapYear, daysInMonth, monthsInYear, gematriya, hebrew2abs, abs2hebrew,
     CITIES, city, setPlaces, EVENT_TYPES, EVENT_NAMES, CHECKLIST, SETTING_DEFAULTS, SETTING_LABELS, RESULT_NAMES, uuid, validISO, parseState, safeParse, emptyState, ValidationError,
     fromISO, toISO, addDays, hd, fromAbs, hebrew, dayNumber, isoAbs, civilLabel, dateInZone, timeInZone, localInstant, sun, atLocation, stamp, onahWindow, today, currentContext,
-    ENGINE_VERSION, SOURCES, CITES, cite, citeUrl, citeText, calculate, sorted, METHOD_PRESETS, METHOD_FAMILIES, methodFamily, presetDiff, applyPreset, nightfallLabel,
+    ENGINE_VERSION, newDiary, SOURCES, CITES, cite, citeUrl, citeText, calculate, sorted, METHOD_PRESETS, METHOD_FAMILIES, methodFamily, presetDiff, applyPreset, nightfallLabel,
     encryptBackup, decryptBackup, calendarExport, reportExport, settingsSummary, eventLine, planLine, demoState,
   };
 })();
@@ -1895,10 +1920,8 @@ const MaayanDict = (() => {
     ["מגבת ובגדים נקיים", "Towel and clean clothes", "Serviette et vêtements propres", "Toalla y ropa limpia"],
     ["פריטים אישיים לדרך", "Personal items for the way", "Affaires personnelles", "Artículos personales"],
     ["היומן שלך ריק", "Your diary is empty", "Votre journal est vide", "Su diario está vacío"],
-    ["כדאי להתחיל מהזנת המחזורים האחרונים (לפחות שניים), כדי שההפלגה ועונת החודש יחושבו נכון. אפשר גם להתאים קודם את שיטת החישוב.", "Start by entering your recent cycles (at least two) so the haflagah and Veset HaChodesh are calculated correctly. You can also set the calculation method first.", "Commencez par saisir vos derniers cycles (au moins deux) pour que la haflaga et le vésset ha'hodech soient calculés correctement. Vous pouvez aussi régler d'abord la méthode de calcul.", "Empiece ingresando sus últimos ciclos (al menos dos) para que la haflagá y el veset hajódesh se calculen correctamente. También puede ajustar primero el método de cálculo."],
     ["רישום ראשון", "First entry", "Première entrée", "Primera entrada"],
     ["הזנת מחזורים קודמים", "Enter past cycles", "Saisir des cycles passés", "Ingresar ciclos anteriores"],
-    ["שיטת החישוב", "Calculation method", "Méthode de calcul", "Método de cálculo"],
     ["יומן לדוגמה", "Sample diary", "Journal d'exemple", "Diario de ejemplo"],
 
     // לוח
@@ -2058,31 +2081,18 @@ const MaayanDict = (() => {
     ["עיר מגורים", "Home city", "Ville de résidence", "Ciudad de residencia"],
     ["לכל רישום נשמר המקום שלו. שינוי העיר אינו משנה רישומים קודמים.", "Each entry keeps its own place. Changing the city does not change earlier entries.", "Chaque entrée garde son propre lieu. Changer de ville ne modifie pas les entrées antérieures.", "Cada entrada conserva su propio lugar. Cambiar la ciudad no modifica entradas anteriores."],
     ["לבחור לפי ההנחיה שקיבלת", "Choose according to the guidance you received", "À choisir selon les instructions reçues", "Elija según la orientación que recibió"],
-    ["המתנה לפני שבעה נקיים", "Wait before the seven clean days", "Attente avant les sept jours propres", "Espera antes de los siete días limpios"],
     ["חמישה ימים מתחילת הנידה", "Five days from the start of niddah", "Cinq jours depuis le début de la nidda", "Cinco días desde el inicio de la nidá"],
-    ["ארבעה ימים ממועד היחסים — לפי הוראה", "Four days from relations — per ruling", "Quatre jours depuis la relation — sur instruction", "Cuatro días desde la relación — según indicación"],
     ["ארבעה ימים ממועד היחסים", "Four days from relations", "Quatre jours depuis la relation", "Cuatro días desde la relación"],
-    ["שיטת חישוב ההפלגה", "Haflagah method", "Méthode de la haflaga", "Método de la haflagá"],
     ["ימים בין תחילות הווסתות", "Days between period starts", "Jours entre les débuts de règles", "Días entre inicios de período"],
-    ["עונות מהפסק טהרה — חב״ד", "Onot from hefsek taharah — Chabad", "Onot depuis le hefsek tahara — Habad", "Onot desde el hefsek tahará — Jabad"],
     ["עונות מהפסק טהרה (חב״ד)", "Onot from hefsek taharah (Chabad)", "Onot depuis le hefsek tahara (Habad)", "Onot desde el hefsek tahará (Jabad)"],
     ["עונה בינונית ביום 30", "Onah Beinonit on day 30", "Ona beinonit au jour 30", "Oná beinonit el día 30"],
-    ["אותה עונה שבה התחילה הווסת", "The same onah in which the period began", "La même ona que le début des règles", "La misma oná en que empezó el período"],
-    ["שתי העונות — לילה ויום", "Both onot — night and day", "Les deux onot — nuit et jour", "Ambas onot — noche y día"],
-    ["הוספת יום 31", "Add day 31", "Ajouter le jour 31", "Añadir el día 31"],
     ["לפי המנהג או ההנחיה", "Per custom or guidance", "Selon la coutume ou l'instruction", "Según la costumbre o la indicación"],
     ["עונת אור זרוע", "Or Zarua onah", "Ona du Or Zaroua", "Oná de Or Zarúa"],
     ["העונה שלפני כל חשש מחושב", "The onah before each calculated time", "L'ona qui précède chaque date calculée", "La oná anterior a cada fecha calculada"],
     ["שימור הפלגות ארוכות", "Keep longer haflagot", "Conserver les haflagot plus longues", "Conservar haflagot más largas"],
-    ["בחישוב ימים, כשווסת חדשה מקדימה את החשש הקודם", "In the days method, when a new period comes before the earlier date", "Dans la méthode des jours, quand de nouvelles règles précèdent la date antérieure", "En el método de días, cuando un nuevo período llega antes de la fecha anterior"],
     ["שימור עונת חודש בזמן דימום", "Keep Veset HaChodesh during bleeding", "Conserver le vésset ha'hodech pendant le saignement", "Conservar el veset hajódesh durante el sangrado"],
     ["דורש תיעוד מלא של הווסת וההפסק", "Requires full records of period and hefsek", "Nécessite un relevé complet des règles et du hefsek", "Requiere registro completo del período y del hefsek"],
-    ["יום ל׳, כשבחודש הבא אין ל׳", "Day 30, when the next month has no 30th", "Le 30, quand le mois suivant n'a pas de 30", "Día 30, cuando el mes siguiente no tiene 30"],
-    ["א׳ בחודש שאחרי החודש החסר (מומלץ)", "The 1st of the month after the short month (recommended)", "Le 1er du mois qui suit le mois court (recommandé)", "El día 1 del mes siguiente al mes corto (recomendado)"],
-    ["בלי עונת חודש באותו חודש", "No Veset HaChodesh that month", "Pas de vésset ha'hodech ce mois-là", "Sin veset hajódesh ese mes"],
     ["תזכורות לבדיקות", "Bedikah reminders", "Rappels de bedikot", "Recordatorios de bedicot"],
-    ["בוקר וערב בכל אחד משבעת הימים", "Morning and evening on each of the seven days", "Matin et soir chacun des sept jours", "Mañana y tarde en cada uno de los siete días"],
-    ["ראשון ושביעי בלבד — לפי הוראה", "First and seventh only — per ruling", "Premier et septième seulement — sur instruction", "Solo el primero y el séptimo — según indicación"],
     ["{n}° מתחת לאופק", "{n}° below the horizon", "{n}° sous l'horizon", "{n}° bajo el horizonte"],
     ["מצב מיוחד", "Special situation", "Situation particulière", "Situación especial"],
     ["מחזור רגיל", "Regular cycle", "Cycle normal", "Ciclo normal"],
@@ -2092,8 +2102,8 @@ const MaayanDict = (() => {
     ["טיפול הורמונלי / אמצעי מניעה", "Hormonal treatment / contraception", "Traitement hormonal / contraception", "Tratamiento hormonal / anticonceptivos"],
     ["טיפול הורמונלי", "Hormonal treatment", "Traitement hormonal", "Tratamiento hormonal"],
     ["במצב מיוחד החישובים הרגילים מושעים, ואפשר לרשום עונות לפי הוראה.", "In a special situation the regular calculations are suspended, and you can record onot per a ruling.", "Dans une situation particulière, les calculs habituels sont suspendus et vous pouvez noter des onot sur instruction.", "En una situación especial se suspenden los cálculos habituales y puede registrar onot según indicación."],
-    ["ממי ההנחיות", "Whose guidance", "Instructions de qui", "De quién es la orientación"],
-    ["שם מורה ההוראה או המנהג", "Name of your rav or custom", "Nom du rav ou de la coutume", "Nombre del rav o la costumbre"],
+    ["למשל: הרב של הקהילה, או מדריכת הכלות", "E.g. your community rabbi, or your kallah teacher", "Par ex. le rav de la communauté, ou la monitrice", "Por ejemplo: el rabino de la comunidad, o la instructora de novias"],
+    ["שם הרב או המדריכה", "Name of your rabbi or teacher", "Nom de votre rav ou de votre monitrice", "Nombre de su rabino o instructora"],
     ["תזכורות", "Reminders", "Rappels", "Recordatorios"],
     ["התראות כשהיומן פתוח", "Notifications while the diary is open", "Notifications quand le journal est ouvert", "Notificaciones con el diario abierto"],
     ["דורש הרשאה מהדפדפן", "Requires browser permission", "Nécessite l'autorisation du navigateur", "Requiere permiso del navegador"],
@@ -2189,6 +2199,7 @@ const MaayanDict = (() => {
     ["לפחות {n} תווים. לשמור אותה בנפרד.", "At least {n} characters. Keep it separately.", "Au moins {n} caractères. Conservez-le à part.", "Al menos {n} caracteres. Guárdela por separado."],
     ["יצירת גיבוי", "Create backup", "Créer la sauvegarde", "Crear copia"],
     ["קובץ גיבוי", "Backup file", "Fichier de sauvegarde", "Archivo de copia"],
+    ["בחירת קובץ", "Choose a file", "Choisir un fichier", "Elegir un archivo"],
     ["או הדבקת טקסט הגיבוי", "Or paste the backup text", "Ou collez le texte de sauvegarde", "O pegue el texto de la copia"],
     ["סיסמת הגיבוי", "Backup password", "Mot de passe de sauvegarde", "Contraseña de la copia"],
     ["פתיחת הגיבוי", "Open backup", "Ouvrir la sauvegarde", "Abrir copia"],
@@ -2292,7 +2303,6 @@ const MaayanDict = (() => {
     ["הערת שיטה: {x}", "Method note: {x}", "Note de méthode : {x}", "Nota del método: {x}"],
     ["לא נרשמה", "none recorded", "non notée", "no registrada"],
     ["כן", "yes", "oui", "sí"], ["לא", "no", "non", "no"],
-    ["אותה עונה", "same onah", "même ona", "misma oná"],
     ["שתי העונות", "both onot", "les deux onot", "ambas onot"],
     ["דילוג", "skip", "sauter", "omitir"],
     ["א׳ בחודש שאחריו", "1st of the following month", "le 1er du mois suivant", "el día 1 del mes siguiente"],
@@ -2383,7 +2393,6 @@ const MaayanDict = (() => {
     ["שימור עונת חודש שחלה בזמן דימום הוא אפשרות נפרדת שדורשת תיעוד מלא.", "Keeping a Veset HaChodesh that fell during bleeding is a separate option that requires full records.", "Conserver un vésset ha'hodech tombé pendant un saignement est une option distincte qui nécessite un relevé complet.", "Conservar un veset hajódesh que cayó durante un sangrado es una opción aparte que requiere registros completos."],
     ["עונה בינונית", "Onah Beinonit", "Ona beinonit", "Oná beinonit"],
     ["יום 30 בספירה כוללנית: יום הראייה הוא יום 1, כלומר 29 ימים אחריו, באותה עונה.", "Day 30, counted inclusively: the day of onset is day 1, i.e. 29 days later, in the same onah.", "Jour 30 en décompte inclusif : le jour de l'apparition est le jour 1, soit 29 jours après, dans la même ona.", "Día 30 en conteo inclusivo: el día de la aparición es el día 1, es decir, 29 días después, en la misma oná."],
-    ["שתי העונות, יום 31 ואור זרוע הם שלוש הגדרות נפרדות, ואף אחת מהן אינה נבחרת לפי עדה.", "Both onot, day 31 and Or Zarua are three separate settings, and none is chosen by community automatically.", "Les deux onot, le jour 31 et le Or Zaroua sont trois réglages distincts, et aucun n'est choisi d'office selon la communauté.", "Ambas onot, el día 31 y Or Zarúa son tres ajustes separados, y ninguno se elige automáticamente por comunidad."],
     ["הפלגה", "Haflagah", "Haflaga", "Haflagá"],
     ["בשיטת הימים: ההפרש בין התאריכים העבריים של שתי הראיות ועוד 1. אותו מרווח נספר מהראייה האחרונה, באותה עונה.", "Days method: the difference between the Hebrew dates of the two periods plus 1. The same interval is counted from the latest period, in the same onah.", "Méthode des jours : l'écart entre les dates hébraïques des deux règles plus 1. Le même intervalle se compte depuis les dernières règles, dans la même ona.", "Método de días: la diferencia entre las fechas hebreas de los dos períodos más 1. El mismo intervalo se cuenta desde el último período, en la misma oná."],
     ["בשיטת חב״ד: מספר העונות מההפסק הקודם ועד הראייה הבאה. המועד החדש נספר מההפסק הנוכחי. מספר זוגי נופל ביום ואי-זוגי בלילה. הפלגה ארוכה נשמרת כשמגיעה קצרה ממנה.", "Chabad method: the number of onot from the previous hefsek to the next period. The new date is counted from the current hefsek. An even number falls by day and an odd one by night. A longer haflagah is kept when a shorter one appears.", "Méthode Habad : le nombre d'onot du hefsek précédent aux règles suivantes. La nouvelle date se compte depuis le hefsek actuel. Un nombre pair tombe de jour, un impair de nuit. Une haflaga plus longue est gardée quand une plus courte apparaît.", "Método de Jabad: el número de onot desde el hefsek anterior hasta el siguiente período. La nueva fecha se cuenta desde el hefsek actual. Un número par cae de día y uno impar de noche. Una haflagá más larga se mantiene cuando aparece una más corta."],
@@ -2416,7 +2425,6 @@ const MaayanDict = (() => {
     ["שנה מעוברת: אדר א׳ ← אדר ב׳", "Leap year: Adar I → Adar II", "Année embolismique : Adar I → Adar II", "Año embolismal: Adar I → Adar II"],
     ["ראייה בי״ב אדר א׳ תשפ״ד. עונת החודש בי״ב אדר ב׳ ולא בי״ב ניסן.", "A period on 12 Adar I 5784. The Veset HaChodesh is on 12 Adar II, not 12 Nisan.", "Règles le 12 Adar I 5784. Le vésset ha'hodech est le 12 Adar II, pas le 12 Nissan.", "Período el 12 de Adar I de 5784. El veset hajódesh es el 12 de Adar II, no el 12 de Nisán."],
     ["יום 31, שתי עונות ואור זרוע", "Day 31, both onot and Or Zarua", "Jour 31, deux onot et Or Zaroua", "Día 31, ambas onot y Or Zarúa"],
-    ["בהפעלת שלוש האפשרויות: עונה בינונית ביום 30 וביום 31, בשתי העונות, ולכל חשש גם עונת אור זרוע שלפניו. כל אפשרות נשלטת בנפרד בהגדרות.", "With all three options on: Onah Beinonit on days 30 and 31, in both onot, and an Or Zarua onah before each date. Each option is controlled separately in settings.", "Avec les trois options : ona beinonit aux jours 30 et 31, dans les deux onot, et une ona de Or Zaroua avant chaque date. Chaque option se règle séparément.", "Con las tres opciones: oná beinonit los días 30 y 31, en ambas onot, y una oná de Or Zarúa antes de cada fecha. Cada opción se controla por separado."],
     ["כתם מסופק באמצע", "A doubtful stain in between", "Une tache douteuse entre deux", "Una mancha dudosa intermedia"],
     ["ראייה מסופקת בט״ו ניסן אינה נמחקת כדי לייצר הפלגה ארוכה. לא מחושבת הפלגה, ומופיעה נקודה לבירור.", "A doubtful period on 15 Nisan is not dropped to create a longer haflagah. No haflagah is calculated, and a point to clarify appears.", "Des règles douteuses le 15 Nissan ne sont pas écartées pour créer une haflaga plus longue. Aucune haflaga n'est calculée, et un point à clarifier apparaît.", "Un período dudoso el 15 de Nisán no se descarta para crear una haflagá más larga. No se calcula haflagá y aparece un punto a aclarar."],
     ["מראה לא ברור — נשאל", "Unclear color — asked a rav", "Couleur incertaine — question posée", "Color dudoso — se consultó"],
@@ -2457,7 +2465,6 @@ const MaayanDict = (() => {
     ["ראתה פעמיים בחודש: עונת החודש של הראייה הראשונה נשמרת", "Two periods in a month: the first one's Veset HaChodesh is kept", "Deux fois dans le mois : le vésset ha'hodech des premières règles est gardé", "Dos veces en un mes: se mantiene el veset hajódesh del primero"],
     ["ראייה קודמת שעונת החודש שלה כבר עברה אינה מוסיפה עונה", "An earlier period whose Veset HaChodesh has passed adds no onah", "Des règles antérieures dont le vésset ha'hodech est passé n'ajoutent pas d'ona", "Un período anterior cuyo veset hajódesh ya pasó no añade oná"],
     ["בחירת חב״ד עם עונה בינונית חלקית מסומנת לבירור", "Choosing Chabad with a partial Onah Beinonit is flagged", "Choisir Habad avec une ona beinonit partielle est signalé", "Elegir Jabad con oná beinonit parcial se marca"],
-    ["בעונה בינונית של יממה אין כפילות של אור זרוע", "No duplicate Or Zarua with a 24-hour Onah Beinonit", "Pas de Or Zaroua en double avec une ona beinonit de 24 h", "Sin Or Zarúa duplicado con oná beinonit de 24 horas"],
     ["שנה של מחזורים קודמים בסדר הזנה הפוך נותנת תוצאה זהה", "A year of past cycles entered in reverse gives the same result", "Une année de cycles saisie à l'envers donne le même résultat", "Un año de ciclos ingresado al revés da el mismo resultado"],
     ["ראיות ישנות בלי טבילה מסומנות לבירור ולא מציגות מצב שגוי בשקט", "Old periods without immersion are flagged instead of silently showing a wrong status", "Des règles anciennes sans tevila sont signalées au lieu d'afficher un état faux", "Períodos antiguos sin tevilá se marcan en lugar de mostrar un estado erróneo"],
     ["חוצה את ראש השנה (אלול ← תשרי)", "Crosses Rosh Hashanah (Elul → Tishrei)", "Passe Roch Hachana (Eloul → Tichri)", "Cruza Rosh Hashaná (Elul → Tishrei)"],
@@ -2619,11 +2626,7 @@ const MaayanDict = (() => {
     ["מה לרשום?", "What to record?", "Que noter ?", "¿Qué registrar?"],
     ["ראייה / וסת", "Sighting / period", "Saignement / règles", "Sangrado / menstruación"],
     ["אחר…", "Other…", "Autre…", "Otro…"],
-    ["שיטת החישוב שלך", "Your calculation method", "Votre méthode de calcul", "Su método de cálculo"],
-    ["לבחור לפי ההנחיה שקיבלת. אפשר לשנות בכל עת", "Choose according to the guidance you received. You can change it at any time", "À choisir selon les directives reçues. Modifiable à tout moment", "Elija según la indicación que recibió. Puede cambiarlo en cualquier momento"],
     ["עונת אור זרוע · לפני {x}", "Or Zarua onah · before {x}", "Ona de l'Or Zaroua · avant {x}", "Oná del Or Zarúa · antes de {x}"],
-    ["העונה שלפני כל עונת פרישה — לפי הוראת הרב", "The onah before each separation time — per your rabbi's ruling", "L'ona qui précède chaque temps de séparation — selon la décision du rav", "La oná anterior a cada tiempo de separación — según la indicación del rabino"],
-    ["העונה שלפני כל עונת פרישה — לפי הוראת הרב. כבויה כברירת מחדל.", "The onah before each separation time — per your rabbi's ruling. Off by default.", "L'ona qui précède chaque temps de séparation — selon la décision du rav. Désactivée par défaut.", "La oná anterior a cada tiempo de separación — según la indicación del rabino. Desactivada por defecto."],
     ["כל אפשרויות החישוב", "All calculation options", "Toutes les options de calcul", "Todas las opciones de cálculo"],
     ["לפני {x}", "before {x}", "avant {x}", "antes de {x}"],
     ["הערב (מהשקיעה {x}) {x}", "This evening (from sunset {x}) {x}", "Ce soir (dès le coucher du soleil {x}) {x}", "Esta noche (desde la puesta del sol {x}) {x}"],
@@ -2649,27 +2652,19 @@ const MaayanDict = (() => {
     ["הטבילה נרשמה לפני ליל הטבילה המחושב", "Immersion recorded before the calculated immersion night", "Tevila enregistrée avant la nuit de tevila calculée", "Tevilá registrada antes de la noche de tevilá calculada"],
     ["לפי ההפסק שנרשם, ליל הטבילה הוא אחרי צאת הכוכבים של היום השביעי. ייתכן שהרישום שגוי או שהייתה הוראה מיוחדת; יש לברר.", "According to the recorded hefsek, the immersion night is after nightfall of the seventh day. The entry may be wrong or there may have been a special ruling; please clarify.", "D'après le hefsek enregistré, la nuit de la tevila est après la tombée de la nuit du septième jour. L'entrée est peut-être erronée ou il y a eu une décision particulière ; à clarifier.", "Según el hefsek registrado, la noche de la tevilá es después de la salida de las estrellas del séptimo día. Puede que el registro sea erróneo o que hubiera una indicación especial; hay que consultar."],
     // שיטות מוכנות, בין השמשות והמתנת ארבעה ימים (מנוע 0.3.0)
-    ["שיטה מוכנה", "Preset method", "Méthode prédéfinie", "Método predefinido"],
     ["התאמה אישית", "Custom", "Personnalisé", "Personalizado"],
     ["מנהג חב״ד", "Chabad practice", "Usage Habad", "Costumbre de Jabad"],
-    ["ארבעה ימים מתחילת הנידה — הרב עובדיה יוסף", "Four days from the onset of niddah — Rav Ovadia Yosef", "Quatre jours depuis le début de la nidda — Rav Ovadia Yossef", "Cuatro días desde el inicio de la nidá — Rav Ovadia Yosef"],
     ["ארבעה ימים מתחילת הנידה (הרב עובדיה יוסף)", "Four days from the onset of niddah (Rav Ovadia Yosef)", "Quatre jours depuis le début de la nidda (Rav Ovadia Yossef)", "Cuatro días desde el inicio de la nidá (Rav Ovadia Yosef)"],
     ["13.5 דקות זמניות אחרי השקיעה (הגאונים)", "13.5 proportional minutes after sunset (Geonim)", "13,5 minutes proportionnelles après le coucher du soleil (Guéonim)", "13,5 minutos proporcionales después de la puesta del sol (Gueonim)"],
     ["{n} דקות אחרי השקיעה", "{n} minutes after sunset", "{n} minutes après le coucher du soleil", "{n} minutos después de la puesta del sol"],
     ["{n} דקות זמניות אחרי השקיעה", "{n} proportional minutes after sunset", "{n} minutes proportionnelles après le coucher du soleil", "{n} minutos proporcionales después de la puesta del sol"],
     ["ראייה סמוך לשקיעה או בין השמשות", "Sighting near sunset or during bein hashmashot", "Écoulement près du coucher du soleil ou pendant bein hachmachot", "Sangrado cerca de la puesta del sol o en bein hashmashot"],
-    ["לחומרא: מועדים לשתי העונות", "Stringently: dates for both onot", "Par rigueur : dates pour les deux onot", "Por rigor: fechas para ambas onot"],
-    ["השעיית החישוב עד בירור", "Suspend the calculation until clarified", "Suspendre le calcul jusqu'à clarification", "Suspender el cálculo hasta aclararlo"],
     ["הפסק טהרה אחרי השקיעה", "Hefsek tahara after sunset", "Hefsek tahara après le coucher du soleil", "Hefsek tahará después de la puesta del sol"],
-    ["רק הפסק לפני השקיעה", "Only a hefsek before sunset", "Seulement un hefsek avant le coucher du soleil", "Solo un hefsek antes de la puesta del sol"],
-    ["בדיעבד עד 13.5 דקות זמניות — הרב עובדיה יוסף", "After the fact, up to 13.5 proportional minutes — Rav Ovadia Yosef", "A posteriori, jusqu'à 13,5 minutes proportionnelles — Rav Ovadia Yossef", "A posteriori, hasta 13,5 minutos proporcionales — Rav Ovadia Yosef"],
     ["לחומרא שתי העונות", "Stringently, both onot", "Par rigueur, les deux onot", "Por rigor, ambas onot"],
     ["השעיית החישוב ובירור", "Suspend the calculation and clarify", "Suspendre le calcul et clarifier", "Suspender el cálculo y aclarar"],
     ["רק לפני השקיעה", "Only before sunset", "Seulement avant le coucher du soleil", "Solo antes de la puesta del sol"],
     ["בדיעבד עד 13.5 דקות זמניות אחרי השקיעה (הרב עובדיה יוסף)", "After the fact, up to 13.5 proportional minutes after sunset (Rav Ovadia Yosef)", "A posteriori, jusqu'à 13,5 minutes proportionnelles après le coucher du soleil (Rav Ovadia Yossef)", "A posteriori, hasta 13,5 minutos proporcionales después de la puesta del sol (Rav Ovadia Yosef)"],
     ["לברר עם רב", "Ask a rabbi", "À vérifier avec un rav", "Consultar con un rabino"],
-    ["שיטה: {x} (עם שינויים)", "Method: {x} (with changes)", "Méthode : {x} (avec modifications)", "Método: {x} (con cambios)"],
-    ["שיטה: {x}", "Method: {x}", "Méthode : {x}", "Método: {x}"],
     ["צאת הכוכבים: {x}", "Nightfall: {x}", "Tombée de la nuit : {x}", "Salida de las estrellas: {x}"],
     ["ראייה בין השמשות: {x}", "Sighting in bein hashmashot: {x}", "Écoulement pendant bein hachmachot : {x}", "Sangrado en bein hashmashot: {x}"],
     ["הפסק אחרי השקיעה: {x}", "Hefsek after sunset: {x}", "Hefsek après le coucher du soleil : {x}", "Hefsek después de la puesta del sol: {x}"],
@@ -2687,7 +2682,6 @@ const MaayanDict = (() => {
     ["ראייה בין השקיעה לצאת הכוכבים, או בשלוש הדקות שסביב השקיעה והזריחה: לפי ברירת המחדל חוששים לשתי העונות — העונה שהסתיימה והעונה שהתחילה — בעונה הבינונית, בעונת החודש ובהפלגה (ש״ך יו״ד קפד, ס״ק יג–יד, בשם הב״ח; כך נוהגים למעשה). הרישום מסומן גם לבירור.", "A sighting between sunset and nightfall, or within three minutes of sunset or sunrise: by default both onot are observed — the onah that ended and the one that began — for the onah beinonit, the monthly onah and the haflagah (Shach YD 184:13–14, citing the Bach; this is the common practice). The entry is also flagged for clarification.", "Un écoulement entre le coucher du soleil et la tombée de la nuit, ou à moins de trois minutes du coucher ou du lever : par défaut on observe les deux onot — celle qui s'achève et celle qui commence — pour l'onah beinonit, l'onah du mois et la haflaga (Shach YD 184:13–14, au nom du Bach ; c'est l'usage). L'entrée est aussi signalée pour clarification.", "Un sangrado entre la puesta del sol y la salida de las estrellas, o a menos de tres minutos de la puesta o la salida del sol: por defecto se observan ambas onot — la que terminó y la que empezó — para la onah beinonit, la onah del mes y la haflagá (Shach YD 184:13–14, en nombre del Bach; así se acostumbra). La entrada también se marca para aclarar."],
     ["אפשר לבחור בהגדרות להשעות את החישוב עד בירור, כמו בגרסאות קודמות.", "In the settings you can choose to suspend the calculation until clarified, as in earlier versions.", "Dans les réglages, on peut choisir de suspendre le calcul jusqu'à clarification, comme dans les versions précédentes.", "En los ajustes se puede elegir suspender el cálculo hasta aclararlo, como en versiones anteriores."],
     ["סוף בין השמשות נקבע לפי הגדרת צאת הכוכבים. לפי 13.5 דקות זמניות (הגאונים, הרב עובדיה יוסף) ראייה מאוחרת יותר היא לילה ודאי.", "The end of bein hashmashot follows the nightfall setting. With 13.5 proportional minutes (Geonim, Rav Ovadia Yosef), a later sighting is certainly night.", "La fin de bein hachmachot suit le réglage de la tombée de la nuit. Avec 13,5 minutes proportionnelles (Guéonim, Rav Ovadia Yossef), un écoulement plus tardif est certainement la nuit.", "El fin de bein hashmashot sigue el ajuste de salida de las estrellas. Con 13,5 minutos proporcionales (Gueonim, Rav Ovadia Yosef), un sangrado posterior es noche con certeza."],
-    ["שיטות מוכנות", "Preset methods", "Méthodes prédéfinies", "Métodos predefinidos"],
     ["בבחירת שיטת הרב עובדיה יוסף: הפסק עד 13.5 דקות זמניות אחרי השקיעה מתקבל בדיעבד ונספר ליום שהסתיים, ומסומן לבירור. לכתחילה עושים הפסק לפני השקיעה.", "With the Rav Ovadia Yosef method: a hefsek up to 13.5 proportional minutes after sunset is accepted after the fact, counted for the day that ended, and flagged for clarification. Ideally the hefsek is done before sunset.", "Avec la méthode du Rav Ovadia Yossef : un hefsek jusqu'à 13,5 minutes proportionnelles après le coucher du soleil est accepté a posteriori, compté pour le jour écoulé et signalé pour clarification. Idéalement, le hefsek se fait avant le coucher du soleil.", "Con el método del Rav Ovadia Yosef: un hefsek hasta 13,5 minutos proporcionales después de la puesta del sol se acepta a posteriori, cuenta para el día que terminó y se marca para aclarar. Lo ideal es hacer el hefsek antes de la puesta del sol."],
     ["שתי העונות, יום 31 ואור זרוע הם שלוש הגדרות נפרדות. השיטות המוכנות קובעות אותן לפי המנהג, ואפשר לשנות.", "Both onot, day 31 and Or Zarua are three separate settings. The preset methods set them according to the custom, and they can be changed.", "Les deux onot, le jour 31 et Or Zaroua sont trois réglages distincts. Les méthodes prédéfinies les fixent selon l'usage, et on peut les modifier.", "Ambas onot, el día 31 y Or Zarúa son tres ajustes separados. Los métodos predefinidos los fijan según la costumbre, y se pueden cambiar."],
     ["{n} עונות", "{n} onot", "{n} onot", "{n} onot"],
@@ -2809,7 +2803,6 @@ const MaayanDict = (() => {
     ["שולחן ערוך אורח חיים תריג, יב", "Shulchan Aruch OC 613:12", "Shulchan Aruch OC 613:12", "Shulchan Aruch OC 613:12"],
     ["בן איש חי, שנה שנייה, פרשת צו, אות א", "Ben Ish Chai, Year 2, Tzav 1", "Ben Ish Chai, 2e année, Tzav 1", "Ben Ish Chai, año 2, Tzav 1"],
     ["בן איש חי, שנה שנייה, פרשת צו, אות ז", "Ben Ish Chai, Year 2, Tzav 7", "Ben Ish Chai, 2e année, Tzav 7", "Ben Ish Chai, año 2, Tzav 7"],
-    ["ל׳ בחודש כשבחודש הבא אין ל׳ — מקור ראשוני לא אותר", "The 30th when the next month has no 30th — no primary source found", "Le 30 quand le mois suivant n'a pas de 30 — aucune source primaire trouvée", "El día 30 cuando el mes siguiente no tiene 30 — no se encontró fuente primaria"],
     ["ש״ך יורה דעה קפד, ס״ק טו", "Shach YD 184:15", "Shach YD 184:15", "Shach YD 184:15"],
     ["שולחן ערוך יורה דעה קצו, א (רמ״א)", "Shulchan Aruch YD 196:1 (Rema)", "Shulchan Aruch YD 196:1 (Rema)", "Shulchan Aruch YD 196:1 (Rema)"],
     ["בן איש חי, שנה שנייה, פרשת צו, אות י", "Ben Ish Chai, Year 2, Tzav 10", "Ben Ish Chai, 2e année, Tzav 10", "Ben Ish Chai, año 2, Tzav 10"],
@@ -2819,35 +2812,79 @@ const MaayanDict = (() => {
     ["ספרדי", "Sephardi", "Séfarade", "Sefardí"],
     ["אשכנזי", "Ashkenazi", "Ashkénaze", "Asquenazí"],
     ["חב״ד", "Chabad", "Habad", "Jabad"],
-    ["לפי מי?", "Following whom?", "Selon qui ?", "¿Según quién?"],
-    ["לפי איזו שיטה?", "Which method?", "Quelle méthode ?", "¿Qué método?"],
     ["הרב עובדיה יוסף", "Rav Ovadia Yosef", "Rav Ovadia Yossef", "Rav Ovadia Yosef"],
     ["בן איש חי", "Ben Ish Chai", "Ben Ish 'Haï", "Ben Ish Jai"],
-    ["עיקר הדין", "The basic law", "Le din de base", "La ley básica"],
     ["כרתי ופלתי", "Kreti uPleti", "Kréti ouPléti", "Kreti uPleti"],
     ["הרב עובדיה יוסף (ספרדי)", "Rav Ovadia Yosef (Sephardi)", "Rav Ovadia Yossef (séfarade)", "Rav Ovadia Yosef (sefardí)"],
     ["בן איש חי (ספרדי)", "Ben Ish Chai (Sephardi)", "Ben Ish 'Haï (séfarade)", "Ben Ish Jai (sefardí)"],
-    ["אשכנזי – עיקר הדין", "Ashkenazi – the basic law", "Ashkénaze – le din de base", "Asquenazí – la ley básica"],
-    ["אשכנזי – כרתי ופלתי", "Ashkenazi – Kreti uPleti", "Ashkénaze – Kréti ouPléti", "Asquenazí – Kreti uPleti"],
     ["טהרת הבית", "Taharat HaBayit", "Taharat HaBayit", "Taharat HaBayit"],
     ["שולחן ערוך הרב", "Shulchan Aruch HaRav", "Choulhan Aroukh HaRav", "Shulján Aruj HaRav"],
     ["התאמה אישית לפי הוראת הרב", "Personal adjustment per your rabbi's ruling", "Ajustement personnel selon la décision de votre rav", "Ajuste personal según la indicación de su rabino"],
-    ["בלי שיטה מוכנה: כל ההגדרות ידנית", "No preset method: all settings manual", "Sans méthode prédéfinie : tous les réglages manuels", "Sin método predefinido: todos los ajustes manuales"],
-    ["בוחרים בשני שלבים: מה המנהג (ספרדי, אשכנזי או חב״ד), ואז לפי מי — לספרדים הרב עובדיה יוסף או בן איש חי, לאשכנזים עיקר הדין או כרתי ופלתי. השיטה קובעת את כל הגדרות החישוב בבת אחת, ואפשר לשנות כל הגדרה אחר כך תחת ״התאמה אישית לפי הוראת הרב״.", "You choose in two steps: your custom (Sephardi, Ashkenazi or Chabad), then whom you follow — for Sephardim Rav Ovadia Yosef or the Ben Ish Chai, for Ashkenazim the basic law or Kreti uPleti. The method sets all calculation settings at once, and any setting can be changed afterwards under “Personal adjustment per your rabbi's ruling”.", "Le choix se fait en deux étapes : votre coutume (séfarade, ashkénaze ou Habad), puis qui vous suivez — pour les Séfarades le Rav Ovadia Yossef ou le Ben Ish 'Haï, pour les Ashkénazes le din de base ou le Kréti ouPléti. La méthode fixe tous les réglages de calcul d'un coup, et chaque réglage peut être modifié ensuite sous « Ajustement personnel selon la décision de votre rav ».", "Se elige en dos pasos: su costumbre (sefardí, asquenazí o Jabad) y luego a quién sigue — para sefardíes el Rav Ovadia Yosef o el Ben Ish Jai, para asquenazíes la ley básica o Kreti uPleti. El método fija todos los ajustes de cálculo de una vez, y cualquier ajuste se puede cambiar después en «Ajuste personal según la indicación de su rabino»."],
+    // המנהג שלי, בחירה בכניסה הראשונה ותוויות פשוטות (מנוע 0.6.0)
+    ["המנהג שלי", "My custom", "Ma coutume", "Mi costumbre"],
+    ["המנהג שלי: {x} (עם שינויים)", "My custom: {x} (with changes)", "Ma coutume : {x} (avec modifications)", "Mi costumbre: {x} (con cambios)"],
+    ["המנהג שלי: {x}", "My custom: {x}", "Ma coutume : {x}", "Mi costumbre: {x}"],
+    ["לפי פסקי מי?", "According to whose rulings?", "Selon les décisions de qui ?", "¿Según las decisiones de quién?"],
+    ["אשכנזי רגיל", "Ashkenazi (standard)", "Ashkénaze (standard)", "Asquenazí (estándar)"],
+    ["יממה שלמה (כרתי ופלתי)", "Full day (Kreiti uPleiti)", "Journée complète (Kréti ouPléti)", "Día completo (Kreiti uPleiti)"],
+    ["אשכנזי – יממה שלמה (כרתי ופלתי)", "Ashkenazi – Full day (Kreiti uPleiti)", "Ashkénaze – Journée complète (Kréti ouPléti)", "Asquenazí – Día completo (Kreiti uPleiti)"],
+    ["כמו הרגיל, והעונה הבינונית יממה שלמה.", "Like the standard, with the onah beinonit a full day.", "Comme le standard, avec la ona beinonit sur une journée complète.", "Como el estándar, con la oná beinonit un día completo."],
+    ["רק העונה שבה התחילה הווסת", "Only the onah it began in", "Seule la ona du début des règles", "Solo la oná en que comenzó"],
+    ["יממה שלמה (לילה ויום)", "Full day (night and day)", "Journée complète (nuit et jour)", "Día completo (noche y día)"],
+    ["עוד לא נבחר מנהג", "No custom chosen yet", "Aucune coutume choisie pour l'instant", "Todavía no se eligió una costumbre"],
+    ["המועדים יחושבו אחרי שתבחרי את המנהג שלך.", "Dates will be calculated once you choose your custom.", "Les dates seront calculées une fois votre coutume choisie.", "Las fechas se calcularán cuando elija su costumbre."],
+    ["כדאי להתחיל מהזנת המחזורים האחרונים (לפחות שניים), כדי שההפלגה ועונת החודש יחושבו נכון.", "Start by entering your last periods (at least two), so the haflagah and Veset HaChodesh are calculated correctly.", "Commencez par saisir vos dernières règles (au moins deux), pour que la haflaga et le vésset ha'hodech soient calculés correctement.", "Empiece ingresando sus últimos períodos (al menos dos), para que la haflagá y el veset hajódesh se calculen correctamente."],
+    ["ימי המתנה לפני ההפסק", "Waiting days before the hefsek", "Jours d'attente avant le hefsek", "Días de espera antes del hefsek"],
+    ["חמישה ימים", "Five days", "Cinq jours", "Cinco días"],
+    ["ארבעה ימים", "Four days", "Quatre jours", "Cuatro días"],
+    ["ארבעה ימים מהיחסים האחרונים (לפי הוראה)", "Four days from last relations (per ruling)", "Quatre jours depuis les dernières relations (sur instruction)", "Cuatro días desde las últimas relaciones (según indicación)"],
+    ["ספירת ההפלגה", "Counting the haflagah", "Calcul de la haflaga", "Cómputo de la haflagá"],
+    ["בימים", "In days", "En jours", "En días"],
+    ["בעונות, מההפסק (חב״ד)", "In onot, from the hefsek (Chabad)", "En onot, depuis le hefsek (Habad)", "En onot, desde el hefsek (Jabad)"],
+    ["יום 30", "Day 30", "Jour 30", "Día 30"],
+    ["לחשוש גם ליום 31", "Also keep day 31", "Tenir compte aussi du jour 31", "Tener en cuenta también el día 31"],
+    ["אור זרוע (גם העונה שלפני)", "Or Zarua (also the onah before)", "Or Zaroua (aussi la ona précédente)", "Or Zarúa (también la oná anterior)"],
+    ["העונה שלפני כל עונת פרישה, לפי הוראת הרב", "The onah before each separation onah, per your rabbi's ruling", "La ona qui précède chaque ona de séparation, selon votre rav", "La oná anterior a cada oná de separación, según su rabino"],
+    ["הפלגה ארוכה נשארת גם אחרי הפלגה קצרה", "A longer haflagah stays after a shorter one", "Une haflaga plus longue reste après une plus courte", "Una haflagá más larga se mantiene tras una más corta"],
+    ["בספירה בימים, כשווסת חדשה מקדימה את החשש הקודם", "When counting in days, if a new period comes before the earlier date", "En comptant en jours, quand de nouvelles règles précèdent la date précédente", "Al contar en días, cuando un nuevo período llega antes de la fecha anterior"],
+    ["עונת חודש שחלה בימי הווסת", "Veset HaChodesh that falls during the period", "Vésset ha'hodech qui tombe pendant les règles", "Veset hajódesh que cae durante el período"],
+    ["נשמרת. דורש תיעוד מלא של הווסת וההפסק", "Is kept. Requires full records of period and hefsek", "Est conservé. Nécessite un relevé complet des règles et du hefsek", "Se mantiene. Requiere registro completo del período y del hefsek"],
+    ["ראתה בל׳, ובחודש הבא אין ל׳", "Saw on the 30th, and the next month has no 30th", "A vu le 30, et le mois suivant n'a pas de 30", "Vio el día 30, y el mes siguiente no tiene día 30"],
+    ["בלי עונת חודש", "No Veset HaChodesh", "Pas de vésset ha'hodech", "Sin veset hajódesh"],
+    ["בוקר וערב, כל יום", "Morning and evening, every day", "Matin et soir, chaque jour", "Mañana y tarde, cada día"],
+    ["ביום הראשון וביום השביעי (לפי הוראה)", "On the first and seventh days (per ruling)", "Le premier et le septième jour (sur instruction)", "El primer y el séptimo día (según indicación)"],
+    ["לחשוש לשתי העונות", "Keep both onot", "Tenir compte des deux onot", "Tener en cuenta ambas onot"],
+    ["לסמן לבירור, בלי חישוב", "Mark for review, without calculating", "Signaler pour vérification, sans calcul", "Marcar para consulta, sin calcular"],
+    ["בדיעבד, עד 13.5 דקות זמניות אחרי השקיעה", "After the fact, up to 13.5 proportional minutes after sunset", "A posteriori, jusqu'à 13,5 minutes proportionnelles après le coucher du soleil", "A posteriori, hasta 13,5 minutos proporcionales después de la puesta del sol"],
+    ["תזכורת לפני השקיעה (דקות)", "Reminder before sunset (minutes)", "Rappel avant le coucher du soleil (minutes)", "Recordatorio antes de la puesta del sol (minutos)"],
+    ["לא נבחר מנהג מוכן: כל ההגדרות נקבעות ידנית, תחת ״התאמה אישית לפי הוראת הרב״.", "No preset custom chosen: all settings are set manually, under \"Personal adjustment per your rabbi's ruling\".", "Aucune coutume prédéfinie : tous les réglages se font manuellement, sous « Ajustement personnel selon la décision de votre rav ».", "Sin costumbre predefinida: todos los ajustes se hacen manualmente, en «Ajuste personal según la indicación de su rabino»."],
+    ["בלי מנהג מוכן: כל ההגדרות ידנית", "No preset custom: all settings manual", "Sans coutume prédéfinie : tous les réglages manuels", "Sin costumbre predefinida: todos los ajustes manuales"],
+    ["הערכים נקבעים לפי המנהג שנבחר. אפשר לשנות כל הגדרה לפי הוראת הרב.", "The values follow the chosen custom. You can change any setting per your rabbi's guidance.", "Les valeurs suivent la coutume choisie. Vous pouvez modifier chaque réglage selon votre rav.", "Los valores siguen la costumbre elegida. Puede cambiar cada ajuste según su rabino."],
+    ["ביומן חדש בוחרים מנהג בכניסה הראשונה, לפני שהיומן מחשב משהו. בוחרים בשני שלבים: מה המנהג (ספרדי, אשכנזי או חב״ד), ואז לפי מי — לספרדים הרב עובדיה יוסף או בן איש חי, לאשכנזים אשכנזי רגיל או יממה שלמה (כרתי ופלתי). המנהג קובע את כל הגדרות החישוב בבת אחת, ואפשר לשנות כל הגדרה אחר כך תחת ״התאמה אישית לפי הוראת הרב״.", "In a new diary you choose your custom when you first open it, before anything is calculated. Two steps: which custom (Sephardi, Ashkenazi or Chabad), then whose rulings — for Sephardim Rav Ovadia Yosef or Ben Ish Chai, for Ashkenazim Ashkenazi (standard) or Full day (Kreiti uPleiti). The custom sets all calculation settings at once, and you can change any setting afterwards under \"Personal adjustment per your rabbi's ruling\".", "Dans un nouveau journal, on choisit sa coutume à la première ouverture, avant tout calcul. En deux étapes : quelle coutume (séfarade, ashkénaze ou Habad), puis selon les décisions de qui — pour les séfarades le Rav Ovadia Yossef ou le Ben Ish 'Haï, pour les ashkénazes Ashkénaze (standard) ou Journée complète (Kréti ouPléti). La coutume fixe tous les réglages de calcul d'un coup, et chaque réglage peut ensuite être modifié sous « Ajustement personnel selon la décision de votre rav ».", "En un diario nuevo se elige la costumbre al abrirlo por primera vez, antes de calcular nada. En dos pasos: qué costumbre (sefardí, asquenazí o Jabad) y luego según las decisiones de quién — para sefardíes el Rav Ovadia Yosef o el Ben Ish Jai, para asquenazíes Asquenazí (estándar) o Día completo (Kreiti uPleiti). La costumbre fija todos los ajustes de cálculo a la vez, y luego se puede cambiar cada ajuste en «Ajuste personal según la indicación de su rabino»."],
+    ["אור זרוע לעונה הבינונית הוא העונה שלפני עונת הראייה. כשהעונה הבינונית יממה שלמה והראייה ביום, העונה הזו (ליל יום 30) כבר בתוך היממה, ולכן אין אור זרוע ביום 29. אור זרוע לעונת החודש ולהפלגה לא משתנה.", "Or Zarua for the onah beinonit is the onah before the onah of the sighting. When the onah beinonit is a full day and the sighting was by day, that onah (the night of day 30) is already inside the full day, so there is no Or Zarua on day 29. Or Zarua for Veset HaChodesh and for the haflagah does not change.", "Le Or Zaroua de la ona beinonit est la ona qui précède la ona de la vue. Quand la ona beinonit est une journée complète et que la vue a eu lieu le jour, cette ona (la nuit du jour 30) est déjà comprise dans la journée, donc pas de Or Zaroua le jour 29. Le Or Zaroua du vésset ha'hodech et de la haflaga ne change pas.", "El Or Zarúa de la oná beinonit es la oná anterior a la oná del sangrado. Cuando la oná beinonit es un día completo y el sangrado fue de día, esa oná (la noche del día 30) ya está dentro del día completo, por lo que no hay Or Zarúa el día 29. El Or Zarúa del veset hajódesh y de la haflagá no cambia."],
+    ["ראייה בל׳ כשהחודש הבא מלא: עונת החודש בל׳ שלו בלבד.", "Sighting on the 30th when the next month is full: Veset HaChodesh only on its 30th.", "Vue le 30 quand le mois suivant est complet : vésset ha'hodech seulement le 30 de ce mois.", "Sangrado el día 30 cuando el mes siguiente es completo: veset hajódesh solo en su día 30."],
+    ["לא ידוע מתי התחיל (מצאתי בקימה או בבדיקה)", "Not known when it began (found on waking or on a check)", "On ne sait pas quand cela a commencé (trouvé au réveil ou lors d'un examen)", "No se sabe cuándo comenzó (encontrado al despertar o en una revisión)"],
+    ["לכל מועד מוצג הכלל, ואת המנהג בוחרים לפי ההנחיה שקיבלת.", "Each date shows its rule, and you choose your custom according to the guidance you received.", "Chaque date affiche sa règle, et vous choisissez votre coutume selon les instructions reçues.", "Cada fecha muestra su regla, y usted elige su costumbre según la orientación que recibió."],
+    ["לבחור לפי ההנחיה שקיבלת. לפי המנהג מעיין קובעת את כל החישובים, ואפשר לשנות אותו בכל עת בהגדרות.", "Choose according to the guidance you received. Maayan sets all calculations by your custom, and you can change it at any time in Settings.", "À choisir selon les instructions reçues. Maayan fixe tous les calculs selon votre coutume, et vous pouvez la changer à tout moment dans les Réglages.", "Elija según la orientación que recibió. Maayan fija todos los cálculos según su costumbre, y puede cambiarla en cualquier momento en Ajustes."],
+    ["המשך", "Continue", "Continuer", "Continuar"],
+    ["חזרה", "Back", "Retour", "Volver"],
+    ["יש הוראה אחרת מהרב? בוחרים את הקרוב ביותר, ואחר כך משנים בהגדרות, תחת ״התאמה אישית לפי הוראת הרב״.", "Did your rabbi rule differently? Choose the closest one, then adjust it in Settings, under \"Personal adjustment per your rabbi's ruling\".", "Votre rav vous a indiqué autre chose ? Choisissez la plus proche, puis modifiez-la dans les Réglages, sous « Ajustement personnel selon la décision de votre rav ».", "¿Su rabino le indicó otra cosa? Elija la más cercana y luego ajústela en Ajustes, en «Ajuste personal según la indicación de su rabino»."],
+    ["בחרי את המנהג שלך", "Choose your custom", "Choisissez votre coutume", "Elija su costumbre"],
+    ["היומן מחושב עכשיו לפי ״התאמה אישית״", "The diary is currently calculated by \"Custom\"", "Le journal est actuellement calculé selon « Personnalisé »", "El diario se calcula ahora según «Personalizado»"],
+    ["אפשר לבחור מנהג מוכן (ספרדי, אשכנזי או חב״ד), או להשאיר את ההגדרות שלך כמו שהן.", "You can choose a preset custom (Sephardi, Ashkenazi or Chabad), or keep your settings as they are.", "Vous pouvez choisir une coutume prédéfinie (séfarade, ashkénaze ou Habad), ou garder vos réglages tels quels.", "Puede elegir una costumbre predefinida (sefardí, asquenazí o Jabad), o dejar sus ajustes como están."],
+    ["בחירת מנהג", "Choose a custom", "Choisir une coutume", "Elegir una costumbre"],
+    ["להשאיר כך", "Keep as is", "Garder ainsi", "Dejar así"],
+    ["הערכים נקבעים לפי המנהג שנבחר", "The values follow the chosen custom", "Les valeurs suivent la coutume choisie", "Los valores siguen la costumbre elegida"],
+    ["בהפעלת שלוש האפשרויות: עונה בינונית ביום 30 וביום 31, יממה שלמה (לילה ויום). הראייה ביום, ואור זרוע הוא העונה שלפני עונת הראייה: ליל יום 30 וליל ב׳ אייר (עונת החודש, ביום 31) כבר בתוך היממה, ולכן אין אור זרוע נוסף, ואין אור זרוע ביום 29. כל אפשרות נשלטת בנפרד בהגדרות.", "With all three options on: onah beinonit on day 30 and day 31, a full day (night and day). The sighting was by day, and Or Zarua is the onah before the onah of the sighting: the night of day 30 and the night of 2 Iyar (Veset HaChodesh, on day 31) are already inside the full day, so no extra Or Zarua is added, and there is no Or Zarua on day 29. Each option is controlled separately in Settings.", "Avec les trois options : ona beinonit le jour 30 et le jour 31, sur une journée complète (nuit et jour). La vue a eu lieu le jour, et le Or Zaroua est la ona qui précède la ona de la vue : la nuit du jour 30 et la nuit du 2 Iyar (vésset ha'hodech, le jour 31) sont déjà comprises dans la journée, donc aucun Or Zaroua n'est ajouté, et pas de Or Zaroua le jour 29. Chaque option se règle séparément.", "Con las tres opciones: oná beinonit el día 30 y el día 31, un día completo (noche y día). El sangrado fue de día, y el Or Zarúa es la oná anterior a la oná del sangrado: la noche del día 30 y la noche del 2 de Iyar (veset hajódesh, el día 31) ya están dentro del día completo, así que no se añade Or Zarúa, y no hay Or Zarúa el día 29. Cada opción se controla por separado en Ajustes."],
     // הערות השיטות (מנוע 0.4.0)
     ["ש״ך יורה דעה קפט, ס״ק לא", "Shach YD 189:31", "Chakh YD 189:31", "Shaj YD 189:31"],
 
     // ״יש לשאול רב״ ונמצא בהתעוררות (מנוע 0.5.0)
     ["{x} — יש לשאול רב", "{x} — ask a rabbi", "{x} — à demander à un rav", "{x} — hay que consultar a un rabino"],
     ["ראתה בל׳ והחודש הבא חסר", "Saw on the 30th, and the next month is short", "A vu le 30, et le mois suivant est incomplet", "Vio el día 30 y el mes siguiente es incompleto"],
-    ["ראתה בל׳ והחודש הבא מלא", "Saw on the 30th, and the next month is full", "A vu le 30, et le mois suivant est complet", "Vio el día 30 y el mes siguiente es completo"],
     ["הפלגה ארוכה שנעקרה בהפלגה קצרה ממנה", "A longer haflagah uprooted by a shorter one", "Une haflaga plus longue déracinée par une plus courte", "Una haflagá más larga desarraigada por una más corta"],
     ["נמצא דם בהתעוררות", "Blood found on waking", "Sang trouvé au réveil", "Sangre encontrada al despertar"],
-    ["אור זרוע לפני עונה בינונית של מעת לעת", "Or Zarua before a 24-hour onah beinonit", "Or Zaroua avant une onah beinonit de 24 heures", "Or Zarúa antes de una oná beinonit de 24 horas"],
-    ["בינתיים מעיין חוששת ל־{x} (א׳ בחודש שאחרי החודש החסר), כערוך השולחן קפט, יב, כח. ההיכל שלמה בדעת הב״ח (מקור משני) הסתפק בדבר.", "Meanwhile Maayan keeps {x} (the 1st of the month after the short month), as the Aruch HaShulchan 189:12, 28. The Heichal Shlomo, in the Bach's view (secondary source), was in doubt.", "En attendant, Maayan tient compte du {x} (le 1er du mois qui suit le mois incomplet), selon le Aroukh HaChoulhan 189:12, 28. Le Heikhal Chlomo, selon le Bah (source secondaire), était dans le doute.", "Mientras tanto, Maayan tiene en cuenta el {x} (el 1 del mes posterior al mes incompleto), según el Aruj HaShulján 189:12, 28. El Heijal Shlomó, según el Baj (fuente secundaria), dudó."],
-    ["בינתיים מעיין אינה חוששת לעונת החודש (נבחר דילוג בהגדרות); לפי ערוך השולחן קפט, יב, כח חוששת ל־{x}. ההיכל שלמה בדעת הב״ח (מקור משני) הסתפק בדבר.", "Meanwhile Maayan does not keep the monthly onah (skip was chosen in settings); by the Aruch HaShulchan 189:12, 28 she keeps {x}. The Heichal Shlomo, in the Bach's view (secondary source), was in doubt.", "En attendant, Maayan ne tient pas compte de l'ona du mois (l'omission a été choisie dans les réglages) ; selon le Aroukh HaChoulhan 189:12, 28, elle tient compte du {x}. Le Heikhal Chlomo, selon le Bah (source secondaire), était dans le doute.", "Mientras tanto, Maayan no tiene en cuenta la oná del mes (se eligió omitirla en los ajustes); según el Aruj HaShulján 189:12, 28 tiene en cuenta el {x}. El Heijal Shlomó, según el Baj (fuente secundaria), dudó."],
     ["הראייה נמצאה בבדיקה או בהתעוררות, ולא ידוע מתי התחילה; לחומרא חוששים לשתי העונות.", "The bleeding was found on a check or on waking, and it is not known when it began; stringently, both onot are kept.", "Le sang a été trouvé lors d'un examen ou au réveil, et on ne sait pas quand il a commencé ; par rigueur, on tient compte des deux onot.", "La sangre se encontró en un examen o al despertar, y no se sabe cuándo comenzó; por rigor se tienen en cuenta las dos onot."],
-    ["נמצא בבדיקה/בהתעוררות — לא ידוע מתי התחיל", "Found on a check / on waking — not known when it began", "Trouvé lors d'un examen / au réveil — on ne sait pas quand cela a commencé", "Encontrado en un examen / al despertar — no se sabe cuándo comenzó"],
     ["לא חובה. מעיין תחשוש לשתי העונות של היום ותסמן ״יש לשאול רב״.", "Optional. Maayan will keep both onot of the day and mark \"ask a rabbi\".", "Facultatif. Maayan tiendra compte des deux onot du jour et indiquera « à demander à un rav ».", "Opcional. Maayan tendrá en cuenta las dos onot del día y marcará «hay que consultar a un rabino»."],
     ["נמצא בהתעוררות", "found on waking", "trouvé au réveil", "encontrado al despertar"],
     ["סימון ״נמצא בהתעוררות״ אינו תקין", "Invalid \"found on waking\" mark", "Indication « trouvé au réveil » invalide", "Marca «encontrado al despertar» no válida"],
@@ -2859,14 +2896,10 @@ const MaayanDict = (() => {
     ["לפי פסקי טהרת הבית.", "According to the rulings of Taharat HaBayit.", "Selon les décisions de Taharat HaBayit.", "Según las decisiones de Taharat HaBayit."],
     ["כמו הרב עובדיה, ובנוסף אור זרוע.", "Like Rav Ovadia, plus Or Zarua.", "Comme le Rav Ovadia, avec en plus Or Zaroua.", "Como el Rav Ovadia, y además Or Zarúa."],
     ["יום 30 ו־31, ואור זרוע.", "Days 30 and 31, and Or Zarua.", "Jours 30 et 31, et Or Zaroua.", "Días 30 y 31, y Or Zarúa."],
-    ["כמו עיקר הדין, והעונה הבינונית יממה שלמה.", "Like the basic law, with the onah beinonit a full 24 hours.", "Comme la loi de base, avec la onah beinonit sur 24 heures complètes.", "Como la ley básica, con la oná beinonit de 24 horas completas."],
     ["לפי שולחן ערוך הרב.", "According to the Shulchan Aruch HaRav.", "Selon le Choulhan Aroukh HaRav.", "Según el Shulján Aruj HaRav."],
     ["הותאם אישית", "Customized", "Personnalisé", "Personalizado"],
     ["הותאם אישית. בחירה מחדש של השיטה מחזירה את ערכיה.", "Customized. Choosing the method again restores its values.", "Personnalisé. Choisir à nouveau la méthode rétablit ses valeurs.", "Personalizado. Elegir de nuevo el método restablece sus valores."],
-    ["לא נבחרה שיטה: כל ההגדרות נקבעות ידנית, תחת ״התאמה אישית לפי הוראת הרב״.", "No method chosen: all settings are set manually, under \"Customize per your rabbi's guidance\".", "Aucune méthode choisie : tous les réglages se font manuellement, sous « Personnaliser selon les directives du rav ».", "No se eligió método: todos los ajustes se fijan manualmente, en «Personalizar según la indicación del rabino»."],
-    ["הערכים נקבעים לפי השיטה שנבחרה. אפשר לשנות כל הגדרה לפי הוראת הרב.", "The values follow the chosen method. You can change any setting per your rabbi's guidance.", "Les valeurs suivent la méthode choisie. Vous pouvez modifier chaque réglage selon les directives du rav.", "Los valores siguen el método elegido. Puede cambiar cualquier ajuste según la indicación del rabino."],
     ["כל מועד הוא תכנון לפי השיטה שנבחרה בהגדרות. לחיצה על מועד מציגה את הכלל.", "Each date is a plan based on the method chosen in Settings. Tap a date to see the rule.", "Chaque date est une planification selon la méthode choisie dans les réglages. Touchez une date pour voir la règle.", "Cada fecha es una planificación según el método elegido en Ajustes. Toque una fecha para ver la regla."],
-    ["לכל מועד מוצג הכלל, ואת שיטת החישוב בוחרים לפי ההנחיה שקיבלת.", "Each date shows its rule, and you choose the calculation method according to the guidance you received.", "Chaque date affiche sa règle, et vous choisissez la méthode de calcul selon les directives reçues.", "Cada fecha muestra su regla, y el método de cálculo se elige según la indicación recibida."],
     ["השיטות אינן תחליף להוראת רב.", "The methods are not a substitute for a rabbi's ruling.", "Les méthodes ne remplacent pas la décision d'un rav.", "Los métodos no sustituyen la decisión de un rabino."],
     ["ראייה בל׳ כשבחודש הבא אין ל׳: ברירת המחדל היא א׳ בחודש שאחרי החודש החסר, לחומרא, ומופיע ״יש לשאול רב״. אפשר לבחור דילוג.", "A sighting on the 30th when the next month has no 30th: the default is the 1st of the month after the short month, to be stringent, and \"Ask a rabbi\" appears. You can choose to skip.", "Vue le 30 quand le mois suivant n'a pas de 30 : par défaut le 1er du mois qui suit le mois incomplet, par rigueur, et « À demander à un rav » apparaît. On peut choisir de sauter.", "Visto el día 30 cuando el mes siguiente no tiene 30: por defecto el día 1 del mes posterior al mes incompleto, por rigor, y aparece «Hay que consultar a un rabino». Se puede elegir omitir."],
     ["מי ששומרת ימים 30 ו-31 שומרת את עונת אור זרוע ליום 30 בלבד.", "Whoever keeps days 30 and 31 keeps the Or Zarua onah for day 30 only.", "Celle qui observe les jours 30 et 31 observe la onah Or Zaroua pour le jour 30 seulement.", "Quien guarda los días 30 y 31 guarda la oná de Or Zarúa solo para el día 30."],
@@ -2874,15 +2907,13 @@ const MaayanDict = (() => {
     ["בכמה מצבים שיש בהם שאלה פתוחה מופיע ״יש לשאול רב״, עם מה שמעיין עושה בינתיים.", "In a few situations with an open question, \"Ask a rabbi\" appears, with what Maayan does in the meantime.", "Dans quelques situations où la question reste ouverte, « À demander à un rav » apparaît, avec ce que Maayan fait en attendant.", "En algunas situaciones con una pregunta abierta aparece «Hay que consultar a un rabino», con lo que Maayan hace mientras tanto."],
     ["יש לשאול רב", "Ask a rabbi", "À demander à un rav", "Hay que consultar a un rabino"],
     ["ראית בל׳ בחודש, ובחודש הבא אין ל׳.", "You saw on the 30th of the month, and next month has no 30th.", "Vous avez vu le 30 du mois, et le mois suivant n'a pas de 30.", "Vio el día 30 del mes, y el mes siguiente no tiene día 30."],
-    ["ראית בל׳ בחודש, ובחודש הבא ראש החודש יומיים: {x} ו־{x}.", "You saw on the 30th of the month, and next month's Rosh Chodesh is two days: {x} and {x}.", "Vous avez vu le 30 du mois, et le Roch Hodech suivant dure deux jours : {x} et {x}.", "Vio el día 30 del mes, y el Rosh Jódesh siguiente es de dos días: {x} y {x}."],
     ["בינתיים מעיין חוששת ל־{x}.", "Meanwhile Maayan keeps {x}.", "En attendant, Maayan tient compte du {x}.", "Mientras tanto Maayan tiene en cuenta el {x}."],
     ["בינתיים מעיין אינה מוסיפה עונת חודש, לפי הבחירה בהגדרות.", "Meanwhile Maayan does not add a monthly onah, as chosen in Settings.", "En attendant, Maayan n'ajoute pas de onah du mois, selon le choix dans les réglages.", "Mientras tanto Maayan no añade oná del mes, según lo elegido en Ajustes."],
+    ["{x} ו־{n}", "{x} and {n}", "{x} et {n}", "{x} y {n}"],
     ["אחרי הפלגה של {x} ימים באה הפלגה קצרה יותר, של {n} ימים.", "After an interval of {x} days came a shorter one, of {n} days.", "Après une haflaga de {x} jours est venue une plus courte, de {n} jours.", "Después de una haflagá de {x} días vino una más corta, de {n} días."],
     ["בינתיים מעיין אינה חוששת ל־{x}.", "Meanwhile Maayan does not keep {x}.", "En attendant, Maayan ne tient pas compte du {x}.", "Mientras tanto Maayan no tiene en cuenta el {x}."],
     ["הדם נמצא בהתעוררות, ולא ידוע מתי התחיל.", "The blood was found on waking, and it is not known when it began.", "Le sang a été trouvé au réveil, et on ne sait pas quand il a commencé.", "La sangre se encontró al despertar, y no se sabe cuándo empezó."],
     ["בינתיים מעיין חוששת ללילה וליום של {x}.", "Meanwhile Maayan keeps both the night and the day of {x}.", "En attendant, Maayan tient compte de la nuit et du jour du {x}.", "Mientras tanto Maayan tiene en cuenta la noche y el día del {x}."],
-    ["העונה הבינונית בשיטה שלך היא יממה שלמה, מתחילת הלילה.", "In your method the onah beinonit is a full 24 hours, from the start of the night.", "Dans votre méthode, la onah beinonit dure 24 heures complètes, dès le début de la nuit.", "En su método la oná beinonit es de 24 horas completas, desde el comienzo de la noche."],
-    ["בינתיים מעיין מוסיפה עונת אור זרוע ב־{x}, ביום שלפניה.", "Meanwhile Maayan adds an Or Zarua onah on {x}, during the day before it.", "En attendant, Maayan ajoute une onah Or Zaroua le {x}, le jour qui la précède.", "Mientras tanto Maayan añade una oná de Or Zarúa el {x}, durante el día anterior."],
     ["בלילות אלה אין טובלים, והטבילה נדחית. על המועד ועל סדר ההכנות יש לשאול רב.", "There is no immersion on these nights, and it is postponed. Ask a rabbi about the date and the order of preparations.", "On ne se trempe pas ces nuits-là, et la tevila est reportée. Pour la date et l'ordre des préparatifs, demandez à un rav.", "En estas noches no se hace la inmersión, y se pospone. Sobre la fecha y el orden de los preparativos hay que consultar a un rabino."],
     ["ההכנות (רחצה, חפיפה, ציפורניים) נעשות לפני כניסת השבת. את הפרטים כדאי לתאם עם הרב ועם המקווה.", "The preparations (bathing, hair washing, nails) are done before Shabbat begins. It is best to coordinate the details with your rabbi and the mikveh.", "Les préparatifs (bain, lavage des cheveux, ongles) se font avant l'entrée du Chabbat. Mieux vaut coordonner les détails avec le rav et le mikvé.", "Los preparativos (baño, lavado del cabello, uñas) se hacen antes de que entre Shabat. Conviene coordinar los detalles con el rabino y la mikve."],
     ["ההכנות נעשות לפני כניסת החג. את הפרטים כדאי לתאם עם הרב ועם המקווה.", "The preparations are done before the holiday begins. It is best to coordinate the details with your rabbi and the mikveh.", "Les préparatifs se font avant l'entrée de la fête. Mieux vaut coordonner les détails avec le rav et le mikvé.", "Los preparativos se hacen antes de que entre la festividad. Conviene coordinar los detalles con el rabino y la mikve."],
@@ -3293,13 +3324,13 @@ const MaayanTests = (M) => {
     a.deepEqual(diff, ["orZarua"]); a.equal(s.orZarua, true); a.equal(P["sefard-bic"].family, "sefard");
     a.ok(P["sefard-bic"].notes.find(n => n.k === "orZarua").src.includes("bic_tzav1b")); a.ok(M.cite("bic_tzav1b").ok, "הציטוט אומת בספריא");
   });
-  test("שיטות", "אשכנזי – עיקר הדין: חמישה ימים, עונה אחת בימים 30 ו-31, אור זרוע, בלי שימור הפלגות", () => {
+  test("שיטות", "אשכנזי רגיל: חמישה ימים, עונה אחת בימים 30 ו-31, אור זרוע, בלי שימור הפלגות", () => {
     const s = P.ashkenaz.settings;
     a.deepEqual([s.wait, s.haflagah, s.beinonit, s.day31, s.orZarua, s.carryLongIntervals, s.nightfall, s.hefsekTwilight, s.beinHashmashot, s.missingMonthly, s.bedikot, s.carryMonthly], ["five", "days", "same", true, true, false, "8.5", "before-sunset", "both", "first-next-month", "twice", false]);
-    a.equal(P.ashkenaz.label, "אשכנזי – עיקר הדין"); a.ok(P.ashkenaz.notes.find(n => n.k === "orZarua").ask, "אור זרוע מסומן לבירור");
+    a.equal(P.ashkenaz.label, "אשכנזי רגיל"); a.equal(P.ashkenaz.name, "אשכנזי רגיל"); a.equal(P["ashkenaz-kreiti"].name, "יממה שלמה (כרתי ופלתי)"); a.ok(P.ashkenaz.notes.find(n => n.k === "orZarua").ask, "אור זרוע מסומן לבירור");
     a.ok(P.ashkenaz.notes.find(n => n.k === "orZarua").src.includes("taz184_2"), "הט״ז החולק מובא");
   });
-  test("שיטות", "אשכנזי – כרתי ופלתי: נבדלת מעיקר הדין רק ביממה שלמה ובשימור הפלגה ארוכה", () => {
+  test("שיטות", "יממה שלמה (כרתי ופלתי): נבדלת מהרגיל רק ביממה שלמה ובשימור הפלגה ארוכה", () => {
     const s = P["ashkenaz-kreiti"].settings, diff = Object.keys(s).filter(k => s[k] !== P.ashkenaz.settings[k]).sort();
     a.deepEqual(diff, ["beinonit", "carryLongIntervals"]); a.equal(s.beinonit, "both"); a.equal(s.day31, true); a.equal(s.carryLongIntervals, true);
     a.ok(P["ashkenaz-kreiti"].notes.find(n => n.k === "beinonit").src.includes("sahr189_1f"), "כרתי ופלתי דרך שו״ע הרב");
@@ -3323,14 +3354,14 @@ const MaayanTests = (M) => {
     a.equal(M.applyPreset(base, "no-such").method, "custom");
     a.equal(M.applyPreset(M.applyPreset(base, "ashkenaz-kreiti"), "ashkenaz").beinonit, "same", "מעבר בין שיטות מחזיר את הערכים");
   });
-  test("שיטות", "יומן ישן עם ״ashkenaz״ שומר את ערכיו, והשם מתחלף ל״אשכנזי – עיקר הדין״", () => {
+  test("שיטות", "יומן ישן עם ״ashkenaz״ שומר את ערכיו, והשם מתחלף ל״אשכנזי רגיל״", () => {
     // ערכי ״מנהג אשכנז הרווח״ כפי שנשמרו בגרסת מנוע 0.3.0
     const old = { wait: "five", haflagah: "days", beinonit: "same", day31: true, orZarua: true, carryLongIntervals: true, carryMonthly: false, missingMonthly: "first-next-month", bedikot: "twice", nightfall: "8.5", beinHashmashot: "both", hefsekTwilight: "before-sunset" };
     const s = emptyState(); s.settings = { ...s.settings, ...old, method: "ashkenaz" };
     const p = M.parseState(JSON.parse(JSON.stringify(s)));
     for (const [k, v] of Object.entries(old)) a.equal(p.settings[k], v, `${k} נשמר`);
     a.equal(p.settings.method, "ashkenaz"); a.deepEqual(M.presetDiff(p.settings), ["carryLongIntervals"]);
-    a.match(M.settingsSummary(p.settings)[0], /^שיטה: אשכנזי – עיקר הדין \(עם שינויים\)$/);
+    a.match(M.settingsSummary(p.settings)[0], /^המנהג שלי: אשכנזי רגיל \(עם שינויים\)$/);
     const old2 = M.parseState({ ...s, settings: { ...s.settings, method: "sefard", wait: "four", nightfall: "20m", hefsekTwilight: "ovadia", orZarua: false, day31: false, carryLongIntervals: true } });
     a.deepEqual(M.presetDiff(old2.settings), ["carryLongIntervals"], "יומן ספרדי ישן: רק השימור שונה");
   });
@@ -3349,7 +3380,7 @@ const MaayanTests = (M) => {
       }
     }
     const one = calculate(presetState("ashkenaz", [event("flow", N(2), "10:00", { cityId: "jerusalem" })]), NOW).plans.filter(p => p.kind === "average");
-    a.deepEqual(one.map(p => `${p.id.match(/-(3[01])-/)[1]}:${p.onah}`), ["30:day", "31:day"], "בעיקר הדין: עונה אחת (עונת הראייה) בימים 30 ו-31");
+    a.deepEqual(one.map(p => `${p.id.match(/-(3[01])-/)[1]}:${p.onah}`), ["30:day", "31:day"], "באשכנזי רגיל: עונה אחת (עונת הראייה) בימים 30 ו-31");
   });
   test("שיטות", "אור זרוע: יש בבן איש חי, אין בשיטת הרב עובדיה", () => {
     const flow = event("flow", N(2), "10:00", { cityId: "jerusalem" }), evs = () => [flow];
@@ -3360,7 +3391,7 @@ const MaayanTests = (M) => {
     const strip = ps => ps.filter(p => p.kind !== "or-zarua").map(p => p.id).sort().join();
     a.equal(strip(bic), strip(ov), "מלבד אור זרוע — אותם מועדים");
   });
-  test("שיטות", "אשכנזי – עיקר הדין: הפלגה ארוכה נעקרת מיד; בכרתי ופלתי נשמרת", () => {
+  test("שיטות", "אשכנזי רגיל: הפלגה ארוכה נעקרת מיד; בכרתי ופלתי נשמרת", () => {
     const evs = () => [event("flow", N(1, 1)), event("flow", N(6, 2)), event("flow", N(27, 2))];
     const ints = pk => calculate(presetState(pk, evs()), NOW).plans.filter(p => p.kind === "interval").map(p => p.title).sort();
     a.deepEqual(ints("ashkenaz"), ["הפלגה · 22 ימים"]); a.deepEqual(ints("sefard"), ["הפלגה · 22 ימים"]);
@@ -3455,20 +3486,18 @@ const MaayanTests = (M) => {
     const v = rv(r, "ask-30-short"); askOk(v, ["aruch189_12", "missing30", "secHeichal"]);
     a.deepEqual(v.eventIds, [f.id]); a.match(v.detail, /א׳ סיון/);
     a.ok(r.plans.some(p => p.kind === "monthly" && p.date === N(1, 3)), "החישוב לחומרא נשאר: א׳ סיון");
-    a.ok(!rv(r, "ask-30-full"), "לא סימון של חודש מלא");
     a.ok(!rv(run([event("flow", N(29, 1))]), "ask-30-short"), "כ״ט ניסן — אין סימון");
     a.ok(!rv(run([event("flow", N(15, 1))]), "ask-30-short"), "ט״ו ניסן — אין סימון");
     a.ok(!rv(run([event("flow", N(30, 1)), event("flow", N(25, 2))]), "ask-30-short"), "רק כשהראייה האחרונה בל׳");
   });
-  test("יש לשאול רב", "ל׳ בחודש והחודש הבא מלא: ask-30-full, ובינתיים חוששת רק לל׳", () => {
+  test("עונת החודש", "ל׳ בחודש והחודש הבא מלא: חוששת רק לל׳ בחודש הבא, בלי ״יש לשאול רב״ (הוכרע: כמו כל הלוחות)", () => {
     // תשפ״ד מעוברת: אחרי ל׳ שבט בא אדר א׳ מלא (ראש חודש אדר ב׳ שני ימים)
-    const f = event("flow", N(30, 11, 5784)), r = run([f]);
-    const v = rv(r, "ask-30-full"); askOk(v, ["missing30", "taz189_14"]); a.ok(M.cite("taz189_14").ok, "הט״ז אומת בספריא");
-    a.deepEqual(v.eventIds, [f.id]); a.match(v.detail, /ל׳ אדר א׳/); a.match(v.detail, /א׳ אדר ב׳/);
-    const mon = r.plans.filter(p => p.kind === "monthly").map(p => p.date);
-    a.deepEqual(mon, [N(30, 12, 5784)], "עונת החודש רק בל׳ אדר א׳"); a.ok(!rv(r, "ask-30-short"));
-    a.ok(!rv(run([event("flow", N(30, 1))]), "ask-30-full"), "חודש חסר — אין סימון של חודש מלא");
-    a.ok(!rv(run([event("flow", N(29, 11, 5784))]), "ask-30-full"), "כ״ט שבט — אין סימון");
+    const f = event("flow", N(30, 11, 5784));
+    for (const settings of [{}, ...["ashkenaz", "ashkenaz-kreiti", "sefard", "sefard-bic", "chabad"].map(pk => M.applyPreset(emptyState().settings, pk))]) {
+      const r = run([f], settings);
+      a.deepEqual(r.plans.filter(p => p.kind === "monthly").map(p => p.date), [N(30, 12, 5784)], `עונת החודש רק בל׳ אדר א׳ (${settings.method || "ברירת מחדל"})`);
+      a.ok(!r.reviews.some(x => /^ask-30/.test(x.id)), "אין סימון לבירור");
+    }
   });
   test("יש לשאול רב", "הפלגה ארוכה של ראייה קודמת שנעקרה (מקרה הרמ״א): ask-uprooted-haflagah בלי שימור, עם התאריך", () => {
     const evs = [event("flow", N(1, 1)), event("flow", N(20, 1)), event("flow", N(1, 2))];
@@ -3486,6 +3515,12 @@ const MaayanTests = (M) => {
     const kr = calculate(presetState("ashkenaz-kreiti", [event("flow", N(1, 1)), event("flow", N(6, 2)), event("flow", N(27, 2))]), NOW).plans.filter(p => /36/.test(p.title) && p.kind === "interval");
     const v2 = rv(r2, "ask-uprooted-haflagah"); askOk(v2);
     for (const p of kr) a.ok(v2.detail.includes(M.hebrew(p.date).split(" ").slice(0, -1).join(" ")), `התאריך ${M.hebrew(p.date)} בפירוט`);
+  });
+  test("יש לשאול רב", "ניסוח: כמה הפלגות ארוכות נכתבות ״30 ו־29״ ולא ״30, 29״", () => {
+    const f0 = N(1, 1), r = calculate(presetState("ashkenaz", [0, 29, 57, 83].map(d => event("flow", M.addDays(f0, d)))), NOW);
+    const v = rv(r, "ask-uprooted-haflagah"); askOk(v);
+    a.equal(v.situation, "אחרי הפלגה של 30 ו־29 ימים באה הפלגה קצרה יותר, של 27 ימים.");
+    a.equal(rv(calculate(presetState("ashkenaz", [0, 29, 55].map(d => event("flow", M.addDays(f0, d)))), NOW), "ask-uprooted-haflagah").situation, "אחרי הפלגה של 30 ימים באה הפלגה קצרה יותר, של 27 ימים.");
   });
   test("יש לשאול רב", "נמצא בהתעוררות: שתי העונות של אותו יום, ההמתנה מהיום המאוחר, ו-ask-waking", () => {
     const d = N(10), plain = event("flow", d, "07:30"), wake = event("flow", d, "07:30", { foundOnWaking: true });
@@ -3512,22 +3547,90 @@ const MaayanTests = (M) => {
     a.deepEqual(M.parseState(JSON.parse(JSON.stringify(p))), p, "שמירה וטעינה חוזרת יציבות");
     s.events = [event("flow", N(10), "07:00", { foundOnWaking: "yes" })]; a.throws(() => M.parseState(s), /התעוררות/);
   });
-  test("יש לשאול רב", "כרתי ופלתי, ראייה ביום: אור זרוע ביום 29 לפני מעת לעת — ask-oz-24h פעם אחת לראייה", () => {
+  /* אור זרוע לעונה בינונית של יממה שלמה (הוכרע: כמו כל הלוחות). אור זרוע נוסף רק לפני עונת הראייה עצמה; כשהעונה הבינונית
+   * היא יממה שלמה, לפני ראייה ביום הוא ליל יום 30, שכבר בתוך היממה, ולכן אין אור זרוע ביום 29. ההרחבה ללילה אינה מוסיפה אור זרוע. */
+  const ozAvg = r => r.plans.filter(p => p.kind === "or-zarua" && p.id.startsWith("oz-average"));
+  test("אור זרוע", "יממה שלמה (כרתי ופלתי), ראייה ביום: אין אור זרוע ביום 29, ואין ״יש לשאול רב״", () => {
     const f = event("flow", N(2), "10:00", { cityId: "jerusalem" }), r = calculate(presetState("ashkenaz-kreiti", [f]), NOW);
-    const v = rv(r, `ask-oz-24h-${f.id}`); askOk(v, ["shach184_7", "sahr189_1f"]); a.deepEqual(v.eventIds, [f.id]);
-    a.equal(r.reviews.filter(x => /^ask-oz-24h/.test(x.id)).length, 1, "פעם אחת");
-    a.ok(r.plans.some(p => p.kind === "or-zarua" && p.id === `oz-average-${f.id}-30-night` && p.onah === "day"), "החישוב לא השתנה: אור זרוע ביום 29");
-    a.match(v.detail, new RegExp(M.hebrew(N(30)).split(" ").slice(0, -1).join(" ")));
-    const n = event("flow", N(2), "22:00", { cityId: "jerusalem" });
-    a.ok(!calculate(presetState("ashkenaz-kreiti", [n]), NOW).reviews.some(x => /^ask-oz-24h/.test(x.id)), "ראייה בלילה — אין סימון");
-    for (const pk of ["ashkenaz", "sefard-bic", "sefard", "chabad"]) a.ok(!calculate(presetState(pk, [f]), NOW).reviews.some(x => /^ask-oz-24h/.test(x.id)), `${pk}: אין סימון`);
+    a.deepEqual(ozAvg(r).map(p => p.id), [], "אין אור זרוע לעונה הבינונית");
+    a.ok(!r.plans.some(p => p.kind === "or-zarua" && p.date === N(29) && p.onah === "day"), "אין אור זרוע ביום 29");
+    a.ok(!r.reviews.some(x => /^ask-oz/.test(x.id)), "אין סימון לבירור");
+    a.deepEqual(r.plans.filter(p => p.kind === "average" && p.id.includes("-30-")).map(p => p.onah).sort(), ["day", "night"], "העונה הבינונית עצמה לא השתנתה");
+    const custom = run([event("flow", N(2), "10:00")], { beinonit: "both", orZarua: true, day31: true });
+    a.deepEqual(ozAvg(custom).map(p => p.id), [], "אותו כלל בהתאמה אישית");
+  });
+  test("אור זרוע", "יממה שלמה (כרתי ופלתי): אור זרוע לעונת החודש ולהפלגה נשאר", () => {
+    // א׳ אדר, ו׳ ניסן (הפלגה 35). ניסן מלא, ולכן עונת החודש (ו׳ אייר) אינה ביום 30 (ה׳ אייר)
+    const evs = [event("flow", N(1, 12), "10:00", { cityId: "jerusalem" }), event("flow", N(6, 1), "10:00", { cityId: "jerusalem" })];
+    const r = calculate(presetState("ashkenaz-kreiti", evs), NOW), last = evs[1];
+    // בכרתי ופלתי עונת החודש (יום 30 או 31) נמצאת תמיד בתוך יממה שלמה, ולכן אור זרוע שלה הוא ליל היממה. בלי יום 31 הוא נראה בנפרד:
+    const m = run([event("flow", N(6, 1), "10:00")], { beinonit: "both", orZarua: true, day31: false });
+    a.ok(m.plans.some(p => p.id.startsWith("oz-monthly-") && p.date === N(5, 2) && p.onah === "night"), "אור זרוע לפני עונת החודש");
+    a.deepEqual(ozAvg(m).map(p => p.id), [], "ולא לעונה הבינונית");
+    a.ok(r.plans.some(p => p.id === `oz-interval-35-${last.id}` && p.onah === "night"), "אור זרוע לפני ההפלגה");
+    a.deepEqual(ozAvg(r).map(p => p.id), [], "ולא לעונה הבינונית");
+  });
+  test("אור זרוע", "יממה שלמה, ראייה בלילה: אור זרוע ביום 29 ביום נשאר (העונה שלפני עונת הראייה)", () => {
+    const n = event("flow", N(2), "22:00", { cityId: "jerusalem" }), r = calculate(presetState("ashkenaz-kreiti", [n]), NOW), see = M.stamp(n).abs;
+    const oz = ozAvg(r); a.equal(oz.length, 1, "אור זרוע אחד");
+    a.equal(oz[0].onah, "day"); a.equal(oz[0].date, fromAbs(see + 28), "ביום 29, בעונת היום");
+    a.ok(!r.reviews.some(x => /^ask-oz/.test(x.id)), "אין סימון לבירור");
+  });
+  test("אור זרוע", "עונה אחת (אשכנזי רגיל, בן איש חי): אור זרוע לפני עונת הראייה ביום 30 לא השתנה", () => {
+    const f = event("flow", N(2), "10:00", { cityId: "jerusalem" }), see = M.stamp(f).abs;
+    for (const pk of ["ashkenaz", "sefard-bic"]) {
+      const oz = ozAvg(calculate(presetState(pk, [f]), NOW));
+      a.deepEqual(oz.map(p => `${p.date}:${p.onah}`), [`${fromAbs(see + 28)}:night`], `${pk}: ליל יום 30`);
+    }
+  });
+  test("אור זרוע", "יממה שלמה, נמצא בהתעוררות (ראייה ביום): אור זרוע ביום 29 בגלל האפשרות שהתחילה בלילה", () => {
+    const w = event("flow", N(2), "07:30", { cityId: "jerusalem", foundOnWaking: true }), r = calculate(presetState("ashkenaz-kreiti", [w]), NOW), see = M.stamp(w).abs;
+    a.equal(M.stamp(w).onah, "day");
+    a.deepEqual(ozAvg(r).map(p => `${p.date}:${p.onah}`), [`${fromAbs(see + 28)}:day`], "כמו ראייה בלילה");
   });
   test("יש לשאול רב", "אור זרוע ביום 31 בשיטות אשכנז אינו מסומן (בחירת שיטה מתועדת)", () => {
     for (const pk of ["ashkenaz", "ashkenaz-kreiti"]) {
       const r = calculate(presetState(pk, [event("flow", N(2), "10:00", { cityId: "jerusalem" })]), NOW);
-      a.ok(!r.reviews.some(x => /31|זרוע/.test(x.id) && x.id !== `ask-oz-24h-${r.latestFlow.id}`), pk);
+      a.ok(!r.reviews.some(x => /31|זרוע/.test(x.id)), pk);
       a.ok(!r.reviews.some(x => /יום 31/.test(`${x.title} ${x.topic || ""}`)), pk);
     }
+  });
+
+  /* ---------- תזכורת לפני השקיעה ובחירת מנהג ביומן חדש ---------- */
+  test("תזכורות", "ברירת המחדל: 60 דקות לפני השקיעה, להפסק ולבדיקת הערב; יומן שמור שומר את הערך שלו", () => {
+    a.equal(M.SETTING_DEFAULTS.reminderMinutes, 60); a.equal(M.newDiary().settings.reminderMinutes, 60);
+    const now = new Date(new HDate(6, 1, 5785).greg().toISOString().slice(0, 10) + "T08:00:00Z");
+    const h = run([event("flow", N(2), "10:00")], {}, now).plans.find(p => p.kind === "hefsek");
+    a.equal(new Date(h.end) - new Date(h.start), 60 * 60000, "הפסק: שעה לפני השקיעה");
+    const pm = run([event("flow", N(2)), event("hefsek", N(6), "16:00")], {}, new Date(new HDate(8, 1, 5785).greg().toISOString().slice(0, 10) + "T08:00:00Z")).plans.find(p => /-pm$/.test(p.id));
+    a.equal(new Date(pm.end) - new Date(pm.start), 60 * 60000, "בדיקת ערב: שעה לפני השקיעה"); a.equal(pm.reason, "60 דקות לפני השקיעה המקומית.");
+    const s = emptyState(); s.settings.reminderMinutes = 30;
+    a.equal(M.parseState(JSON.parse(JSON.stringify(s))).settings.reminderMinutes, 30, "יומן שנשמר עם 30 נשאר 30");
+  });
+  test("בחירת מנהג", "יומן חדש: המנהג לא נבחר, ואין חישוב עד שבוחרים", () => {
+    const s = M.newDiary(); a.equal(s.settings.methodChosen, false); a.equal(s.settings.method, "custom");
+    s.events = [event("flow", N(2)), event("flow", N(30))];
+    const r = calculate(M.parseState(JSON.parse(JSON.stringify(s))), NOW);
+    a.deepEqual(r.plans, [], "אין מועדים"); a.ok(r.reviews.some(x => x.id === "method-not-chosen"), "מסומן שלא נבחר מנהג"); a.equal(r.phase, "empty");
+    for (const pk of Object.keys(P)) {
+      const chosen = M.applyPreset(s.settings, pk); a.equal(chosen.methodChosen, true, pk);
+      const r2 = calculate(M.parseState({ ...s, settings: chosen }), NOW);
+      a.ok(r2.plans.length > 0 && !r2.reviews.some(x => x.id === "method-not-chosen"), `${pk}: מחושב`);
+    }
+    a.equal(M.applyPreset(s.settings, "custom").methodChosen, true, "בחירה מפורשת בהתאמה אישית");
+  });
+  test("בחירת מנהג", "יומן קיים (בלי השדה, עם ״custom״ או עם שיטה) אינו מחויב לבחור ואינו משתנה", () => {
+    for (const method of ["custom", "ashkenaz", "sefard"]) {
+      const s = emptyState(); delete s.settings.methodChosen; s.settings.method = method; s.events = [event("flow", N(2))];
+      const p = M.parseState(JSON.parse(JSON.stringify(s)));
+      a.equal(p.settings.methodChosen, true, `${method}: נחשב כנבחר`); a.equal(p.settings.method, method, "השיטה לא השתנתה");
+      a.ok(calculate(p, NOW).plans.length > 0, "מחושב כרגיל");
+    }
+    a.equal(M.parseState({ schemaVersion: 1 }).settings.methodChosen, true, "יומן ישן בלי הגדרות");
+    a.equal(emptyState().settings.methodChosen, true, "emptyState (תרחישים, יומן לדוגמה) אינו מושפע");
+    a.equal(M.demoState(NOW).settings.methodChosen, true);
+    const bad = emptyState(); bad.settings.methodChosen = "yes"; a.throws(() => M.parseState(bad), /methodChosen/);
+    const n = M.newDiary(); a.deepEqual(M.parseState(JSON.parse(JSON.stringify(n))).settings.methodChosen, false, "שמירה וטעינה חוזרת");
   });
 
   return {
@@ -3599,7 +3702,7 @@ const MaayanScenarios = (M) => {
     },
     {
       id: "stringencies", tag: "עונה בינונית", title: "יום 31, שתי עונות ואור זרוע",
-      check: "בהפעלת שלוש האפשרויות: עונה בינונית ביום 30 וביום 31, בשתי העונות, ולכל חשש גם עונת אור זרוע שלפניו. כל אפשרות נשלטת בנפרד בהגדרות.",
+      check: "בהפעלת שלוש האפשרויות: עונה בינונית ביום 30 וביום 31, יממה שלמה (לילה ויום). הראייה ביום, ואור זרוע הוא העונה שלפני עונת הראייה: ליל יום 30 וליל ב׳ אייר (עונת החודש, ביום 31) כבר בתוך היממה, ולכן אין אור זרוע נוסף, ואין אור זרוע ביום 29. כל אפשרות נשלטת בנפרד בהגדרות.",
       settings: { beinonit: "both", day31: true, orZarua: true }, events: () => [ev("flow", N(2, NIS, Y))], now: () => at(N(10, NIS, Y)),
     },
     {
@@ -3777,6 +3880,8 @@ if (typeof module !== "undefined") module.exports = MaayanWidget;
   const STORE_KEY = "maayan.v1.diary", SEEN_KEY = "maayan.v1.seen", LANG_KEY = "maayan.v1.lang";
   // נעילה בקוד (רק גיבוב PBKDF2 עם מלח, אף פעם לא הקוד עצמו), מונה ניסיונות שגויים, ותזכורת לגיבוי
   const LOCK_KEY = "maayan.v1.lock", LOCKFAIL_KEY = "maayan.v1.lockfail", BACKUP_KEY = "maayan.v1.backup";
+  // כרטיס ״בחרי את המנהג שלך״ ליומן קיים עם ״התאמה אישית״: מוצג עד שסוגרים אותו, פעם אחת
+  const METHODCARD_KEY = "maayan.v1.methodcard";
   const CAP = window.Capacitor, NATIVE = !!(CAP && typeof CAP.isNativePlatform === "function" && CAP.isNativePlatform()), PL = NATIVE ? CAP.Plugins : {};
   const TERMS_VERSION = "2026-11";
   const $ = sel => document.querySelector(sel);
@@ -3828,6 +3933,7 @@ if (typeof module !== "undefined") module.exports = MaayanWidget;
     upload: '<path d="M12 15V4M7.5 8.5 12 4l4.5 4.5M5 20h14"/>',
     lock: '<path class="f" d="M8 10.5h8a3 3 0 0 1 3 3v4a3 3 0 0 1-3 3H8a3 3 0 0 1-3-3v-4a3 3 0 0 1 3-3z"/><rect x="5" y="10.5" width="14" height="10" rx="3"/><path d="M8.5 10.5V8a3.5 3.5 0 0 1 7 0v2.5M12 14.5v2"/>',
     help: '<circle cx="12" cy="12" r="9"/><path d="M9.6 9.4a2.5 2.5 0 0 1 4.8.9c0 1.7-2.4 2.1-2.4 3.7"/><path class="dot" d="M12 17.2h.01"/>',
+    globe: '<circle class="f" cx="12" cy="12" r="8.6"/><circle cx="12" cy="12" r="8.6"/><path d="M3.6 12h16.8"/><path d="M12 3.4c2.3 2.4 3.4 5.3 3.4 8.6s-1.1 6.2-3.4 8.6c-2.3-2.4-3.4-5.3-3.4-8.6S9.7 5.8 12 3.4z"/>',
     info: '<circle cx="12" cy="12" r="9"/><path d="M12 11v5.5"/><path class="dot" d="M12 7.8h.01"/>',
     list: '<path d="M9.5 6.5H20M9.5 12H20M9.5 17.5H20"/><path class="dot" d="M4.8 6.5h.01M4.8 12h.01M4.8 17.5h.01"/>',
     flask: '<path d="M9.5 3.5h5M10.5 3.5v5.3L5.3 17.7a1.9 1.9 0 0 0 1.7 2.8h10a1.9 1.9 0 0 0 1.7-2.8L13.5 8.8V3.5M7.6 14.5h8.8"/>',
@@ -3854,7 +3960,7 @@ if (typeof module !== "undefined") module.exports = MaayanWidget;
   };
   function loadPersonal() {
     const raw = storage.get(STORE_KEY);
-    if (!raw) return M.emptyState();
+    if (!raw) return M.newDiary();
     try { return M.parseState(JSON.parse(raw)); } catch { app.loadWarning = "היומן השמור במכשיר פגום ולא נטען. הנתונים לא נמחקו."; app.blockSave = true; return M.emptyState(); }
   }
   const NAV = [
@@ -3920,7 +4026,7 @@ if (typeof module !== "undefined") module.exports = MaayanWidget;
     const prefix = p.onah === "day" ? "" : "ליל ";
     return `<details class="plan k-${p.kind} tone-${planTone(p.kind)}${p.done ? " done" : ""}"${open ? " open" : ""}>
       <summary><span class="plan-ic">${I(planIcon(p), 18)}</span>
-        <span class="plan-name"><strong>${esc(planTitle(p))}</strong><small><span class="hebdate">${prefix}${esc(planHebrew(p))}</span>${compact ? "" : ` · ${esc(civilLabel(p.date, true))} · ${esc(c.name)}`}</small></span>
+        <span class="plan-name"><strong>${esc(planTitle(p))}</strong><small><span class="hebdate">${prefix}${esc(planHebrew(p))}</span>${compact ? "" : ` · ${esc(civilLabel(p.date, true))}${p.cityId !== state().settings.cityId ? ` · ${esc(c.name)}` : ""}`}</small></span>
         <time dir="ltr">${start}</time>${I("left", 16)}</summary>
       <div class="plan-more"><p>${esc(p.reason)}</p>
         <small>${onahLabel(p.onah)} · ${p.end ? `מ-${start} עד ${timeInZone(new Date(p.end), c.tz)}` : `מ-${start}`} · ${esc(c.name)}</small>
@@ -4003,7 +4109,7 @@ if (typeof module !== "undefined") module.exports = MaayanWidget;
     app.locked = false; app.lock = null; app.awayOk = 0;
     app.modal = app.lockedModal; app.lockedModal = null;
     render();
-    if (!app.modal && !storage.get(SEEN_KEY) && !app.personal.events.length) { app.modal = { kind: "welcome" }; renderModal(); }
+    firstRun();
   }
   async function bioAuth() {
     const B = BIO(); if (!B) return false;
@@ -4120,16 +4226,16 @@ if (typeof module !== "undefined") module.exports = MaayanWidget;
       <section class="hero" data-phase="${heroPhase}">
         <div class="hero-row"><div class="hero-copy">
           <span class="chip-phase"><i class="phase-dot"></i>${first ? "היומן שלך ריק" : esc(phase === "planned" && mikvahNight ? "ליל הטבילה" : PHASE_NAMES[phase])}</span>
-          <h2>${esc(C[0])}</h2><p>${esc(first ? "כדאי להתחיל מהזנת המחזורים האחרונים (לפחות שניים), כדי שההפלגה ועונת החודש יחושבו נכון. אפשר גם להתאים קודם את שיטת החישוב." : C[1])}</p>
+          <h2>${esc(C[0])}</h2><p>${esc(first ? "כדאי להתחיל מהזנת המחזורים האחרונים (לפחות שניים), כדי שההפלגה ועונת החודש יחושבו נכון." : C[1])}</p>
         </div>${ring}</div>${days}
-        ${first ? `<div class="first-btns"><button class="btn" data-act="cycle">${I("calendar", 18)}הזנת מחזורים קודמים</button><div class="row-btns"><button class="btn ghost sm" data-go="prefs">${I("sliders", 16)}שיטת החישוב</button><button class="btn ghost sm" data-act="demo">${I("flask", 16)}יומן לדוגמה</button></div></div>` : ""}
+        ${first ? `<div class="first-btns"><button class="btn" data-act="cycle">${I("calendar", 18)}הזנת מחזורים קודמים</button><div class="row-btns"><button class="btn ghost sm" data-go="prefs">${I("sliders", 16)}המנהג שלי</button><button class="btn ghost sm" data-act="demo">${I("flask", 16)}יומן לדוגמה</button></div></div>` : ""}
         ${nextLine}
         ${prepNow ? prepButton(st, "prep-btn") : ""}
       </section>
       ${backupNudge(st)}
-      ${first ? `<section class="card method"><div class="card-h">${I("scale")}<div><h3>שיטת החישוב שלך</h3><p>לבחור לפי ההנחיה שקיבלת. אפשר לשנות בכל עת</p></div></div>
-        ${methodChooser(st.settings, "first")}
-        <ul class="method-sum">${M.settingsSummary(st.settings).filter(x => /^(שיטה|המתנה|הפלגה|עונה בינונית|יום 31|אור זרוע)/.test(x)).map(x => `<li>${esc(x)}</li>`).join("")}</ul>
+      ${methodCard(st)}
+      ${first && st.settings.methodChosen && !methodCardDue(st) ? `<section class="card method"><div class="card-h">${I("scale")}<div><h3>המנהג שלי</h3><p>${esc(M.SETTING_LABELS.method[st.settings.method] || M.SETTING_LABELS.method.custom)}${M.presetDiff(st.settings).length ? " · הותאם אישית" : ""}</p></div></div>
+        <ul class="method-sum">${M.settingsSummary(st.settings).filter(x => /^(המתנה|הפלגה|עונה בינונית|יום 31|אור זרוע)/.test(x)).map(x => `<li>${esc(x)}</li>`).join("")}</ul>
         <button class="btn ghost full" data-go="prefs">${I("sliders", 17)}התאמה אישית לפי הוראת הרב</button></section>` : ""}
       ${r.reviews.length ? `<button class="notice${askFirst(r.reviews)[0].ask ? " ask" : ""}" data-go="journal"><span class="notice-ic">${I("help", 20)}</span><span><strong>${r.reviews.length} ${r.reviews.length === 1 ? "נקודה לבירור" : "נקודות לבירור"}</strong><small>${esc(askFirst(r.reviews).slice(0, 2).map(reviewHead).join(" · "))}</small></span>${I("left", 16)}</button>` : ""}
       <section class="card upcoming"><div class="card-h"><h3>מועדים קרובים</h3><button class="link" data-go="dates">הכול ${I("left", 14)}</button></div>
@@ -4206,7 +4312,7 @@ if (typeof module !== "undefined") module.exports = MaayanWidget;
       .filter(e => (app.filter === "all" || e.type === app.filter) && (!q || `${EVENT_NAMES[e.type]} ${e.date} ${e.note} ${hebrew(e.date)}`.toLowerCase().includes(q)));
     return `${r.reviews.length ? `<section class="card reviews"><div class="card-h">${I("help")}<h3>נקודות לבירור <span class="count">${r.reviews.length}</span></h3></div>
       <p class="fine">המערכת אינה מכריעה בנקודות אלה. כל נקודה מפנה לרישומים הנוגעים בה.</p>
-      ${askFirst(r.reviews).map(v => `<details${v.ask ? ` class="ask" data-review="${esc(v.id)}"` : ` data-review="${esc(v.id)}"`}><summary>${v.ask ? `<span class="ask-ic">${I("scale", 16)}</span>` : ""}<span class="rv-t">${esc(v.title)}</span>${I("left", 15)}</summary>${reviewBody(v)}${v.eventIds.map(id => { const e = st.events.find(x => x.id === id); return e ? `<button class="link" data-edit="${id}">${esc(EVENT_NAMES[e.type])} · ${esc(civilLabel(e.date, true))} ${I("pencil", 13)}</button>` : ""; }).join("")}</details>`).join("")}</section>` : ""}
+      ${askFirst(r.reviews).map(v => `<details${v.ask ? ` class="ask" data-review="${esc(v.id)}"` : ` data-review="${esc(v.id)}"`}><summary>${v.ask ? `<span class="ask-ic">${I("scale", 16)}</span>` : ""}${v.ask ? `<span class="rv-t"><small class="ask-l">${esc(v.title)}</small>${esc(v.situation)}</span>` : `<span class="rv-t">${esc(v.title)}</span>`}${I("left", 15)}</summary>${v.ask ? `<p class="ask-now">${esc(v.meanwhile)}</p>` : reviewBody(v)}${v.eventIds.map(id => { const e = st.events.find(x => x.id === id); return e ? `<button class="link" data-edit="${id}">${esc(EVENT_NAMES[e.type])} · ${esc(civilLabel(e.date, true))} ${I("pencil", 13)}</button>` : ""; }).join("")}</details>`).join("")}</section>` : ""}
     <section class="card"><div class="card-h">${I("book")}<h3>רישומים <span class="count">${st.events.length}</span></h3><button class="link" data-act="report">${I("file", 15)}דוח לבירור</button></div>
       <div class="filters"><label class="search">${I("search", 17)}<input id="q" type="search" placeholder="חיפוש לפי תאריך או הערה" value="${esc(app.query)}" aria-label="חיפוש"></label>
       <select id="filter" aria-label="סינון לפי סוג"><option value="all">כל הסוגים</option>${Object.entries(EVENT_NAMES).map(([v, n]) => `<option value="${v}"${app.filter === v ? " selected" : ""}>${n}</option>`).join("")}</select></div>
@@ -4237,30 +4343,30 @@ if (typeof module !== "undefined") module.exports = MaayanWidget;
       <button class="btn ghost full" type="button" data-act="locate">${I("pin", 17)}זיהוי המיקום שלי</button>
       ${(state().places || []).map(pl => `<div class="trip"><span><strong>${esc(pl.name)}</strong><small dir="ltr">${pl.lat.toFixed(3)}, ${pl.lon.toFixed(3)} · ${esc(pl.tz)}</small></span><button class="icon-btn" type="button" data-delplace="${pl.id}" aria-label="מחיקת מקום">${I("trash", 17)}</button></div>`).join("")}
       <p class="fine">זיהוי המיקום נעשה רק בלחיצה, והמיקום נשמר במכשיר בלבד. לכל רישום נשמר המקום שלו, ושינוי העיר אינו משנה רישומים קודמים.</p></section>
-    <section class="card"><div class="card-h">${I("scale")}<div><h3>שיטת החישוב</h3><p>לבחור לפי ההנחיה שקיבלת</p></div></div>
+    <section class="card"><div class="card-h">${I("scale")}<div><h3>המנהג שלי</h3><p>לבחור לפי ההנחיה שקיבלת</p></div></div>
       ${methodChooser(s, "prefs")}
       <p class="mc-sum">${esc(M.settingsSummary(s)[0])}</p>
       ${methodNotes(s)}
       <details class="custom-set" data-keep="custom"${app.keep.has("custom") ? " open" : ""}><summary><span>התאמה אישית לפי הוראת הרב</span>${M.presetDiff(s).length ? `<span class="count">הותאם אישית</span>` : ""}${I("left", 15)}</summary>
-      <p class="fine">הערכים נקבעים לפי השיטה שנבחרה. אפשר לשנות כל הגדרה לפי הוראת הרב.</p>
-      ${sel("wait", "המתנה לפני שבעה נקיים", s, [["five", "חמישה ימים מתחילת הנידה"], ["four", "ארבעה ימים מתחילת הנידה — הרב עובדיה יוסף"], ["four-from-relations", "ארבעה ימים ממועד היחסים — לפי הוראה"]])}
-      ${sel("haflagah", "שיטת חישוב ההפלגה", s, [["days", "ימים בין תחילות הווסתות"], ["chabad-onot", "עונות מהפסק טהרה — חב״ד"]])}
-      ${sel("beinonit", "עונה בינונית ביום 30", s, [["same", "אותה עונה שבה התחילה הווסת"], ["both", "שתי העונות — לילה ויום"]])}
-      ${tog("day31", "הוספת יום 31", "לפי המנהג או ההנחיה", s)}<div class="oz-box">${tog("orZarua", "עונת אור זרוע", "העונה שלפני כל עונת פרישה — לפי הוראת הרב. כבויה כברירת מחדל.", s)}</div>
-      ${tog("carryLongIntervals", "שימור הפלגות ארוכות", "בחישוב ימים, כשווסת חדשה מקדימה את החשש הקודם", s)}
-      ${tog("carryMonthly", "שימור עונת חודש בזמן דימום", "דורש תיעוד מלא של הווסת וההפסק", s)}
-      ${sel("missingMonthly", "יום ל׳, כשבחודש הבא אין ל׳", s, [["first-next-month", "א׳ בחודש שאחרי החודש החסר (מומלץ)"], ["skip", "בלי עונת חודש באותו חודש"]])}
-      ${sel("bedikot", "תזכורות לבדיקות", s, [["twice", "בוקר וערב בכל אחד משבעת הימים"], ["first-last", "ראשון ושביעי בלבד — לפי הוראה"]])}
+      <p class="fine">הערכים נקבעים לפי המנהג שנבחר. אפשר לשנות כל הגדרה לפי הוראת הרב.</p>
+      ${sel("wait", "ימי המתנה לפני ההפסק", s, [["five", "חמישה ימים"], ["four", "ארבעה ימים"], ["four-from-relations", "ארבעה ימים מהיחסים האחרונים (לפי הוראה)"]])}
+      ${sel("haflagah", "ספירת ההפלגה", s, [["days", "בימים"], ["chabad-onot", "בעונות, מההפסק (חב״ד)"]])}
+      ${sel("beinonit", "יום 30", s, [["same", "רק העונה שבה התחילה הווסת"], ["both", "יממה שלמה (לילה ויום)"]])}
+      ${tog("day31", "לחשוש גם ליום 31", "לפי המנהג או ההנחיה", s)}<div class="oz-box">${tog("orZarua", "אור זרוע (גם העונה שלפני)", "העונה שלפני כל עונת פרישה, לפי הוראת הרב", s)}</div>
+      ${tog("carryLongIntervals", "הפלגה ארוכה נשארת גם אחרי הפלגה קצרה", "בספירה בימים, כשווסת חדשה מקדימה את החשש הקודם", s)}
+      ${tog("carryMonthly", "עונת חודש שחלה בימי הווסת", "נשמרת. דורש תיעוד מלא של הווסת וההפסק", s)}
+      ${sel("missingMonthly", "ראתה בל׳, ובחודש הבא אין ל׳", s, [["first-next-month", "א׳ בחודש שאחריו"], ["skip", "בלי עונת חודש"]])}
+      ${sel("bedikot", "תזכורות לבדיקות", s, [["twice", "בוקר וערב, כל יום"], ["first-last", "ביום הראשון וביום השביעי (לפי הוראה)"]])}
       ${sel("nightfall", "צאת הכוכבים", s, [["8.5", "8.5° מתחת לאופק"], ["7.083", "7.083° מתחת לאופק"], ["13.5z", "13.5 דקות זמניות אחרי השקיעה (הגאונים)"], ["18m", "18 דקות אחרי השקיעה"], ["20m", "20 דקות אחרי השקיעה"]])}
-      ${sel("beinHashmashot", "ראייה סמוך לשקיעה או בין השמשות", s, [["both", "לחומרא: מועדים לשתי העונות"], ["flag", "השעיית החישוב עד בירור"]])}
-      ${sel("hefsekTwilight", "הפסק טהרה אחרי השקיעה", s, [["before-sunset", "רק הפסק לפני השקיעה"], ["ovadia", "בדיעבד עד 13.5 דקות זמניות — הרב עובדיה יוסף"]])}
-      ${s.method !== "custom" ? `<button type="button" class="link mc-none" data-method="custom">${I("sliders", 15)}בלי שיטה מוכנה: כל ההגדרות ידנית</button>` : ""}</details>
+      ${sel("beinHashmashot", "ראייה סמוך לשקיעה או בין השמשות", s, [["both", "לחשוש לשתי העונות"], ["flag", "לסמן לבירור, בלי חישוב"]])}
+      ${sel("hefsekTwilight", "הפסק טהרה אחרי השקיעה", s, [["before-sunset", "רק לפני השקיעה"], ["ovadia", "בדיעבד, עד 13.5 דקות זמניות אחרי השקיעה"]])}
+      ${s.method !== "custom" ? `<button type="button" class="link mc-none" data-method="custom">${I("sliders", 15)}בלי מנהג מוכן: כל ההגדרות ידנית</button>` : ""}</details>
       ${sel("special", "מצב מיוחד", s, [["regular", "מחזור רגיל"], ["pregnancy", "היריון"], ["postpartum", "אחרי לידה"], ["nursing", "הנקה"], ["hormonal", "טיפול הורמונלי / אמצעי מניעה"]])}
       <p class="fine">במצב מיוחד החישובים הרגילים מושעים, ואפשר לרשום עונות לפי הוראה.</p>
-      <label class="field" for="s-methodNote">ממי ההנחיות<textarea id="s-methodNote" name="methodNote" rows="2" maxlength="1000" placeholder="שם מורה ההוראה או המנהג">${esc(s.methodNote)}</textarea></label></section>
+      <label class="field" for="s-methodNote"><span>שם הרב או המדריכה <span class="opt">לא חובה</span></span><textarea id="s-methodNote" name="methodNote" rows="2" maxlength="1000" placeholder="למשל: הרב של הקהילה, או מדריכת הכלות">${esc(s.methodNote)}</textarea></label></section>
     <section class="card"><div class="card-h">${I("bell")}<div><h3>תזכורות</h3></div></div>
       ${tog("remindersEnabled", "התראות כשהיומן פתוח", "דורש הרשאה מהדפדפן", s)}${tog("neutralReminders", "נוסח דיסקרטי", "״תזכורת אישית״ בלי פירוט", s)}
-      <div class="pair"><label class="field" for="s-reminderMinutes">דקות לפני השקיעה<input id="s-reminderMinutes" name="reminderMinutes" type="number" min="5" max="120" value="${s.reminderMinutes}" inputmode="numeric"></label>
+      <div class="pair end"><label class="field" for="s-reminderMinutes">תזכורת לפני השקיעה (דקות)<input id="s-reminderMinutes" name="reminderMinutes" type="number" min="5" max="120" value="${s.reminderMinutes}" inputmode="numeric"></label>
       <label class="field" for="s-morningTime">שעת בדיקת בוקר<input id="s-morningTime" name="morningTime" type="time" value="${s.morningTime}"></label></div></section>${WIDGET_FIELDS(s)}`;
   /* ---------- וידג׳ט למסך הבית (src/widget.js): רק באנדרואיד וביומן האישי; כבוי כברירת מחדל ---------- */
   const WIDGET_FIELDS = s => !(NATIVE && CAP.getPlatform && CAP.getPlatform() === "android" && app.mode === "personal") ? "" : `
@@ -4273,12 +4379,12 @@ if (typeof module !== "undefined") module.exports = MaayanWidget;
     sefard: "לפי פסקי טהרת הבית.",
     "sefard-bic": "כמו הרב עובדיה, ובנוסף אור זרוע.",
     ashkenaz: "יום 30 ו־31, ואור זרוע.",
-    "ashkenaz-kreiti": "כמו עיקר הדין, והעונה הבינונית יממה שלמה.",
+    "ashkenaz-kreiti": "כמו הרגיל, והעונה הבינונית יממה שלמה.",
     chabad: "לפי שולחן ערוך הרב.",
   };
   /** בחירת שיטה בשני שלבים: מה המנהג (ספרדי / אשכנזי / חב״ד), ואז לפי מי. בחב״ד אין שלב שני. */
-  function methodChooser(s, where) {
-    const P = M.METHOD_PRESETS, fam = app.methodFamily || M.methodFamily(s.method), F = M.METHOD_FAMILIES.find(f => f.id === fam);
+  function methodChooser(s, where, family) {
+    const P = M.METHOD_PRESETS, fam = family !== undefined ? family : app.methodFamily || M.methodFamily(s.method), F = M.METHOD_FAMILIES.find(f => f.id === fam);
     const card = m => `<button type="button" class="mc-card" role="radio" aria-checked="${s.method === m}" data-method="${m}"><span class="mc-dot" aria-hidden="true"></span><span class="mc-body"><strong>${esc(P[m].name)}</strong><small>${esc(METHOD_LINES[m])}</small></span></button>`;
     const one = m => `<div class="mc-card on mc-only"><span class="mc-body"><strong>${esc(P[m].name)}</strong><small>${esc(METHOD_LINES[m])}</small></span></div>`;
     return `<div class="mchoose">
@@ -4290,6 +4396,7 @@ if (typeof module !== "undefined") module.exports = MaayanWidget;
   }
   function chooseMethod(m) {
     const st = state(); app.methodFamily = null;
+    if (m === "custom") dismissMethodCard();
     if (st.settings.method === m && !M.presetDiff(st.settings).length) return render();
     try { commit({ ...st, settings: M.applyPreset(st.settings, m) }); } catch (err) { toast(err.message); render(); }
   }
@@ -4298,9 +4405,48 @@ if (typeof module !== "undefined") module.exports = MaayanWidget;
     if (F.methods.length === 1) return chooseMethod(F.methods[0]);
     app.methodFamily = M.methodFamily(state().settings.method) === id ? null : id; render();
   }
+  /* ---------- בחירת מנהג בכניסה הראשונה ----------
+   * יומן אישי חדש (methodChosen: false) אינו מחושב ואינו שמיש עד שבוחרים מנהג: ברוכה הבאה ← התחלת יומן ← ״המנהג שלי״ ← המשך.
+   * יומן קיים (גם עם ״התאמה אישית״) אינו מחויב: לכל היותר כרטיס עדין ״בחרי את המנהג שלך״ במסך היום, שאפשר לסגור. */
+  const needsMethod = () => app.mode === "personal" && !app.locked && !app.covered && app.personal?.settings.methodChosen === false;
+  /** פותח את ברוכה הבאה או את בחירת המנהג, כשצריך. לא במסך הבודקים, כדי שבודק יוכל להגיע לתרחישים */
+  function firstRun() {
+    if (app.locked || app.covered || app.modal) return;
+    if (needsMethod() && app.tab !== "review") app.modal = storage.get(SEEN_KEY) ? onboardModal() : { kind: "welcome" };
+    else if (app.mode === "personal" && !storage.get(SEEN_KEY) && !app.personal.events.length) app.modal = { kind: "welcome" };
+    if (app.modal) renderModal();
+  }
+  const onboardModal = () => ({ kind: "onboard", family: null, method: null });
+  /** בחירה בתוך מסך הפתיחה: נשמרת רק בלחיצה על ״המשך״ */
+  function onboardPick(d) {
+    const m = app.modal;
+    if (d.family) { const F = M.METHOD_FAMILIES.find(f => f.id === d.family); if (!F) return; m.family = F.id; m.method = F.methods.length === 1 ? F.methods[0] : F.methods.includes(m.method) ? m.method : null; }
+    else if (d.method && M.METHOD_PRESETS[d.method]) { m.method = d.method; m.family = M.methodFamily(d.method); }
+    renderModal(); document.querySelector(`#modal [data-${d.family ? "family" : "method"}="${d.family || d.method}"]`)?.focus({ preventScroll: true });
+  }
+  function onboardDone() {
+    const m = app.modal; if (!m || !M.METHOD_PRESETS[m.method]) return;
+    const st = app.personal;
+    markSeen(); app.modal = null; app.methodFamily = null; app.tab = "today";
+    try { commit({ ...st, settings: M.applyPreset(st.settings, m.method) }); } catch (err) { app.modal = m; toast(err.message); render(); renderModal(); return; }
+    renderModal(); window.scrollTo(0, 0);
+  }
+  const onboardBody = m => `<div class="onboard">
+      <div class="ob-h"><span class="ob-ic">${I("scale", 22)}</span><h2 id="m-title" tabindex="-1" autofocus>המנהג שלי</h2>
+        <p>לבחור לפי ההנחיה שקיבלת. לפי המנהג מעיין קובעת את כל החישובים, ואפשר לשנות אותו בכל עת בהגדרות.</p></div>
+      ${methodChooser({ method: m.method || "" }, "onboard", m.family)}
+      <div class="stack-s"><button class="btn full" data-act="onboard-done"${M.METHOD_PRESETS[m.method] ? "" : " disabled"}>המשך${I("left", 18)}</button>
+      <button class="link ob-back" data-act="onboard-back">${I("right", 15)}חזרה</button></div>
+      <p class="fine">יש הוראה אחרת מהרב? בוחרים את הקרוב ביותר, ואחר כך משנים בהגדרות, תחת ״התאמה אישית לפי הוראת הרב״.</p></div>`;
+  /** יומן קיים עם ״התאמה אישית״ (מגרסה קודמת): הצעה עדינה לבחור מנהג, פעם אחת */
+  const methodCardDue = st => app.mode === "personal" && st.settings.methodChosen && st.settings.method === "custom" && !storage.get(METHODCARD_KEY);
+  const dismissMethodCard = () => storage.set(METHODCARD_KEY, "1");
+  const methodCard = st => !methodCardDue(st) ? "" : `<section class="card nudge" aria-labelledby="mcard-h"><div class="card-h">${I("scale")}<div><h3 id="mcard-h">בחרי את המנהג שלך</h3><p>היומן מחושב עכשיו לפי ״התאמה אישית״</p></div><button class="icon-btn" data-act="method-card-x" aria-label="סגירה">${I("x", 18)}</button></div>
+      <p>אפשר לבחור מנהג מוכן (ספרדי, אשכנזי או חב״ד), או להשאיר את ההגדרות שלך כמו שהן.</p>
+      <div class="row-btns"><button class="btn sm" data-act="method-card-go">${I("sliders", 16)}בחירת מנהג</button><button class="btn ghost sm" data-act="method-card-x">להשאיר כך</button></div></section>`;
   /** מתחת לבחירה: רק כשלא נבחרה שיטה, או כשההגדרות הותאמו אישית */
   function methodNotes(s) {
-    if (!M.METHOD_PRESETS[s.method]) return `<p class="fine">לא נבחרה שיטה: כל ההגדרות נקבעות ידנית, תחת ״התאמה אישית לפי הוראת הרב״.</p>`;
+    if (!M.METHOD_PRESETS[s.method]) return `<p class="fine">לא נבחר מנהג מוכן: כל ההגדרות נקבעות ידנית, תחת ״התאמה אישית לפי הוראת הרב״.</p>`;
     return M.presetDiff(s).length ? `<p class="fine">הותאם אישית. בחירה מחדש של השיטה מחזירה את ערכיה.</p>` : "";
   }
   const sel = (name, label, s, opts) => `<label class="field" for="s-${name}">${label}<select id="s-${name}" name="${name}">${opts.map(([v, t]) => `<option value="${v}"${s[name] === v ? " selected" : ""}>${t}</option>`).join("")}</select></label>`;
@@ -4323,7 +4469,7 @@ if (typeof module !== "undefined") module.exports = MaayanWidget;
         <div class="pair"><label class="field" for="t-from">מתאריך<input id="t-from" name="from" type="date" required min="2000-01-01" max="2100-12-31"></label><label class="field" for="t-to">עד תאריך<input id="t-to" name="to" type="date" required min="2000-01-01" max="2100-12-31"></label></div>
         <button class="btn ghost full" type="submit">${I("plus", 17)}הוספת נסיעה</button></form>
         <p class="fine">נסיעה מעבר לקו התאריך מחייבת בירור אישי.</p></section>
-      <section class="card"><div class="card-h">${I("info")}<div><h3>שפה</h3></div></div>${langSwitch()}</section>
+      <section class="card"><div class="card-h">${I("globe")}<div><h3>שפה</h3></div></div>${langSwitch()}</section>
       <section class="card"><div class="card-h">${I("shield")}<div><h3>פרטיות ונתונים</h3><p>שום מידע לא יוצא מהמכשיר</p></div></div>
         ${lockSettings()}
         <a class="action" href="${PRIVACY_URL}" target="_blank" rel="noopener">${I("lock", 19)}<span><strong>מדיניות פרטיות</strong><small>מה נשמר, איפה, ומה לא נאסף</small></span>${I("out", 15)}</a>
@@ -4332,7 +4478,7 @@ if (typeof module !== "undefined") module.exports = MaayanWidget;
         ${app.mode === "personal" ? `<button class="action danger" data-act="wipe">${I("x", 19)}<span><strong>מחיקת כל הנתונים שלי</strong><small>יומן, הגדרות, מקומות ותזכורות — מהמכשיר הזה, לצמיתות</small></span></button>` : ""}</section>
       <section class="card"><div class="card-h">${I("scale")}<div><h3>לבודקים הלכתיים</h3><p>תרחישים מוכנים, בדיקות אוטומטיות וכללי החישוב</p></div></div>
         <button class="btn ghost full" data-go="review">${I("flask", 17)}מסך הבודקים</button></section>
-      <section class="card about"><div class="card-h">${I("spring")}<div><h3>על מעיין</h3><p>גרסה ${APP_VERSION} · מנוע ${M.ENGINE_VERSION}</p></div></div>
+      <section class="card about"><div class="card-h">${I("spring")}<div><h3>על מעיין</h3><p>גרסה \u2066${APP_VERSION}\u2069 · מנוע \u2066${M.ENGINE_VERSION}\u2069</p></div></div>
         <p>האפליקציה חינמית ופועלת כולה בטלפון, בלי חשבון ובלי שרת. שום מידע לא נשלח לאף אחד.</p>
         ${NATIVE ? "" : `<p>להתקנה: בתפריט הדפדפן (⋮) בוחרים ״הוספה למסך הבית״.</p>${/Android/i.test(navigator.userAgent) ? `<a class="link" href="https://github.com/nrt613/maayan/releases/latest/download/maayan.apk" target="_blank" rel="noopener">${I("download", 15)}אפליקציית אנדרואיד עם התראות</a>` : ""}`}</section>
     </aside></div>`;
@@ -4343,7 +4489,7 @@ if (typeof module !== "undefined") module.exports = MaayanWidget;
     const res = app.testResults, passed = res && res.filter(t => t.ok).length;
     const groups = res ? [...new Set(res.map(t => t.group))] : [];
     return `<section class="review-hero"><div>
-        <span class="chip-light">גרסת בדיקה ${APP_VERSION}</span><h2>הנחיות לבודקים</h2>
+        <span class="chip-light">גרסת בדיקה \u2066${APP_VERSION}\u2069</span><h2>הנחיות לבודקים</h2>
         <p>תודה על הבדיקה. המטרה היא לוודא שכל כלל מחושב כמו שצריך לפי השיטה שנבחרה, ושהמערכת לא מכריעה במקום שבו צריך לשאול.</p>
         <ol class="steps"><li>פותחים תרחיש מוכן, רואים מה הוזן ומה חושב, ומשווים להלכה.</li><li>אפשר לפתוח תרחיש ביומן המלא, לשנות רישומים והגדרות ולראות את החישוב משתנה.</li><li>מעתיקים דוח ושולחים למפתח עם ההערות.</li></ol>
       </div></section>
@@ -4387,7 +4533,7 @@ if (typeof module !== "undefined") module.exports = MaayanWidget;
     const d = M.SETTING_DEFAULTS, keys = ["method", "wait", "haflagah", "beinonit", "day31", "orZarua", "carryMonthly", "carryLongIntervals", "missingMonthly", "beinHashmashot", "hefsekTwilight", "nightfall"];
     const changed = keys.filter(k => s[k] !== d[k]);
     if (!changed.length) return `<p class="fine">הגדרות ברירת המחדל: חמישה ימים, הפלגה בימים, עונה בינונית באותה עונה.</p>`;
-    return `<p class="fine">הגדרות התרחיש: ${changed.map(k => esc(M.settingsSummary(s).find(x => x.startsWith({ method: "שיטה", wait: "המתנה", haflagah: "הפלגה", beinonit: "עונה בינונית", day31: "יום 31", orZarua: "אור זרוע", carryMonthly: "שימור עונת", carryLongIntervals: "שימור הפלגות", missingMonthly: "יום ל׳", beinHashmashot: "ראייה בין השמשות", hefsekTwilight: "הפסק אחרי השקיעה", nightfall: "צאת הכוכבים" }[k])))).join(" · ")}</p>`;
+    return `<p class="fine">הגדרות התרחיש: ${changed.map(k => esc(M.settingsSummary(s).find(x => x.startsWith({ method: "המנהג שלי", wait: "המתנה", haflagah: "הפלגה", beinonit: "עונה בינונית", day31: "יום 31", orZarua: "אור זרוע", carryMonthly: "שימור עונת", carryLongIntervals: "שימור הפלגות", missingMonthly: "יום ל׳", beinHashmashot: "ראייה בין השמשות", hefsekTwilight: "הפסק אחרי השקיעה", nightfall: "צאת הכוכבים" }[k])))).join(" · ")}</p>`;
   }
   const TERMS = [
     { t: "מה זה מעיין", p: ["מעיין היא כלי עזר אישי לרישום ולתכנון בענייני טהרת המשפחה. היא אינה פוסקת הלכה, אינה מורה הוראה ואינה ייעוץ רפואי.", "האפליקציה ניתנת בחינם, לשימוש אישי."] },
@@ -4405,10 +4551,10 @@ if (typeof module !== "undefined") module.exports = MaayanWidget;
       "ארבעה ימים ממועד היחסים: נספרים ממועד היחסים שנרשם כבסיס, ולא מהראייה. בלי בסיס רשום אין חישוב, ומופיעה נקודה לבירור.",
       "ראייה סמוך לשקיעה או בין השמשות: ההמתנה נספרת מהיום העברי המאוחר, לחומרא.", "חידוש ספירה בתוך תקופת הנידה נשען על תחילת הנידה הקודמת ולא מוסיף חמישה ימים חדשים."], src: [...S.wait, "thbWait"] },
     { t: "ראייה בין השמשות", p: ["ראייה בין השקיעה לצאת הכוכבים, או בשלוש הדקות שסביב השקיעה והזריחה: לפי ברירת המחדל חוששים לשתי העונות — העונה שהסתיימה והעונה שהתחילה — בעונה הבינונית, בעונת החודש ובהפלגה (ש״ך יו״ד קפד, ס״ק יג–יד, בשם הב״ח; כך נוהגים למעשה). הרישום מסומן גם לבירור.", "אפשר לבחור בהגדרות להשעות את החישוב עד בירור, כמו בגרסאות קודמות.", "סוף בין השמשות נקבע לפי הגדרת צאת הכוכבים. לפי 13.5 דקות זמניות (הגאונים, הרב עובדיה יוסף) ראייה מאוחרת יותר היא לילה ודאי."], src: S.bhs },
-    { t: "שיטות מוכנות", p: ["בוחרים בשני שלבים: מה המנהג (ספרדי, אשכנזי או חב״ד), ואז לפי מי — לספרדים הרב עובדיה יוסף או בן איש חי, לאשכנזים עיקר הדין או כרתי ופלתי. השיטה קובעת את כל הגדרות החישוב בבת אחת, ואפשר לשנות כל הגדרה אחר כך תחת ״התאמה אישית לפי הוראת הרב״.", "השיטות אינן תחליף להוראת רב."], src: [] },
+    { t: "המנהג שלי", p: ["ביומן חדש בוחרים מנהג בכניסה הראשונה, לפני שהיומן מחשב משהו. בוחרים בשני שלבים: מה המנהג (ספרדי, אשכנזי או חב״ד), ואז לפי מי — לספרדים הרב עובדיה יוסף או בן איש חי, לאשכנזים אשכנזי רגיל או יממה שלמה (כרתי ופלתי). המנהג קובע את כל הגדרות החישוב בבת אחת, ואפשר לשנות כל הגדרה אחר כך תחת ״התאמה אישית לפי הוראת הרב״.", "השיטות אינן תחליף להוראת רב."], src: [] },
     { t: "הפסק טהרה ושבעה נקיים", p: ["הספירה מתחילה רק מהפסק שנרשם כנקי, לפני השקיעה ולא בזמן מסופק, ולא לפני סוף ההמתנה. הפסק מוקדם מתקבל רק עם הוראה אישית מתועדת.", "בבחירת שיטת הרב עובדיה יוסף: הפסק עד 13.5 דקות זמניות אחרי השקיעה מתקבל בדיעבד ונספר ליום שהסתיים, ומסומן לבירור. לכתחילה עושים הפסק לפני השקיעה.", "יום א׳ הוא היום העברי שאחרי ההפסק. ליל הטבילה המתוכנן הוא במוצאי היום השביעי, וזה נשאר תכנון בלבד.", "חוסר רישום בדיקה באחד מימי הספירה (לפי הגדרת הבדיקות) מסומן לבירור כשהיום מסתיים בשקיעה, ואינו פוסל או מאשר. בוקר וערב נקבעים לפי חצות היום. בדיקה שנרשמה כלא נקייה אינה מאפסת אוטומטית."], src: [...S.hefsek, ...S.clean, "thbHefsek", ...S.mikvah] },
-    { t: "עונת החודש", p: ["אותו יום בחודש העברי הבא, באותה עונה.", "ראייה בל׳ כשבחודש הבא אין ל׳: ברירת המחדל היא א׳ בחודש שאחרי החודש החסר, לחומרא, ומופיע ״יש לשאול רב״. אפשר לבחור דילוג.", "ראתה פעמיים באותו חודש: כל החישובים נעשים מהראייה האחרונה, ובנוסף נשמרת עונת החודש של הראייה הקודמת אם עוד לא הגיעה (רמ״א יו״ד קפט, יג; שו״ע הרב שם, ס״ק מד).", "בשנה מעוברת אדר א׳ עובר לאדר ב׳.", "שימור עונת חודש שחלה בזמן דימום הוא אפשרות נפרדת שדורשת תיעוד מלא."], src: [...S.monthly, "missing30"] },
-    { t: "עונה בינונית", p: ["יום 30 בספירה כוללנית: יום הראייה הוא יום 1, כלומר 29 ימים אחריו, באותה עונה.", "שתי העונות, יום 31 ואור זרוע הם שלוש הגדרות נפרדות. השיטות המוכנות קובעות אותן לפי המנהג, ואפשר לשנות.", "מי ששומרת ימים 30 ו-31 שומרת את עונת אור זרוע ליום 30 בלבד."], src: [...S.average, "orZarua31"] },
+    { t: "עונת החודש", p: ["אותו יום בחודש העברי הבא, באותה עונה.", "ראייה בל׳ כשבחודש הבא אין ל׳: ברירת המחדל היא א׳ בחודש שאחרי החודש החסר, לחומרא, ומופיע ״יש לשאול רב״. אפשר לבחור דילוג.", "ראייה בל׳ כשהחודש הבא מלא: עונת החודש בל׳ שלו בלבד.", "ראתה פעמיים באותו חודש: כל החישובים נעשים מהראייה האחרונה, ובנוסף נשמרת עונת החודש של הראייה הקודמת אם עוד לא הגיעה (רמ״א יו״ד קפט, יג; שו״ע הרב שם, ס״ק מד).", "בשנה מעוברת אדר א׳ עובר לאדר ב׳.", "שימור עונת חודש שחלה בזמן דימום הוא אפשרות נפרדת שדורשת תיעוד מלא."], src: [...S.monthly, "missing30"] },
+    { t: "עונה בינונית", p: ["יום 30 בספירה כוללנית: יום הראייה הוא יום 1, כלומר 29 ימים אחריו, באותה עונה.", "שתי העונות, יום 31 ואור זרוע הם שלוש הגדרות נפרדות. השיטות המוכנות קובעות אותן לפי המנהג, ואפשר לשנות.", "מי ששומרת ימים 30 ו-31 שומרת את עונת אור זרוע ליום 30 בלבד.", "אור זרוע לעונה הבינונית הוא העונה שלפני עונת הראייה. כשהעונה הבינונית יממה שלמה והראייה ביום, העונה הזו (ליל יום 30) כבר בתוך היממה, ולכן אין אור זרוע ביום 29. אור זרוע לעונת החודש ולהפלגה לא משתנה."], src: [...S.average, "orZarua31"] },
     { t: "הפלגה", p: ["בשיטת הימים: ההפרש בין התאריכים העבריים של שתי הראיות ועוד 1. אותו מרווח נספר מהראייה האחרונה, באותה עונה.", "בשיטת חב״ד: מספר העונות מההפסק הקודם ועד הראייה הבאה. המועד החדש נספר מההפסק הנוכחי. מספר זוגי נופל ביום ואי-זוגי בלילה. הפלגה ארוכה נשמרת כשמגיעה קצרה ממנה.", "ראייה מסופקת באמצע אינה נמחקת כדי לייצר מרווח ארוך."], src: [...S.interval, ...S.chabad] },
     { t: "וסת קבוע", p: ["שלוש ראיות רצופות באותו יום בחודש ובאותה עונה, או שלוש הפלגות שוות בארבע ראיות, מסומנות כדפוס אפשרי.", "המערכת אינה קובעת, עוקרת או משעה וסת קבוע בעצמה."], src: S.fixed },
     { t: "במה המערכת לא מכריעה", p: ["היריון, אחרי לידה, הנקה, טיפול הורמונלי, וסתות לא רגילים (דילוג, סירוג), מראות וכתמים, בדיקות שהוחסרו ומעבר קו התאריך.", "במצבים האלה החישוב הרגיל מושעה ואפשר לרשום עונות ידניות לפי הוראה. אין במערכת זיהוי מראות.", "בכמה מצבים שיש בהם שאלה פתוחה מופיע ״יש לשאול רב״, עם מה שמעיין עושה בינתיים."], src: [] },
@@ -4471,6 +4617,8 @@ if (typeof module !== "undefined") module.exports = MaayanWidget;
     root.innerHTML = shell(); app.enter = false; L.dom(root);
     if (focusId) { const el = document.getElementById(focusId); if (el) { el.focus(); try { if (selStart != null) el.setSelectionRange(selStart, selStart); } catch { /* */ } } }
     window.scrollTo(0, scroll);
+    // יומן חדש בלי מנהג: תמיד חוזרים לבחירת המנהג (גם אחרי ״ליומן שלי״ מהיומן לדוגמה, או אחרי מחיקת כל הנתונים)
+    if (!app.modal && needsMethod() && app.tab !== "review") app.modal = storage.get(SEEN_KEY) ? onboardModal() : { kind: "welcome" };
     renderModal(); renderToast();
   }
   function renderToast() {
@@ -4516,8 +4664,8 @@ if (typeof module !== "undefined") module.exports = MaayanWidget;
         <label class="field" for="e-city">מקום<select id="e-city" name="cityId">${placeOptions(state(), f.cityId)}</select></label>
         ${f.type === "manual" ? `<label class="field" for="e-onah">עונה<select id="e-onah" name="onah" required><option value="" ${f.onah ? "" : "selected"} disabled>בחירה</option><option value="day"${f.onah === "day" ? " selected" : ""}>יום · מהזריחה עד השקיעה</option><option value="night"${f.onah === "night" ? " selected" : ""}>לילה · מהשקיעה הקודמת עד הזריחה</option></select></label>` : ""}
         ${needsResult ? `<label class="field" for="e-result">תוצאה<select id="e-result" name="result"><option value="clear"${f.result === "clear" ? " selected" : ""}>נקייה</option><option value="uncertain"${f.result === "uncertain" ? " selected" : ""}>ממתינה לבירור</option><option value="bleeding"${f.result === "bleeding" ? " selected" : ""}>לא נקייה</option></select></label>` : ""}
-        ${f.type === "flow" ? `<label class="toggle wake" for="e-wake"><span><strong>נמצא בבדיקה/בהתעוררות — לא ידוע מתי התחיל</strong><small>לא חובה. מעיין תחשוש לשתי העונות של היום ותסמן ״יש לשאול רב״.</small></span><input id="e-wake" name="foundOnWaking" type="checkbox"${f.foundOnWaking ? " checked" : ""}></label>` : ""}
-        <label class="field" for="e-note">הערה <span class="opt">לא חובה</span><textarea id="e-note" name="note" rows="2" maxlength="2000">${esc(f.note)}</textarea></label>
+        ${f.type === "flow" ? `<label class="toggle wake" for="e-wake"><span><strong>לא ידוע מתי התחיל (מצאתי בקימה או בבדיקה)</strong><small>לא חובה. מעיין תחשוש לשתי העונות של היום ותסמן ״יש לשאול רב״.</small></span><input id="e-wake" name="foundOnWaking" type="checkbox"${f.foundOnWaking ? " checked" : ""}></label>` : ""}
+        <label class="field" for="e-note"><span>הערה <span class="opt">לא חובה</span></span><textarea id="e-note" name="note" rows="2" maxlength="2000">${esc(f.note)}</textarea></label>
         <details class="adv"${f.authorityNote ? " open" : ""}><summary>הוראה אישית שקיבלת${I("left", 14)}</summary><label class="field" for="e-auth">תיעוד ההוראה<textarea id="e-auth" name="authorityNote" rows="2" maxlength="1000" placeholder="מי הורה, מתי ומה נאמר">${esc(f.authorityNote)}</textarea></label></details>
         ${HELP[f.type] ? `<p class="hint">${I("info", 16)}${HELP[f.type]}</p>` : ""}
         ${m.error ? `<p class="err" role="alert">${esc(m.error)}</p>` : ""}
@@ -4539,16 +4687,16 @@ if (typeof module !== "undefined") module.exports = MaayanWidget;
         <div class="m-actions"><button class="btn" data-act="close-modal">${I("check", 17)}סיום</button></div>`;
     }
     if (m.kind === "text") return `<div class="m-h"><h2 id="m-title">${esc(m.title)}</h2>${close}</div><p>${esc(m.intro)}</p>
-      <textarea id="m-text" class="mono" rows="9" readonly>${esc(m.text)}</textarea>
+      <textarea id="m-text" class="${/[\u0590-\u05FF]/.test(String(m.text).slice(0, 400)) ? "plain-text" : "mono"}" dir="auto" rows="9" readonly>${esc(m.text)}</textarea>
       <div class="m-actions"><button class="btn" data-act="copy-text">${I("copy", 17)}העתקה</button>${m.file ? `<button class="btn ghost" data-act="dl-text">${I("download", 17)}שמירה כקובץ</button>` : ""}</div>
       ${m.file ? `<p class="fine">אם השמירה כקובץ לא עובדת בדפדפן הזה, מעתיקים ושומרים בפתקים או שולחים לעצמך.</p>` : ""}`;
     if (m.kind === "cycle") return `<div class="m-h"><h2 id="m-title">הזנת מחזור קודם</h2>${close}</div>
       <form id="cycle-form" class="stack-s"><p class="fine">מזינים כל מחזור בנפרד, בכל סדר. החישוב מסדר הכול לפי התאריכים.${m.saved ? ` נשמרו ${m.saved} מחזורים.` : ""}</p>
         <div class="pair"><label class="field" for="c-flow">תחילת הווסת<input id="c-flow" type="date" required min="2000-01-01" max="2100-12-31"></label>
         <label class="field" for="c-flow-t">שעה<input id="c-flow-t" type="time" required value="10:00"><small>אחרי השקיעה = היום העברי הבא</small></label></div>
-        <div class="pair"><label class="field" for="c-hef">הפסק טהרה <span class="opt">אם ידוע</span><input id="c-hef" type="date" min="2000-01-01" max="2100-12-31"></label>
+        <div class="pair"><label class="field" for="c-hef"><span>הפסק טהרה <span class="opt">אם ידוע</span></span><input id="c-hef" type="date" min="2000-01-01" max="2100-12-31"></label>
         <label class="field" for="c-hef-t">שעה<input id="c-hef-t" type="time" value="16:00"></label></div>
-        <label class="field" for="c-mik">טבילה <span class="opt">תאריך הערב, אם ידוע</span><input id="c-mik" type="date" min="2000-01-01" max="2100-12-31"></label>
+        <label class="field" for="c-mik"><span>טבילה <span class="opt">תאריך הערב, אם ידוע</span></span><input id="c-mik" type="date" min="2000-01-01" max="2100-12-31"></label>
         <label class="field" for="c-city">מקום<select id="c-city">${placeOptions(state(), state().settings.cityId)}</select></label>
         ${m.error ? `<p class="err" role="alert">${esc(m.error)}</p>` : ""}
         <div class="m-actions"><button class="btn" type="submit">${I("check", 17)}שמירת המחזור</button><button type="button" class="btn ghost" data-act="close-modal">${m.saved ? "סיום" : "ביטול"}</button></div></form>`;
@@ -4557,7 +4705,7 @@ if (typeof module !== "undefined") module.exports = MaayanWidget;
       <label class="field" for="b-pass">סיסמת גיבוי<input id="b-pass" type="password" minlength="10" required autocomplete="new-password"><small>לפחות 10 תווים. לשמור אותה בנפרד.</small></label>
       ${m.error ? `<p class="err" role="alert">${esc(m.error)}</p>` : ""}<div class="m-actions"><button class="btn" type="submit">${I("lock", 17)}יצירת גיבוי</button></div></form>`;
     if (m.kind === "restore") return `<div class="m-h"><h2 id="m-title">שחזור מגיבוי</h2>${close}</div>
-      <form id="restore-form" class="stack-s"><label class="field" for="r-file">קובץ גיבוי<input id="r-file" type="file"${NATIVE && CAP.getPlatform?.() === "ios" ? "" : ' accept=".may,.json,.txt,application/json,text/plain"'}></label>
+      <form id="restore-form" class="stack-s"><div class="field"><span id="r-file-l">קובץ גיבוי</span><input id="r-file" class="file-in" type="file" aria-labelledby="r-file-l"${NATIVE && CAP.getPlatform?.() === "ios" ? "" : ' accept=".may,.json,.txt,application/json,text/plain"'}><label class="file-pick" for="r-file">${I("upload", 18)}<span id="r-file-name">בחירת קובץ</span></label></div>
       <label class="field" for="r-text">או הדבקת טקסט הגיבוי<textarea id="r-text" class="mono" rows="3" placeholder='{"format":"maayan-encrypted-v1",…}'>${esc(m.text || "")}</textarea></label>
       <label class="field" for="r-pass">סיסמת הגיבוי<input id="r-pass" type="password" required autocomplete="off"></label>
       ${m.error ? `<p class="err" role="alert">${esc(m.error)}</p>` : ""}<div class="m-actions"><button class="btn" type="submit">${I("upload", 17)}פתיחת הגיבוי</button></div></form>`;
@@ -4585,10 +4733,11 @@ if (typeof module !== "undefined") module.exports = MaayanWidget;
         <label class="field" for="pin-cur">הקוד הנוכחי<input id="pin-cur" type="password" inputmode="numeric" pattern="[0-9]{4,6}" minlength="4" maxlength="6" required autocomplete="off" dir="ltr" class="pin-in" autofocus></label>
         ${m.error ? `<p class="err" role="alert">${esc(m.error)}</p>` : ""}
         <div class="m-actions"><button class="btn" type="submit">כיבוי הנעילה</button><button type="button" class="btn ghost" data-act="close-modal">ביטול</button></div></form>`;
+    if (m.kind === "onboard") return onboardBody(m);
     if (m.kind === "welcome") return `<div class="welcome">${langSwitch()}<div class="mark big"><img src="${LOGO_IMG}" alt=""></div><h2 id="m-title" tabindex="-1" autofocus>ברוכה הבאה למעיין</h2>
       <p>יומן אישי לטהרת המשפחה: רישום, חישוב עונות הפרישה, שבעה נקיים ותזכורות.</p>
       <ul class="promises"><li>${I("lock", 18)}<span><strong>פרטי לגמרי.</strong> הכול נשמר רק בטלפון הזה, בלי חשבון ובלי שרת.</span></li>
-      <li>${I("scale", 18)}<span><strong>שקוף.</strong> לכל מועד מוצג הכלל, ואת שיטת החישוב בוחרים לפי ההנחיה שקיבלת.</span></li>
+      <li>${I("scale", 18)}<span><strong>שקוף.</strong> לכל מועד מוצג הכלל, ואת המנהג בוחרים לפי ההנחיה שקיבלת.</span></li>
       <li>${I("help", 18)}<span><strong>לא פוסק.</strong> זו גרסת בדיקה שטרם קיבלה אישור הלכתי. במקום של ספק המערכת מסמנת לבירור.</span></li></ul>
       <div class="stack-s"><button class="btn full" data-act="start-personal">${I("plus", 18)}התחלת יומן אישי</button>
       <button class="btn ghost full" data-act="start-demo">${I("flask", 18)}צפייה ביומן לדוגמה</button>
@@ -4653,6 +4802,7 @@ if (typeof module !== "undefined") module.exports = MaayanWidget;
       return;
     }
     const mf = e.target.closest("[data-family],[data-method]");
+    if (mf && app.modal?.kind === "onboard") { e.preventDefault(); return onboardPick(mf.dataset); }
     if (mf) { e.preventDefault(); return mf.dataset.family ? chooseFamily(mf.dataset.family) : chooseMethod(mf.dataset.method); }
     const lb = e.target.closest("[data-lang]");
     if (lb) { applyLang(lb.dataset.lang, true); render(); syncNotifications(); return; }
@@ -4708,12 +4858,19 @@ if (typeof module !== "undefined") module.exports = MaayanWidget;
       case "lock-now": return lockNow();
       case "lock-change": app.modal = { kind: "pin-set", change: true, error: "" }; return renderModal();
       case "nudge-x": saveBackupInfo({ snooze: new Date().toISOString() }); toast("נזכיר שוב בהמשך. הגיבוי תמיד זמין בהגדרות."); return render();
-      case "close-modal": if (app.modal?.kind === "terms" && app.modal.back) { app.modal = { kind: "welcome" }; return renderModal(); } if (app.modal?.kind === "welcome") markSeen(); app.modal = null; return renderModal();
+      case "close-modal": if (app.modal?.kind === "terms" && app.modal.back) { app.modal = { kind: "welcome" }; return renderModal(); }
+        if (app.modal?.kind === "onboard") return; // בחירת המנהג אינה נסגרת בלחיצה בצד
+        if (app.modal?.kind === "welcome") { markSeen(); if (needsMethod()) { app.modal = onboardModal(); return renderModal(); } }
+        app.modal = null; return renderModal();
+      case "onboard-done": return onboardDone();
+      case "onboard-back": app.modal = { kind: "welcome" }; return renderModal();
+      case "method-card-x": dismissMethodCard(); return render();
+      case "method-card-go": dismissMethodCard(); app.keep.delete("custom"); return go("prefs");
       case "toast-x": app.toast = ""; app.toastAction = null; return renderToast();
       case "toast-undo": { const a = app.toastAction; app.toast = ""; app.toastAction = null; renderToast(); try { a?.run(); } catch (err) { toast(err.message); } return; }
       case "demo": Object.assign(app, { mode: "demo", sandbox: M.demoState(realNow()), cal: { cursor: null, mode: "civil", selected: null } }); return go("today");
       case "personal": Object.assign(app, { mode: "personal", sandbox: null, scenario: null, cal: { cursor: null, mode: "civil", selected: null } }); return go("today");
-      case "start-personal": markSeen(); app.modal = null; return go("today");
+      case "start-personal": markSeen(); app.modal = needsMethod() ? onboardModal() : null; renderModal(); return go("today");
       case "start-demo": markSeen(); app.modal = null; Object.assign(app, { mode: "demo", sandbox: M.demoState(realNow()) }); return go("today");
       case "start-review": markSeen(); app.modal = null; return go("review");
       case "delete": app.modal.form = readEventForm(); app.modal.confirmDelete = true; return renderModal();
@@ -4763,7 +4920,7 @@ if (typeof module !== "undefined") module.exports = MaayanWidget;
       bioAuth().then(ok => { if (ok) { saveLockCfg({ bio: true }); toast("הפתיחה בטביעת אצבע או בזיהוי פנים הופעלה"); } else toast("הזיהוי לא הצליח. הנעילה נשארת בקוד בלבד."); render(); });
     }
     else if (t.id === "bk-remind") { saveBackupInfo({ remind: t.value }); toast("נשמר במכשיר"); }
-    else if (t.id === "r-file") { const f = t.files?.[0]; if (f && f.size < 4e6) f.text().then(x => { $("#r-text").value = x; }); }
+    else if (t.id === "r-file") { const f = t.files?.[0], nm = $("#r-file-name"); if (nm && f) { nm.textContent = f.name; nm.dir = "auto"; } if (f && f.size < 4e6) f.text().then(x => { $("#r-text").value = x; }); }
   });
   /* לחיצה ארוכה על יום בלוח (או תפריט הקשר) פותחת את תפריט הרישום המהיר לאותו יום */
   {
@@ -4852,7 +5009,13 @@ if (typeof module !== "undefined") module.exports = MaayanWidget;
       else if (f.length && !e.shiftKey && document.activeElement === f[f.length - 1]) { e.preventDefault(); f[0].focus(); }
     }
   });
-  document.addEventListener("keydown", e => { if (e.key === "Escape" && app.modal) { if (app.modal.kind === "welcome") markSeen(); app.modal = null; renderModal(); } });
+  document.addEventListener("keydown", e => { if (e.key === "Escape" && app.modal) closeTop(); });
+  /** Escape ובאנדרואיד ״חזרה״: מבחירת המנהג חוזרים לברוכה הבאה, ומברוכה הבאה ליומן רק אם המנהג כבר נבחר */
+  function closeTop() {
+    if (app.modal.kind === "onboard") { app.modal = { kind: "welcome" }; return renderModal(); }
+    if (app.modal.kind === "welcome") { markSeen(); if (needsMethod()) return false; }
+    app.modal = null; renderModal();
+  }
   /** ההגדרות נשמרות מיד בכל שינוי, בלי כפתור שמירה */
   function saveSettings(f) {
     const st = state(), fd = new FormData(f), s = { ...st.settings };
@@ -4868,9 +5031,9 @@ if (typeof module !== "undefined") module.exports = MaayanWidget;
   function markSeen() { storage.set(SEEN_KEY, "1"); }
   /** מחיקת כל הנתונים מהמכשיר (דרישת חנויות האפליקציות): יומן, הגדרות, שפה, ותזכורות מתוזמנות */
   async function wipeAll() {
-    for (const k of [STORE_KEY, SEEN_KEY, LANG_KEY, LOCK_KEY, LOCKFAIL_KEY, BACKUP_KEY]) { try { localStorage.removeItem(k); } catch { /* */ } }
+    for (const k of [STORE_KEY, SEEN_KEY, LANG_KEY, LOCK_KEY, LOCKFAIL_KEY, BACKUP_KEY, METHODCARD_KEY]) { try { localStorage.removeItem(k); } catch { /* */ } }
     Object.assign(app, { locked: false, covered: false, lock: null, lockedModal: null });
-    Object.assign(app, { mode: "personal", personal: M.emptyState(), sandbox: null, scenario: null, blockSave: false, loadWarning: "", cal: { cursor: null, mode: "civil", selected: null }, modal: { kind: "welcome" } });
+    Object.assign(app, { mode: "personal", personal: M.newDiary(), sandbox: null, scenario: null, blockSave: false, loadWarning: "", cal: { cursor: null, mode: "civil", selected: null }, modal: { kind: "welcome" } });
     syncSecure();
     if (window.MaayanWidget) MaayanWidget.clear();
     toast("כל הנתונים נמחקו מהמכשיר");
@@ -4989,7 +5152,7 @@ if (typeof module !== "undefined") module.exports = MaayanWidget;
   if (lockCfg()) { app.locked = true; app.lock = { entry: "", view: "pin", msg: "", bad: false, busy: false }; }
   render();
   syncSecure();
-  if (!app.locked && !storage.get(SEEN_KEY) && !app.personal.events.length) { app.modal = { kind: "welcome" }; renderModal(); }
+  firstRun();
   if (BIO()) BIO().checkBiometry().then(r => { app.bio = r; if (app.locked && lockCfg()?.bio && r.isAvailable) tryBio(); else if (!app.locked && app.tab === "prefs" && !app.modal) render(); }).catch(() => { app.bio = null; });
   setInterval(tick, 30000);
   /** יציאה לרקע: נעילה מיד, או כיסוי המסך (בלי נתונים) עד שיעבור זמן הנעילה שנבחר */
@@ -5023,7 +5186,7 @@ if (typeof module !== "undefined") module.exports = MaayanWidget;
   });
   if (NATIVE && PL.App) PL.App.addListener("backButton", () => {
     if (app.locked || app.covered) { if (app.lock && app.lock.view !== "pin") { app.lock.view = "pin"; return renderLock(); } return PL.App.minimizeApp(); }
-    if (app.modal) { if (app.modal.kind === "welcome") markSeen(); app.modal = null; renderModal(); }
+    if (app.modal) { if (closeTop() === false) PL.App.minimizeApp(); }
     else if (app.tab === "review") go("prefs");
     else if (app.tab !== "today") go("today");
     else PL.App.minimizeApp();

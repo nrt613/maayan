@@ -227,7 +227,9 @@ const Maayan = (() => {
     cityId: "netanya", wait: "five", haflagah: "days", beinonit: "same", day31: false, orZarua: false, carryMonthly: false,
     carryLongIntervals: false, missingMonthly: "first-next-month", bedikot: "twice", nightfall: "8.5", special: "regular", methodNote: "",
     method: "custom", beinHashmashot: "both", hefsekTwilight: "before-sunset",
-    neutralReminders: true, reminderMinutes: 30, morningTime: "08:00", remindersEnabled: true, checklist: [],
+    // methodChosen: יומן חדש מתחיל ב-false עד שבוחרים מנהג (newDiary). יומן שנשמר לפני שהשדה נוסף — true, ולא משתנה
+    methodChosen: true,
+    neutralReminders: true, reminderMinutes: 60, morningTime: "08:00", remindersEnabled: true, checklist: [],
   };
   const SETTING_ENUMS = {
     wait: ["five", "four", "four-from-relations"], method: ["custom", "ashkenaz", "ashkenaz-kreiti", "sefard", "sefard-bic", "chabad"], beinHashmashot: ["both", "flag"], hefsekTwilight: ["before-sunset", "ovadia"], haflagah: ["days", "chabad-onot"], beinonit: ["same", "both"], missingMonthly: ["skip", "first-next-month"],
@@ -268,7 +270,7 @@ const Maayan = (() => {
     const known = id => CITIES.some(c => c.id === id) || places.some(c => c.id === id);
     if (!known(s.cityId)) fail("עיר לא מוכרת בהגדרות");
     for (const [k, vals] of Object.entries(SETTING_ENUMS)) if (!vals.includes(s[k])) fail(`ערך לא תקין בהגדרה ${k}`);
-    for (const k of ["day31", "orZarua", "carryMonthly", "carryLongIntervals", "neutralReminders", "remindersEnabled"]) if (typeof s[k] !== "boolean") fail(`ערך לא תקין בהגדרה ${k}`);
+    for (const k of ["day31", "orZarua", "carryMonthly", "carryLongIntervals", "neutralReminders", "remindersEnabled", "methodChosen"]) if (typeof s[k] !== "boolean") fail(`ערך לא תקין בהגדרה ${k}`);
     if (typeof s.methodNote !== "string" || s.methodNote.length > 1000) fail("הערת השיטה ארוכה מדי");
     if (!Number.isInteger(s.reminderMinutes) || s.reminderMinutes < 5 || s.reminderMinutes > 120) fail("דקות התזכורת צריכות להיות בין 5 ל-120");
     if (!TIME_RE.test(s.morningTime)) fail("שעת הבוקר אינה תקינה");
@@ -309,6 +311,8 @@ const Maayan = (() => {
   }
   const safeParse = input => { try { return { success: true, data: parseState(input) }; } catch (e) { return { success: false, error: e }; } };
   const emptyState = () => ({ schemaVersion: 1, settings: { ...SETTING_DEFAULTS, checklist: [] }, events: [], trips: [], places: [] });
+  /** יומן אישי חדש: המנהג עוד לא נבחר, ואין חישוב עד שבוחרים (בכניסה הראשונה) */
+  const newDiary = () => { const s = emptyState(); s.settings.methodChosen = false; return s; };
 
   /* ---------- תאריכים ---------- */
   const fromISO = d => { const [y, m, day] = d.split("-").map(Number); return new Date(y, m - 1, day, 12); };
@@ -472,7 +476,7 @@ const Maayan = (() => {
   }
 
   /* ---------- מנוע ---------- */
-  const ENGINE_VERSION = "0.5.0-review";
+  const ENGINE_VERSION = "0.6.0-review";
   /* ---------- מקורות ----------
    * כל מקור הוא מקום בטקסט הראשוני, לא אתר. ref הוא מקום הטקסט בספריא: הציטוט q נבדק מול הטקסט שם.
    * מקור בלי ref לא נבדק מול לשון הספר (הספר אינו בספריא, או שהמקום המדויק לא אומת) — לבדיקת הרב. */
@@ -567,6 +571,11 @@ const Maayan = (() => {
     // בין השמשות: "both" — לחומרא חוששים לשתי העונות; "flag" — משעים את החישוב ומסמנים לבירור
     const bhs = set.beinHashmashot !== "flag";
     const review = (id, title, detail, eventIds = [], source = []) => { if (!reviews.some(r => r.id === id)) reviews.push({ id, title, detail, eventIds, source }); };
+    // יומן חדש שעוד לא נבחר בו מנהג: אין חישוב בכלל, כדי שלא יחושב בשקט לפי ״התאמה אישית״
+    if (set.methodChosen === false) {
+      review("method-not-chosen", "עוד לא נבחר מנהג", "המועדים יחושבו אחרי שתבחרי את המנהג שלך.");
+      return { plans, reviews, latestFlow: undefined, hefsek: undefined, earliestHefsek: undefined, cleanDay: undefined, phase: "empty", immersionDate: undefined, checks: {}, version: ENGINE_VERSION };
+    }
     /* ״יש לשאול רב״: שאלה פתוחה שהמצב שלה נוצר ביומן. המנוע אינו מכריע; החישוב נשאר לחומרא.
      * לממשק: כותרת ״יש לשאול רב״, משפט אחד שמתאר את המצב (situation) ומשפט אחד על מה שמעיין עושה בינתיים (meanwhile).
      * topic הוא שם השאלה למסמכי הרב, ו-source המקורות שלה — למסמכים ולדוח לרב, לא לתצוגה באפליקציה. */
@@ -722,15 +731,20 @@ const Maayan = (() => {
     const latestHasUncertainty = unresolvedFlows.some(event => couldFollow(event, lastRecorded)) || (!!lastRecorded && ((lastRecorded.s.uncertain && !bhs) || lastRecorded.e.result === "uncertain"));
     if (last && !latestHasUncertainty && state.settings.special === "regular" && !dateline) {
       const lastReadings = readings(last), altOf = (r, i) => i ? `-alt` : "";
-      const seenAverage = new Set();
+      const averages = new Map();
       lastReadings.forEach((r, i) => {
         const onot = state.settings.beinonit === "both" ? ["night", "day"] : [r.onah];
         // אור זרוע ביום 31 אינו נוסף: מי ששומרת ימים 30 ו-31 שומרת את אור זרוע ליום 30 בלבד (מקור ראשוני לא אותר — CITES.orZarua31)
+        // אור זרוע לעונה הבינונית רק לפני עונת הראייה עצמה (לכל שיוך אפשרי שלה), לא לפני ההרחבה ליממה שלמה. ביממה שלמה וראייה ביום
+        // הוא ליל יום 30, שכבר בתוך היממה, ולכן אין אור זרוע ביום 29 (הוכרע: כך כל הלוחות). לעונת החודש ולהפלגה — ללא שינוי.
         for (const day of (state.settings.day31 ? [30, 31] : [30])) for (const onah of onot) {
-          const key = `${r.abs + day - 1}|${onah}`; if (seenAverage.has(key)) continue; seenAverage.add(key);
-          addOnah(r.abs + day - 1, onah, "average", `עונה בינונית · יום ${day}`, i ? altWhy(last) : `ספירה כוללנית: יום הראייה הוא יום 1. יום ${day} הוא ${day - 1} ימים לאחר התאריך העברי שנרשם.`, SOURCES.average, [last.e.id], `average-${last.e.id}-${day}-${onah}${altOf(r, i)}`, day === 30);
+          const key = `${r.abs + day - 1}|${onah}`, own = day === 30 && onah === r.onah, seen = averages.get(key);
+          if (seen) { seen.oz ||= own; continue; }
+          averages.set(key, { abs: r.abs + day - 1, onah, day, i, r, oz: own });
         }
       });
+      for (const { abs, onah, day, i, r, oz } of averages.values())
+        addOnah(abs, onah, "average", `עונה בינונית · יום ${day}`, i ? altWhy(last) : `ספירה כוללנית: יום הראייה הוא יום 1. יום ${day} הוא ${day - 1} ימים לאחר התאריך העברי שנרשם.`, SOURCES.average, [last.e.id], `average-${last.e.id}-${day}-${onah}${altOf(r, i)}`, oz);
       const monthly = f => {
         const h = new HDate(typeof f === "number" ? f : f.s.abs), nextFirst = new HDate(1, h.getMonth(), h.getFullYear()).add(1, "M");
         const monthLength = nextFirst.add(1, "M").abs() - nextFirst.abs();
@@ -742,15 +756,13 @@ const Maayan = (() => {
       if (useAlt(last)) { const t = monthly(last.s.alt.abs); if (t) addOnah(t, last.s.alt.onah, "monthly", "עונת החודש · העונה הסמוכה", altWhy(last), SOURCES.monthly, [last.e.id], `monthly-${last.e.id}-alt`); }
       if (monthlyAbs) addOnah(monthlyAbs, last.s.onah, "monthly", "עונת החודש", "אותו יום בחודש העברי הבא ובאותה עונה. כלל יום ל׳ בחודש חסר נקבע בנפרד בהגדרות.", SOURCES.monthly, [last.e.id], `monthly-${last.e.id}`);
       else review("missing-month-day", "בחודש הבא אין יום מקביל", "לפי הבחירה בהגדרות, בחודש הזה אין עונת חודש.", [last.e.id]);
-      // ראתה בל׳ בחודש (א׳ דראש חודש): מה דין עונת החודש כשהחודש הבא חסר, וכשהוא מלא (ראש חודש שני ימים)
+      // ראתה בל׳ בחודש (א׳ דראש חודש) והחודש הבא חסר: שאלה לרב
       if (new HDate(last.s.abs).getDate() === 30) {
         const h = new HDate(last.s.abs), nextFirst = new HDate(1, h.getMonth(), h.getFullYear()).add(1, "M"), afterFirst = nextFirst.add(1, "M").abs();
         if (afterFirst - nextFirst.abs() === 29) ask("ask-30-short", "ראתה בל׳ והחודש הבא חסר", "ראית בל׳ בחודש, ובחודש הבא אין ל׳.",
           monthlyAbs ? `בינתיים מעיין חוששת ל־${hs(monthlyAbs)}.` : "בינתיים מעיין אינה מוסיפה עונת חודש, לפי הבחירה בהגדרות.",
           [last.e.id], ["aruch189_12", "missing30", "secHeichal"]);
-        else ask("ask-30-full", "ראתה בל׳ והחודש הבא מלא", `ראית בל׳ בחודש, ובחודש הבא ראש החודש יומיים: ${hs(monthlyAbs)} ו־${hs(afterFirst)}.`,
-          `בינתיים מעיין חוששת ל־${hs(monthlyAbs)}.`,
-          [last.e.id], ["missing30", "taz189_14"]);
+        // כשהחודש הבא מלא: עונת החודש בל׳ בלבד, בלי א׳ שאחריו (הוכרע: כך כל הלוחות)
       }
       const monthlyTargets = new Set([monthlyAbs]);
       // ראייה קודמת שעונת החודש שלה עוד לא הגיעה כשבאה הראייה האחרונה — עונת החודש שלה נשארת (ראתה פעמיים בחודש)
@@ -829,7 +841,7 @@ const Maayan = (() => {
             const dates = [...new Set([...extra.map(x => x.target), ...long.map(x => last.s.abs + x.v - 1)])].sort((p, q) => p - q).map(hs);
             const values = [...new Set([...extra, ...long].map(x => x.v))].sort((p, q) => q - p);
             ask("ask-uprooted-haflagah", "הפלגה ארוכה שנעקרה בהפלגה קצרה ממנה",
-              `אחרי הפלגה של ${values.join(", ")} ימים באה הפלגה קצרה יותר, של ${lastV} ימים.`, `בינתיים מעיין אינה חוששת ל־${dates.join(", ")}.`,
+              `אחרי הפלגה של ${values.length > 1 ? `${values.slice(0, -1).join(", ")} ו־${values.at(-1)}` : values[0]} ימים באה הפלגה קצרה יותר, של ${lastV} ימים.`, `בינתיים מעיין אינה חוששת ל־${dates.join(", ")}.`,
               [...new Set([...extra.flatMap(x => x.ids), ...long.flatMap(x => x.ids), last.e.id])], ["rema189_13", "shach189_31", "secCarryTaz", "secCarryMajority"]);
           }
         }
@@ -879,13 +891,6 @@ const Maayan = (() => {
     // אור זרוע שחופף בדיוק לעונה שכבר נשמרת (למשל בעונה בינונית של יממה שלמה) אינו מוצג פעמיים
     const windows = new Set(plans.filter(p => p.kind !== "or-zarua").map(p => `${p.start}|${p.end}`));
     const deduped = [...new Map(plans.filter(p => p.kind !== "or-zarua" || !windows.has(`${p.start}|${p.end}`)).map(p => [p.id, p])).values()].sort((a, b) => a.start.localeCompare(b.start));
-    // כרתי ופלתי (עונה בינונית מעת לעת ואור זרוע), ראייה ביום: אור זרוע נוסף לפני עונת הלילה של יום 30, כלומר ביום 29 ביום — שאלה לרב
-    if (last && last.s.onah === "day" && set.beinonit === "both" && set.orZarua) {
-      const oz = deduped.find(p => p.id === `oz-average-${last.e.id}-30-night`);
-      if (oz) ask(`ask-oz-24h-${last.e.id}`, "אור זרוע לפני עונה בינונית של מעת לעת",
-        "העונה הבינונית בשיטה שלך היא יממה שלמה, מתחילת הלילה.", `בינתיים מעיין מוסיפה עונת אור זרוע ב־${hs(isoAbs(oz.date))}, ביום שלפניה.`,
-        [last.e.id], ["shach184_7", "sahr189_1f", "secBadei"]);
-    }
     return { plans: deduped, reviews, latestFlow, hefsek: validHefsek?.e, earliestHefsek, cleanDay, phase, immersionDate, checks, version: ENGINE_VERSION };
   }
 
@@ -936,11 +941,11 @@ const Maayan = (() => {
   }
   const SETTING_LABELS = {
     wait: { five: "חמישה ימים מתחילת הנידה", four: "ארבעה ימים מתחילת הנידה (הרב עובדיה יוסף)", "four-from-relations": "ארבעה ימים ממועד היחסים" },
-    method: { custom: "התאמה אישית", ashkenaz: "אשכנזי – עיקר הדין", "ashkenaz-kreiti": "אשכנזי – כרתי ופלתי", sefard: "הרב עובדיה יוסף (ספרדי)", "sefard-bic": "בן איש חי (ספרדי)", chabad: "מנהג חב״ד" },
+    method: { custom: "התאמה אישית", ashkenaz: "אשכנזי רגיל", "ashkenaz-kreiti": "אשכנזי – יממה שלמה (כרתי ופלתי)", sefard: "הרב עובדיה יוסף (ספרדי)", "sefard-bic": "בן איש חי (ספרדי)", chabad: "מנהג חב״ד" },
     beinHashmashot: { both: "לחומרא שתי העונות", flag: "השעיית החישוב ובירור" },
     hefsekTwilight: { "before-sunset": "רק לפני השקיעה", ovadia: "בדיעבד עד 13.5 דקות זמניות אחרי השקיעה (הרב עובדיה יוסף)" },
     haflagah: { days: "ימים בין תחילות הווסתות", "chabad-onot": "עונות מהפסק טהרה (חב״ד)" },
-    beinonit: { same: "אותה עונה", both: "שתי העונות" },
+    beinonit: { same: "רק העונה שבה התחילה הווסת", both: "יממה שלמה (לילה ויום)" },
     missingMonthly: { skip: "דילוג", "first-next-month": "א׳ בחודש שאחריו" },
     bedikot: { twice: "בוקר וערב בכל יום", "first-last": "ראשון ושביעי" },
     special: { regular: "מחזור רגיל", pregnancy: "היריון", postpartum: "אחרי לידה", nursing: "הנקה", hormonal: "טיפול הורמונלי" },
@@ -980,9 +985,9 @@ const Maayan = (() => {
   ];
   const ASHKENAZ_NOTES = [
     note("wait", "חמישה ימים מתחילת הווסת: יום הראייה הוא יום 1, וההפסק ביום החמישי לפני השקיעה (רמ״א יו״ד קצו, יא; כך נוהגים כל קהילות אשכנז).", PS.wait),
-    note("beinonit", "עונה בינונית ביום 30, בעונה שבה התחילה הראייה בלבד (שו״ע יו״ד קפט, א). מעת לעת שלם — בשיטת ״כרתי ופלתי״.", PS.average),
+    note("beinonit", "עונה בינונית ביום 30, בעונה שבה התחילה הראייה בלבד (שו״ע יו״ד קפט, א). מעת לעת שלם — בשיטת ״יממה שלמה (כרתי ופלתי)״.", PS.average),
     note("day31", "שומרים גם את יום 31, בעונת הראייה (חוות דעת קפט; ש״ך קפט, ס״ק ל). כך המנהג הרווח: לחוש גם ליום 30 וגם ליום 31 (שבט הלוי, מקור משני).", PS.day31Kreiti),
-    note("orZarua", "עונת אור זרוע — העונה שלפני כל וסת (ש״ך קפד, ס״ק ז, בשם האור זרוע, ובשם הב״ח: ״הירא דבר ה׳ נוהג כהא״ז״). הט״ז (קפד, ס״ק ב) חולק. האם לכלול אותה בעיקר הדין — לברר.", PS.ozAshkenazBasic, true),
+    note("orZarua", "עונת אור זרוע — העונה שלפני כל וסת (ש״ך קפד, ס״ק ז, בשם האור זרוע, ובשם הב״ח: ״הירא דבר ה׳ נוהג כהא״ז״). הט״ז (קפד, ס״ק ב) חולק. האם לכלול אותה בשיטה הרגילה — לברר.", PS.ozAshkenazBasic, true),
     note("haflagah", "הפלגה בימים מתחילת וסת לתחילת וסת, בספירה כוללנית.", PS.haflagah),
     note("carryLongIntervals", "הפלגה ארוכה נעקרת מיד כשבאה ראייה לפניה (״נעקר בפעם אחת״), כדעת הב״ח והש״ך (ובסיכום המשני גם סדרי טהרה, חוות דעת, רעק״א) — דלא כרמ״א (קפט, יג) והט״ז.", PS.uproot),
     note("missingMonthly", "ל׳ בחודש כשבחודש הבא אין ל׳: א׳ בחודש שאחריו, לחומרא (העונה הבינונית חלה ממילא בכ״ט).", PS.missing30),
@@ -1009,19 +1014,19 @@ const Maayan = (() => {
         note("orZarua", "חוששים לעונת אור זרוע — העונה שלפני כל וסת: ״ומרן ז״ל סבירא לה כדעה הראשונה, אך צריך לחוש לדעה זו השניה״ (בן איש חי, שנה ב, צו, א).", PS.ozBic)),
     },
     ashkenaz: {
-      label: SETTING_LABELS.method.ashkenaz, family: "ashkenaz", name: "עיקר הדין",
+      label: SETTING_LABELS.method.ashkenaz, family: "ashkenaz", name: "אשכנזי רגיל",
       line: "עונה בינונית ביום 30 ו-31, עונה אחת (עונת הראייה), ועונת אור זרוע לפני כל וסת.", source: "שו״ע ורמ״א; חוות דעת קפט; ש״ך קפד, ס״ק ז",
       settings: { ...ASHKENAZ_BASE },
       notes: ASHKENAZ_NOTES,
     },
     "ashkenaz-kreiti": {
-      label: SETTING_LABELS.method["ashkenaz-kreiti"], family: "ashkenaz", name: "כרתי ופלתי",
+      label: SETTING_LABELS.method["ashkenaz-kreiti"], family: "ashkenaz", name: "יממה שלמה (כרתי ופלתי)",
       line: "עונה בינונית יממה שלמה, לילה ויום, בימים 30 ו-31. הפלגה ארוכה נשמרת עד שנעקרת (רמ״א, ט״ז).", source: "כרתי ופלתי, מובא בשו״ע הרב קפט, א",
       settings: { ...ASHKENAZ_BASE, beinonit: "both", carryLongIntervals: true },
       notes: withNotes(ASHKENAZ_NOTES,
         note("beinonit", "עונה בינונית מעת לעת שלם, לילה ויום, מתחילת הלילה ועד סוף היום (כרתי ופלתי, מובא בשו״ע הרב קפט, א). בדי השלחן פוסק כך (מקור משני).", PS.beinonitKreiti),
         note("day31", "שומרים גם את יום 31, גם הוא יממה שלמה (חוות דעת קפט; ש״ך קפט, ס״ק ל). כך המנהג הרווח: לחוש גם ליום 30 וגם ליום 31 (שבט הלוי, מקור משני).", PS.day31Kreiti),
-        note("orZarua", "עונת אור זרוע לפני יום 30, עונת החודש וההפלגה (ש״ך קפד, ס״ק ז; הט״ז, ס״ק ב, חולק). לפני יום 31 אין אור זרוע. כשהעונה הבינונית היא מעת לעת, אור זרוע מתווסף לפני עונת הלילה שלה, כלומר ביום 29 — לברר.", PS.ozKreiti, true),
+        note("orZarua", "עונת אור זרוע לפני יום 30, עונת החודש וההפלגה (ש״ך קפד, ס״ק ז; הט״ז, ס״ק ב, חולק). לפני יום 31 אין אור זרוע. אור זרוע לעונה הבינונית רק לפני עונת הראייה: בראייה ביום הוא ליל יום 30, שכבר בתוך היממה, ולכן אין אור זרוע ביום 29; בראייה בלילה — ביום 29 ביום (כך כל הלוחות). האם לכלול את אור זרוע בשיטה — לברר, כמו באשכנזי רגיל.", PS.ozKreiti, true),
         note("carryLongIntervals", "הפלגה ארוכה שלא נעקרה נשמרת לצד ההפלגה הקצרה, וגם ההפלגה של הראייה הקודמת, שנספרת ממנה, כל עוד מועדה לא הגיע — כדעת הרמ״א (קפט, יג: ״חוששת לט׳ באייר״) והט״ז. הב״ח והש״ך חולקים.", PS.carryTaz, true)),
     },
     chabad: {
@@ -1044,17 +1049,18 @@ const Maayan = (() => {
   };
   /* בחירת שיטה בשני שלבים: מה המנהג, ואחר כך לפי מי (בחב״ד אין שלב שני) */
   const METHOD_FAMILIES = [
-    { id: "sefard", label: "ספרדי", ask: "לפי מי?", methods: ["sefard", "sefard-bic"] },
-    { id: "ashkenaz", label: "אשכנזי", ask: "לפי איזו שיטה?", methods: ["ashkenaz", "ashkenaz-kreiti"] },
+    { id: "sefard", label: "ספרדי", ask: "לפי פסקי מי?", methods: ["sefard", "sefard-bic"] },
+    { id: "ashkenaz", label: "אשכנזי", ask: "לפי פסקי מי?", methods: ["ashkenaz", "ashkenaz-kreiti"] },
     { id: "chabad", label: "חב״ד", ask: "", methods: ["chabad"] },
   ];
   const methodFamily = method => (METHOD_PRESETS[method] || {}).family || "";
   /** אילו הגדרות שונו אחרי בחירת שיטה */
   const presetDiff = s => { const p = METHOD_PRESETS[s && s.method]; return p ? Object.keys(p.settings).filter(k => s[k] !== p.settings[k]) : []; };
-  const applyPreset = (settings, method) => { const p = METHOD_PRESETS[method]; return p ? { ...settings, ...p.settings, method } : { ...settings, method: "custom" }; };
+  /** בחירת מנהג (גם ״התאמה אישית״ במפורש) מסמנת שהמנהג נבחר */
+  const applyPreset = (settings, method) => { const p = METHOD_PRESETS[method]; return p ? { ...settings, ...p.settings, method, methodChosen: true } : { ...settings, method: "custom", methodChosen: true }; };
   function settingsSummary(s) {
     return [
-      `שיטה: ${SETTING_LABELS.method[s.method] || SETTING_LABELS.method.custom}${presetDiff(s).length ? " (עם שינויים)" : ""}`,
+      `המנהג שלי: ${SETTING_LABELS.method[s.method] || SETTING_LABELS.method.custom}${presetDiff(s).length ? " (עם שינויים)" : ""}`,
       `מקום: ${city(s.cityId).name}`, `המתנה: ${SETTING_LABELS.wait[s.wait]}`, `הפלגה: ${SETTING_LABELS.haflagah[s.haflagah]}`,
       `עונה בינונית: ${SETTING_LABELS.beinonit[s.beinonit]}`, `יום 31: ${yesNo(s.day31)}`, `אור זרוע: ${yesNo(s.orZarua)}`,
       `שימור הפלגות ארוכות: ${yesNo(s.carryLongIntervals)}`, `שימור עונת חודש בזמן דימום: ${yesNo(s.carryMonthly)}`,
@@ -1098,7 +1104,7 @@ const Maayan = (() => {
     setLang, getLang, LOCALES, HDate, isLeapYear, daysInMonth, monthsInYear, gematriya, hebrew2abs, abs2hebrew,
     CITIES, city, setPlaces, EVENT_TYPES, EVENT_NAMES, CHECKLIST, SETTING_DEFAULTS, SETTING_LABELS, RESULT_NAMES, uuid, validISO, parseState, safeParse, emptyState, ValidationError,
     fromISO, toISO, addDays, hd, fromAbs, hebrew, dayNumber, isoAbs, civilLabel, dateInZone, timeInZone, localInstant, sun, atLocation, stamp, onahWindow, today, currentContext,
-    ENGINE_VERSION, SOURCES, CITES, cite, citeUrl, citeText, calculate, sorted, METHOD_PRESETS, METHOD_FAMILIES, methodFamily, presetDiff, applyPreset, nightfallLabel,
+    ENGINE_VERSION, newDiary, SOURCES, CITES, cite, citeUrl, citeText, calculate, sorted, METHOD_PRESETS, METHOD_FAMILIES, methodFamily, presetDiff, applyPreset, nightfallLabel,
     encryptBackup, decryptBackup, calendarExport, reportExport, settingsSummary, eventLine, planLine, demoState,
   };
 })();

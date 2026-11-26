@@ -25,6 +25,13 @@ const OUT = process.env.MAAYAN_OUT ? path.resolve(process.env.MAAYAN_OUT) : HERE
 if (contact && path.resolve(OUT).startsWith(ROOT + path.sep)) { console.error("פרטי קשר אישיים: יש לכתוב אל MAAYAN_OUT מחוץ למאגר"); process.exit(1); }
 fs.mkdirSync(OUT, { recursive: true });
 const esc = s => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+// nombre de comparaisons lu dans la sortie de verify.js (pour ne pas vieillir)
+const VERIFY = (() => {
+  const out = require("child_process").execFileSync(process.execPath, [path.join(ROOT, "verify.js")], { cwd: ROOT, encoding: "utf8" });
+  const m = out.match(/checks: (\d+), failures: (\d+)/);
+  if (!m || m[2] !== "0") throw new Error("verify.js: " + out.trim().split("\n").pop());
+  return Number(m[1]);
+})();
 const he = s => `<bdi lang="he" dir="rtl">${esc(s)}</bdi>`;
 
 /* ---------- liens ---------- */
@@ -160,7 +167,7 @@ slide("care", `
       <ul class="feat">
         <li>${IC.ring}<span><b>Écran « Aujourd'hui »</b> : où elle en est, et la prochaine étape</span></li>
         <li>${IC.check}<span><b>7 nekiim</b> : « jour 5 sur 7 », et chaque bedika à son heure</span></li>
-        <li>${IC.sun}<span><b>Ona de nuit</b> : rappel avant le coucher du soleil ; <b>ona de jour</b> : le matin</span></li>
+        <li>${IC.sun}<span><b>Ona de nuit</b> : rappel une heure avant le coucher du soleil ; <b>ona de jour</b> : le matin</span></li>
         <li>${IC.bell}<span><b>Notifications discrètes</b> : « Rappel personnel », par défaut</span></li>
         <li>${IC.moon}<span><b>Nuit du mikvé</b> : liste de préparation</span></li>
         <li>${IC.widget}<span><b>Widget</b> sur l'écran d'accueil (Android, au choix)</span></li>
@@ -176,20 +183,20 @@ slide("methods", `
   <div class="split">
     <div class="main">
       <h2>Chacun selon son minhag</h2>
-      <p class="lead">Un choix en deux étapes : la coutume, puis « selon qui ».</p>
+      <p class="lead">Choisie à la première ouverture, en deux étapes : la coutume, puis « selon les décisions de qui ».</p>
       <div class="meth">
         <div class="fam"><span class="tag">Séfarade</span>
           <div class="m"><b>Rav Ovadia Yossef</b><span>Selon les décisions de Taharat HaBayit.</span></div>
           <div class="m"><b>Ben Ish 'Haï</b><span>Comme le Rav Ovadia, avec en plus or zaroua.</span></div></div>
         <div class="fam"><span class="tag">Ashkénaze</span>
-          <div class="m"><b>Ikar hadin</b> ${he("עיקר הדין")}<span>Jours 30 et 31, et or zaroua.</span></div>
-          <div class="m"><b>Kréti ouPléti</b><span>Comme le Ikar hadin, avec l'ona beinonit sur 24 heures.</span></div></div>
+          <div class="m"><b>Ashkénaze (standard)</b><span>Jours 30 et 31, et or zaroua.</span></div>
+          <div class="m"><b>Journée complète (Kréti ouPléti)</b><span>Comme le standard, avec l'ona beinonit sur une journée complète.</span></div></div>
         <div class="fam"><span class="tag">'Habad</span>
           <div class="m"><b>Minhag 'Habad</b><span>Selon le Choul'han Aroukh HaRav.</span></div></div>
       </div>
       <p class="note">${IC.scale}<span>Chaque réglage peut être adapté <b>selon la directive de son Rav</b>.</span></p>
     </div>
-    ${phone("method.png", "Choix de la méthode")}
+    ${phone("method.png", "Choix de la coutume à la première ouverture")}
   </div>`);
 
 // 6. Calcul
@@ -212,11 +219,10 @@ slide("ask", `
       <p class="lead">L'application affiche « ${he("יש לשאול רב")} », et indique ce qu'elle fait en attendant.</p>
       <ol class="asks">
         <li>Vue le 30 du mois, et le mois suivant est <b>incomplet</b> (pas de 30)</li>
-        <li>Vue le 30 du mois, et le mois suivant est <b>plein</b> (Roch 'Hodech de deux jours)</li>
         <li>Une <b>haflaga longue</b> déracinée par une haflaga plus courte</li>
         <li>Sang trouvé <b>au réveil</b>, heure de début inconnue</li>
-        <li><b>Or zaroua</b> quand l'ona beinonit dure 24 heures</li>
       </ol>
+      <p class="also"><b>Tranché comme dans tous les autres calendriers :</b> vue le 30 et mois suivant <b>plein</b> — seulement le 30 ; or zaroua avant une ona beinonit d'une journée complète — seulement avant l'ona de la ${he("ראייה")} (vue de jour : pas d'or zaroua le jour 29).</p>
       <p class="also"><b>Également signalés :</b> bedikot non notées · heure du hefsek proche du coucher du soleil · nuit du mikvé un Chabbat ou un Yom Tov · trois ${he("ראיות")} à la même date (veset kavoua possible).</p>
     </div>
     ${phone("ask.png", "Point « À demander à un rav »")}
@@ -239,9 +245,9 @@ slide("privacy vc", `
 slide("rigour vc", `
   <h2>Rigueur</h2>
   <div class="nums">
-    <div class="num"><strong>138</strong><span>tests automatiques<br>du moteur de calcul</span></div>
-    <div class="num"><strong>168 000</strong><span>comparaisons du calendrier hébraïque et des heures solaires avec des références indépendantes · 0 échec</span></div>
-    <div class="num"><strong>97 p.</strong><span>spécification halakhique complète, préparée pour la relecture rabbinique</span></div>
+    <div class="num"><strong>${require(path.join(ROOT, "src", "tests.js"))(M).tests.length}</strong><span>tests automatiques<br>du moteur de calcul</span></div>
+    <div class="num"><strong>${VERIFY.toLocaleString("fr-FR").replace(/\s/g, "\u202f")}</strong><span>comparaisons du calendrier hébraïque et des heures solaires avec des références indépendantes · 0 échec</span></div>
+    <div class="num"><strong>99 p.</strong><span>spécification halakhique complète, préparée pour la relecture rabbinique</span></div>
   </div>
   <div class="docs">
     <p>${IC.shield}<span>Les documents sont générés à partir du moteur lui-même : chaque tableau et chaque calendrier est calculé, pas recopié.</span></p>
