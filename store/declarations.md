@@ -60,7 +60,11 @@
 - `SCHEDULE_EXACT_ALARM`: הרשאה שהמשתמשת מאשרת בעצמה ("שעונים מעוררים ותזכורות"), כברירת מחדל כבויה. שימוש: תזכורות לפי שעת השקיעה ולפי מועדים שהמשתמשת רשמה. **לא** משתמשים ב-`USE_EXACT_ALARM` (שמיועדת רק לאפליקציות שעון מעורר/יומן, ודורשת הצהרה). אם Google תבקש בכל זאת להסיר: לבנות עם `EXACT_ALARM=0` (ראו android/prepare.py) — התזכורות יעבדו כהתראות לא-מדויקות.
 - `POST_NOTIFICATIONS`, `RECEIVE_BOOT_COMPLETED`, `WAKE_LOCK`: התראות מקומיות ושחזורן אחרי הפעלה מחדש.
 - `USE_BIOMETRIC`: פתיחת הנעילה בטביעת אצבע, רק אם המשתמשת הפעילה אותה. הזיהוי נעשה במערכת ההפעלה; האפליקציה מקבלת רק הצליח/לא הצליח.
+- `USE_FINGERPRINT`: הגרסה הישנה של אותה הרשאה, שהספרייה לטביעת אצבע מוסיפה לאנדרואיד ישן.
+- `ACCESS_NETWORK_STATE`: מתווספת מספרייה (מיזוג מניפסטים). הרשאה רגילה שמאפשרת רק לדעת אם יש חיבור; בלי `INTERNET` האפליקציה לא יכולה לפנות לרשת, ובדיקת האמולטור מוודאת שאין שום פנייה.
+- `<package>.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION`: הרשאה פנימית של AndroidX, בתוך האפליקציה בלבד.
 - הווידג׳ט למסך הבית אינו דורש הרשאה.
+- הרשימה בפועל (גרסה 1.2.55): ACCESS_COARSE_LOCATION, ACCESS_FINE_LOCATION, POST_NOTIFICATIONS, RECEIVE_BOOT_COMPLETED, WAKE_LOCK, SCHEDULE_EXACT_ALARM, USE_BIOMETRIC, USE_FINGERPRINT, ACCESS_NETWORK_STATE.
 - אין `INTERNET`, אין `AD_ID`, אין `USE_EXACT_ALARM`, אין `ACCESS_BACKGROUND_LOCATION`. ה-workflow (android-app) מדפיס את ההרשאות של הגרסה לחנות אחרי מיזוג המניפסטים, ונכשל אם אחת מאלה מופיעה.
 
 ### Advertising ID
