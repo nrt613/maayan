@@ -621,3 +621,13 @@ main.enter > :nth-child(2) { animation-delay: .03s; } main.enter > :nth-child(3)
 
 /* יומן ארוך (שנים של רישומים): בלי פריסה וציור לרישומים שמחוץ למסך */
 .entries > .entry { content-visibility: auto; contain-intrinsic-size: auto 64px; }
+/* בחירת המנהג בכניסה הראשונה */
+.onboard { display: grid; gap: 18px; }
+.ob-h { display: grid; gap: 6px; justify-items: center; text-align: center; }
+.ob-ic { display: grid; place-items: center; width: 48px; height: 48px; border-radius: 50%; background: var(--accent-soft); color: var(--accent-strong); margin-bottom: 2px; }
+.ob-h h2 { font-size: 25px; }
+.ob-h p { color: var(--muted); font-size: 15px; max-width: 34ch; }
+.onboard .btn .ic { margin-inline-start: 2px; }
+.onboard .btn:disabled { opacity: .4; }
+.ob-back { justify-self: center; font-size: 14.5px; color: var(--muted); font-weight: 500; }
+.onboard > .fine { text-align: center; }

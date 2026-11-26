@@ -38,6 +38,15 @@ const geoFix = () => { exec("adb emu geo fix 34.8532 32.3215", { timeout: 8000 }
   check("terms screen", (await page.$$(".terms h4")).length === 7);
   await page.click('[data-act="terms-back"]');
   await page.click('[data-act="start-personal"]');
+  // בחירת המנהג בכניסה הראשונה: ״המשך״ כבוי עד שבוחרים מנהג ושיטה
+  await page.waitForSelector(".onboard", { timeout: 5000 });
+  check("custom chooser on first run, continue disabled", await page.$eval('[data-act="onboard-done"]', b => b.disabled));
+  await page.click('#modal [data-family="ashkenaz"]');
+  await page.click('#modal [data-method="ashkenaz"]');
+  await sleep(300); await shot("2b-custom");
+  await page.click('[data-act="onboard-done"]');
+  await sleep(600);
+  check("custom saved", await page.evaluate(() => { const s = JSON.parse(localStorage.getItem("maayan.v1.diary") || "{}").settings || {}; return s.method === "ashkenaz" && s.methodChosen === true; }));
 
   // הזנת מחזור מלפני שלושה ימים: אמורה להיווצר תזכורת להפסק ועונות פרישה
   const flow = await page.evaluate(() => { const d = new Date(Date.now() - 3 * 864e5); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`; });
