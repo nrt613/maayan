@@ -60,7 +60,7 @@ a { color: var(--accent); text-decoration: none; }
 .ic .s { fill: currentColor; stroke: none; }
 .ic .dot { stroke-width: 2.6; }
 .hebdate { font-weight: inherit; }
-time, [dir="ltr"], dd, .count, input[type="time"], input[type="date"], .ring strong, .day b, .key { font-variant-numeric: tabular-nums; }
+time, [dir="ltr"]:not(html, #app, #modal, #toast, .welcome, .sheet), dd, .count, input[type="time"], input[type="date"], .ring strong, .day b, .key { font-variant-numeric: tabular-nums; }
 
 /* ---------- מסגרת ---------- */
 #app { display: grid; grid-template-columns: 252px minmax(0, 1fr); min-height: 100dvh; }
@@ -359,7 +359,7 @@ details.past { box-shadow: 0 -1px 0 var(--line); }
 .toggle.wake { border: 1px solid var(--line); border-radius: var(--r-m, 14px); padding: 8px 12px; }
 
 /* ---------- טפסים ---------- */
-.field { display: grid; gap: 7px; font-weight: 500; font-size: 14px; min-width: 0; color: var(--ink); }
+.field { display: grid; align-content: start; gap: 7px; font-weight: 500; font-size: 14px; min-width: 0; color: var(--ink); }
 .field small { color: var(--muted); font-weight: 400; font-size: 12.5px; }
 .opt { color: var(--muted); font-weight: 400; font-size: 12.5px; }
 input:not([type="checkbox"]), select, textarea { width: 100%; min-width: 0; min-height: 50px; padding: 12px 14px; border: 1.5px solid transparent; border-radius: 14px; background: var(--soft); font-weight: 400; font-size: 16px; color: var(--ink); transition: border-color .15s, background .15s, box-shadow .15s; -webkit-appearance: none; appearance: none; }
@@ -371,6 +371,11 @@ input:not([type="checkbox"]):hover, select:hover, textarea:hover { background-co
 input:not([type="checkbox"]):focus, select:focus, textarea:focus { border-color: var(--accent); background-color: var(--surface); outline: none; box-shadow: 0 0 0 4px var(--accent-soft); }
 textarea { resize: vertical; line-height: 1.5; }
 ::placeholder { color: var(--faint); }
+.plain-text { font-size: 13.5px !important; line-height: 1.6 !important; white-space: pre-wrap; }
+.file-in { position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
+.file-pick { display: flex; align-items: center; gap: 10px; min-height: 50px; padding: 12px 14px; border-radius: 14px; border: 1.5px dashed var(--line-2, #d9cdd3); background: var(--soft); color: var(--accent); font-weight: 600; font-size: 15px; cursor: pointer; overflow: hidden; }
+.file-pick span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
+.file-in:focus-visible + .file-pick { border-color: var(--accent); box-shadow: 0 0 0 4px var(--accent-soft); }
 .mono { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 12px !important; direction: ltr; text-align: left; }
 /* מתג בסגנון iOS */
 .toggle { display: flex; align-items: center; justify-content: space-between; gap: 14px; min-height: 56px; padding: 6px 0; cursor: pointer; }
@@ -385,6 +390,7 @@ textarea { resize: vertical; line-height: 1.5; }
 .toggle input:focus-visible { outline: 2.5px solid var(--accent); outline-offset: 2px; }
 .toggle + .toggle, .field + .toggle, .toggle + .field, .oz-box + .toggle, .toggle + .oz-box { box-shadow: 0 -1px 0 var(--line); }
 .pair { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.pair.end { align-items: end; }
 .trip { display: flex; justify-content: space-between; align-items: center; gap: 10px; min-height: 56px; padding: 6px 6px 6px 14px; padding-inline-start: 14px; border-radius: var(--r-m); background: var(--soft); }
 .trip span { display: grid; } .trip small { color: var(--muted); }
 .action { display: flex; align-items: center; gap: 14px; width: 100%; min-height: 60px; padding: 10px 0; border: 0; background: transparent; text-align: start; color: var(--ink); }
@@ -2093,7 +2099,8 @@ const MaayanDict = (() => {
     ["טיפול הורמונלי / אמצעי מניעה", "Hormonal treatment / contraception", "Traitement hormonal / contraception", "Tratamiento hormonal / anticonceptivos"],
     ["טיפול הורמונלי", "Hormonal treatment", "Traitement hormonal", "Tratamiento hormonal"],
     ["במצב מיוחד החישובים הרגילים מושעים, ואפשר לרשום עונות לפי הוראה.", "In a special situation the regular calculations are suspended, and you can record onot per a ruling.", "Dans une situation particulière, les calculs habituels sont suspendus et vous pouvez noter des onot sur instruction.", "En una situación especial se suspenden los cálculos habituales y puede registrar onot según indicación."],
-    ["שם מורה ההוראה או המנהג", "Name of your rav or custom", "Nom du rav ou de la coutume", "Nombre del rav o la costumbre"],
+    ["למשל: הרב של הקהילה, או מדריכת הכלות", "E.g. your community rabbi, or your kallah teacher", "Par ex. le rav de la communauté, ou la monitrice", "Por ejemplo: el rabino de la comunidad, o la instructora de novias"],
+    ["שם הרב או המדריכה", "Name of your rabbi or teacher", "Nom de votre rav ou de votre monitrice", "Nombre de su rabino o instructora"],
     ["תזכורות", "Reminders", "Rappels", "Recordatorios"],
     ["התראות כשהיומן פתוח", "Notifications while the diary is open", "Notifications quand le journal est ouvert", "Notificaciones con el diario abierto"],
     ["דורש הרשאה מהדפדפן", "Requires browser permission", "Nécessite l'autorisation du navigateur", "Requiere permiso del navegador"],
@@ -2189,6 +2196,7 @@ const MaayanDict = (() => {
     ["לפחות {n} תווים. לשמור אותה בנפרד.", "At least {n} characters. Keep it separately.", "Au moins {n} caractères. Conservez-le à part.", "Al menos {n} caracteres. Guárdela por separado."],
     ["יצירת גיבוי", "Create backup", "Créer la sauvegarde", "Crear copia"],
     ["קובץ גיבוי", "Backup file", "Fichier de sauvegarde", "Archivo de copia"],
+    ["בחירת קובץ", "Choose a file", "Choisir un fichier", "Elegir un archivo"],
     ["או הדבקת טקסט הגיבוי", "Or paste the backup text", "Ou collez le texte de sauvegarde", "O pegue el texto de la copia"],
     ["סיסמת הגיבוי", "Backup password", "Mot de passe de sauvegarde", "Contraseña de la copia"],
     ["פתיחת הגיבוי", "Open backup", "Ouvrir la sauvegarde", "Abrir copia"],
@@ -2818,7 +2826,7 @@ const MaayanDict = (() => {
     ["יממה שלמה (כרתי ופלתי)", "Full day (Kreiti uPleiti)", "Journée complète (Kréti ouPléti)", "Día completo (Kreiti uPleiti)"],
     ["אשכנזי – יממה שלמה (כרתי ופלתי)", "Ashkenazi – Full day (Kreiti uPleiti)", "Ashkénaze – Journée complète (Kréti ouPléti)", "Asquenazí – Día completo (Kreiti uPleiti)"],
     ["כמו הרגיל, והעונה הבינונית יממה שלמה.", "Like the standard, with the onah beinonit a full day.", "Comme le standard, avec la ona beinonit sur une journée complète.", "Como el estándar, con la oná beinonit un día completo."],
-    ["רק העונה שבה התחילה הווסת", "Only the onah in which the period began", "Seulement la ona où les règles ont commencé", "Solo la oná en que comenzó el período"],
+    ["רק העונה שבה התחילה הווסת", "Only the onah it began in", "Seule la ona du début des règles", "Solo la oná en que comenzó"],
     ["יממה שלמה (לילה ויום)", "Full day (night and day)", "Journée complète (nuit et jour)", "Día completo (noche y día)"],
     ["עוד לא נבחר מנהג", "No custom chosen yet", "Aucune coutume choisie pour l'instant", "Todavía no se eligió una costumbre"],
     ["המועדים יחושבו אחרי שתבחרי את המנהג שלך.", "Dates will be calculated once you choose your custom.", "Les dates seront calculées une fois votre coutume choisie.", "Las fechas se calcularán cuando elija su costumbre."],
@@ -2845,7 +2853,6 @@ const MaayanDict = (() => {
     ["לחשוש לשתי העונות", "Keep both onot", "Tenir compte des deux onot", "Tener en cuenta ambas onot"],
     ["לסמן לבירור, בלי חישוב", "Mark for review, without calculating", "Signaler pour vérification, sans calcul", "Marcar para consulta, sin calcular"],
     ["בדיעבד, עד 13.5 דקות זמניות אחרי השקיעה", "After the fact, up to 13.5 proportional minutes after sunset", "A posteriori, jusqu'à 13,5 minutes proportionnelles après le coucher du soleil", "A posteriori, hasta 13,5 minutos proporcionales después de la puesta del sol"],
-    ["שם הרב או המדריכה (לא חובה)", "Name of your rabbi or teacher (optional)", "Nom de votre rav ou de votre monitrice (facultatif)", "Nombre de su rabino o instructora (opcional)"],
     ["תזכורת לפני השקיעה (דקות)", "Reminder before sunset (minutes)", "Rappel avant le coucher du soleil (minutes)", "Recordatorio antes de la puesta del sol (minutos)"],
     ["לא נבחר מנהג מוכן: כל ההגדרות נקבעות ידנית, תחת ״התאמה אישית לפי הוראת הרב״.", "No preset custom chosen: all settings are set manually, under \"Personal adjustment per your rabbi's ruling\".", "Aucune coutume prédéfinie : tous les réglages se font manuellement, sous « Ajustement personnel selon la décision de votre rav ».", "Sin costumbre predefinida: todos los ajustes se hacen manualmente, en «Ajuste personal según la indicación de su rabino»."],
     ["בלי מנהג מוכן: כל ההגדרות ידנית", "No preset custom: all settings manual", "Sans coutume prédéfinie : tous les réglages manuels", "Sin costumbre predefinida: todos los ajustes manuales"],
@@ -3916,6 +3923,7 @@ if (typeof module !== "undefined") module.exports = MaayanWidget;
     upload: '<path d="M12 15V4M7.5 8.5 12 4l4.5 4.5M5 20h14"/>',
     lock: '<path class="f" d="M8 10.5h8a3 3 0 0 1 3 3v4a3 3 0 0 1-3 3H8a3 3 0 0 1-3-3v-4a3 3 0 0 1 3-3z"/><rect x="5" y="10.5" width="14" height="10" rx="3"/><path d="M8.5 10.5V8a3.5 3.5 0 0 1 7 0v2.5M12 14.5v2"/>',
     help: '<circle cx="12" cy="12" r="9"/><path d="M9.6 9.4a2.5 2.5 0 0 1 4.8.9c0 1.7-2.4 2.1-2.4 3.7"/><path class="dot" d="M12 17.2h.01"/>',
+    globe: '<circle class="f" cx="12" cy="12" r="8.6"/><circle cx="12" cy="12" r="8.6"/><path d="M3.6 12h16.8"/><path d="M12 3.4c2.3 2.4 3.4 5.3 3.4 8.6s-1.1 6.2-3.4 8.6c-2.3-2.4-3.4-5.3-3.4-8.6S9.7 5.8 12 3.4z"/>',
     info: '<circle cx="12" cy="12" r="9"/><path d="M12 11v5.5"/><path class="dot" d="M12 7.8h.01"/>',
     list: '<path d="M9.5 6.5H20M9.5 12H20M9.5 17.5H20"/><path class="dot" d="M4.8 6.5h.01M4.8 12h.01M4.8 17.5h.01"/>',
     flask: '<path d="M9.5 3.5h5M10.5 3.5v5.3L5.3 17.7a1.9 1.9 0 0 0 1.7 2.8h10a1.9 1.9 0 0 0 1.7-2.8L13.5 8.8V3.5M7.6 14.5h8.8"/>',
@@ -4008,7 +4016,7 @@ if (typeof module !== "undefined") module.exports = MaayanWidget;
     const prefix = p.onah === "day" ? "" : "ליל ";
     return `<details class="plan k-${p.kind} tone-${planTone(p.kind)}${p.done ? " done" : ""}"${open ? " open" : ""}>
       <summary><span class="plan-ic">${I(planIcon(p), 18)}</span>
-        <span class="plan-name"><strong>${esc(planTitle(p))}</strong><small><span class="hebdate">${prefix}${esc(planHebrew(p))}</span>${compact ? "" : ` · ${esc(civilLabel(p.date, true))} · ${esc(c.name)}`}</small></span>
+        <span class="plan-name"><strong>${esc(planTitle(p))}</strong><small><span class="hebdate">${prefix}${esc(planHebrew(p))}</span>${compact ? "" : ` · ${esc(civilLabel(p.date, true))}${p.cityId !== state().settings.cityId ? ` · ${esc(c.name)}` : ""}`}</small></span>
         <time dir="ltr">${start}</time>${I("left", 16)}</summary>
       <div class="plan-more"><p>${esc(p.reason)}</p>
         <small>${onahLabel(p.onah)} · ${p.end ? `מ-${start} עד ${timeInZone(new Date(p.end), c.tz)}` : `מ-${start}`} · ${esc(c.name)}</small>
@@ -4345,10 +4353,10 @@ if (typeof module !== "undefined") module.exports = MaayanWidget;
       ${s.method !== "custom" ? `<button type="button" class="link mc-none" data-method="custom">${I("sliders", 15)}בלי מנהג מוכן: כל ההגדרות ידנית</button>` : ""}</details>
       ${sel("special", "מצב מיוחד", s, [["regular", "מחזור רגיל"], ["pregnancy", "היריון"], ["postpartum", "אחרי לידה"], ["nursing", "הנקה"], ["hormonal", "טיפול הורמונלי / אמצעי מניעה"]])}
       <p class="fine">במצב מיוחד החישובים הרגילים מושעים, ואפשר לרשום עונות לפי הוראה.</p>
-      <label class="field" for="s-methodNote">שם הרב או המדריכה (לא חובה)<textarea id="s-methodNote" name="methodNote" rows="2" maxlength="1000" placeholder="שם מורה ההוראה או המנהג">${esc(s.methodNote)}</textarea></label></section>
+      <label class="field" for="s-methodNote"><span>שם הרב או המדריכה <span class="opt">לא חובה</span></span><textarea id="s-methodNote" name="methodNote" rows="2" maxlength="1000" placeholder="למשל: הרב של הקהילה, או מדריכת הכלות">${esc(s.methodNote)}</textarea></label></section>
     <section class="card"><div class="card-h">${I("bell")}<div><h3>תזכורות</h3></div></div>
       ${tog("remindersEnabled", "התראות כשהיומן פתוח", "דורש הרשאה מהדפדפן", s)}${tog("neutralReminders", "נוסח דיסקרטי", "״תזכורת אישית״ בלי פירוט", s)}
-      <div class="pair"><label class="field" for="s-reminderMinutes">תזכורת לפני השקיעה (דקות)<input id="s-reminderMinutes" name="reminderMinutes" type="number" min="5" max="120" value="${s.reminderMinutes}" inputmode="numeric"></label>
+      <div class="pair end"><label class="field" for="s-reminderMinutes">תזכורת לפני השקיעה (דקות)<input id="s-reminderMinutes" name="reminderMinutes" type="number" min="5" max="120" value="${s.reminderMinutes}" inputmode="numeric"></label>
       <label class="field" for="s-morningTime">שעת בדיקת בוקר<input id="s-morningTime" name="morningTime" type="time" value="${s.morningTime}"></label></div></section>${WIDGET_FIELDS(s)}`;
   /* ---------- וידג׳ט למסך הבית (src/widget.js): רק באנדרואיד וביומן האישי; כבוי כברירת מחדל ---------- */
   const WIDGET_FIELDS = s => !(NATIVE && CAP.getPlatform && CAP.getPlatform() === "android" && app.mode === "personal") ? "" : `
@@ -4451,7 +4459,7 @@ if (typeof module !== "undefined") module.exports = MaayanWidget;
         <div class="pair"><label class="field" for="t-from">מתאריך<input id="t-from" name="from" type="date" required min="2000-01-01" max="2100-12-31"></label><label class="field" for="t-to">עד תאריך<input id="t-to" name="to" type="date" required min="2000-01-01" max="2100-12-31"></label></div>
         <button class="btn ghost full" type="submit">${I("plus", 17)}הוספת נסיעה</button></form>
         <p class="fine">נסיעה מעבר לקו התאריך מחייבת בירור אישי.</p></section>
-      <section class="card"><div class="card-h">${I("info")}<div><h3>שפה</h3></div></div>${langSwitch()}</section>
+      <section class="card"><div class="card-h">${I("globe")}<div><h3>שפה</h3></div></div>${langSwitch()}</section>
       <section class="card"><div class="card-h">${I("shield")}<div><h3>פרטיות ונתונים</h3><p>שום מידע לא יוצא מהמכשיר</p></div></div>
         ${lockSettings()}
         <a class="action" href="${PRIVACY_URL}" target="_blank" rel="noopener">${I("lock", 19)}<span><strong>מדיניות פרטיות</strong><small>מה נשמר, איפה, ומה לא נאסף</small></span>${I("out", 15)}</a>
@@ -4460,7 +4468,7 @@ if (typeof module !== "undefined") module.exports = MaayanWidget;
         ${app.mode === "personal" ? `<button class="action danger" data-act="wipe">${I("x", 19)}<span><strong>מחיקת כל הנתונים שלי</strong><small>יומן, הגדרות, מקומות ותזכורות — מהמכשיר הזה, לצמיתות</small></span></button>` : ""}</section>
       <section class="card"><div class="card-h">${I("scale")}<div><h3>לבודקים הלכתיים</h3><p>תרחישים מוכנים, בדיקות אוטומטיות וכללי החישוב</p></div></div>
         <button class="btn ghost full" data-go="review">${I("flask", 17)}מסך הבודקים</button></section>
-      <section class="card about"><div class="card-h">${I("spring")}<div><h3>על מעיין</h3><p>גרסה ${APP_VERSION} · מנוע ${M.ENGINE_VERSION}</p></div></div>
+      <section class="card about"><div class="card-h">${I("spring")}<div><h3>על מעיין</h3><p>גרסה \u2066${APP_VERSION}\u2069 · מנוע \u2066${M.ENGINE_VERSION}\u2069</p></div></div>
         <p>האפליקציה חינמית ופועלת כולה בטלפון, בלי חשבון ובלי שרת. שום מידע לא נשלח לאף אחד.</p>
         ${NATIVE ? "" : `<p>להתקנה: בתפריט הדפדפן (⋮) בוחרים ״הוספה למסך הבית״.</p>${/Android/i.test(navigator.userAgent) ? `<a class="link" href="https://github.com/nrt613/maayan/releases/latest/download/maayan.apk" target="_blank" rel="noopener">${I("download", 15)}אפליקציית אנדרואיד עם התראות</a>` : ""}`}</section>
     </aside></div>`;
@@ -4471,7 +4479,7 @@ if (typeof module !== "undefined") module.exports = MaayanWidget;
     const res = app.testResults, passed = res && res.filter(t => t.ok).length;
     const groups = res ? [...new Set(res.map(t => t.group))] : [];
     return `<section class="review-hero"><div>
-        <span class="chip-light">גרסת בדיקה ${APP_VERSION}</span><h2>הנחיות לבודקים</h2>
+        <span class="chip-light">גרסת בדיקה \u2066${APP_VERSION}\u2069</span><h2>הנחיות לבודקים</h2>
         <p>תודה על הבדיקה. המטרה היא לוודא שכל כלל מחושב כמו שצריך לפי השיטה שנבחרה, ושהמערכת לא מכריעה במקום שבו צריך לשאול.</p>
         <ol class="steps"><li>פותחים תרחיש מוכן, רואים מה הוזן ומה חושב, ומשווים להלכה.</li><li>אפשר לפתוח תרחיש ביומן המלא, לשנות רישומים והגדרות ולראות את החישוב משתנה.</li><li>מעתיקים דוח ושולחים למפתח עם ההערות.</li></ol>
       </div></section>
@@ -4647,7 +4655,7 @@ if (typeof module !== "undefined") module.exports = MaayanWidget;
         ${f.type === "manual" ? `<label class="field" for="e-onah">עונה<select id="e-onah" name="onah" required><option value="" ${f.onah ? "" : "selected"} disabled>בחירה</option><option value="day"${f.onah === "day" ? " selected" : ""}>יום · מהזריחה עד השקיעה</option><option value="night"${f.onah === "night" ? " selected" : ""}>לילה · מהשקיעה הקודמת עד הזריחה</option></select></label>` : ""}
         ${needsResult ? `<label class="field" for="e-result">תוצאה<select id="e-result" name="result"><option value="clear"${f.result === "clear" ? " selected" : ""}>נקייה</option><option value="uncertain"${f.result === "uncertain" ? " selected" : ""}>ממתינה לבירור</option><option value="bleeding"${f.result === "bleeding" ? " selected" : ""}>לא נקייה</option></select></label>` : ""}
         ${f.type === "flow" ? `<label class="toggle wake" for="e-wake"><span><strong>לא ידוע מתי התחיל (מצאתי בקימה או בבדיקה)</strong><small>לא חובה. מעיין תחשוש לשתי העונות של היום ותסמן ״יש לשאול רב״.</small></span><input id="e-wake" name="foundOnWaking" type="checkbox"${f.foundOnWaking ? " checked" : ""}></label>` : ""}
-        <label class="field" for="e-note">הערה <span class="opt">לא חובה</span><textarea id="e-note" name="note" rows="2" maxlength="2000">${esc(f.note)}</textarea></label>
+        <label class="field" for="e-note"><span>הערה <span class="opt">לא חובה</span></span><textarea id="e-note" name="note" rows="2" maxlength="2000">${esc(f.note)}</textarea></label>
         <details class="adv"${f.authorityNote ? " open" : ""}><summary>הוראה אישית שקיבלת${I("left", 14)}</summary><label class="field" for="e-auth">תיעוד ההוראה<textarea id="e-auth" name="authorityNote" rows="2" maxlength="1000" placeholder="מי הורה, מתי ומה נאמר">${esc(f.authorityNote)}</textarea></label></details>
         ${HELP[f.type] ? `<p class="hint">${I("info", 16)}${HELP[f.type]}</p>` : ""}
         ${m.error ? `<p class="err" role="alert">${esc(m.error)}</p>` : ""}
@@ -4669,16 +4677,16 @@ if (typeof module !== "undefined") module.exports = MaayanWidget;
         <div class="m-actions"><button class="btn" data-act="close-modal">${I("check", 17)}סיום</button></div>`;
     }
     if (m.kind === "text") return `<div class="m-h"><h2 id="m-title">${esc(m.title)}</h2>${close}</div><p>${esc(m.intro)}</p>
-      <textarea id="m-text" class="mono" rows="9" readonly>${esc(m.text)}</textarea>
+      <textarea id="m-text" class="${/[\u0590-\u05FF]/.test(String(m.text).slice(0, 400)) ? "plain-text" : "mono"}" dir="auto" rows="9" readonly>${esc(m.text)}</textarea>
       <div class="m-actions"><button class="btn" data-act="copy-text">${I("copy", 17)}העתקה</button>${m.file ? `<button class="btn ghost" data-act="dl-text">${I("download", 17)}שמירה כקובץ</button>` : ""}</div>
       ${m.file ? `<p class="fine">אם השמירה כקובץ לא עובדת בדפדפן הזה, מעתיקים ושומרים בפתקים או שולחים לעצמך.</p>` : ""}`;
     if (m.kind === "cycle") return `<div class="m-h"><h2 id="m-title">הזנת מחזור קודם</h2>${close}</div>
       <form id="cycle-form" class="stack-s"><p class="fine">מזינים כל מחזור בנפרד, בכל סדר. החישוב מסדר הכול לפי התאריכים.${m.saved ? ` נשמרו ${m.saved} מחזורים.` : ""}</p>
         <div class="pair"><label class="field" for="c-flow">תחילת הווסת<input id="c-flow" type="date" required min="2000-01-01" max="2100-12-31"></label>
         <label class="field" for="c-flow-t">שעה<input id="c-flow-t" type="time" required value="10:00"><small>אחרי השקיעה = היום העברי הבא</small></label></div>
-        <div class="pair"><label class="field" for="c-hef">הפסק טהרה <span class="opt">אם ידוע</span><input id="c-hef" type="date" min="2000-01-01" max="2100-12-31"></label>
+        <div class="pair"><label class="field" for="c-hef"><span>הפסק טהרה <span class="opt">אם ידוע</span></span><input id="c-hef" type="date" min="2000-01-01" max="2100-12-31"></label>
         <label class="field" for="c-hef-t">שעה<input id="c-hef-t" type="time" value="16:00"></label></div>
-        <label class="field" for="c-mik">טבילה <span class="opt">תאריך הערב, אם ידוע</span><input id="c-mik" type="date" min="2000-01-01" max="2100-12-31"></label>
+        <label class="field" for="c-mik"><span>טבילה <span class="opt">תאריך הערב, אם ידוע</span></span><input id="c-mik" type="date" min="2000-01-01" max="2100-12-31"></label>
         <label class="field" for="c-city">מקום<select id="c-city">${placeOptions(state(), state().settings.cityId)}</select></label>
         ${m.error ? `<p class="err" role="alert">${esc(m.error)}</p>` : ""}
         <div class="m-actions"><button class="btn" type="submit">${I("check", 17)}שמירת המחזור</button><button type="button" class="btn ghost" data-act="close-modal">${m.saved ? "סיום" : "ביטול"}</button></div></form>`;
@@ -4687,7 +4695,7 @@ if (typeof module !== "undefined") module.exports = MaayanWidget;
       <label class="field" for="b-pass">סיסמת גיבוי<input id="b-pass" type="password" minlength="10" required autocomplete="new-password"><small>לפחות 10 תווים. לשמור אותה בנפרד.</small></label>
       ${m.error ? `<p class="err" role="alert">${esc(m.error)}</p>` : ""}<div class="m-actions"><button class="btn" type="submit">${I("lock", 17)}יצירת גיבוי</button></div></form>`;
     if (m.kind === "restore") return `<div class="m-h"><h2 id="m-title">שחזור מגיבוי</h2>${close}</div>
-      <form id="restore-form" class="stack-s"><label class="field" for="r-file">קובץ גיבוי<input id="r-file" type="file"${NATIVE && CAP.getPlatform?.() === "ios" ? "" : ' accept=".may,.json,.txt,application/json,text/plain"'}></label>
+      <form id="restore-form" class="stack-s"><div class="field"><span id="r-file-l">קובץ גיבוי</span><input id="r-file" class="file-in" type="file" aria-labelledby="r-file-l"${NATIVE && CAP.getPlatform?.() === "ios" ? "" : ' accept=".may,.json,.txt,application/json,text/plain"'}><label class="file-pick" for="r-file">${I("upload", 18)}<span id="r-file-name">בחירת קובץ</span></label></div>
       <label class="field" for="r-text">או הדבקת טקסט הגיבוי<textarea id="r-text" class="mono" rows="3" placeholder='{"format":"maayan-encrypted-v1",…}'>${esc(m.text || "")}</textarea></label>
       <label class="field" for="r-pass">סיסמת הגיבוי<input id="r-pass" type="password" required autocomplete="off"></label>
       ${m.error ? `<p class="err" role="alert">${esc(m.error)}</p>` : ""}<div class="m-actions"><button class="btn" type="submit">${I("upload", 17)}פתיחת הגיבוי</button></div></form>`;
@@ -4902,7 +4910,7 @@ if (typeof module !== "undefined") module.exports = MaayanWidget;
       bioAuth().then(ok => { if (ok) { saveLockCfg({ bio: true }); toast("הפתיחה בטביעת אצבע או בזיהוי פנים הופעלה"); } else toast("הזיהוי לא הצליח. הנעילה נשארת בקוד בלבד."); render(); });
     }
     else if (t.id === "bk-remind") { saveBackupInfo({ remind: t.value }); toast("נשמר במכשיר"); }
-    else if (t.id === "r-file") { const f = t.files?.[0]; if (f && f.size < 4e6) f.text().then(x => { $("#r-text").value = x; }); }
+    else if (t.id === "r-file") { const f = t.files?.[0], nm = $("#r-file-name"); if (nm && f) { nm.textContent = f.name; nm.dir = "auto"; } if (f && f.size < 4e6) f.text().then(x => { $("#r-text").value = x; }); }
   });
   /* לחיצה ארוכה על יום בלוח (או תפריט הקשר) פותחת את תפריט הרישום המהיר לאותו יום */
   {

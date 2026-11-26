@@ -49,7 +49,7 @@ a { color: var(--accent); text-decoration: none; }
 .ic .s { fill: currentColor; stroke: none; }
 .ic .dot { stroke-width: 2.6; }
 .hebdate { font-weight: inherit; }
-time, [dir="ltr"], dd, .count, input[type="time"], input[type="date"], .ring strong, .day b, .key { font-variant-numeric: tabular-nums; }
+time, [dir="ltr"]:not(html, #app, #modal, #toast, .welcome, .sheet), dd, .count, input[type="time"], input[type="date"], .ring strong, .day b, .key { font-variant-numeric: tabular-nums; }
 
 /* ---------- מסגרת ---------- */
 #app { display: grid; grid-template-columns: 252px minmax(0, 1fr); min-height: 100dvh; }
@@ -348,7 +348,7 @@ details.past { box-shadow: 0 -1px 0 var(--line); }
 .toggle.wake { border: 1px solid var(--line); border-radius: var(--r-m, 14px); padding: 8px 12px; }
 
 /* ---------- טפסים ---------- */
-.field { display: grid; gap: 7px; font-weight: 500; font-size: 14px; min-width: 0; color: var(--ink); }
+.field { display: grid; align-content: start; gap: 7px; font-weight: 500; font-size: 14px; min-width: 0; color: var(--ink); }
 .field small { color: var(--muted); font-weight: 400; font-size: 12.5px; }
 .opt { color: var(--muted); font-weight: 400; font-size: 12.5px; }
 input:not([type="checkbox"]), select, textarea { width: 100%; min-width: 0; min-height: 50px; padding: 12px 14px; border: 1.5px solid transparent; border-radius: 14px; background: var(--soft); font-weight: 400; font-size: 16px; color: var(--ink); transition: border-color .15s, background .15s, box-shadow .15s; -webkit-appearance: none; appearance: none; }
@@ -360,6 +360,11 @@ input:not([type="checkbox"]):hover, select:hover, textarea:hover { background-co
 input:not([type="checkbox"]):focus, select:focus, textarea:focus { border-color: var(--accent); background-color: var(--surface); outline: none; box-shadow: 0 0 0 4px var(--accent-soft); }
 textarea { resize: vertical; line-height: 1.5; }
 ::placeholder { color: var(--faint); }
+.plain-text { font-size: 13.5px !important; line-height: 1.6 !important; white-space: pre-wrap; }
+.file-in { position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
+.file-pick { display: flex; align-items: center; gap: 10px; min-height: 50px; padding: 12px 14px; border-radius: 14px; border: 1.5px dashed var(--line-2, #d9cdd3); background: var(--soft); color: var(--accent); font-weight: 600; font-size: 15px; cursor: pointer; overflow: hidden; }
+.file-pick span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
+.file-in:focus-visible + .file-pick { border-color: var(--accent); box-shadow: 0 0 0 4px var(--accent-soft); }
 .mono { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 12px !important; direction: ltr; text-align: left; }
 /* מתג בסגנון iOS */
 .toggle { display: flex; align-items: center; justify-content: space-between; gap: 14px; min-height: 56px; padding: 6px 0; cursor: pointer; }
@@ -374,6 +379,7 @@ textarea { resize: vertical; line-height: 1.5; }
 .toggle input:focus-visible { outline: 2.5px solid var(--accent); outline-offset: 2px; }
 .toggle + .toggle, .field + .toggle, .toggle + .field, .oz-box + .toggle, .toggle + .oz-box { box-shadow: 0 -1px 0 var(--line); }
 .pair { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.pair.end { align-items: end; }
 .trip { display: flex; justify-content: space-between; align-items: center; gap: 10px; min-height: 56px; padding: 6px 6px 6px 14px; padding-inline-start: 14px; border-radius: var(--r-m); background: var(--soft); }
 .trip span { display: grid; } .trip small { color: var(--muted); }
 .action { display: flex; align-items: center; gap: 14px; width: 100%; min-height: 60px; padding: 10px 0; border: 0; background: transparent; text-align: start; color: var(--ink); }

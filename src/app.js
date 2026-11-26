@@ -61,6 +61,7 @@
     upload: '<path d="M12 15V4M7.5 8.5 12 4l4.5 4.5M5 20h14"/>',
     lock: '<path class="f" d="M8 10.5h8a3 3 0 0 1 3 3v4a3 3 0 0 1-3 3H8a3 3 0 0 1-3-3v-4a3 3 0 0 1 3-3z"/><rect x="5" y="10.5" width="14" height="10" rx="3"/><path d="M8.5 10.5V8a3.5 3.5 0 0 1 7 0v2.5M12 14.5v2"/>',
     help: '<circle cx="12" cy="12" r="9"/><path d="M9.6 9.4a2.5 2.5 0 0 1 4.8.9c0 1.7-2.4 2.1-2.4 3.7"/><path class="dot" d="M12 17.2h.01"/>',
+    globe: '<circle class="f" cx="12" cy="12" r="8.6"/><circle cx="12" cy="12" r="8.6"/><path d="M3.6 12h16.8"/><path d="M12 3.4c2.3 2.4 3.4 5.3 3.4 8.6s-1.1 6.2-3.4 8.6c-2.3-2.4-3.4-5.3-3.4-8.6S9.7 5.8 12 3.4z"/>',
     info: '<circle cx="12" cy="12" r="9"/><path d="M12 11v5.5"/><path class="dot" d="M12 7.8h.01"/>',
     list: '<path d="M9.5 6.5H20M9.5 12H20M9.5 17.5H20"/><path class="dot" d="M4.8 6.5h.01M4.8 12h.01M4.8 17.5h.01"/>',
     flask: '<path d="M9.5 3.5h5M10.5 3.5v5.3L5.3 17.7a1.9 1.9 0 0 0 1.7 2.8h10a1.9 1.9 0 0 0 1.7-2.8L13.5 8.8V3.5M7.6 14.5h8.8"/>',
@@ -153,7 +154,7 @@
     const prefix = p.onah === "day" ? "" : "ליל ";
     return `<details class="plan k-${p.kind} tone-${planTone(p.kind)}${p.done ? " done" : ""}"${open ? " open" : ""}>
       <summary><span class="plan-ic">${I(planIcon(p), 18)}</span>
-        <span class="plan-name"><strong>${esc(planTitle(p))}</strong><small><span class="hebdate">${prefix}${esc(planHebrew(p))}</span>${compact ? "" : ` · ${esc(civilLabel(p.date, true))} · ${esc(c.name)}`}</small></span>
+        <span class="plan-name"><strong>${esc(planTitle(p))}</strong><small><span class="hebdate">${prefix}${esc(planHebrew(p))}</span>${compact ? "" : ` · ${esc(civilLabel(p.date, true))}${p.cityId !== state().settings.cityId ? ` · ${esc(c.name)}` : ""}`}</small></span>
         <time dir="ltr">${start}</time>${I("left", 16)}</summary>
       <div class="plan-more"><p>${esc(p.reason)}</p>
         <small>${onahLabel(p.onah)} · ${p.end ? `מ-${start} עד ${timeInZone(new Date(p.end), c.tz)}` : `מ-${start}`} · ${esc(c.name)}</small>
@@ -490,10 +491,10 @@
       ${s.method !== "custom" ? `<button type="button" class="link mc-none" data-method="custom">${I("sliders", 15)}בלי מנהג מוכן: כל ההגדרות ידנית</button>` : ""}</details>
       ${sel("special", "מצב מיוחד", s, [["regular", "מחזור רגיל"], ["pregnancy", "היריון"], ["postpartum", "אחרי לידה"], ["nursing", "הנקה"], ["hormonal", "טיפול הורמונלי / אמצעי מניעה"]])}
       <p class="fine">במצב מיוחד החישובים הרגילים מושעים, ואפשר לרשום עונות לפי הוראה.</p>
-      <label class="field" for="s-methodNote">שם הרב או המדריכה (לא חובה)<textarea id="s-methodNote" name="methodNote" rows="2" maxlength="1000" placeholder="שם מורה ההוראה או המנהג">${esc(s.methodNote)}</textarea></label></section>
+      <label class="field" for="s-methodNote"><span>שם הרב או המדריכה <span class="opt">לא חובה</span></span><textarea id="s-methodNote" name="methodNote" rows="2" maxlength="1000" placeholder="למשל: הרב של הקהילה, או מדריכת הכלות">${esc(s.methodNote)}</textarea></label></section>
     <section class="card"><div class="card-h">${I("bell")}<div><h3>תזכורות</h3></div></div>
       ${tog("remindersEnabled", "התראות כשהיומן פתוח", "דורש הרשאה מהדפדפן", s)}${tog("neutralReminders", "נוסח דיסקרטי", "״תזכורת אישית״ בלי פירוט", s)}
-      <div class="pair"><label class="field" for="s-reminderMinutes">תזכורת לפני השקיעה (דקות)<input id="s-reminderMinutes" name="reminderMinutes" type="number" min="5" max="120" value="${s.reminderMinutes}" inputmode="numeric"></label>
+      <div class="pair end"><label class="field" for="s-reminderMinutes">תזכורת לפני השקיעה (דקות)<input id="s-reminderMinutes" name="reminderMinutes" type="number" min="5" max="120" value="${s.reminderMinutes}" inputmode="numeric"></label>
       <label class="field" for="s-morningTime">שעת בדיקת בוקר<input id="s-morningTime" name="morningTime" type="time" value="${s.morningTime}"></label></div></section>${WIDGET_FIELDS(s)}`;
   /* ---------- וידג׳ט למסך הבית (src/widget.js): רק באנדרואיד וביומן האישי; כבוי כברירת מחדל ---------- */
   const WIDGET_FIELDS = s => !(NATIVE && CAP.getPlatform && CAP.getPlatform() === "android" && app.mode === "personal") ? "" : `
@@ -596,7 +597,7 @@
         <div class="pair"><label class="field" for="t-from">מתאריך<input id="t-from" name="from" type="date" required min="2000-01-01" max="2100-12-31"></label><label class="field" for="t-to">עד תאריך<input id="t-to" name="to" type="date" required min="2000-01-01" max="2100-12-31"></label></div>
         <button class="btn ghost full" type="submit">${I("plus", 17)}הוספת נסיעה</button></form>
         <p class="fine">נסיעה מעבר לקו התאריך מחייבת בירור אישי.</p></section>
-      <section class="card"><div class="card-h">${I("info")}<div><h3>שפה</h3></div></div>${langSwitch()}</section>
+      <section class="card"><div class="card-h">${I("globe")}<div><h3>שפה</h3></div></div>${langSwitch()}</section>
       <section class="card"><div class="card-h">${I("shield")}<div><h3>פרטיות ונתונים</h3><p>שום מידע לא יוצא מהמכשיר</p></div></div>
         ${lockSettings()}
         <a class="action" href="${PRIVACY_URL}" target="_blank" rel="noopener">${I("lock", 19)}<span><strong>מדיניות פרטיות</strong><small>מה נשמר, איפה, ומה לא נאסף</small></span>${I("out", 15)}</a>
@@ -605,7 +606,7 @@
         ${app.mode === "personal" ? `<button class="action danger" data-act="wipe">${I("x", 19)}<span><strong>מחיקת כל הנתונים שלי</strong><small>יומן, הגדרות, מקומות ותזכורות — מהמכשיר הזה, לצמיתות</small></span></button>` : ""}</section>
       <section class="card"><div class="card-h">${I("scale")}<div><h3>לבודקים הלכתיים</h3><p>תרחישים מוכנים, בדיקות אוטומטיות וכללי החישוב</p></div></div>
         <button class="btn ghost full" data-go="review">${I("flask", 17)}מסך הבודקים</button></section>
-      <section class="card about"><div class="card-h">${I("spring")}<div><h3>על מעיין</h3><p>גרסה ${APP_VERSION} · מנוע ${M.ENGINE_VERSION}</p></div></div>
+      <section class="card about"><div class="card-h">${I("spring")}<div><h3>על מעיין</h3><p>גרסה \u2066${APP_VERSION}\u2069 · מנוע \u2066${M.ENGINE_VERSION}\u2069</p></div></div>
         <p>האפליקציה חינמית ופועלת כולה בטלפון, בלי חשבון ובלי שרת. שום מידע לא נשלח לאף אחד.</p>
         ${NATIVE ? "" : `<p>להתקנה: בתפריט הדפדפן (⋮) בוחרים ״הוספה למסך הבית״.</p>${/Android/i.test(navigator.userAgent) ? `<a class="link" href="https://github.com/nrt613/maayan/releases/latest/download/maayan.apk" target="_blank" rel="noopener">${I("download", 15)}אפליקציית אנדרואיד עם התראות</a>` : ""}`}</section>
     </aside></div>`;
@@ -616,7 +617,7 @@
     const res = app.testResults, passed = res && res.filter(t => t.ok).length;
     const groups = res ? [...new Set(res.map(t => t.group))] : [];
     return `<section class="review-hero"><div>
-        <span class="chip-light">גרסת בדיקה ${APP_VERSION}</span><h2>הנחיות לבודקים</h2>
+        <span class="chip-light">גרסת בדיקה \u2066${APP_VERSION}\u2069</span><h2>הנחיות לבודקים</h2>
         <p>תודה על הבדיקה. המטרה היא לוודא שכל כלל מחושב כמו שצריך לפי השיטה שנבחרה, ושהמערכת לא מכריעה במקום שבו צריך לשאול.</p>
         <ol class="steps"><li>פותחים תרחיש מוכן, רואים מה הוזן ומה חושב, ומשווים להלכה.</li><li>אפשר לפתוח תרחיש ביומן המלא, לשנות רישומים והגדרות ולראות את החישוב משתנה.</li><li>מעתיקים דוח ושולחים למפתח עם ההערות.</li></ol>
       </div></section>
@@ -792,7 +793,7 @@
         ${f.type === "manual" ? `<label class="field" for="e-onah">עונה<select id="e-onah" name="onah" required><option value="" ${f.onah ? "" : "selected"} disabled>בחירה</option><option value="day"${f.onah === "day" ? " selected" : ""}>יום · מהזריחה עד השקיעה</option><option value="night"${f.onah === "night" ? " selected" : ""}>לילה · מהשקיעה הקודמת עד הזריחה</option></select></label>` : ""}
         ${needsResult ? `<label class="field" for="e-result">תוצאה<select id="e-result" name="result"><option value="clear"${f.result === "clear" ? " selected" : ""}>נקייה</option><option value="uncertain"${f.result === "uncertain" ? " selected" : ""}>ממתינה לבירור</option><option value="bleeding"${f.result === "bleeding" ? " selected" : ""}>לא נקייה</option></select></label>` : ""}
         ${f.type === "flow" ? `<label class="toggle wake" for="e-wake"><span><strong>לא ידוע מתי התחיל (מצאתי בקימה או בבדיקה)</strong><small>לא חובה. מעיין תחשוש לשתי העונות של היום ותסמן ״יש לשאול רב״.</small></span><input id="e-wake" name="foundOnWaking" type="checkbox"${f.foundOnWaking ? " checked" : ""}></label>` : ""}
-        <label class="field" for="e-note">הערה <span class="opt">לא חובה</span><textarea id="e-note" name="note" rows="2" maxlength="2000">${esc(f.note)}</textarea></label>
+        <label class="field" for="e-note"><span>הערה <span class="opt">לא חובה</span></span><textarea id="e-note" name="note" rows="2" maxlength="2000">${esc(f.note)}</textarea></label>
         <details class="adv"${f.authorityNote ? " open" : ""}><summary>הוראה אישית שקיבלת${I("left", 14)}</summary><label class="field" for="e-auth">תיעוד ההוראה<textarea id="e-auth" name="authorityNote" rows="2" maxlength="1000" placeholder="מי הורה, מתי ומה נאמר">${esc(f.authorityNote)}</textarea></label></details>
         ${HELP[f.type] ? `<p class="hint">${I("info", 16)}${HELP[f.type]}</p>` : ""}
         ${m.error ? `<p class="err" role="alert">${esc(m.error)}</p>` : ""}
@@ -814,16 +815,16 @@
         <div class="m-actions"><button class="btn" data-act="close-modal">${I("check", 17)}סיום</button></div>`;
     }
     if (m.kind === "text") return `<div class="m-h"><h2 id="m-title">${esc(m.title)}</h2>${close}</div><p>${esc(m.intro)}</p>
-      <textarea id="m-text" class="mono" rows="9" readonly>${esc(m.text)}</textarea>
+      <textarea id="m-text" class="${/[\u0590-\u05FF]/.test(String(m.text).slice(0, 400)) ? "plain-text" : "mono"}" dir="auto" rows="9" readonly>${esc(m.text)}</textarea>
       <div class="m-actions"><button class="btn" data-act="copy-text">${I("copy", 17)}העתקה</button>${m.file ? `<button class="btn ghost" data-act="dl-text">${I("download", 17)}שמירה כקובץ</button>` : ""}</div>
       ${m.file ? `<p class="fine">אם השמירה כקובץ לא עובדת בדפדפן הזה, מעתיקים ושומרים בפתקים או שולחים לעצמך.</p>` : ""}`;
     if (m.kind === "cycle") return `<div class="m-h"><h2 id="m-title">הזנת מחזור קודם</h2>${close}</div>
       <form id="cycle-form" class="stack-s"><p class="fine">מזינים כל מחזור בנפרד, בכל סדר. החישוב מסדר הכול לפי התאריכים.${m.saved ? ` נשמרו ${m.saved} מחזורים.` : ""}</p>
         <div class="pair"><label class="field" for="c-flow">תחילת הווסת<input id="c-flow" type="date" required min="2000-01-01" max="2100-12-31"></label>
         <label class="field" for="c-flow-t">שעה<input id="c-flow-t" type="time" required value="10:00"><small>אחרי השקיעה = היום העברי הבא</small></label></div>
-        <div class="pair"><label class="field" for="c-hef">הפסק טהרה <span class="opt">אם ידוע</span><input id="c-hef" type="date" min="2000-01-01" max="2100-12-31"></label>
+        <div class="pair"><label class="field" for="c-hef"><span>הפסק טהרה <span class="opt">אם ידוע</span></span><input id="c-hef" type="date" min="2000-01-01" max="2100-12-31"></label>
         <label class="field" for="c-hef-t">שעה<input id="c-hef-t" type="time" value="16:00"></label></div>
-        <label class="field" for="c-mik">טבילה <span class="opt">תאריך הערב, אם ידוע</span><input id="c-mik" type="date" min="2000-01-01" max="2100-12-31"></label>
+        <label class="field" for="c-mik"><span>טבילה <span class="opt">תאריך הערב, אם ידוע</span></span><input id="c-mik" type="date" min="2000-01-01" max="2100-12-31"></label>
         <label class="field" for="c-city">מקום<select id="c-city">${placeOptions(state(), state().settings.cityId)}</select></label>
         ${m.error ? `<p class="err" role="alert">${esc(m.error)}</p>` : ""}
         <div class="m-actions"><button class="btn" type="submit">${I("check", 17)}שמירת המחזור</button><button type="button" class="btn ghost" data-act="close-modal">${m.saved ? "סיום" : "ביטול"}</button></div></form>`;
@@ -832,7 +833,7 @@
       <label class="field" for="b-pass">סיסמת גיבוי<input id="b-pass" type="password" minlength="10" required autocomplete="new-password"><small>לפחות 10 תווים. לשמור אותה בנפרד.</small></label>
       ${m.error ? `<p class="err" role="alert">${esc(m.error)}</p>` : ""}<div class="m-actions"><button class="btn" type="submit">${I("lock", 17)}יצירת גיבוי</button></div></form>`;
     if (m.kind === "restore") return `<div class="m-h"><h2 id="m-title">שחזור מגיבוי</h2>${close}</div>
-      <form id="restore-form" class="stack-s"><label class="field" for="r-file">קובץ גיבוי<input id="r-file" type="file"${NATIVE && CAP.getPlatform?.() === "ios" ? "" : ' accept=".may,.json,.txt,application/json,text/plain"'}></label>
+      <form id="restore-form" class="stack-s"><div class="field"><span id="r-file-l">קובץ גיבוי</span><input id="r-file" class="file-in" type="file" aria-labelledby="r-file-l"${NATIVE && CAP.getPlatform?.() === "ios" ? "" : ' accept=".may,.json,.txt,application/json,text/plain"'}><label class="file-pick" for="r-file">${I("upload", 18)}<span id="r-file-name">בחירת קובץ</span></label></div>
       <label class="field" for="r-text">או הדבקת טקסט הגיבוי<textarea id="r-text" class="mono" rows="3" placeholder='{"format":"maayan-encrypted-v1",…}'>${esc(m.text || "")}</textarea></label>
       <label class="field" for="r-pass">סיסמת הגיבוי<input id="r-pass" type="password" required autocomplete="off"></label>
       ${m.error ? `<p class="err" role="alert">${esc(m.error)}</p>` : ""}<div class="m-actions"><button class="btn" type="submit">${I("upload", 17)}פתיחת הגיבוי</button></div></form>`;
@@ -1047,7 +1048,7 @@
       bioAuth().then(ok => { if (ok) { saveLockCfg({ bio: true }); toast("הפתיחה בטביעת אצבע או בזיהוי פנים הופעלה"); } else toast("הזיהוי לא הצליח. הנעילה נשארת בקוד בלבד."); render(); });
     }
     else if (t.id === "bk-remind") { saveBackupInfo({ remind: t.value }); toast("נשמר במכשיר"); }
-    else if (t.id === "r-file") { const f = t.files?.[0]; if (f && f.size < 4e6) f.text().then(x => { $("#r-text").value = x; }); }
+    else if (t.id === "r-file") { const f = t.files?.[0], nm = $("#r-file-name"); if (nm && f) { nm.textContent = f.name; nm.dir = "auto"; } if (f && f.size < 4e6) f.text().then(x => { $("#r-text").value = x; }); }
   });
   /* לחיצה ארוכה על יום בלוח (או תפריט הקשר) פותחת את תפריט הרישום המהיר לאותו יום */
   {
