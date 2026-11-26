@@ -62,7 +62,7 @@ const list1 = rowsHtml([
   ["oz", "אור זרוע: הלילה שלפני כל אחת", oz1.map(when).join(" · ")],
 ]);
 
-// ב. ראייה בלילה — אשכנזי, עיקר הדין
+// ב. ראייה בלילה — אשכנזי רגיל
 n = 0;
 const ex2 = Q.run("ashkenaz", [ev("flow", N(5, TISHREI), "21:00"), ev("flow", N(10, CHESHVAN), "21:00"), ev("hefsek", N(15, CHESHVAN), "16:00")], N(16, CHESHVAN));
 const s2 = A(11, CHESHVAN), h2 = A(15, CHESHVAN);
@@ -80,7 +80,7 @@ const list2 = rowsHtml([
   ["oz", "אור זרוע: היום שלפני (לא לפני יום 31)", oz2.map(when).join(" · ")],
 ]);
 
-// ג. הפלגה ארוכה ואחריה קצרה — עיקר הדין מול כרתי ופלתי
+// ג. הפלגה ארוכה ואחריה קצרה — אשכנזי רגיל מול יממה שלמה (כרתי ופלתי)
 const evs3 = () => [ev("flow", N(3, CHESHVAN), "10:00"), ev("flow", N(7, KISLEV), "10:00"), ev("flow", N(28, KISLEV), "10:00")];
 n = 100; const ikar = Q.run("ashkenaz", evs3(), N(1, TEVET));
 n = 100; const kreti = Q.run("ashkenaz-kreiti", evs3(), N(1, TEVET));
@@ -92,8 +92,8 @@ if (!ikar.r.reviews.some(r => r.id === "ask-uprooted-haflagah")) fail("שאלה 
 const kAvg = kreti.marks.filter(m => m.kind === "avg");
 if (kAvg.length !== 4) fail("בינונית מעת לעת ג");
 const from3 = A(10, TEVET), to3 = extra[1].abs;
-const cal3a = Q.grid({ label: "עיקר הדין", from: from3, to: to3, anchor: s3, marks: ikar.marks, ghosts: extra.map(m => ({ abs: m.abs, kind: "int", onah: m.onah })), q: [extra[0].abs] });
-const cal3b = Q.grid({ label: "כרתי ופלתי", from: from3, to: to3, anchor: s3, marks: kreti.marks });
+const cal3a = Q.grid({ label: "אשכנזי רגיל", from: from3, to: to3, anchor: s3, marks: ikar.marks, ghosts: extra.map(m => ({ abs: m.abs, kind: "int", onah: m.onah })), q: [extra[0].abs] });
+const cal3b = Q.grid({ label: "יממה שלמה (כרתי ופלתי)", from: from3, to: to3, anchor: s3, marks: kreti.marks });
 
 /* ---------- יצירת קשר ---------- */
 const contactHtml = contact
@@ -235,10 +235,10 @@ slide("remind", `
     <div class="main">
       <h2>תזכורות, בזמן הנכון</h2>
       <table class="rt">
-        <tr><th>עונת פרישה בלילה</th><td>לפני השקיעה (30 דקות, ניתן לשינוי)</td></tr>
+        <tr><th>עונת פרישה בלילה</th><td>שעה לפני השקיעה (ניתן לשינוי)</td></tr>
         <tr><th>עונת פרישה ביום</th><td>בבוקר (08:00, ניתן לשינוי)</td></tr>
-        <tr><th>הפסק טהרה</th><td>לפני השקיעה, ביום המוקדם האפשרי</td></tr>
-        <tr><th>בדיקות</th><td>בבוקר, ולפני השקיעה</td></tr>
+        <tr><th>הפסק טהרה</th><td>שעה לפני השקיעה, ביום המוקדם האפשרי</td></tr>
+        <tr><th>בדיקות</th><td>בבוקר, ושעה לפני השקיעה</td></tr>
         <tr><th>ליל טבילה</th><td>בצאת הכוכבים</td></tr>
       </table>
       <ul class="feat sm">
@@ -271,17 +271,17 @@ slide("calendar", `
 // 9
 slide("method", `
   <div class="split">
-    ${phone("method.png", "בחירת שיטה")}
+    ${phone("method.png", "בחירת המנהג בכניסה הראשונה")}
     <div class="main">
-      <h2>בחירת שיטה, בשני שלבים</h2>
-      <p class="lead small"><b>1.</b> מה המנהג שלך? &nbsp; <b>2.</b> לפי מי?</p>
+      <h2>המנהג שלי, בשני שלבים</h2>
+      <p class="lead small"><b>1.</b> מה המנהג שלך? &nbsp; <b>2.</b> לפי פסקי מי? &nbsp;·&nbsp; בוחרים בכניסה הראשונה, ועד אז אין חישוב.</p>
       <div class="meth">
         <div class="fam"><span class="tag">ספרדי</span>
           <div class="m"><b>הרב עובדיה יוסף</b><span>לפי פסקי טהרת הבית.</span></div>
           <div class="m"><b>בן איש חי</b><span>כמו הרב עובדיה, ובנוסף אור זרוע.</span></div></div>
         <div class="fam"><span class="tag">אשכנזי</span>
-          <div class="m"><b>עיקר הדין</b><span>יום 30 ו־31, ואור זרוע.</span></div>
-          <div class="m"><b>כרתי ופלתי</b><span>כמו עיקר הדין, והעונה הבינונית יממה שלמה.</span></div></div>
+          <div class="m"><b>אשכנזי רגיל</b><span>יום 30 ו־31, ואור זרוע.</span></div>
+          <div class="m"><b>יממה שלמה (כרתי ופלתי)</b><span>כמו הרגיל, והעונה הבינונית יממה שלמה.</span></div></div>
         <div class="fam"><span class="tag">חב״ד</span>
           <div class="m"><b>מנהג חב״ד</b><span>לפי שולחן ערוך הרב.</span></div></div>
       </div>
@@ -310,7 +310,7 @@ slide("table vc", `
   <h2>השיטות במבט אחד</h2>
   <table class="mt">
     <thead><tr class="famrow"><th></th><th colspan="2">ספרדי</th><th colspan="2">אשכנזי</th></tr>
-    <tr><th></th><th>הרב עובדיה יוסף</th><th>בן איש חי</th><th>עיקר הדין</th><th>כרתי ופלתי</th></tr></thead>
+    <tr><th></th><th>הרב עובדיה יוסף</th><th>בן איש חי</th><th>אשכנזי רגיל</th><th>יממה שלמה</th></tr></thead>
     <tbody>${T.map(([h, ...c]) => `<tr><th>${h}</th>${c.map(x => `<td>${x}</td>`).join("")}</tr>`).join("")}</tbody>
   </table>
   <p class="foot"><b>חב״ד:</b> 5 ימים · הפסק רק לפני השקיעה · הפלגה בעונות מההפסק · עונה בינונית מעת לעת ביום 30 · בלי אור זרוע · הפלגה ארוכה נשמרת.</p>
@@ -326,14 +326,14 @@ const calSlide = (title, sub, cal, list, foot) => slide("calcs", `
   </div>`);
 const LEGEND = "צבעים: ימי נידה עד ההפסק, ואחריהם שבעה נקיים. בכל משבצת: חצי ימני — לילה, חצי שמאלי — יום. המספר הקטן: היום מהראייה.";
 calSlide("איך מחושבות העונות: ראייה ביום", "דוגמה אמיתית, מחושבת במנוע · בן איש חי", cal1, list1, LEGEND);
-calSlide("ראייה בלילה", "אותם תאריכים, אחרי השקיעה · אשכנזי, עיקר הדין", cal2, list2, "כל העונות נקבעות בעונת הראייה — כאן בלילה. " + LEGEND.split(". ").slice(1).join(". "));
+calSlide("ראייה בלילה", "אותם תאריכים, אחרי השקיעה · אשכנזי רגיל", cal2, list2, "כל העונות נקבעות בעונת הראייה — כאן בלילה. " + LEGEND.split(". ").slice(1).join(". "));
 slide("calcs two", `
   <h2>הפלגה ארוכה, ואחריה קצרה</h2>
   <p class="lead small">ראיות: ${hs(A(3, CHESHVAN))}, ${hs(A(7, KISLEV))} (הפלגה 35), ${hs(s3)} (הפלגה 22) · מחושב במנוע</p>
   <div class="two-cals">${cal3a}${cal3b}</div>
   <div class="cmp">
-    <p><b>עיקר הדין:</b> ההפלגה הארוכה נעקרה; רק 22 (${hs(ikarInt[0].abs)}). מסומן ״יש לשאול רב״, עם התאריך שבמחלוקת (${hs(extra[0].abs)}, <span class="qmk">?</span>).</p>
-    <p><b>כרתי ופלתי:</b> שומרת גם את 35 (${hs(extra[0].abs)}, ${hs(extra[1].abs)}), והעונה הבינונית יממה שלמה, לילה ויום.</p>
+    <p><b>אשכנזי רגיל:</b> ההפלגה הארוכה נעקרה; רק 22 (${hs(ikarInt[0].abs)}). מסומן ״יש לשאול רב״, עם התאריך שבמחלוקת (${hs(extra[0].abs)}, <span class="qmk">?</span>).</p>
+    <p><b>יממה שלמה (כרתי ופלתי):</b> שומרת גם את 35 (${hs(extra[0].abs)}, ${hs(extra[1].abs)}), והעונה הבינונית יממה שלמה, לילה ויום.</p>
   </div>`);
 
 // 14
@@ -364,10 +364,8 @@ slide("clean vc", `
 // 15
 const ASKS = [
   ["ראתה בל׳, והחודש הבא חסר", "חוששת לא׳ בחודש שאחריו"],
-  ["ראתה בל׳, והחודש הבא מלא", "חוששת לל׳ בלבד, ומציגה את שני ימי ראש החודש"],
   ["הפלגה ארוכה שנעקרה בהפלגה קצרה ממנה", "אינה חוששת לארוכה, ומציגה את התאריך שבמחלוקת"],
   ["דם שנמצא בהתעוררות, ולא ידוע מתי התחיל", "חוששת ללילה וליום של אותו יום"],
-  ["אור זרוע לפני עונה בינונית של יממה שלמה", "מוסיפה אור זרוע ביום שלפניה (יום 29)"],
 ];
 slide("ask", `
   <div class="split">
@@ -379,6 +377,7 @@ slide("ask", `
         <thead><tr><th>המצב</th><th>בינתיים</th></tr></thead>
         <tbody>${ASKS.map(([a, b], i) => `<tr><th><span class="an">${i + 1}</span>${a}</th><td>${b}</td></tr>`).join("")}</tbody>
       </table>
+      <p class="fine">הוכרע כמו כל הלוחות, בלי ״יש לשאול רב״: ראתה בל׳ והחודש הבא מלא — לל׳ בלבד; ואור זרוע לפני יממה שלמה — רק לפני עונת הראייה (בראייה ביום, אין אור זרוע ביום 29).</p>
     </div>
   </div>`);
 
@@ -411,9 +410,9 @@ slide("privacy vc", `
 slide("rigour vc", `
   <h2>בדיקות ודיוק</h2>
   <div class="nums">
-    <div class="num"><strong>138</strong><span>בדיקות אוטומטיות למנוע החישוב</span></div>
+    <div class="num"><strong>${require(path.join(ROOT, "src", "tests.js"))(M).tests.length}</strong><span>בדיקות אוטומטיות למנוע החישוב</span></div>
     <div class="num"><strong>${ltr("168,451")}</strong><span>השוואות של הלוח העברי וזמני השמש מול מקורות חיצוניים — בלי כישלון</span></div>
-    <div class="num"><strong>97</strong><span>עמודי מפרט הלכתי מלא, שהוכן לבדיקת רב</span></div>
+    <div class="num"><strong>99</strong><span>עמודי מפרט הלכתי מלא, שהוכן לבדיקת רב</span></div>
   </div>
   <div class="docs">
     <p>${IC.doc}<span>לרב: <b>סיכום לרב</b> (7 עמודים) ו<b>שאלות לרב</b> (7 עמודים). המסמכים נוצרים מהמנוע עצמו — כל טבלה וכל לוח מחושבים, לא מועתקים.</span></p>
@@ -428,7 +427,7 @@ slide("adds-s vc", `
     <div>${IC.ring}<b>ליווי</b><span>יום אחר יום, עם הצעד הבא</span></div>
     <div>${IC.sun}<b>לפני השקיעה</b><span>תזכורת לעונת לילה בזמן</span></div>
     <div>${IC.eye}<b>שקיפות</b><span>לכל מועד — הכלל שלו</span></div>
-    <div>${IC.scale}<b>שיטה לבחירה</b><span>ספרדי, אשכנזי, חב״ד, וכל הגדרה לפי הרב</span></div>
+    <div>${IC.scale}<b>המנהג שלי</b><span>ספרדי, אשכנזי, חב״ד, וכל הגדרה לפי הרב</span></div>
     <div>${IC.help}<b>לא מכריעה בשקט</b><span>״יש לשאול רב״, ומה נעשה בינתיים</span></div>
     <div>${IC.lock}<b>פרטיות מלאה</b><span>בלי חשבון, בלי שרת</span></div>
   </div>`);
